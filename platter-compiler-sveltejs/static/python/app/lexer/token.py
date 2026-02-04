@@ -13,4 +13,4 @@ class Token:
     InvalidCharacter = "Invalid Character"
     InvalidLexeme = "Invalid Lexeme"
     InvalidLexemeExceeds = "Invalid Lexeme Exceeds"
-    InvalidLexemeReserved = "Invalid Lexeme Reserved"
+    InvalidLexemeReserved = "Invalid Reserved Word Delimeter"

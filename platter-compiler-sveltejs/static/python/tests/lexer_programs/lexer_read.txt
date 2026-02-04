@@ -1,5 +1,0 @@
-start() {
-    id[0] = 10;
-    matrix[0][1] = examplePiece;
-    s1:age += 30;
-}

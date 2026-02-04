@@ -82,27 +82,25 @@ class Lexer(LexerBase, LexerKeywords, LexerOperators, LexerIdentifier, LexerChar
 
 if __name__ == "__main__":
 
-    while True:
-        def set_clipboard(text: str):
-            subprocess.run("clip", universal_newlines=True, input=text)
+    def set_clipboard(text: str):
+        subprocess.run("clip", universal_newlines=True, input=text)
 
 
-        filepath = "./tests/lexer_programs/lexer_read.txt"
+    filepath = "./tests/sample_program.txt"
 
-        include_whitespace = False # choice == 'y'
+    include_whitespace = False # choice == 'y'
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            source = f.read()
+    with open(filepath, "r", encoding="utf-8") as f:
+        source = f.read()
 
-        lexer = Lexer(source)
-        tokens = lexer.tokenize()
+    lexer = Lexer(source)
+    tokens = lexer.tokenize()
 
-        tokens = [
-            t for t in tokens
-            if t.type not in ("comment", "space", "newline", "tab") or include_whitespace
-        ]
+    tokens = [
+        t for t in tokens
+        if t.type not in ("comment", "space", "newline", "tab") or include_whitespace
+    ]
 
-        print("\n\nTOKENS:")
-        pprint(tokens)
-        set_clipboard((" ".join(t.type for t in tokens if not "comment" in t.type )))
-        input("Enter to rerun")
+    print("\n\nTOKENS:")
+    pprint(tokens)
+    set_clipboard((" ".join(t.type for t in tokens if not "comment" in t.type )))   
