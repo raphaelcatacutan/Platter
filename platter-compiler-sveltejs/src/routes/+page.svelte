@@ -599,7 +599,10 @@ tokens
 					if (current.type === 'Invalid Character') {
 						// Format: Error at line X col Y - Invalid Character: <character>
 						errorText = `Error at line ${current.line} col ${current.col} - Invalid Character: ${current.value}`;
-					} else if (current.type === 'Invalid Identifier') {
+					} else if (current.type === 'Invalid Reserved Word Delimeter') {
+						// Format: Error at line X col Y - Invalid Lexeme: Invalid <RW> delimiter '<delimiter>'
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: Invalid ${current.value} delimiter ${invalidTokens[i+1].value}`;
+					}else if (current.type === 'Invalid Identifier') {
 						// Format: Error at line X col Y - Invalid Lexeme: <RW> cannot be an identifier
 						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: ${current.value} cannot be an identifier`;
 					} else if (current.type === 'Invalid Lexeme') {
