@@ -607,13 +607,16 @@ class Parser():
             self.notation_val()
             self.parse_token("]")
             
-            """ 155 <strict_datas_expr>	=>	<id> """
+            """ 155 <strict_datas_expr>	=>	<id>    <id_tail>   """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_datas_expr>_1"]:
             self.id_()
+            self.id_tail()
             
-            """ 156 <strict_datas_expr>	=>	<ret_array> """
+            """ 156 <strict_datas_expr>	=>	<ret_array>     <opt_array_access>"""
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_datas_expr>_2"]:
             self.ret_array()
+            self.opt_array_access()
+
         else: self.parse_token(PREDICT_SET_M["<strict_datas_expr>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -665,13 +668,35 @@ class Parser():
             self.array_element_id()
             self.parse_token("]")
             
-            """ 255 <strict_array_expr>	=>	<id> """
+            """ 255 <strict_array_expr>	=>	<id>    <id_tail> """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_array_expr>_1"]:
             self.id_()
-            
+            self.id_tail()
+        
+            """ 256 <strict_array_expr>	=>	<ret_array> <opt_array_access> """
+        elif self.tokens[self.pos].type in PREDICT_SET["<strict_array_expr>_2"]:
+            self.ret_array()    
+            self.opt_array_access()
+        
         else: self.parse_token(PREDICT_SET_M["<strict_array_expr>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def opt_array_access(self):
+        log.info("Enter: " + self.tokens[self.pos].type)
+
+        """ <opt_array_access>  =>  <array_accessor>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<opt_array_access>"]:
+            self.array_accessor()
+
+            """ <opt_array_access>  =>  λ """
+        elif self.tokens[self.pos].type in PREDICT_SET["<opt_array_access>_1"]:
+            pass
+
+        else: self.parse_token(PREDICT_SET_M["<opt_array_access>"])
+
+        log.info("Exit: " + self.tokens[self.pos].type)
+
 
     def ret_chars(self):
         log.info("Enter: " + self.tokens[self.pos].type) # J
