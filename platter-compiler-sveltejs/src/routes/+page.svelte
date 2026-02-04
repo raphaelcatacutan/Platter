@@ -601,7 +601,7 @@ tokens
 						errorText = `Error at line ${current.line} col ${current.col} - Invalid Character: ${current.value}`;
 					} else if (current.type === 'Invalid Reserved Word Delimeter') {
 						// Format: Error at line X col Y - Invalid Lexeme: Invalid <RW> delimiter '<delimiter>'
-						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: Invalid ${current.value} delimiter ${invalidTokens[i+1].value}`;
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: Invalid delimiter for reserved word '${current.value}'`;
 					}else if (current.type === 'Invalid Identifier') {
 						// Format: Error at line X col Y - Invalid Lexeme: <RW> cannot be an identifier
 						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: ${current.value} cannot be an identifier`;
