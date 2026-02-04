@@ -152,7 +152,8 @@
 <ret_flag>	{ toflag }
 <ret_flag>	{ flag_lit }
 <strict_datas_expr>	{ [ }
-<strict_datas_expr>	{ id, append, sort, reverse, remove }
+<strict_datas_expr>	{ id }
+<strict_datas_expr>	{ append, sort, reverse, remove }
 <notation_val>	{ piece_lit, sip_lit, flag_lit, chars_lit, [ }
 <notation_val>	{ id }
 <notation_val>	{ ] }
@@ -171,6 +172,20 @@
 <array_or_table>	{ ] }
 <field_assignments>	{ id }
 <field_assignments>	{ ] }
+<ret_array>	{ append }
+<ret_array>	{ sort }
+<ret_array>	{ reverse }
+<ret_array>	{ remove }
+<strict_array_expr>	{ [ }
+<strict_array_expr>	{ id }
+<strict_array_expr>	{ append, sort, reverse, remove }
+<opt_array_access>	{ [ }
+<opt_array_access>	{ ,, ), ; }
+<array_accessor>	{ [ }
+<accessor_tail>	{ [ }
+<accessor_tail>	{ : }
+<accessor_tail>	{ *, /, %, +, -, ,, ;, ==, !=, <=, >=, <, >, and, or, ), =, +=, -=, *=, /=, %=, ] }
+<table_accessor>	{ : }
 <univ_mult_tail>	{ * }
 <univ_mult_tail>	{ / }
 <univ_mult_tail>	{ % }
@@ -247,19 +262,8 @@
 <univ_bridge>	{ > }
 <univ_closure>	{ ) }
 <flag_after_paren>	{ ), ,, ; }
-<ret_array>	{ append }
-<ret_array>	{ sort }
-<ret_array>	{ reverse }
-<ret_array>	{ remove }
-<strict_array_expr>	{ [ }
-<strict_array_expr>	{ id, append, sort, reverse, remove }
 <value_tail>	{ [ }
 <value_tail>	{ ), ,, ; }
-<array_accessor>	{ [ }
-<accessor_tail>	{ [ }
-<accessor_tail>	{ : }
-<accessor_tail>	{ *, /, %, +, -, ,, ;, ==, !=, <=, >=, <, >, and, or, ), =, +=, -=, *=, /=, %=, ] }
-<table_accessor>	{ : }
 <flavor_tail>	{ , }
 <flavor_tail>	{ ) }
 <piece_inner_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
