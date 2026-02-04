@@ -53,7 +53,7 @@ class TestPlatterLexerStrings(unittest.TestCase):
             "expected_types": [
                 Token.InvalidLexeme,
                 "serve",
-                "id",
+                Token.InvalidLexemeReserved,
                 ";"
             ]
         },
@@ -68,14 +68,14 @@ class TestPlatterLexerStrings(unittest.TestCase):
                 "-",
                 "chars_lit",
                 "+=",
-                Token.InvalidLexeme
+                Token.InvalidLexemeReserved,
             ]
         },
         {
             "number": 7,
             "code": "piece+jm ,,, ; : ' ` - --2 -(0.1",
             "expected_types": [
-                "id",
+                Token.InvalidLexemeReserved,
                 "+",
                 "id",
                 ",",
