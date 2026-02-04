@@ -272,7 +272,7 @@ class TableDrivenParser:
 
 if __name__ == "__main__":
     """Test the table-driven parser."""
-    grammar_file = "app/utils/sources/cfg.tsv"
+    grammar_file = "app/utils/sources/test.tsv"
     filepath = "./tests/sample_program.txt"
 
     include_whitespace = False # choice == 'y'
