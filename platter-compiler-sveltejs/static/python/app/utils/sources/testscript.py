@@ -19,6 +19,12 @@ start(){
     "code":  
     """
 start(){
+    piece of x = 4, y = 9;
+    x = x + y;
+    y = x - y;
+    x = x - y;
+    bill(tochars(x) + " " + tochars(y));
+}
     """
   },
   {
@@ -1145,7 +1151,7 @@ start(){
     "code":  
     """
 start(){
-	sip of c = ((x*(x+1)*(x-2) - (3*x-5)*(x+4))*(x*x - 1)) / (((x-1)*(x-1) + (x+1)*(x+1))*(x*x + 1));
+        sip of c = ((x*(x+1)*(x-2) - (3*x-5)*(x+4))*(x*x - 1)) / (((x-1)*(x-1) + (x+1)*(x+1))*(x*x + 1));
 }
     """
   },
@@ -1268,7 +1274,7 @@ start() {
     "code":  
     """
 prepare piece of serving () {
-	serving of server; server; }
+        serving of server; server; }
 
 start() {
 }
@@ -1293,7 +1299,7 @@ start() {
     "code":  
     """
 table of person = [
-	piece of age;
+        piece of age;
     chars of name;
 
 ]
@@ -1522,7 +1528,7 @@ start(){
     """
 start() {
     int sum = 24 + 26;
-	bill(tochars(sum));
+        bill(tochars(sum));
 }
     """
   },
@@ -1534,7 +1540,7 @@ start() {
     """
 start() {
 piece of xx = 24 + 26;
-	bill(tochars(sum));
+        bill(tochars(sum));
 }
     """
   },
@@ -1579,7 +1585,7 @@ start(){
     "code":  
     """
 start(){
-	piece of z = 5 + 10;
+        piece of z = 5 + 10;
 }
     """
   },

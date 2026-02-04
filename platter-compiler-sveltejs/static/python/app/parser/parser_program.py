@@ -669,10 +669,6 @@ class Parser():
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_array_expr>_1"]:
             self.id_()
             
-            """ 256 <strict_array_expr>	=>	<ret_array> """
-        elif self.tokens[self.pos].type in PREDICT_SET["<strict_array_expr>_2"]:
-            self.ret_array()
-        
         else: self.parse_token(PREDICT_SET_M["<strict_array_expr>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J

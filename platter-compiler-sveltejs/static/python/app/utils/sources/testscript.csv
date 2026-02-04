@@ -3,7 +3,13 @@ Number,Test Case/Test Scenario,Expected Output,Actual Output,Test Result
     piece of a = 5, b = 3;
     bill(tochars((a*a + b*b) > 30));
 }",No Syntax Error,No Syntax Error,TRUE
-2,start(){,No Syntax Error,No Syntax Error,TRUE
+2,"start(){
+    piece of x = 4, y = 9;
+    x = x + y;
+    y = x - y;
+    x = x - y;
+    bill(tochars(x) + "" "" + tochars(y));
+}",No Syntax Error,No Syntax Error,TRUE
 3,"start(){
     piece of n = 12345, c = 0;
     repeat(n != 0){
@@ -554,7 +560,7 @@ start(){
         bill(""The answer is: "" + ans);
 }",No Syntax Error,No Syntax Error,TRUE
 75,"start(){
-	sip of c = ((x*(x+1)*(x-2) - (3*x-5)*(x+4))*(x*x - 1)) / (((x-1)*(x-1) + (x+1)*(x+1))*(x*x + 1));
+        sip of c = ((x*(x+1)*(x-2) - (3*x-5)*(x+4))*(x*x - 1)) / (((x-1)*(x-1) + (x+1)*(x+1))*(x*x + 1));
 }","Syntax Error: Unexpected 'piece_lit' at line 3, col 25. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.","Syntax Error: Unexpected 'piece_lit' at line 3, col 25. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",TRUE
 76,"sip of a = (((x*(x+2) - (x-1)*(x-1))*(x*(x-3) + 5) + (2*x+1)*(x+4)) /
  ((x*(x-2) + (x+1)*(x+1))*(x+3)));
@@ -592,12 +598,14 @@ start() {
     x = x + 999;  
     # comment ko
   }
-}",No Syntax Error,No Syntax Error,TRUE
+}
+",No Syntax Error,No Syntax Error,TRUE
 84,"start() {
   a[0 = 1;
-}","Syntax Error: Unexpected '=' at line 3, col 7. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.","Syntax Error: Unexpected '=' at line 3, col 7. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",TRUE
+}
+","Syntax Error: Unexpected '=' at line 3, col 7. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.","Syntax Error: Unexpected '=' at line 3, col 7. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",TRUE
 85,"prepare piece of serving () {
-	serving of server; server; }
+        serving of server; server; }
 
 start() {
 }
@@ -608,7 +616,7 @@ start() {
 }
 ",No Syntax Error,No Syntax Error,TRUE
 87,"table of person = [
-	piece of age;
+        piece of age;
     chars of name;
 
 ]
@@ -663,13 +671,15 @@ start() {
   pass( x = 0; x+=1 ; x>1) {
     sum = x + y + z;
   }
-}",No Syntax Error,No Syntax Error,TRUE
+}
+",No Syntax Error,No Syntax Error,TRUE
 96,"start() {
   repeat(true) {
     x = x + 1;
     pass(up) { stop; }
   }
-}","Syntax Error: Unexpected 'flag_lit' at line 4, col 10. Expected 'id'.","Syntax Error: Unexpected 'flag_lit' at line 4, col 10. Expected 'id'.",TRUE
+}
+","Syntax Error: Unexpected 'flag_lit' at line 4, col 10. Expected 'id'.","Syntax Error: Unexpected 'flag_lit' at line 4, col 10. Expected 'id'.",TRUE
 97,"start() {
   x = 0;
   order {
@@ -709,11 +719,12 @@ start() {
 }","Unexpected 'piece_lit' at line 2, col 17. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.","Unexpected 'piece_lit' at line 2, col 17. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",TRUE
 104,"start() {
     int sum = 24 + 26;
-	bill(tochars(sum));
-}","Syntax Error: Unexpected 'id' at line 2, col 9. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.","Syntax Error: Unexpected 'id' at line 2, col 9. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",TRUE
+        bill(tochars(sum));
+}
+","Syntax Error: Unexpected 'id' at line 2, col 9. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.","Syntax Error: Unexpected 'id' at line 2, col 9. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",TRUE
 105,"start() {
 piece of xx = 24 + 26;
-	bill(tochars(sum));
+        bill(tochars(sum));
 }",No Syntax Error,No Syntax Error,TRUE
 106,"start(){     
        check (input > 0){
@@ -734,7 +745,7 @@ piece of xx = 24 + 26;
         }
 }",No Syntax Error,No Syntax Error,TRUE
 108,"start(){
-	piece of z = 5 + 10;
+        piece of z = 5 + 10;
 }",No Syntax Error,No Syntax Error,TRUE
 109,piece of x = 42; ,"Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.","Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",TRUE
 110,"piece[] of nums = [1, 2, 3];
