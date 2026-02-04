@@ -78,6 +78,7 @@ start() {
 	let fileInputEl: HTMLInputElement;
 
 	function openFileDialog() {
+		normalizeCurlyQuotes();
 		fileInputEl?.click();
 	}
 
@@ -107,6 +108,7 @@ start() {
 	// Save current editor content as a .platter file. Uses the File System Access API when available,
 	// otherwise falls back to a download via an anchor element.
 	async function saveFileDialog() {
+		normalizeCurlyQuotes();
 		const content =
 			cmInstance && typeof cmInstance.getValue === 'function' ? cmInstance.getValue() : codeInput;
 		try {
@@ -194,11 +196,110 @@ start() {
 			);
 			if (textareaEl && (window as any).CodeMirror) {
 				const CM = (window as any).CodeMirror;
+				
+				// Define Platter syntax highlighting mode
+				CM.defineMode('platter', function() {
+					const keywords: Record<string, boolean> = {
+						// Conditionals
+						'alt': true, 'check': true, 'instead': true,
+						// Logical operators
+						'and': true, 'or': true, 'not': true,
+						// Loops
+						'order': true, 'repeat': true, 'pass': true, 'menu': true,
+						'choice': true, 'stop': true, 'next': true, 'usual': true,
+						// Function definition
+						'prepare': true, 'start': true,
+						// Return
+						'serve': true, 'of': true,
+						// Struct
+						'table': true
+					};
+					
+					const builtinMethods: Record<string, boolean> = {
+						'append': true, 'bill': true, 'copy': true, 'cut': true, 
+						'fact': true, 'matches': true, 'size': true, 'sort': true, 
+						'sqrt': true, 'tochars': true, 'topiece': true, 'take': true,
+						'tosip': true, 'rand': true, 'pow': true, 'remove': true,
+						'reverse': true, 'search': true
+					};
+					
+					const dataTypes: Record<string, boolean> = {
+						'chars': true, 'flag': true, 'piece': true, 'sip': true
+					};
+					
+					const booleanLiterals: Record<string, boolean> = {
+						'down': true, 'up': true
+					};
+					
+					const operators = /^(?:\+|-|\*|\/|%|>|<|=|==|>=|<=|!=|\+=|-=|\*=|\/=|%=)/;
+					const delimiters = /^(?:,|\{|\}|\(|\)|\[|\]|;|:)/;
+					
+					return {
+						token: function(stream: any, state: any) {
+							// Whitespace
+							if (stream.eatSpace()) return null;
+							
+							// Comments
+							if (stream.match(/\/\/.*/)) return 'comment';
+							if (stream.match(/\/\*/)) {
+								state.inComment = true;
+								return 'comment';
+							}
+							if (state.inComment) {
+								if (stream.match(/.*?\*\//)) {
+									state.inComment = false;
+								} else {
+									stream.skipToEnd();
+								}
+								return 'comment';
+							}
+							
+							// String literals
+							if (stream.match(/^"(?:[^"\\]|\\.)*"/)) return 'string';
+							if (stream.match(/^'(?:[^'\\]|\\.)*'/)) return 'string';
+							
+							// Escape sequences in strings
+							if (stream.match(/\\[nt'"\\]/)) return 'string-2';
+							
+							// Numbers
+							if (stream.match(/^-?\d+\.?\d*/)) return 'number';
+							
+							// Operators
+							if (stream.match(operators)) return 'operator';
+							
+							// Delimiters
+							if (stream.match(delimiters)) return 'punctuation';
+							
+							// Keywords, types, methods, etc.
+							if (stream.match(/^[a-zA-Z_]\w*/)) {
+								const word: string = stream.current();
+								if (keywords[word]) return 'keyword';
+								if (dataTypes[word]) return 'type';
+								if (booleanLiterals[word]) return 'atom';
+								if (builtinMethods[word]) return 'builtin';
+								return 'variable';
+							}
+							
+							stream.next();
+							return null;
+						},
+						startState: function() {
+							return { inComment: false };
+						}
+					};
+				});
+				
 				cmInstance = CM.fromTextArea(textareaEl, {
 					lineNumbers: true,
 					// enable soft-wrapping so long lines flow to the next visual line
 					lineWrapping: true,
-					viewportMargin: Infinity
+					viewportMargin: Infinity,
+					mode: 'platter',
+					extraKeys: {
+						'Ctrl-Enter': function() {
+							analyzeSemantic();
+						}
+					}
 				});
 				cmInstance.setSize('100%', '100%');
 				cmInstance.on('change', () => {
@@ -267,12 +368,39 @@ start() {
 		});
 	}
 
+	// Convert curly quotes to straight quotes in CodeMirror
+	function normalizeCurlyQuotes() {
+		if (!cmInstance) return;
+		
+		const content = cmInstance.getValue();
+		
+		// Replace curly quotes with straight quotes using Unicode
+		const normalized = content
+			.replace(/\u201C/g, '\u0022') // Left double curly quote → straight double quote
+			.replace(/\u201D/g, '\u0022') // Right double curly quote → straight double quote
+			.replace(/\u2018/g, '\u0027') // Left single curly quote → straight single quote
+			.replace(/\u2019/g, '\u0027'); // Right single curly quote → straight single quote
+		
+		if (content !== normalized) {
+			// Save cursor position
+			const cursor = cmInstance.getCursor();
+			
+			// Update content
+			cmInstance.setValue(normalized);
+			
+			// Restore cursor position
+			cmInstance.setCursor(cursor);
+		}
+	}
+
 	async function analyzeSemantic() {
+		normalizeCurlyQuotes();
 		activeTab = 'semantic';
 		setTerminalError('Semantics not yet implemented');
 	}
 
 	async function analyzeSyntax() {
+		normalizeCurlyQuotes();
 		await analyzeLexical();
 
 		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
@@ -354,6 +482,7 @@ result
 	}
 
 	async function analyzeLexical() {
+		normalizeCurlyQuotes();
 		activeTab = 'lexical';
 		if (!codeInput) {
 			setTerminalError('Editor is empty');
@@ -527,10 +656,12 @@ tokens
 	}
 
 	function toggleTheme() {
+		normalizeCurlyQuotes();
 		theme = theme === 'dark' ? 'light' : 'dark';
 	}
 
 	async function handleCopyToClipboard() {
+		normalizeCurlyQuotes();
 		const content =
 			cmInstance && typeof cmInstance.getValue === 'function' ? cmInstance.getValue() : codeInput;
 		try {
@@ -595,6 +726,7 @@ tokens
 					class="icon-btn"
 					title="refresh"
 					on:click={() => {
+						normalizeCurlyQuotes();
 						if (cmInstance) cmInstance.setValue('');
 						codeInput = '';
 						clearTerminal();
@@ -668,6 +800,7 @@ tokens
 				<button
 					class="btn"
 					on:click={() => {
+						normalizeCurlyQuotes();
 						const newWindow = window.open(window.location.href, '_blank');
 						if (newWindow) setTimeout(() => (newWindow.document.body.style.zoom = '80%'), 100);
 					}}
@@ -727,8 +860,13 @@ tokens
 </div>
 
 <style>
+	:global(html) {
+		height: 100%;
+	}
+
 	:global(body) {
 		margin: 0;
+		min-height: 100%;
 	}
 
 	.ide {
@@ -740,12 +878,13 @@ tokens
 		--outline: #ffffff;
 		--panel: rgba(255, 255, 255, 0.03);
 		--shadow: 0 0 0 2px var(--outline) inset;
-		min-height: 100dvh;
+		min-height: 100vh;
+		min-width: 100vw;
 		/* Use Svelte-provided CSS var for image */
 		background-image: var(--bg-img);
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
+		background-size: auto;
+		background-position: top left;
+		background-repeat: repeat;
 		background-color: #26262a; /* fallback color */
 		color: var(--ink);
 		font-family: 'Inter', Roboto, sans-serif;
@@ -760,6 +899,7 @@ tokens
 		--accent: #111;
 		--outline: #111;
 		background-image: var(--bg-img);
+		background-color: #e8e8ed; /* fallback color for light theme */
 	}
 
 	.titlebar {
@@ -770,6 +910,8 @@ tokens
 		color: #fff;
 		padding: 8px 12px;
 		user-select: none;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.title {
@@ -807,8 +949,7 @@ tokens
 	.grid {
 		display: grid;
 		width: 100%;
-		/* Let the right column grow to take available space */
-		grid-template-columns: 1fr minmax(420px, 1fr);
+		grid-template-columns: minmax(60%, 1130px) minmax(420px, 1fr);
 		gap: 16px;
 		padding: 16px;
 	}
@@ -868,7 +1009,8 @@ tokens
 	.left {
 		display: flex;
 		flex-direction: column;
-		width: 1130px;
+		max-width: 1130px;
+		width: 100%;
 	}
 	.panel {
 		/* background: var(--panel); */
@@ -1065,7 +1207,16 @@ tokens
 		padding: 12px;
 	}
 
-	@media (max-width: 1130px) {
+	@media (max-width: 1500px) {
+		.left {
+			zoom: 0.75;
+		}
+	}
+
+	@media (max-width: 1280px) {
+		.left {
+			zoom: 1;
+		}
 		.grid {
 			grid-template-columns: 1fr;
 		}
@@ -1138,9 +1289,126 @@ tokens
 		border-left: 1px solid #000000 !important; /* black cursor for light theme */
 	}
 
+	/* Base text color for dark theme */
+	:global(.ide[data-theme='dark'] .CodeMirror) {
+		color: #d4d4d4 !important;
+	}
+
+	/* Base text color for light theme */
+	:global(.ide[data-theme='light'] .CodeMirror) {
+		color: #1f1f23 !important;
+	}
+
 	/* Error underline styling */
 	:global(.error-underline) {
 		border-bottom: 2px solid #ff0000 !important;
 		background-color: rgba(255, 0, 0, 0.1) !important;
+	}
+
+	/* Platter Language Syntax Highlighting - TypeScript-inspired colors */
+	
+	/* Dark theme syntax colors */
+	/* Keywords (if, else, for, while, etc.) - Purple/Magenta */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-keyword) {
+		color: #c586c0 !important;
+		font-weight: 500 !important;
+	}
+
+	/* Data types (string, number, boolean, etc.) - Teal/Cyan */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-type) {
+		color: #4ec9b0 !important;
+	}
+
+	/* Built-in methods/functions - Yellow */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-builtin) {
+		color: #dcdcaa !important;
+	}
+
+	/* Boolean literals (true, false) - Blue */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-atom) {
+		color: #569cd6 !important;
+	}
+
+	/* Variables and identifiers - Light blue */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-variable) {
+		color: #9cdcfe !important;
+	}
+
+	/* String literals - Orange/Red */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-string) {
+		color: #ce9178 !important;
+	}
+
+	/* Escape sequences - Yellow-orange */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-string-2) {
+		color: #d7ba7d !important;
+	}
+
+	/* Numbers - Light green */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-number) {
+		color: #b5cea8 !important;
+	}
+
+	/* Operators (+, -, *, /, etc.) - White/Light gray */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-operator) {
+		color: #d4d4d4 !important;
+	}
+
+	/* Punctuation (brackets, parentheses, etc.) - Light gray */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-punctuation) {
+		color: #d4d4d4 !important;
+	}
+
+	/* Comments - Green */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-comment) {
+		color: #6a9955 !important;
+		font-style: italic !important;
+	}
+
+	/* Light theme syntax colors - Darker colors for better contrast */
+	:global(.ide[data-theme='light'] .CodeMirror .cm-keyword) {
+		color: #7c00a8 !important;
+		font-weight: 500 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-type) {
+		color: #1a5c6f !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-builtin) {
+		color: #5c4a1e !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-atom) {
+		color: #0000cc !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-variable) {
+		color: #000c5a !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-string) {
+		color: #7d0e0e !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-string-2) {
+		color: #cc0000 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-number) {
+		color: #07603f !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-operator) {
+		color: #000000 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-punctuation) {
+		color: #000000 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-comment) {
+		color: #006600 !important;
+		font-style: italic !important;
 	}
 </style>
