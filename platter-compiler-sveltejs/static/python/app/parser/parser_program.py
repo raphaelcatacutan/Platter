@@ -474,9 +474,10 @@ class Parser():
             self.ret_array()
             self.value_tail()
             
-            """ 54 <value>	=>	id	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate> """
+            """ 54 <value>	=>	id	<id_tail>   <univ_mult_tail>	<univ_add_tail>	<univ_rel_gate> """
         elif self.tokens[self.pos].type in PREDICT_SET["<value>_8"]:
             self.parse_token("id")
+            self.id_tail()
             self.univ_mult_tail()
             self.univ_add_tail()
             self.univ_rel_gate()
