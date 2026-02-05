@@ -53,15 +53,12 @@ class Parser():
             filtered_tok = tok
             if isinstance(tok, list):
                 # If tok is a list of expected tokens, filter it
-                filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0) or (t == ',' and self.paren_counter <= 0))]
+                filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0))]
             elif tok == ')' and self.paren_counter <= 0:
                 # If expecting only ')', but no unclosed '(', don't show it
                 filtered_tok = []
             elif tok == ']' and self.bracket_counter <= 0:
                 # If expecting only ']', but no unclosed '[', don't show it
-                filtered_tok = []
-            elif tok == ',' and self.paren_counter <= 0:
-                # If expecting only ',', but no unclosed '(', don't show it
                 filtered_tok = []
             
             raise ErrorHandler("Unexpected_err", self.tokens[self.pos], filtered_tok if filtered_tok else tok)
@@ -390,7 +387,6 @@ class Parser():
         if self.tokens[self.pos].type in PREDICT_SET["<id_tail>"]:
             self.call_tailopt()
             self.accessor_tail()
-        else: self.parse_token(PREDICT_SET_M["<id_tail>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
