@@ -948,8 +948,8 @@ start() {
   },
   {
     "number": 61,
-    "actual_output": "Syntax Error: Unexpected ';' at line 6, col 22. Expected ',', '=', ']'.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 6, col 22. Expected ',', '=', ']'.",
+    "actual_output": "Syntax Error: Unexpected ';' at line 7, col 22. Expected =.",
+    "expected_output": "Syntax Error: Unexpected ';' at line 7, col 22. Expected =.",
     "code":  
     """
 piece of x = 2;
@@ -976,8 +976,8 @@ start(){
   },
   {
     "number": 63,
-    "actual_output": "Syntax Error: Unexpected '(' at line 1, col 8. Expected '[', 'of'.",
-    "expected_output": "Syntax Error: Unexpected '(' at line 1, col 8. Expected '[', 'of'.",
+    "actual_output": "Syntax Error: Unexpected '(' at line 1, col 8. Expected 'of', '['.",
+    "expected_output": "Syntax Error: Unexpected '(' at line 1, col 8. Expected 'of', '['.",
     "code":  
     """
 prepare(){}
@@ -986,8 +986,8 @@ start(){}
   },
   {
     "number": 64,
-    "actual_output": "Syntax Error: Unexpected ';' at line 1, col 13. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', '['.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 1, col 13. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', '['.",
+    "actual_output": "Syntax Error: Unexpected ';' at line 1, col 13. Expected '[', 'id', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected ';' at line 1, col 13. Expected '[', 'id', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 iwag of a = ;
@@ -1474,8 +1474,8 @@ start() {
   },
   {
     "number": 100,
-    "actual_output": "Unexpected 'id' at line 6, col 23. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Unexpected 'id' at line 6, col 23. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '<=', '>=', '<', '>', '==', '!=', ')', ',', 'and', 'or', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '<=', '>=', '<', '>', '==', '!=', ')', ',', 'and', 'or', ';'.",
     "code":  
     """
 table of animal = [ chars of sound; ];
@@ -1489,8 +1489,8 @@ start() {
   },
   {
     "number": 101,
-    "actual_output": "Syntax Error: Unexpected '}' at line 3, col 1. Expected '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', '=', '+=', '-=', '*=', '/=', '%=', ']'.",
-    "expected_output": "Syntax Error: Unexpected '}' at line 3, col 1. Expected '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', '=', '+=', '-=', '*=', '/=', '%=', ']'.",
+    "actual_output": "Syntax Error: Unexpected '}' at line 3, col 1. Expected ;.",
+    "expected_output": "Syntax Error: Unexpected '}' at line 3, col 1. Expected ;.",
     "code":  
     """
 start(){
@@ -1500,8 +1500,8 @@ start(){
   },
   {
     "number": 102,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 13. Expected '=', ',', ';'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 13. Expected '=', ',', ';'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 20. Expected '=', ',', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 20. Expected '=', ',', ';'.",
     "code":  
     """
 start(){
@@ -1511,8 +1511,8 @@ start(){
   },
   {
     "number": 103,
-    "actual_output": "Unexpected 'piece_lit' at line 2, col 17. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Unexpected 'piece_lit' at line 2, col 17. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 24. Expected '*', '/', '%', '+', '-', ',', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 24. Expected '*', '/', '%', '+', '-', ',', ';'.",
     "code":  
     """
 start(){
@@ -1591,8 +1591,8 @@ start(){
   },
   {
     "number": 109,
-    "actual_output": "Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",
-    "expected_output": "Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",
+    "actual_output": "Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.",
+    "expected_output": "Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.",
     "code":  
     """
 piece of x = 42;
@@ -1600,8 +1600,8 @@ piece of x = 42;
   },
   {
     "number": 110,
-    "actual_output": "Syntax Error: Unexpected 'remove' at line 5, col 1. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",
-    "expected_output": "Syntax Error: Unexpected 'remove' at line 5, col 1. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",
+    "actual_output": "Syntax Error: Unexpected 'remove' at line 5, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.",
+    "expected_output": "Syntax Error: Unexpected 'remove' at line 5, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.",
     "code":  
     """
 piece[] of nums = [1, 2, 3];
@@ -1613,8 +1613,8 @@ remove([1, 2, 3], 1);
   },
   {
     "number": 111,
-    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 7. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 7. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "actual_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 2 col 2 - Invalid Lexeme: Invalid delimiter for reserved word 'serve'",
+    "expected_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 2 col 2 - Invalid Lexeme: Invalid delimiter for reserved word 'serve'",
     "code":  
     """
 start(){
@@ -1635,8 +1635,8 @@ start(){
   },
   {
     "number": 113,
-    "actual_output": "Syntax Error: Unexpected 'EOF' at line 5, col 2. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",
-    "expected_output": "Syntax Error: Unexpected 'EOF' at line 5, col 2. Expected 'piece', 'sip', 'flag', 'chars', 'table', 'id', 'prepare', 'start'.",
+    "actual_output": "Syntax Error: Unexpected 'EOF' at line 5, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.",
+    "expected_output": "Syntax Error: Unexpected 'EOF' at line 5, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.",
     "code":  
     """
 table of Vector3= [
@@ -1655,15 +1655,15 @@ table of Vector3= [
 piece of a;
 
 start(){
-        crumb of a, b, c;
+        sip of a, b, c;
         piece of a;
 }
     """
   },
   {
     "number": 115,
-    "actual_output": "Syntax Error: Unexpected '+=' at line 1, col 7. Expected '[', 'of'.",
-    "expected_output": "Syntax Error: Unexpected '+=' at line 1, col 7. Expected '[', 'of'.",
+    "actual_output": "Syntax Error: Unexpected '+=' at line 1, col 7. Expected 'of', '['.",
+    "expected_output": "Syntax Error: Unexpected '+=' at line 1, col 7. Expected 'of', '['.",
     "code":  
     """
 three += one;
@@ -1671,8 +1671,8 @@ three += one;
   },
   {
     "number": 116,
-    "actual_output": "Syntax Error: Unexpected '+' at line 3, col 3. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
-    "expected_output": "Syntax Error: Unexpected '+' at line 3, col 3. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "actual_output": "Syntax Error: Unexpected '+' at line 3, col 11. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "expected_output": "Syntax Error: Unexpected '+' at line 3, col 11. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
     "code":  
     """
 start(){
@@ -1712,8 +1712,8 @@ order {
   },
   {
     "number": 119,
-    "actual_output": "Syntax Error: Unexpected '=' at line 2, col 8. Expected '[', 'of'.",
-    "expected_output": "Syntax Error: Unexpected '=' at line 2, col 8. Expected '[', 'of'.",
+    "actual_output": "Syntax Error: Unexpected '=' at line 2, col 8. Expected 'of', '['.",
+    "expected_output": "Syntax Error: Unexpected '=' at line 2, col 8. Expected 'of', '['.",
     "code":  
     """
 piece of candy = 1;
@@ -1728,8 +1728,8 @@ check(candy == 1){
   },
   {
     "number": 120,
-    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 5. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 5. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 12. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 12. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
     "code":  
     """
 start(){

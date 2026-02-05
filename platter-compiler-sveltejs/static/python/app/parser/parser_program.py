@@ -8,7 +8,7 @@ import logging as log
 
 # To disable logs, set level=log.CRITICAL. 
 # To enable logs, set level=log.DEBUG
-log.basicConfig(level=log.DEBUG, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
+log.basicConfig(level=log.CRITICAL, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
 
 class Parser():
     def __init__(self, tokens):
@@ -2137,6 +2137,24 @@ class Parser():
             pass
         else: self.parse_token(PREDICT_SET_M["<flag_after_paren>"])
 
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def value_tail(self):
+        log.info("Enter: " + self.tokens[self.pos].type) # J
+        
+        """ 265 <value_tail>    =>  <array_accessor>    <univ_mult_tail>    <univ_add_tail> <univ_rel_gate> """
+        if self.tokens[self.pos].type in PREDICT_SET["<value_tail>"]:
+            self.array_accessor()
+            self.univ_mult_tail()
+            self.univ_add_tail()
+            self.univ_rel_gate()
+
+            """ 266 <value_tail>    =>  λ   """
+        elif self.tokens[self.pos].type in PREDICT_SET["<value_tail>_1"]:
+            pass
+        
+        else: self.parse_token(PREDICT_SET_M["<value_tail>"])
+        
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def strict_piece_mult_tail(self):
