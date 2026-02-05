@@ -322,9 +322,8 @@ class TableDrivenParser:
 
 if __name__ == "__main__":
     """Test the table-driven parser."""
-    grammar_file = "app/utils/sources/test.tsv"
-    filepath = "./tests/sample_program.txt"
 
+    filepath = "./tests/sample_program.txt"
     include_whitespace = False # choice == 'y'
 
     with open(filepath, "r", encoding="utf-8") as f:
@@ -338,6 +337,7 @@ if __name__ == "__main__":
         if t.type not in ("comment", "space", "newline", "tab") or include_whitespace
     ]
     
+    grammar_file = "app/utils/sources/test.tsv"
     try:
         parser = TableDrivenParser(grammar_file, tokens)
         expected = parser.get_expected()

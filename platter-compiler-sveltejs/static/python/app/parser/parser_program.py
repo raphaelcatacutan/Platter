@@ -1,6 +1,6 @@
 from app.lexer.lexer import Lexer
 from app.lexer.token import Token
-from app.parser.error_handler import ErrorHandler
+from app.parser.error_handler import ErrorHandler, shared_state
 from app.parser.predict_set import PREDICT_SET
 from app.parser.predict_set_m import PREDICT_SET_M 
 from app.utils.FileHandler import run_file
@@ -19,6 +19,7 @@ class Parser():
         # Add EOF token at the end to prevent index out of range errors
         last_token = self.tokens[-1]
         self.tokens.append(Token("EOF", "EOF", last_token.line, last_token.col))
+        shared_state['input_tokens'] = tokens
         
         self.pos = 0
         # Track parenthesis and bracket balancing
