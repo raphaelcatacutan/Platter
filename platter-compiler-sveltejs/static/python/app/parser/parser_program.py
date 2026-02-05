@@ -8,7 +8,7 @@ import logging as log
 
 # To disable logs, set level=log.CRITICAL. 
 # To enable logs, set level=log.DEBUG
-log.basicConfig(level=log.DEBUG, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
+log.basicConfig(level=log.CRITICAL, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
 
 class Parser():
     def __init__(self, tokens):
@@ -21,6 +21,9 @@ class Parser():
         self.tokens.append(Token("EOF", "EOF", last_token.line, last_token.col))
         
         self.pos = 0
+        # Track parenthesis and bracket balancing
+        self.paren_counter = 0
+        self.bracket_counter = 0
     
     def parse_token(self, tok):
         """Parse and consume a specific token type"""
@@ -29,11 +32,39 @@ class Parser():
         
         if self.tokens[self.pos].type == tok: 
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: MATCH!") # J
+            
+            # Track opening parenthesis and brackets
+            if tok == '(':
+                self.paren_counter += 1
+            elif tok == '[':
+                self.bracket_counter += 1
+            # Track closing parenthesis and brackets
+            elif tok == ')':
+                self.paren_counter -= 1
+            elif tok == ']':
+                self.bracket_counter -= 1
+            
             self.pos += 1
 
         else:
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: INVALID!\n") # J
-            raise ErrorHandler("Unexpected_err", self.tokens[self.pos], tok)
+            
+            # Filter out closing delimiters from expected tokens if there are no unclosed pairs
+            filtered_tok = tok
+            if isinstance(tok, list):
+                # If tok is a list of expected tokens, filter it
+                filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0) or (t == ',' and self.paren_counter <= 0))]
+            elif tok == ')' and self.paren_counter <= 0:
+                # If expecting only ')', but no unclosed '(', don't show it
+                filtered_tok = []
+            elif tok == ']' and self.bracket_counter <= 0:
+                # If expecting only ']', but no unclosed '[', don't show it
+                filtered_tok = []
+            elif tok == ',' and self.paren_counter <= 0:
+                # If expecting only ',', but no unclosed '(', don't show it
+                filtered_tok = []
+            
+            raise ErrorHandler("Unexpected_err", self.tokens[self.pos], filtered_tok if filtered_tok else tok)
 
     def parse_program(self):
         """ 1 <program> -> <global_decl> <recipe_decl> start() <platter>"""
@@ -443,9 +474,10 @@ class Parser():
             self.ret_array()
             self.value_tail()
             
-            """ 54 <value>	=>	id	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate> """
+            """ 54 <value>	=>	id	<id_tail>   <univ_mult_tail>	<univ_add_tail>	<univ_rel_gate> """
         elif self.tokens[self.pos].type in PREDICT_SET["<value>_8"]:
             self.parse_token("id")
+            self.id_tail()
             self.univ_mult_tail()
             self.univ_add_tail()
             self.univ_rel_gate()
@@ -2106,6 +2138,24 @@ class Parser():
             pass
         else: self.parse_token(PREDICT_SET_M["<flag_after_paren>"])
 
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def value_tail(self):
+        log.info("Enter: " + self.tokens[self.pos].type) # J
+        
+        """ 265 <value_tail>    =>  <array_accessor>    <univ_mult_tail>    <univ_add_tail> <univ_rel_gate> """
+        if self.tokens[self.pos].type in PREDICT_SET["<value_tail>"]:
+            self.array_accessor()
+            self.univ_mult_tail()
+            self.univ_add_tail()
+            self.univ_rel_gate()
+
+            """ 266 <value_tail>    =>  λ   """
+        elif self.tokens[self.pos].type in PREDICT_SET["<value_tail>_1"]:
+            pass
+        
+        else: self.parse_token(PREDICT_SET_M["<value_tail>"])
+        
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def strict_piece_mult_tail(self):
