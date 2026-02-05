@@ -51,12 +51,13 @@ chars[] of names = ["Hello Platter", "Raph", "Jieco"];
 prepare sip of sips() { check(topiece(y) > x) { serve x;} instead {serve y;} }
 
 prepare piece of pieces() {
-	serve x;
+	 x =  x + 32 / 323 or up;
 }
 
 start() {
 	piece of z = topiece(topiece(sips()) + pieces());
 	serve z;
+    pass (i =0 ; i+=1; (i>4)) {  }
 }`;
 
 	type Token = { type: string; value: string; line: number; col: number };
