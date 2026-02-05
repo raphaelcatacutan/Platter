@@ -1,3 +1,12 @@
-start() {
-	bill()
+piece[] of x;
+
+prepare piece of appendX(piece of y){
+	x = append(x,y);
+    serve 0;
+}
+
+start(){
+	appendX(3);
+    appendX(5);
+    bill(tochars(x));
 }
