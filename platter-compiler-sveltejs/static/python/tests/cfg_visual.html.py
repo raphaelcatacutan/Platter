@@ -268,6 +268,56 @@ class TableDrivenParser:
         
         # Filter out lambda
         return sorted([t for t in expected if t not in ('λ', '')])
+    
+    def get_expected(self):
+        # Tokenize input
+        token_strings = [t.value if t.type == 'EOF' else t.type for t in self.tokens]
+        
+        # Initialize stack
+        stack = ['$', self.start_symbol]
+        cursor = 0
+        steps = 0
+        
+        while stack:
+            if steps > 1000:
+                return []
+            
+            steps += 1
+            top = stack[-1]
+            current = token_strings[cursor] if cursor < len(token_strings) else '$'
+            
+            # End of input
+            if top == '$':
+                if current == '$':
+                    return []  # No error
+                else:
+                    expected = self.get_expected_tokens(stack)
+                    return expected
+            
+            # Match terminal
+            if top == current:
+                stack.pop()
+                cursor += 1
+            # Expand non-terminal
+            elif top in self.non_terminals:
+                rule = self.parse_table.get(top, {}).get(current)
+                
+                if not rule:
+                    expected = self.get_expected_tokens(stack)
+                    return expected
+                
+                stack.pop()
+                
+                # Push RHS in reverse (skip λ)
+                if not (len(rule) == 1 and rule[0] == 'λ'):
+                    for i in range(len(rule) - 1, -1, -1):
+                        stack.append(rule[i])
+            else:
+                # Unexpected situation
+                expected = self.get_expected_tokens(stack)
+                return expected
+        
+        return []
 
 
 if __name__ == "__main__":

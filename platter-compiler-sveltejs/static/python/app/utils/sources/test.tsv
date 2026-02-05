@@ -51,508 +51,512 @@
 51	<value>	=>	not	<must_be_flag>						
 52	<value>	=>	[	<notation_val>	]					
 53	<value>	=>	<ret_array>	<value_tail>						
-54	<value>	=>	id	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
-55	<value_tail>	=>	<array_accessor>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
-56	<value_tail>	=>	λ							
-57	<notation_val>	=>	<array_element>							
-58	<notation_val>	=>	id	<array_or_table>						
-59	<notation_val>	=>	λ							
-60	<array_element>	=>	<ret_piece>	<element_value_tail>						
-61	<array_element>	=>	<ret_sip>	<element_value_tail>						
-62	<array_element>	=>	<ret_flag>	<element_value_tail>						
-63	<array_element>	=>	<ret_chars>	<element_value_tail>						
-64	<array_element>	=>	[	<notation_val>	]	<element_value_tail>				
-65	<element_value_tail>	=>	,	<array_element_id>						
-66	<element_value_tail>	=>	λ							
-67	<array_element_id>	=>	id	<element_value_tail>						
-68	<array_element_id>	=>	<array_element>							
-69	<array_element_id>		λ							
-70	<ret_sip>	=>	sqrt	(	<strict_piece_expr>	)				
-71	<ret_sip>	=>	rand	(	)					
-72	<ret_sip>	=>	tosip	(	<any_expr>	)				
-73	<ret_sip>	=>	sip_lit							
-74	<ret_flag>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)		
-75	<ret_flag>	=>	toflag	(	<any_expr>	)				
-76	<ret_flag>	=>	flag_lit							
-77	<strict_datas_expr>	=>	[	<notation_val>	]					
-78	<strict_datas_expr>	=>	<id>							
-79	<ret_array>	=>	append	(	<strict_array_expr>	,	<value>	)		
-80	<ret_array>	=>	sort	(	<strict_array_expr>	)				
-81	<ret_array>	=>	reverse	(	<strict_array_expr>	)				
-82	<ret_array>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)		
-83	<strict_array_expr>	=>	[	<array_element_id>	]					
-84	<strict_array_expr>	=>	<id>							
-85	<ret_chars>	=>	bill	(	<strict_chars_expr>	)				
-86	<ret_chars>	=>	take	(	)					
-87	<ret_chars>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)
-88	<ret_chars>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)		
-89	<ret_chars>	=>	tochars	(	<any_expr>	)				
-90	<ret_chars>	=>	chars_lit							
-91	<strict_chars_expr>	=>	<strict_chars_factor>	<strict_chars_add_tail>						
-92	<strict_chars_factor>	=>	<ret_chars>							
-93	<strict_chars_factor>	=>	<id>							
-94	<strict_chars_factor>	=>	(	<strict_chars_expr>	)					
-95	<strict_chars_add_tail>	=>	+	<strict_chars_factor>	<strict_chars_add_tail>					
-96	<strict_chars_add_tail>	=>	λ							
-97	<strict_sip_expr>	=>	<strict_sip_term>	<strict_sip_add_tail>						
-98	<strict_sip_term>	=>	<strict_sip_factor>	<strict_sip_mult_tail>						
-99	<strict_sip_factor>	=>	<ret_sip>							
-100	<strict_sip_factor>	=>	<id>							
-101	<strict_sip_factor>	=>	(	<strict_sip_expr>	)					
-102	<strict_sip_mult_tail>	=>	*	<strict_sip_factor>	<strict_sip_mult_tail>					
-103	<strict_sip_mult_tail>	=>	/	<strict_sip_factor>	<strict_sip_mult_tail>					
-104	<strict_sip_mult_tail>	=>	λ							
-105	<strict_sip_add_tail>	=>	+	<strict_sip_term>	<strict_sip_add_tail>					
-106	<strict_sip_add_tail>	=>	-	<strict_sip_term>	<strict_sip_add_tail>					
-107	<strict_sip_add_tail>	=>	λ							
-108	<array_or_table>	=>	,	<array_element_id>						
-109	<array_or_table>	=>	=	<value>	;	<field_assignments>				
-110	<array_or_table>	=>	λ							
-111	<field_assignments>	=>	id	=	<value>	;	<field_assignments>			
-112	<field_assignments>	=>	λ							
-113	<flavor_tail>	=>	,	<value>	<flavor_tail>					
-114	<flavor_tail>	=>	λ							
-115	<accessor_tail>	=>	<array_accessor>							
-116	<accessor_tail>	=>	<table_accessor>							
-117	<accessor_tail>	=>	λ							
-118	<array_accessor>	=>	[	<strict_piece_expr>	]	<accessor_tail>				
-119	<table_accessor>	=>	:	id	<accessor_tail>					
-120	<piece_inner_dispatch>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<piece_bridge_recurse>				
-121	<piece_inner_dispatch>	=>	<id>	<piece_mult_tail>	<piece_add_tail>	<piece_bridge_recurse>				
-122	<piece_inner_dispatch>	=>	(	<piece_inner_dispatch>	<piece_close_recurse>					
-123	<piece_add_tail>	=>	+	<piece_term>	<piece_add_tail>					
-124	<piece_add_tail>	=>	-	<piece_term>	<piece_add_tail>					
-125	<piece_add_tail>	=>	λ							
-126	<piece_term>	=>	<piece_factor>	<piece_mult_tail>						
-127	<piece_bridge_recurse>	=>	)							
-128	<piece_close_recurse>	=>	)							
-129	<piece_rel_gate>	=>	==	<piece_expr>	<flag_logic_tail>					
-130	<piece_rel_gate>	=>	!=	<piece_expr>	<flag_logic_tail>					
-131	<piece_rel_gate>	=>	<=	<piece_expr>	<flag_logic_tail>					
-132	<piece_rel_gate>	=>	>=	<piece_expr>	<flag_logic_tail>					
-133	<piece_rel_gate>	=>	<	<piece_expr>	<flag_logic_tail>					
-134	<piece_rel_gate>	=>	>	<piece_expr>	<flag_logic_tail>					
-135	<piece_rel_gate>	=>	λ							
-136	<piece_expr>	=>	<piece_term>	<piece_add_tail>						
-137	<flag_logic_tail>	=>	and	<must_be_flag>						
-138	<flag_logic_tail>	=>	or	<must_be_flag>						
-139	<flag_logic_tail>	=>	==	<must_be_flag>						
-140	<flag_logic_tail>	=>	!=	<must_be_flag>						
-141	<flag_logic_tail>	=>	λ							
-142	<must_be_flag>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<piece_trap_gate>				
-143	<must_be_flag>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_trap_gate>				
-144	<must_be_flag>	=>	<ret_chars>	<chars_add_tail>	<chars_trap_gate>					
-145	<must_be_flag>	=>	<ret_flag>	<flag_logic_tail>						
-146	<must_be_flag>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
-147	<must_be_flag>	=>	(	<paren_dispatch>	<flag_after_paren>					
-148	<must_be_flag>	=>	not	<must_be_flag>						
-149	<piece_trap_gate>	=>	==	<piece_expr>	<flag_logic_tail>					
-150	<piece_trap_gate>	=>	!=	<piece_expr>	<flag_logic_tail>					
-151	<piece_trap_gate>	=>	<=	<piece_expr>	<flag_logic_tail>					
-152	<piece_trap_gate>	=>	>=	<piece_expr>	<flag_logic_tail>					
-153	<piece_trap_gate>	=>	<	<piece_expr>	<flag_logic_tail>					
-154	<piece_trap_gate>	=>	>	<piece_expr>	<flag_logic_tail>					
-155	<sip_mult_tail>	=>	*	<sip_factor>	<sip_mult_tail>					
-156	<sip_mult_tail>	=>	/	<sip_factor>	<sip_mult_tail>					
-157	<sip_mult_tail>	=>	λ							
-158	<sip_factor>	=>	<ret_sip>							
-159	<sip_factor>	=>	<id>							
-160	<sip_factor>	=>	(	<sip_inner_dispatch>						
-161	<sip_inner_dispatch>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_bridge_recurse>				
-162	<sip_inner_dispatch>	=>	<id>	<sip_mult_tail>	<sip_add_tail>	<sip_bridge_recurse>				
-163	<sip_inner_dispatch>	=>	(	<sip_inner_dispatch>	<sip_close_recurse>					
-164	<sip_add_tail>	=>	+	<sip_term>	<sip_add_tail>					
-165	<sip_add_tail>	=>	-	<sip_term>	<sip_add_tail>					
-166	<sip_add_tail>	=>	λ							
-167	<sip_term>	=>	<sip_factor>	<sip_mult_tail>						
-168	<sip_bridge_recurse>	=>	)							
-169	<sip_close_recurse>	=>	)							
-170	<sip_trap_gate>	=>	==	<sip_expr>	<flag_logic_tail>					
-171	<sip_trap_gate>	=>	!=	<sip_expr>	<flag_logic_tail>					
-172	<sip_trap_gate>	=>	<=	<sip_expr>	<flag_logic_tail>					
-173	<sip_trap_gate>	=>	>=	<sip_expr>	<flag_logic_tail>					
-174	<sip_trap_gate>	=>	<	<sip_expr>	<flag_logic_tail>					
-175	<sip_trap_gate>	=>	>	<sip_expr>	<flag_logic_tail>					
-176	<sip_expr>	=>	<sip_term>	<sip_add_tail>						
-177	<chars_add_tail>	=>	+	<chars_factor>	<chars_add_tail>					
-178	<chars_add_tail>	=>	λ							
-179	<chars_factor>	=>	<ret_chars>							
-180	<chars_factor>	=>	<id>							
-181	<chars_factor>	=>	(	<chars_inner_dispatch>						
-182	<chars_inner_dispatch>	=>	<ret_chars>	<chars_add_tail>	<chars_bridge_recurse>					
-183	<chars_inner_dispatch>	=>	<id>	<chars_add_tail>	<chars_bridge_recurse>					
-184	<chars_inner_dispatch>	=>	(	<chars_inner_dispatch>	<chars_close_recurse>					
-185	<chars_bridge_recurse>	=>	)							
-186	<chars_close_recurse>	=>	)							
-187	<chars_trap_gate>	=>	==	<chars_expr>	<flag_logic_tail>					
-188	<chars_trap_gate>	=>	!=	<chars_expr>	<flag_logic_tail>					
-189	<chars_trap_gate>	=>	<=	<chars_expr>	<flag_logic_tail>					
-190	<chars_trap_gate>	=>	>=	<chars_expr>	<flag_logic_tail>					
-191	<chars_trap_gate>	=>	<	<chars_expr>	<flag_logic_tail>					
-192	<chars_trap_gate>	=>	>	<chars_expr>	<flag_logic_tail>					
-193	<chars_expr>	=>	<chars_factor>	<chars_add_tail>						
-194	<univ_mult_tail>	=>	*	<univ_factor>	<univ_mult_tail>					
-195	<univ_mult_tail>	=>	/	<univ_factor>	<univ_mult_tail>					
-196	<univ_mult_tail>	=>	%	<univ_factor>	<univ_mult_tail>					
-197	<univ_mult_tail>	=>	λ							
-198	<univ_factor>	=>	<id>							
-199	<univ_factor>	=>	<ret_piece>							
-200	<univ_factor>	=>	<ret_sip>							
-201	<univ_factor>	=>	<ret_chars>							
-202	<univ_factor>	=>	<ret_flag>							
-203	<univ_factor>	=>	(	<any_expr>	)					
-204	<univ_add_tail>	=>	+	<univ_term>	<univ_add_tail>					
-205	<univ_add_tail>	=>	-	<univ_term>	<univ_add_tail>					
-206	<univ_add_tail>	=>	λ							
-207	<univ_term>	=>	<univ_factor>	<univ_mult_tail>						
-208	<univ_rel_gate>	=>	==	<univ_expr>	<flag_logic_tail>					
-209	<univ_rel_gate>	=>	!=	<univ_expr>	<flag_logic_tail>					
-210	<univ_rel_gate>	=>	<=	<univ_expr>	<flag_logic_tail>					
-211	<univ_rel_gate>	=>	>=	<univ_expr>	<flag_logic_tail>					
-212	<univ_rel_gate>	=>	<	<univ_expr>	<flag_logic_tail>					
-213	<univ_rel_gate>	=>	>	<univ_expr>	<flag_logic_tail>					
-214	<univ_rel_gate>	=>	and	<must_be_flag>						
-215	<univ_rel_gate>	=>	or	<must_be_flag>						
-216	<univ_rel_gate>	=>	λ							
-217	<univ_expr>	=>	<univ_term>	<univ_add_tail>						
-218	<paren_dispatch>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<piece_bridge>				
-219	<paren_dispatch>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_bridge>				
-220	<paren_dispatch>	=>	<ret_chars>	<chars_add_tail>	<chars_bridge>					
-221	<paren_dispatch>	=>	<ret_flag>	<flag_logic_tail>	<flag_closure>					
-222	<paren_dispatch>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_bridge>				
-223	<paren_dispatch>	=>	(	<paren_dispatch>	<univ_closure>					
-224	<paren_dispatch>	=>	not	<must_be_flag>	<flag_closure>					
-225	<piece_bridge>	=>	)	<piece_mult_tail>	<piece_add_tail>	<piece_rel_gate>				
-226	<piece_bridge>	=>	==	<piece_expr>	<flag_logic_tail>	<flag_closure>				
-227	<piece_bridge>	=>	!=	<piece_expr>	<flag_logic_tail>	<flag_closure>				
-228	<piece_bridge>	=>	<=	<piece_expr>	<flag_logic_tail>	<flag_closure>				
-229	<piece_bridge>	=>	>=	<piece_expr>	<flag_logic_tail>	<flag_closure>				
-230	<piece_bridge>	=>	<	<piece_expr>	<flag_logic_tail>	<flag_closure>				
-231	<piece_bridge>	=>	>	<piece_expr>	<flag_logic_tail>	<flag_closure>				
-232	<flag_closure>	=>	)	<flag_logic_tail>						
-233	<sip_bridge>	=>	)	<sip_mult_tail>	<sip_add_tail>	<sip_rel_gate>				
-234	<sip_bridge>	=>	==	<sip_expr>	<flag_logic_tail>	<flag_closure>				
-235	<sip_bridge>	=>	!=	<sip_expr>	<flag_logic_tail>	<flag_closure>				
-236	<sip_bridge>	=>	<=	<sip_expr>	<flag_logic_tail>	<flag_closure>				
-237	<sip_bridge>	=>	>=	<sip_expr>	<flag_logic_tail>	<flag_closure>				
-238	<sip_bridge>	=>	<	<sip_expr>	<flag_logic_tail>	<flag_closure>				
-239	<sip_bridge>	=>	>	<sip_expr>	<flag_logic_tail>	<flag_closure>				
-240	<sip_rel_gate>	=>	==	<sip_expr>	<flag_logic_tail>					
-241	<sip_rel_gate>	=>	!=	<sip_expr>	<flag_logic_tail>					
-242	<sip_rel_gate>	=>	<=	<sip_expr>	<flag_logic_tail>					
-243	<sip_rel_gate>	=>	>=	<sip_expr>	<flag_logic_tail>					
-244	<sip_rel_gate>	=>	<	<sip_expr>	<flag_logic_tail>					
-245	<sip_rel_gate>	=>	>	<sip_expr>	<flag_logic_tail>					
-246	<sip_rel_gate>	=>	λ							
-247	<chars_bridge>	=>	)	<chars_add_tail>	<chars_rel_gate>					
-248	<chars_bridge>	=>	==	<chars_expr>	<flag_logic_tail>	<flag_closure>				
-249	<chars_bridge>	=>	<=	<chars_expr>	<flag_logic_tail>	<flag_closure>				
-250	<chars_bridge>	=>	>=	<chars_expr>	<flag_logic_tail>	<flag_closure>				
-251	<chars_bridge>	=>	<	<chars_expr>	<flag_logic_tail>	<flag_closure>				
-252	<chars_bridge>	=>	>	<chars_expr>	<flag_logic_tail>	<flag_closure>				
-253	<chars_bridge>	=>	!=	<chars_expr>	<flag_logic_tail>	<flag_closure>				
-254	<chars_rel_gate>	=>	<=	<chars_expr>	<flag_logic_tail>					
-255	<chars_rel_gate>	=>	>=	<chars_expr>	<flag_logic_tail>					
-256	<chars_rel_gate>	=>	<	<chars_expr>	<flag_logic_tail>					
-257	<chars_rel_gate>	=>	>	<chars_expr>	<flag_logic_tail>					
-258	<chars_rel_gate>	=>	==	<chars_expr>	<flag_logic_tail>					
-259	<chars_rel_gate>	=>	!=	<chars_expr>	<flag_logic_tail>					
-260	<chars_rel_gate>	=>	λ							
-261	<univ_bridge>	=>	)	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
-262	<univ_bridge>	=>	==	<univ_expr>	<flag_logic_tail>	<flag_closure>				
-263	<univ_bridge>	=>	!=	<univ_expr>	<flag_logic_tail>	<flag_closure>				
-264	<univ_bridge>	=>	<=	<univ_expr>	<flag_logic_tail>	<flag_closure>				
-265	<univ_bridge>	=>	>=	<univ_expr>	<flag_logic_tail>	<flag_closure>				
-266	<univ_bridge>	=>	<	<univ_expr>	<flag_logic_tail>	<flag_closure>				
-267	<univ_bridge>	=>	>	<univ_expr>	<flag_logic_tail>	<flag_closure>				
-268	<univ_closure>	=>	)	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
-269	<flag_after_paren>	=>	λ							
-270	<strict_piece_mult_tail>	=>	*	<strict_piece_factor>	<strict_piece_mult_tail>					
-271	<strict_piece_mult_tail>	=>	/	<strict_piece_factor>	<strict_piece_mult_tail>					
-272	<strict_piece_mult_tail>	=>	%	<strict_piece_factor>	<strict_piece_mult_tail>					
-273	<strict_piece_mult_tail>	=>	λ							
-274	<strict_piece_add_tail>	=>	+	<strict_piece_term>	<strict_piece_add_tail>					
-275	<strict_piece_add_tail>	=>	-	<strict_piece_term>	<strict_piece_add_tail>					
-276	<strict_piece_add_tail>	=>	λ							
-277	<piece_id_tail>	=>	,	id	<piece_ingredient_init>	<piece_id_tail>				
-278	<piece_id_tail>	=>	λ							
-279	<decl_type>	=>	<dimensions>	of	<array_declare>	;				
-280	<dimensions>	=>	[	]	<dimensions_tail>					
-281	<dimensions_tail>	=>	<dimensions>							
-282	<dimensions_tail>	=>	λ							
-283	<array_declare>	=>	id	<array_init>	<array_declare_tail>					
-284	<array_init>	=>	=	<strict_array_expr>						
-285	<array_init>	=>	λ							
-286	<array_declare_tail>	=>	,	<array_declare>						
-287	<array_declare_tail>	=>	λ							
-288	<chars_decl>	=>	of	<chars_id>	;					
-289	<chars_decl>	=>	<decl_type>							
-290	<chars_id>	=>	id	<chars_ingredient_init>	<chars_id_tail>					
-291	<chars_ingredient_init>	=>	=	<strict_chars_expr>						
-292	<chars_ingredient_init>	=>	λ							
-293	<chars_id_tail>	=>	,	id	<chars_ingredient_init>	<chars_id_tail>				
-294	<chars_id_tail>	=>	λ							
-295	<sip_decl>	=>	of	<sip_id>	;					
-296	<sip_decl>	=>	<decl_type>							
-297	<sip_id>	=>	id	<sip_ingredient_init>	<sip_id_tail>					
-298	<sip_ingredient_init>	=>	=	<strict_sip_expr>						
-299	<sip_ingredient_init>	=>	λ							
-300	<sip_id_tail>	=>	,	id	<sip_ingredient_init>	<sip_id_tail>				
-301	<sip_id_tail>	=>	λ							
-302	<flag_decl>	=>	of	<flag_id>	;					
-303	<flag_decl>	=>	<decl_type>							
-304	<flag_id>	=>	id	<flag_ingredient_init>	<flag_id_tail>					
-305	<flag_ingredient_init>	=>	=	<strict_flag_expr>						
-306	<flag_ingredient_init>	=>	λ							
-307	<strict_flag_expr>	=>	<strict_flag_term>	<strict_flag_or_tail>						
-308	<strict_flag_term>	=>	<strict_flag_equality>	<strict_flag_and_tail>						
-309	<strict_flag_equality>	=>	<strict_flag_factor>	<strict_flag_eq_tail>						
-310	<strict_flag_factor>	=>	<ret_flag>							
-311	<strict_flag_factor>	=>	not	<strict_flag_factor>						
-312	<strict_flag_factor>	=>	<id>	<strict_id_master_tail>						
-313	<strict_flag_factor>	=>	(	<strict_flag_paren_entry>						
-314	<strict_flag_factor>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<strict_piece_gate>				
-315	<strict_flag_factor>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<strict_sip_gate>				
-316	<strict_flag_factor>	=>	<ret_chars>	<chars_add_tail>	<strict_chars_gate>					
-317	<strict_id_master_tail>	=>	*	<univ_factor>	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>			
-318	<strict_id_master_tail>	=>	/	<univ_factor>	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>			
-319	<strict_id_master_tail>	=>	%	<univ_factor>	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>			
-320	<strict_id_master_tail>	=>	+	<univ_term>	<univ_add_tail>	<strict_forced_gate>				
-321	<strict_id_master_tail>	=>	-	<univ_term>	<univ_add_tail>	<strict_forced_gate>				
-322	<strict_id_master_tail>	=>	==	<univ_expr>						
-323	<strict_id_master_tail>	=>	!=	<univ_expr>						
-324	<strict_id_master_tail>	=>	<=	<comparable_expr>						
-325	<strict_id_master_tail>	=>	>=	<comparable_expr>						
-326	<strict_id_master_tail>	=>	<	<comparable_expr>						
-327	<strict_id_master_tail>	=>	>	<comparable_expr>						
-328	<strict_id_master_tail>	=>	λ							
-329	<strict_forced_gate>	=>	==	<univ_expr>						
-330	<strict_forced_gate>	=>	!=	<univ_expr>						
-331	<strict_forced_gate>	=>	<=	<univ_expr>						
-332	<strict_forced_gate>	=>	>=	<univ_expr>						
-333	<strict_forced_gate>	=>	<	<univ_expr>						
-334	<strict_forced_gate>	=>	>	<univ_expr>						
-335	<comparable_expr>	=>	<comparable_term>	<comparable_add_tail>						
-336	<comparable_term>	=>	<comparable_factor>	<comparable_mult_tail>						
-337	<comparable_factor>	=>	<id>							
-338	<comparable_factor>	=>	<ret_piece>							
-339	<comparable_factor>	=>	<ret_sip>							
-340	<comparable_factor>	=>	<ret_chars>							
-341	<comparable_factor>	=>	(	<any_expr>	)					
-342	<comparable_mult_tail>	=>	*	<comparable_factor>	<comparable_mult_tail>					
-343	<comparable_mult_tail>	=>	/	<comparable_factor>	<comparable_mult_tail>					
-344	<comparable_mult_tail>	=>	%	<comparable_factor>	<comparable_mult_tail>					
-345	<comparable_mult_tail>	=>	λ							
-346	<comparable_add_tail>	=>	+	<comparable_term>	<comparable_add_tail>					
-347	<comparable_add_tail>	=>	-	<comparable_term>	<comparable_add_tail>					
-348	<comparable_add_tail>	=>	λ							
-349	<strict_flag_paren_entry>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<strict_paren_piece_bridge>				
-350	<strict_flag_paren_entry>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<strict_paren_sip_bridge>				
-351	<strict_flag_paren_entry>	=>	<ret_chars>	<chars_add_tail>	<strict_paren_chars_bridge>					
-352	<strict_flag_paren_entry>	=>	<ret_flag>	<flag_logic_tail>	<strict_paren_flag_bridge>					
-353	<strict_flag_paren_entry>	=>	not	<must_be_flag>	<strict_paren_flag_bridge>					
-354	<strict_flag_paren_entry>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<strict_paren_univ_bridge>				
-355	<strict_flag_paren_entry>	=>	(	<strict_flag_paren_entry>	<strict_paren_univ_bridge>					
-356	<strict_paren_piece_bridge>	=>	)	<piece_mult_tail>	<piece_add_tail>	<strict_piece_gate>				
-357	<strict_paren_piece_bridge>	=>	<strict_piece_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
-358	<strict_piece_gate>	=>	==	<piece_expr>						
-359	<strict_piece_gate>	=>	!=	<piece_expr>						
-360	<strict_piece_gate>	=>	<=	<piece_expr>						
-361	<strict_piece_gate>	=>	>=	<piece_expr>						
-362	<strict_piece_gate>	=>	<	<piece_expr>						
-363	<strict_piece_gate>	=>	>	<piece_expr>						
-364	<strict_paren_flag_bridge>	=>	)							
-365	<strict_paren_sip_bridge>	=>	)	<sip_mult_tail>	<sip_add_tail>	<strict_sip_gate>				
-366	<strict_paren_sip_bridge>	=>	<strict_sip_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
-367	<strict_sip_gate>	=>	==	<sip_expr>						
-368	<strict_sip_gate>	=>	!=	<sip_expr>						
-369	<strict_sip_gate>	=>	<=	<sip_expr>						
-370	<strict_sip_gate>	=>	>=	<sip_expr>						
-371	<strict_sip_gate>	=>	<	<sip_expr>						
-372	<strict_sip_gate>	=>	>	<sip_expr>						
-373	<strict_paren_chars_bridge>	=>	)	<chars_add_tail>	<strict_chars_gate>					
-374	<strict_paren_chars_bridge>	=>	<strict_chars_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
-375	<strict_chars_gate>	=>	<=	<chars_expr>						
-376	<strict_chars_gate>	=>	>=	<chars_expr>						
-377	<strict_chars_gate>	=>	<	<chars_expr>						
-378	<strict_chars_gate>	=>	>	<chars_expr>						
-379	<strict_chars_gate>	=>	==	<chars_expr>						
-380	<strict_chars_gate>	=>	!=	<chars_expr>						
-381	<strict_paren_univ_bridge>	=>	)	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>				
-382	<strict_paren_univ_bridge>	=>	<strict_forced_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
-383	<strict_flag_eq_tail>	=>	==	<strict_flag_equality>						
-384	<strict_flag_eq_tail>	=>	!=	<strict_flag_equality>						
-385	<strict_flag_eq_tail>	=>	λ							
-386	<strict_flag_and_tail>	=>	and	<strict_flag_equality>	<strict_flag_and_tail>					
-387	<strict_flag_and_tail>	=>	λ							
-388	<strict_flag_or_tail>	=>	or	<strict_flag_term>	<strict_flag_or_tail>					
-389	<strict_flag_or_tail>	=>	λ							
-390	<flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>				
-391	<flag_id_tail>	=>	λ							
-392	<table_prototype>	=>	table	of	id	=	[	<required_decl>	]	;
-393	<required_decl>	=>	<decl_head>	;	<required_decl_tail>					
-394	<decl_head>	=>	<primitive_types_dims>	of	id					
-395	<primitive_types_dims>	=>	piece	<dimensions_tail>						
-396	<primitive_types_dims>	=>	sip	<dimensions_tail>						
-397	<primitive_types_dims>	=>	flag	<dimensions_tail>						
-398	<primitive_types_dims>	=>	chars	<dimensions_tail>						
-399	<primitive_types_dims>	=>	id	<dimensions_tail>						
-400	<required_decl_tail>	=>	<required_decl>							
-401	<required_decl_tail>	=>	λ							
-402	<table_decl>	=>	of	<table_declare>	;					
-403	<table_decl>	=>	<decl_type>							
-404	<table_declare>	=>	id	<table_init>	<table_declare_tail>					
-405	<table_init>	=>	=	<strict_table_expr>						
-406	<table_init>	=>	λ							
-407	<strict_table_expr>	=>	[	<field_assignments>	]					
-408	<strict_table_expr>	=>	<id>							
-409	<table_declare_tail>	=>	,	<table_declare>						
-410	<table_declare_tail>	=>	λ							
-411	<recipe_decl>	=>	prepare	<serve_type>	(	<spice>	)	<platter>	<recipe_decl>	
-412	<recipe_decl>	=>	λ							
-413	<serve_type>	=>	<decl_head>							
-414	<spice>	=>	<decl_head>	<spice_tail>						
-415	<spice>	=>	λ							
-416	<spice_tail>	=>	,	<decl_head>	<spice_tail>					
-417	<spice_tail>	=>	λ							
-418	<platter>	=>	{	<local_decl>	<statements>	}				
-419	<local_decl>	=>	piece	<piece_decl>	<local_decl>					
-420	<local_decl>	=>	chars	<chars_decl>	<local_decl>					
-421	<local_decl>	=>	sip	<sip_decl>	<local_decl>					
-422	<local_decl>	=>	flag	<flag_decl>	<local_decl>					
-423	<local_decl>	=>	id	<local_id_tail>						
-424	<local_decl>	=>	λ							
-425	<local_id_tail>	=>	of	<table_declare>	;	<local_decl>				
-426	<local_id_tail>	=>	[	<]_tail>						
-427	<local_id_tail>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements>			
-428	<local_id_tail>	=>	<assignment_op>	<value>	;	<statements>				
-429	<local_id_tail>	=>	<tail1>	;	<statements>					
-430	<]_tail>	=>	]	<dimensions_tail>	of	<array_declare>	;	<local_decl>		
-431	<]_tail>	=>	<strict_piece_expr>	]	<accessor_tail>	<assignment_op>	<value>	;	<statements>	
-432	<assignment_op>	=>	=							
-433	<assignment_op>	=>	+=							
-434	<assignment_op>	=>	-=							
-435	<assignment_op>	=>	*=							
-436	<assignment_op>	=>	/=							
-437	<assignment_op>	=>	%=							
-438	<statements>	=>	<id_statements>	<statements>						
-439	<statements>	=>	<built-in_rec_call>	;	<statements>					
-440	<statements>	=>	<conditional_st>	<statements>						
-441	<statements>	=>	<looping_st>	<statements>						
-442	<statements>	=>	<jump_serve>	<statements>						
-443	<statements>	=>	λ							
-444	<id_statements>	=>	id	<id_statements_ext>	<statements>					
-445	<id_statements_ext>	=>	<tail1>	;						
-446	<id_statements_ext>	=>	<assignment_st>							
-447	<tail1>	=>	<call_tail>	<accessor_tail>						
-448	<call_tail>	=>	(	<flavor>	)					
-449	<assignment_st>	=>	<accessor_tail>	<assignment_op>	<value>	;				
-450	<built-in_rec_call>	=>	<built-in_rec>							
-451	<built-in_rec>	=>	append	(	<strict_array_expr>	,	<value>	)		
-452	<built-in_rec>	=>	bill	(	<strict_chars_expr>	)				
-453	<built-in_rec>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)
-454	<built-in_rec>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)		
-455	<built-in_rec>	=>	fact	(	<strict_piece_expr>	)				
-456	<built-in_rec>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)		
-457	<built-in_rec>	=>	pow	(	<strict_piece_expr>	,	<strict_piece_expr>	)		
-458	<built-in_rec>	=>	rand	(	)					
-459	<built-in_rec>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)		
-460	<built-in_rec>	=>	reverse	(	<strict_array_expr>	)				
-461	<built-in_rec>	=>	search	(	<strict_array_expr>	,	<value>	)		
-462	<built-in_rec>	=>	size	(	<strict_array_expr>	)				
-463	<built-in_rec>	=>	sort	(	<strict_array_expr>	)				
-464	<built-in_rec>	=>	sqrt	(	<strict_piece_expr>	)				
-465	<built-in_rec>	=>	take	(	)					
-466	<built-in_rec>	=>	tochars	(	<any_expr>	)				
-467	<built-in_rec>	=>	topiece	(	<any_expr>	)				
-468	<built-in_rec>	=>	tosip	(	<any_expr>	)				
-469	<conditional_st>	=>	<cond_check>							
-470	<conditional_st>	=>	<cond_menu>							
-471	<cond_check>	=>	check	(	<strict_flag_expr>	)	<platter>	<alt_clause>	<instead_clause>	
-472	<alt_clause>	=>	alt	(	<strict_flag_expr>	)	<platter>	<alt_clause>		
-473	<alt_clause>	=>	λ							
-474	<instead_clause>	=>	instead	<platter>						
-475	<instead_clause>	=>	λ							
-476	<cond_menu>	=>	menu	(	<any_expr>	)	<menu_platter>			
-477	<menu_platter>	=>	{	<choice_clause>	<usual_clause>	}				
-478	<choice_clause>	=>	choice	<choice_val>	:	<statements_menu>	<choice_clause>			
-479	<choice_clause>	=>	λ							
-480	<choice_val>	=>	piece_lit							
-481	<choice_val>	=>	chars_lit							
-482	<statements_menu>	=>	<id_statements_menu>	<statements_menu>						
-483	<statements_menu>	=>	<built-in_rec_call>	;	<statements_menu>					
-484	<statements_menu>	=>	<conditional_st_menu>	<statements_menu>						
-485	<statements_menu>	=>	<looping_st>	<statements_menu>						
-486	<statements_menu>	=>	<jump_stop>	<statements_menu>						
-487	<statements_menu>	=>	<jump_serve>	<statements_menu>						
-488	<statements_menu>	=>	λ							
-489	<id_statements_menu>	=>	id	<id_statements_ext>	<statements_menu>					
-490	<conditional_st_menu>	=>	<cond_check_menu>							
-491	<conditional_st_menu>	=>	<cond_menu>							
-492	<cond_check_menu>	=>	check	(	<strict_flag_expr>	)	<menu_check_platter>	<alt_clause>	<instead_clause>	
-493	<menu_check_platter>	=>	{	<local_decl_menu>	<statements_menu>	}				
-494	<local_decl_menu>	=>	piece	<piece_decl>	<local_decl_menu>					
-495	<local_decl_menu>	=>	chars	<chars_decl>	<local_decl_menu>					
-496	<local_decl_menu>	=>	sip	<sip_decl>	<local_decl_menu>					
-497	<local_decl_menu>	=>	flag	<flag_decl>	<local_decl_menu>					
-498	<local_decl_menu>	=>	id	<local_id_tail_menu>						
-499	<local_decl_menu>	=>	λ							
-500	<local_id_tail_menu>	=>	of	<table_declare>	;	<local_decl_menu>				
-501	<local_id_tail_menu>	=>	[	<]_tail_menu>						
-502	<local_id_tail_menu>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_menu>			
-503	<local_id_tail_menu>	=>	<assignment_op>	<value>	;	<statements_menu>				
-504	<local_id_tail_menu>	=>	<tail1>	;	<statements_menu>					
-505	<]_tail_menu>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_menu>		
-506	<]_tail_menu>	=>	<strict_piece_expr>	]	<accessor_tail>	<assignment_op>	<value>	;	<statements_menu>	
-507	<looping_st>	=>	<loop_pass>							
-508	<looping_st>	=>	<loop_repeat>							
-509	<looping_st>	=>	<loop_order>							
-510	<loop_pass>	=>	pass	(	<initialization>	<update>	<strict_flag_expr>	)	<loop_platter>	
-511	<initialization>	=>	id	<loop_init>	;					
-512	<loop_init>	=>	=	<strict_piece_expr>						
-513	<loop_init>	=>	λ							
-514	<update>	=>	id	<assignment_st>						
-515	<loop_platter>	=>	{	<local_decl_loop>	<statements_loop>	}				
-516	<local_decl_loop>	=>	piece	<piece_decl>	<local_decl_loop>					
-517	<local_decl_loop>	=>	chars	<chars_decl>	<local_decl_loop>					
-518	<local_decl_loop>	=>	sip	<sip_decl>	<local_decl_loop>					
-519	<local_decl_loop>	=>	flag	<flag_decl>	<local_decl_loop>					
-520	<local_decl_loop>	=>	id	<local_id_tail_loop>						
-521	<local_decl_loop>	=>	λ							
-522	<local_id_tail_loop>	=>	of	<table_declare>	;	<local_decl_loop>				
-523	<local_id_tail_loop>	=>	[	<]_tail_loop>						
-524	<local_id_tail_loop>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_loop>			
-525	<local_id_tail_loop>	=>	<assignment_op>	<value>	;	<statements_loop>				
-526	<local_id_tail_loop>	=>	<tail1>	;	<statements_loop>					
-527	<]_tail_loop>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_loop>		
-528	<]_tail_loop>	=>	<strict_piece_expr>	]	<accessor_tail>	<assignment_op>	<value>	;	<statements_loop>	
-529	<statements_loop>	=>	<id_statements_loop>	<statements_loop>						
-530	<statements_loop>	=>	<built-in_rec_call>	;	<statements_loop>					
-531	<statements_loop>	=>	<conditional_st_loop>	<statements_loop>						
-532	<statements_loop>	=>	<looping_st>	<statements_loop>						
-533	<statements_loop>	=>	<jump_st>	<statements_loop>						
-534	<statements_loop>	=>	λ							
-535	<id_statements_loop>	=>	id	<id_statements_ext>	<statements_loop>					
-536	<conditional_st_loop>	=>	<cond_check_loop>							
-537	<conditional_st_loop>	=>	<cond_menu_loop>							
-538	<cond_check_loop>	=>	check	(	<strict_flag_expr>	)	<loop_platter>	<alt_clause_loop>	<instead_clause_loop>	
-539	<alt_clause_loop>	=>	alt	(	<strict_flag_expr>	)	<loop_platter>	<alt_clause_loop>		
-540	<alt_clause_loop>	=>	λ							
-541	<instead_clause_loop>	=>	instead	<loop_platter>						
-542	<instead_clause_loop>	=>	λ							
-543	<cond_menu_loop>	=>	menu	(	<any_expr>	)	<menu_loop_platter>			
-544	<menu_loop_platter>	=>	{	<choice_clause_loop>	<usual_clause_loop>	}				
-545	<choice_clause_loop>	=>	choice	<choice_val>	:	<statements_loop>	<choice_clause_loop>			
-546	<choice_clause_loop>	=>	λ							
-547	<usual_clause_loop>	=>	usual	:	<statements_loop>					
-548	<usual_clause_loop>	=>	λ							
-549	<jump_st>	=>	<jump_next>							
-550	<jump_st>	=>	<jump_stop>							
-551	<jump_st>	=>	<jump_serve>							
-552	<jump_next>	=>	next	;						
-553	<jump_stop>	=>	stop	;						
-554	<jump_serve>	=>	serve	<value>	;					
-555	<loop_repeat>	=>	repeat	(	<strict_flag_expr>	)	<loop_platter>			
-556	<loop_order>	=>	order	<loop_platter>	repeat	(	<strict_flag_expr>	)	;	
-557	<usual_clause>	=>	usual	:	<statements_menu>					
-558	<usual_clause>	=>	λ							
+54	<value>	=>	id	<id_tail>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>			
+55	<piece_add_tail>	=>	+	<piece_term>	<piece_add_tail>					
+56	<piece_add_tail>	=>	-	<piece_term>	<piece_add_tail>					
+57	<piece_add_tail>	=>	λ							
+58	<piece_term>	=>	<piece_factor>	<piece_mult_tail>						
+59	<piece_rel_gate>	=>	==	<piece_expr>	<flag_logic_tail>					
+60	<piece_rel_gate>	=>	!=	<piece_expr>	<flag_logic_tail>					
+61	<piece_rel_gate>	=>	<=	<piece_expr>	<flag_logic_tail>					
+62	<piece_rel_gate>	=>	>=	<piece_expr>	<flag_logic_tail>					
+63	<piece_rel_gate>	=>	<	<piece_expr>	<flag_logic_tail>					
+64	<piece_rel_gate>	=>	>	<piece_expr>	<flag_logic_tail>					
+65	<piece_rel_gate>	=>	λ							
+66	<piece_expr>	=>	<piece_term>	<piece_add_tail>						
+67	<flag_logic_tail>	=>	and	<must_be_flag>						
+68	<flag_logic_tail>	=>	or	<must_be_flag>						
+69	<flag_logic_tail>	=>	==	<must_be_flag>						
+70	<flag_logic_tail>	=>	!=	<must_be_flag>						
+71	<flag_logic_tail>	=>	λ							
+72	<must_be_flag>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<piece_trap_gate>				
+73	<must_be_flag>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_trap_gate>				
+74	<must_be_flag>	=>	<ret_chars>	<chars_add_tail>	<chars_trap_gate>					
+75	<must_be_flag>	=>	<ret_flag>	<flag_logic_tail>						
+76	<must_be_flag>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
+77	<must_be_flag>	=>	(	<paren_dispatch>	<flag_after_paren>					
+78	<must_be_flag>	=>	not	<must_be_flag>						
+79	<piece_trap_gate>	=>	==	<piece_expr>	<flag_logic_tail>					
+80	<piece_trap_gate>	=>	!=	<piece_expr>	<flag_logic_tail>					
+81	<piece_trap_gate>	=>	<=	<piece_expr>	<flag_logic_tail>					
+82	<piece_trap_gate>	=>	>=	<piece_expr>	<flag_logic_tail>					
+83	<piece_trap_gate>	=>	<	<piece_expr>	<flag_logic_tail>					
+84	<piece_trap_gate>	=>	>	<piece_expr>	<flag_logic_tail>					
+85	<ret_sip>	=>	sqrt	(	<strict_piece_expr>	)				
+86	<ret_sip>	=>	rand	(	)					
+87	<ret_sip>	=>	tosip	(	<any_expr>	)				
+88	<ret_sip>	=>	sip_lit							
+89	<sip_mult_tail>	=>	*	<sip_factor>	<sip_mult_tail>					
+90	<sip_mult_tail>	=>	/	<sip_factor>	<sip_mult_tail>					
+91	<sip_mult_tail>	=>	λ							
+92	<sip_factor>	=>	<ret_sip>							
+93	<sip_factor>	=>	<id>							
+94	<sip_factor>	=>	(	<sip_inner_dispatch>						
+95	<sip_inner_dispatch>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_bridge_recurse>				
+96	<sip_inner_dispatch>	=>	<id>	<sip_mult_tail>	<sip_add_tail>	<sip_bridge_recurse>				
+97	<sip_inner_dispatch>	=>	(	<sip_inner_dispatch>	<sip_close_recurse>					
+98	<sip_add_tail>	=>	+	<sip_term>	<sip_add_tail>					
+99	<sip_add_tail>	=>	-	<sip_term>	<sip_add_tail>					
+100	<sip_add_tail>	=>	λ							
+101	<sip_term>	=>	<sip_factor>	<sip_mult_tail>						
+102	<sip_bridge_recurse>	=>	)							
+103	<sip_close_recurse>	=>	)							
+104	<sip_trap_gate>	=>	==	<sip_expr>	<flag_logic_tail>					
+105	<sip_trap_gate>	=>	!=	<sip_expr>	<flag_logic_tail>					
+106	<sip_trap_gate>	=>	<=	<sip_expr>	<flag_logic_tail>					
+107	<sip_trap_gate>	=>	>=	<sip_expr>	<flag_logic_tail>					
+108	<sip_trap_gate>	=>	<	<sip_expr>	<flag_logic_tail>					
+109	<sip_trap_gate>	=>	>	<sip_expr>	<flag_logic_tail>					
+110	<sip_expr>	=>	<sip_term>	<sip_add_tail>						
+111	<ret_chars>	=>	bill	(	<strict_chars_expr>	)				
+112	<ret_chars>	=>	take	(	)					
+113	<ret_chars>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)
+114	<ret_chars>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)		
+115	<ret_chars>	=>	tochars	(	<any_expr>	)				
+116	<ret_chars>	=>	chars_lit							
+117	<strict_chars_expr>	=>	<strict_chars_factor>	<strict_chars_add_tail>						
+118	<strict_chars_factor>	=>	<ret_chars>							
+119	<strict_chars_factor>	=>	<id>							
+120	<strict_chars_factor>	=>	(	<strict_chars_expr>	)					
+121	<strict_chars_add_tail>	=>	+	<strict_chars_factor>	<strict_chars_add_tail>					
+122	<strict_chars_add_tail>	=>	λ							
+123	<strict_sip_expr>	=>	<strict_sip_term>	<strict_sip_add_tail>						
+124	<strict_sip_term>	=>	<strict_sip_factor>	<strict_sip_mult_tail>						
+125	<strict_sip_factor>	=>	<ret_sip>							
+126	<strict_sip_factor>	=>	<id>							
+127	<strict_sip_factor>	=>	(	<strict_sip_expr>	)					
+128	<strict_sip_mult_tail>	=>	*	<strict_sip_factor>	<strict_sip_mult_tail>					
+129	<strict_sip_mult_tail>	=>	/	<strict_sip_factor>	<strict_sip_mult_tail>					
+130	<strict_sip_mult_tail>	=>	λ							
+131	<strict_sip_add_tail>	=>	+	<strict_sip_term>	<strict_sip_add_tail>					
+132	<strict_sip_add_tail>	=>	-	<strict_sip_term>	<strict_sip_add_tail>					
+133	<strict_sip_add_tail>	=>	λ							
+134	<chars_add_tail>	=>	+	<chars_factor>	<chars_add_tail>					
+135	<chars_add_tail>	=>	λ							
+136	<chars_factor>	=>	<ret_chars>							
+137	<chars_factor>	=>	<id>							
+138	<chars_factor>	=>	(	<chars_inner_dispatch>						
+139	<chars_inner_dispatch>	=>	<ret_chars>	<chars_add_tail>	<chars_bridge_recurse>					
+140	<chars_inner_dispatch>	=>	<id>	<chars_add_tail>	<chars_bridge_recurse>					
+141	<chars_inner_dispatch>	=>	(	<chars_inner_dispatch>	<chars_close_recurse>					
+142	<chars_bridge_recurse>	=>	)							
+143	<chars_close_recurse>	=>	)							
+144	<chars_trap_gate>	=>	==	<chars_expr>	<flag_logic_tail>					
+145	<chars_trap_gate>	=>	!=	<chars_expr>	<flag_logic_tail>					
+146	<chars_trap_gate>	=>	<=	<chars_expr>	<flag_logic_tail>					
+147	<chars_trap_gate>	=>	>=	<chars_expr>	<flag_logic_tail>					
+148	<chars_trap_gate>	=>	<	<chars_expr>	<flag_logic_tail>					
+149	<chars_trap_gate>	=>	>	<chars_expr>	<flag_logic_tail>					
+150	<chars_expr>	=>	<chars_factor>	<chars_add_tail>						
+151	<ret_flag>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)		
+152	<ret_flag>	=>	toflag	(	<any_expr>	)				
+153	<ret_flag>	=>	flag_lit							
+154	<strict_datas_expr>	=>	[	<notation_val>	]					
+155	<strict_datas_expr>	=>	id	<id_tail>						
+156	<strict_datas_expr>	=>	<ret_array>	<opt_array_access>						
+157	<notation_val>	=>	<array_element>							
+158	<notation_val>	=>	id	<array_or_table>						
+159	<notation_val>	=>	λ							
+160	<array_element>	=>	piece_lit	<element_value_tail>						
+161	<array_element>	=>	sip_lit	<element_value_tail>						
+162	<array_element>	=>	flag_lit	<element_value_tail>						
+163	<array_element>	=>	chars_lit	<element_value_tail>						
+164	<array_element>	=>	[	<notation_val>	]	<element_value_tail>				
+165	<element_value_tail>	=>	,	<array_element_id>						
+166	<element_value_tail>	=>	λ							
+167	<array_element_id>	=>	id	<element_value_tail>						
+168	<array_element_id>	=>	<array_element>							
+169	<array_element_id>		λ							
+170	<array_or_table>	=>	,	<array_element_id>						
+171	<array_or_table>	=>	=	<value>	;	<field_assignments>				
+172	<array_or_table>	=>	λ							
+173	<field_assignments>	=>	id	=	<value>	;	<field_assignments>			
+174	<field_assignments>	=>	λ							
+175	<ret_array>	=>	append	(	<strict_array_expr>	,	<value>	)		
+176	<ret_array>	=>	sort	(	<strict_array_expr>	)				
+177	<ret_array>	=>	reverse	(	<strict_array_expr>	)				
+178	<ret_array>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)		
+179	<strict_array_expr>	=>	[	<array_element_id>	]					
+180	<strict_array_expr>	=>	id	<id_tail>						
+181	<strict_array_expr>	=>	<ret_array>	<opt_array_access>						
+182	<opt_array_access>	=>	<array_accessor>							
+183	<opt_array_access>	=>	λ							
+184	<array_accessor>	=>	[	<strict_piece_expr>	]	<accessor_tail>				
+185	<accessor_tail>	=>	<array_accessor>							
+186	<accessor_tail>	=>	<table_accessor>							
+187	<accessor_tail>	=>	λ							
+188	<table_accessor>	=>	:	id	<accessor_tail>					
+189	<univ_mult_tail>	=>	*	<univ_factor>	<univ_mult_tail>					
+190	<univ_mult_tail>	=>	/	<univ_factor>	<univ_mult_tail>					
+191	<univ_mult_tail>	=>	%	<univ_factor>	<univ_mult_tail>					
+192	<univ_mult_tail>	=>	λ							
+193	<univ_factor>	=>	<id>							
+194	<univ_factor>	=>	<ret_piece>							
+195	<univ_factor>	=>	<ret_sip>							
+196	<univ_factor>	=>	<ret_chars>							
+197	<univ_factor>	=>	<ret_flag>							
+198	<univ_factor>	=>	(	<any_expr>	)					
+199	<univ_add_tail>	=>	+	<univ_term>	<univ_add_tail>					
+200	<univ_add_tail>	=>	-	<univ_term>	<univ_add_tail>					
+201	<univ_add_tail>	=>	λ							
+202	<univ_term>	=>	<univ_factor>	<univ_mult_tail>						
+203	<univ_rel_gate>	=>	==	<univ_expr>	<flag_logic_tail>					
+204	<univ_rel_gate>	=>	!=	<univ_expr>	<flag_logic_tail>					
+205	<univ_rel_gate>	=>	<=	<univ_expr>	<flag_logic_tail>					
+206	<univ_rel_gate>	=>	>=	<univ_expr>	<flag_logic_tail>					
+207	<univ_rel_gate>	=>	<	<univ_expr>	<flag_logic_tail>					
+208	<univ_rel_gate>	=>	>	<univ_expr>	<flag_logic_tail>					
+209	<univ_rel_gate>	=>	and	<must_be_flag>						
+210	<univ_rel_gate>	=>	or	<must_be_flag>						
+211	<univ_rel_gate>	=>	λ							
+212	<univ_expr>	=>	<univ_term>	<univ_add_tail>						
+213	<paren_dispatch>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<piece_bridge>				
+214	<paren_dispatch>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_bridge>				
+215	<paren_dispatch>	=>	<ret_chars>	<chars_add_tail>	<chars_bridge>					
+216	<paren_dispatch>	=>	<ret_flag>	<flag_logic_tail>	<flag_closure>					
+217	<paren_dispatch>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_bridge>				
+218	<paren_dispatch>	=>	(	<paren_dispatch>	<univ_closure>					
+219	<paren_dispatch>	=>	not	<must_be_flag>	<flag_closure>					
+220	<piece_bridge>	=>	)	<piece_mult_tail>	<piece_add_tail>	<piece_rel_gate>				
+221	<piece_bridge>	=>	==	<piece_expr>	<flag_logic_tail>	<flag_closure>				
+222	<piece_bridge>	=>	!=	<piece_expr>	<flag_logic_tail>	<flag_closure>				
+223	<piece_bridge>	=>	<=	<piece_expr>	<flag_logic_tail>	<flag_closure>				
+224	<piece_bridge>	=>	>=	<piece_expr>	<flag_logic_tail>	<flag_closure>				
+225	<piece_bridge>	=>	<	<piece_expr>	<flag_logic_tail>	<flag_closure>				
+226	<piece_bridge>	=>	>	<piece_expr>	<flag_logic_tail>	<flag_closure>				
+227	<flag_closure>	=>	)	<flag_logic_tail>						
+228	<sip_bridge>	=>	)	<sip_mult_tail>	<sip_add_tail>	<sip_rel_gate>				
+229	<sip_bridge>	=>	==	<sip_expr>	<flag_logic_tail>	<flag_closure>				
+230	<sip_bridge>	=>	!=	<sip_expr>	<flag_logic_tail>	<flag_closure>				
+231	<sip_bridge>	=>	<=	<sip_expr>	<flag_logic_tail>	<flag_closure>				
+232	<sip_bridge>	=>	>=	<sip_expr>	<flag_logic_tail>	<flag_closure>				
+233	<sip_bridge>	=>	<	<sip_expr>	<flag_logic_tail>	<flag_closure>				
+234	<sip_bridge>	=>	>	<sip_expr>	<flag_logic_tail>	<flag_closure>				
+235	<sip_rel_gate>	=>	==	<sip_expr>	<flag_logic_tail>					
+236	<sip_rel_gate>	=>	!=	<sip_expr>	<flag_logic_tail>					
+237	<sip_rel_gate>	=>	<=	<sip_expr>	<flag_logic_tail>					
+238	<sip_rel_gate>	=>	>=	<sip_expr>	<flag_logic_tail>					
+239	<sip_rel_gate>	=>	<	<sip_expr>	<flag_logic_tail>					
+240	<sip_rel_gate>	=>	>	<sip_expr>	<flag_logic_tail>					
+241	<sip_rel_gate>	=>	λ							
+242	<chars_bridge>	=>	)	<chars_add_tail>	<chars_rel_gate>					
+243	<chars_bridge>	=>	==	<chars_expr>	<flag_logic_tail>	<flag_closure>				
+244	<chars_bridge>	=>	<=	<chars_expr>	<flag_logic_tail>	<flag_closure>				
+245	<chars_bridge>	=>	>=	<chars_expr>	<flag_logic_tail>	<flag_closure>				
+246	<chars_bridge>	=>	<	<chars_expr>	<flag_logic_tail>	<flag_closure>				
+247	<chars_bridge>	=>	>	<chars_expr>	<flag_logic_tail>	<flag_closure>				
+248	<chars_bridge>	=>	!=	<chars_expr>	<flag_logic_tail>	<flag_closure>				
+249	<chars_rel_gate>	=>	<=	<chars_expr>	<flag_logic_tail>					
+250	<chars_rel_gate>	=>	>=	<chars_expr>	<flag_logic_tail>					
+251	<chars_rel_gate>	=>	<	<chars_expr>	<flag_logic_tail>					
+252	<chars_rel_gate>	=>	>	<chars_expr>	<flag_logic_tail>					
+253	<chars_rel_gate>	=>	==	<chars_expr>	<flag_logic_tail>					
+254	<chars_rel_gate>	=>	!=	<chars_expr>	<flag_logic_tail>					
+255	<chars_rel_gate>	=>	λ							
+256	<univ_bridge>	=>	)	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
+257	<univ_bridge>	=>	==	<univ_expr>	<flag_logic_tail>	<flag_closure>				
+258	<univ_bridge>	=>	!=	<univ_expr>	<flag_logic_tail>	<flag_closure>				
+259	<univ_bridge>	=>	<=	<univ_expr>	<flag_logic_tail>	<flag_closure>				
+260	<univ_bridge>	=>	>=	<univ_expr>	<flag_logic_tail>	<flag_closure>				
+261	<univ_bridge>	=>	<	<univ_expr>	<flag_logic_tail>	<flag_closure>				
+262	<univ_bridge>	=>	>	<univ_expr>	<flag_logic_tail>	<flag_closure>				
+263	<univ_closure>	=>	)	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
+264	<flag_after_paren>	=>	λ							
+265	<value_tail>	=>	<array_accessor>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
+266	<value_tail>	=>	λ							
+267	<flavor_tail>	=>	,	<value>	<flavor_tail>					
+268	<flavor_tail>	=>	λ							
+269	<piece_inner_dispatch>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<piece_bridge_recurse>				
+270	<piece_inner_dispatch>	=>	<id>	<piece_mult_tail>	<piece_add_tail>	<piece_bridge_recurse>				
+271	<piece_inner_dispatch>	=>	(	<piece_inner_dispatch>	<piece_close_recurse>					
+272	<piece_bridge_recurse>	=>	)							
+273	<piece_close_recurse>	=>	)							
+274	<strict_piece_mult_tail>	=>	*	<strict_piece_factor>	<strict_piece_mult_tail>					
+275	<strict_piece_mult_tail>	=>	/	<strict_piece_factor>	<strict_piece_mult_tail>					
+276	<strict_piece_mult_tail>	=>	%	<strict_piece_factor>	<strict_piece_mult_tail>					
+277	<strict_piece_mult_tail>	=>	λ							
+278	<strict_piece_add_tail>	=>	+	<strict_piece_term>	<strict_piece_add_tail>					
+279	<strict_piece_add_tail>	=>	-	<strict_piece_term>	<strict_piece_add_tail>					
+280	<strict_piece_add_tail>	=>	λ							
+281	<piece_id_tail>	=>	,	id	<piece_ingredient_init>	<piece_id_tail>				
+282	<piece_id_tail>	=>	λ							
+283	<decl_type>	=>	<dimensions>	of	<array_declare>	;				
+284	<dimensions>	=>	[	]	<dimensions_tail>					
+285	<dimensions_tail>	=>	<dimensions>							
+286	<dimensions_tail>	=>	λ							
+287	<array_declare>	=>	id	<array_init>	<array_declare_tail>					
+288	<array_init>	=>	=	<strict_array_expr>						
+289	<array_init>	=>	λ							
+290	<array_declare_tail>	=>	,	<array_declare>						
+291	<array_declare_tail>	=>	λ							
+292	<chars_decl>	=>	of	<chars_id>	;					
+293	<chars_decl>	=>	<decl_type>							
+294	<chars_id>	=>	id	<chars_ingredient_init>	<chars_id_tail>					
+295	<chars_ingredient_init>	=>	=	<strict_chars_expr>						
+296	<chars_ingredient_init>	=>	λ							
+297	<chars_id_tail>	=>	,	id	<chars_ingredient_init>	<chars_id_tail>				
+298	<chars_id_tail>	=>	λ							
+299	<sip_decl>	=>	of	<sip_id>	;					
+300	<sip_decl>	=>	<decl_type>							
+301	<sip_id>	=>	id	<sip_ingredient_init>	<sip_id_tail>					
+302	<sip_ingredient_init>	=>	=	<strict_sip_expr>						
+303	<sip_ingredient_init>	=>	λ							
+304	<sip_id_tail>	=>	,	id	<sip_ingredient_init>	<sip_id_tail>				
+305	<sip_id_tail>	=>	λ							
+306	<flag_decl>	=>	of	<flag_id>	;					
+307	<flag_decl>	=>	<decl_type>							
+308	<flag_id>	=>	id	<flag_ingredient_init>	<flag_id_tail>					
+309	<flag_ingredient_init>	=>	=	<strict_flag_expr>						
+310	<flag_ingredient_init>	=>	λ							
+311	<strict_flag_expr>	=>	<strict_flag_term>	<strict_flag_or_tail>						
+312	<strict_flag_term>	=>	<strict_flag_equality>	<strict_flag_and_tail>						
+313	<strict_flag_equality>	=>	<strict_flag_factor>	<strict_flag_eq_tail>						
+314	<strict_flag_factor>	=>	<ret_flag>							
+315	<strict_flag_factor>	=>	not	<strict_flag_factor>						
+316	<strict_flag_factor>	=>	<id>	<strict_id_master_tail>						
+317	<strict_flag_factor>	=>	(	<strict_flag_paren_entry>						
+318	<strict_flag_factor>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<strict_piece_gate>				
+319	<strict_flag_factor>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<strict_sip_gate>				
+320	<strict_flag_factor>	=>	<ret_chars>	<chars_add_tail>	<strict_chars_gate>					
+321	<strict_id_master_tail>	=>	*	<univ_factor>	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>			
+322	<strict_id_master_tail>	=>	/	<univ_factor>	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>			
+323	<strict_id_master_tail>	=>	%	<univ_factor>	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>			
+324	<strict_id_master_tail>	=>	+	<univ_term>	<univ_add_tail>	<strict_forced_gate>				
+325	<strict_id_master_tail>	=>	-	<univ_term>	<univ_add_tail>	<strict_forced_gate>				
+326	<strict_id_master_tail>	=>	==	<univ_expr>						
+327	<strict_id_master_tail>	=>	!=	<univ_expr>						
+328	<strict_id_master_tail>	=>	<=	<comparable_expr>						
+329	<strict_id_master_tail>	=>	>=	<comparable_expr>						
+330	<strict_id_master_tail>	=>	<	<comparable_expr>						
+331	<strict_id_master_tail>	=>	>	<comparable_expr>						
+332	<strict_id_master_tail>	=>	λ							
+333	<strict_forced_gate>	=>	==	<univ_expr>						
+334	<strict_forced_gate>	=>	!=	<univ_expr>						
+335	<strict_forced_gate>	=>	<=	<univ_expr>						
+336	<strict_forced_gate>	=>	>=	<univ_expr>						
+337	<strict_forced_gate>	=>	<	<univ_expr>						
+338	<strict_forced_gate>	=>	>	<univ_expr>						
+339	<comparable_expr>	=>	<comparable_term>	<comparable_add_tail>						
+340	<comparable_term>	=>	<comparable_factor>	<comparable_mult_tail>						
+341	<comparable_factor>	=>	<id>							
+342	<comparable_factor>	=>	<ret_piece>							
+343	<comparable_factor>	=>	<ret_sip>							
+344	<comparable_factor>	=>	<ret_chars>							
+345	<comparable_factor>	=>	(	<any_expr>	)					
+346	<comparable_mult_tail>	=>	*	<comparable_factor>	<comparable_mult_tail>					
+347	<comparable_mult_tail>	=>	/	<comparable_factor>	<comparable_mult_tail>					
+348	<comparable_mult_tail>	=>	%	<comparable_factor>	<comparable_mult_tail>					
+349	<comparable_mult_tail>	=>	λ							
+350	<comparable_add_tail>	=>	+	<comparable_term>	<comparable_add_tail>					
+351	<comparable_add_tail>	=>	-	<comparable_term>	<comparable_add_tail>					
+352	<comparable_add_tail>	=>	λ							
+353	<strict_flag_paren_entry>	=>	<ret_piece>	<piece_mult_tail>	<piece_add_tail>	<strict_paren_piece_bridge>				
+354	<strict_flag_paren_entry>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<strict_paren_sip_bridge>				
+355	<strict_flag_paren_entry>	=>	<ret_chars>	<chars_add_tail>	<strict_paren_chars_bridge>					
+356	<strict_flag_paren_entry>	=>	<ret_flag>	<flag_logic_tail>	<strict_paren_flag_bridge>					
+357	<strict_flag_paren_entry>	=>	not	<must_be_flag>	<strict_paren_flag_bridge>					
+358	<strict_flag_paren_entry>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<strict_paren_univ_bridge>				
+359	<strict_flag_paren_entry>	=>	(	<strict_flag_paren_entry>	<strict_paren_univ_bridge>					
+360	<strict_paren_piece_bridge>	=>	)	<piece_mult_tail>	<piece_add_tail>	<strict_piece_gate>				
+361	<strict_paren_piece_bridge>	=>	<strict_piece_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
+362	<strict_piece_gate>	=>	==	<piece_expr>						
+363	<strict_piece_gate>	=>	!=	<piece_expr>						
+364	<strict_piece_gate>	=>	<=	<piece_expr>						
+365	<strict_piece_gate>	=>	>=	<piece_expr>						
+366	<strict_piece_gate>	=>	<	<piece_expr>						
+367	<strict_piece_gate>	=>	>	<piece_expr>						
+368	<strict_paren_flag_bridge>	=>	)							
+369	<strict_paren_sip_bridge>	=>	)	<sip_mult_tail>	<sip_add_tail>	<strict_sip_gate>				
+370	<strict_paren_sip_bridge>	=>	<strict_sip_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
+371	<strict_sip_gate>	=>	==	<sip_expr>						
+372	<strict_sip_gate>	=>	!=	<sip_expr>						
+373	<strict_sip_gate>	=>	<=	<sip_expr>						
+374	<strict_sip_gate>	=>	>=	<sip_expr>						
+375	<strict_sip_gate>	=>	<	<sip_expr>						
+376	<strict_sip_gate>	=>	>	<sip_expr>						
+377	<strict_paren_chars_bridge>	=>	)	<chars_add_tail>	<strict_chars_gate>					
+378	<strict_paren_chars_bridge>	=>	<strict_chars_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
+379	<strict_chars_gate>	=>	<=	<chars_expr>						
+380	<strict_chars_gate>	=>	>=	<chars_expr>						
+381	<strict_chars_gate>	=>	<	<chars_expr>						
+382	<strict_chars_gate>	=>	>	<chars_expr>						
+383	<strict_chars_gate>	=>	==	<chars_expr>						
+384	<strict_chars_gate>	=>	!=	<chars_expr>						
+385	<strict_paren_univ_bridge>	=>	)	<univ_mult_tail>	<univ_add_tail>	<strict_forced_gate>				
+386	<strict_paren_univ_bridge>	=>	<strict_forced_gate>	<flag_logic_tail>	<strict_paren_flag_bridge>					
+387	<strict_flag_eq_tail>	=>	==	<strict_flag_equality>						
+388	<strict_flag_eq_tail>	=>	!=	<strict_flag_equality>						
+389	<strict_flag_eq_tail>	=>	λ							
+390	<strict_flag_and_tail>	=>	and	<strict_flag_equality>	<strict_flag_and_tail>					
+391	<strict_flag_and_tail>	=>	λ							
+392	<strict_flag_or_tail>	=>	or	<strict_flag_term>	<strict_flag_or_tail>					
+393	<strict_flag_or_tail>	=>	λ							
+394	<flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>				
+395	<flag_id_tail>	=>	λ							
+396	<table_prototype>	=>	table	of	id	=	[	<required_decl>	]	;
+397	<required_decl>	=>	<decl_head>	;	<required_decl_tail>					
+398	<decl_head>	=>	<primitive_types_dims>	of	id					
+399	<primitive_types_dims>	=>	piece	<dimensions_tail>						
+400	<primitive_types_dims>	=>	sip	<dimensions_tail>						
+401	<primitive_types_dims>	=>	flag	<dimensions_tail>						
+402	<primitive_types_dims>	=>	chars	<dimensions_tail>						
+403	<primitive_types_dims>	=>	id	<dimensions_tail>						
+404	<required_decl_tail>	=>	<required_decl>							
+405	<required_decl_tail>	=>	λ							
+406	<table_decl>	=>	of	<table_declare>	;					
+407	<table_decl>	=>	<decl_type>							
+408	<table_declare>	=>	id	<table_init>	<table_declare_tail>					
+409	<table_init>	=>	=	<strict_table_expr>						
+410	<table_init>	=>	λ							
+411	<strict_table_expr>	=>	[	<field_assignments>	]					
+412	<strict_table_expr>	=>	<id>							
+413	<table_declare_tail>	=>	,	<table_declare>						
+414	<table_declare_tail>	=>	λ							
+415	<recipe_decl>	=>	prepare	<serve_type>	(	<spice>	)	<platter>	<recipe_decl>	
+416	<recipe_decl>	=>	λ							
+417	<serve_type>	=>	<decl_head>							
+418	<spice>	=>	<decl_head>	<spice_tail>						
+419	<spice>	=>	λ							
+420	<spice_tail>	=>	,	<decl_head>	<spice_tail>					
+421	<spice_tail>	=>	λ							
+422	<platter>	=>	{	<local_decl>	<statements>	}				
+423	<local_decl>	=>	piece	<piece_decl>	<local_decl>					
+424	<local_decl>	=>	chars	<chars_decl>	<local_decl>					
+425	<local_decl>	=>	sip	<sip_decl>	<local_decl>					
+426	<local_decl>	=>	flag	<flag_decl>	<local_decl>					
+427	<local_decl>	=>	id	<local_id_tail>						
+428	<local_decl>	=>	λ							
+429	<local_id_tail>	=>	of	<table_declare>	;	<local_decl>				
+430	<local_id_tail>	=>	[	<]_tail>						
+431	<local_id_tail>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements>			
+432	<local_id_tail>	=>	<assignment_op>	<value>	;	<statements>				
+433	<local_id_tail>	=>	<tail1>	;	<statements>					
+434	<]_tail>	=>	]	<dimensions_tail>	of	<array_declare>	;	<local_decl>		
+435	<]_tail>	=>	<strict_piece_expr>	]	<accessor_tail>	<assignment_op>	<value>	;	<statements>	
+436	<assignment_op>	=>	=							
+437	<assignment_op>	=>	+=							
+438	<assignment_op>	=>	-=							
+439	<assignment_op>	=>	*=							
+440	<assignment_op>	=>	/=							
+441	<assignment_op>	=>	%=							
+442	<statements>	=>	<id_statements>	<statements>						
+443	<statements>	=>	<built-in_rec_call>	;	<statements>					
+444	<statements>	=>	<conditional_st>	<statements>						
+445	<statements>	=>	<looping_st>	<statements>						
+446	<statements>	=>	<jump_serve>	<statements>						
+447	<statements>	=>	λ							
+448	<id_statements>	=>	id	<id_statements_ext>	<statements>					
+449	<id_statements_ext>	=>	<tail1>	;						
+450	<id_statements_ext>	=>	<assignment_st>							
+451	<tail1>	=>	<call_tail>	<accessor_tail>						
+452	<call_tail>	=>	(	<flavor>	)					
+453	<assignment_st>	=>	<accessor_tail>	<assignment_op>	<value>	;				
+454	<built-in_rec_call>	=>	<built-in_rec>							
+455	<built-in_rec>	=>	append	(	<strict_array_expr>	,	<value>	)		
+456	<built-in_rec>	=>	bill	(	<strict_chars_expr>	)				
+457	<built-in_rec>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)
+458	<built-in_rec>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)		
+459	<built-in_rec>	=>	fact	(	<strict_piece_expr>	)				
+460	<built-in_rec>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)		
+461	<built-in_rec>	=>	pow	(	<strict_piece_expr>	,	<strict_piece_expr>	)		
+462	<built-in_rec>	=>	rand	(	)					
+463	<built-in_rec>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)		
+464	<built-in_rec>	=>	reverse	(	<strict_array_expr>	)				
+465	<built-in_rec>	=>	search	(	<strict_array_expr>	,	<value>	)		
+466	<built-in_rec>	=>	size	(	<strict_array_expr>	)				
+467	<built-in_rec>	=>	sort	(	<strict_array_expr>	)				
+468	<built-in_rec>	=>	sqrt	(	<strict_piece_expr>	)				
+469	<built-in_rec>	=>	take	(	)					
+470	<built-in_rec>	=>	tochars	(	<any_expr>	)				
+471	<built-in_rec>	=>	topiece	(	<any_expr>	)				
+472	<built-in_rec>	=>	tosip	(	<any_expr>	)				
+473	<conditional_st>	=>	<cond_check>							
+474	<conditional_st>	=>	<cond_menu>							
+475	<cond_check>	=>	check	(	<strict_flag_expr>	)	<platter>	<alt_clause>	<instead_clause>	
+476	<alt_clause>	=>	alt	(	<strict_flag_expr>	)	<platter>	<alt_clause>		
+477	<alt_clause>	=>	λ							
+478	<instead_clause>	=>	instead	<platter>						
+479	<instead_clause>	=>	λ							
+480	<cond_menu>	=>	menu	(	<any_expr>	)	<menu_platter>			
+481	<menu_platter>	=>	{	<choice_clause>	<usual_clause>	}				
+482	<choice_clause>	=>	choice	<choice_val>	:	<statements_menu>	<choice_clause>			
+483	<choice_clause>	=>	λ							
+484	<choice_val>	=>	piece_lit							
+485	<choice_val>	=>	chars_lit							
+486	<statements_menu>	=>	<id_statements_menu>	<statements_menu>						
+487	<statements_menu>	=>	<built-in_rec_call>	;	<statements_menu>					
+488	<statements_menu>	=>	<conditional_st_menu>	<statements_menu>						
+489	<statements_menu>	=>	<looping_st>	<statements_menu>						
+490	<statements_menu>	=>	<jump_stop>	<statements_menu>						
+491	<statements_menu>	=>	<jump_serve>	<statements_menu>						
+492	<statements_menu>	=>	λ							
+493	<id_statements_menu>	=>	id	<id_statements_ext>	<statements_menu>					
+494	<conditional_st_menu>	=>	<cond_check_menu>							
+495	<conditional_st_menu>	=>	<cond_menu>							
+496	<cond_check_menu>	=>	check	(	<strict_flag_expr>	)	<menu_check_platter>	<alt_clause>	<instead_clause>	
+497	<menu_check_platter>	=>	{	<local_decl_menu>	<statements_menu>	}				
+498	<local_decl_menu>	=>	piece	<piece_decl>	<local_decl_menu>					
+499	<local_decl_menu>	=>	chars	<chars_decl>	<local_decl_menu>					
+500	<local_decl_menu>	=>	sip	<sip_decl>	<local_decl_menu>					
+501	<local_decl_menu>	=>	flag	<flag_decl>	<local_decl_menu>					
+502	<local_decl_menu>	=>	id	<local_id_tail_menu>						
+503	<local_decl_menu>	=>	λ							
+504	<local_id_tail_menu>	=>	of	<table_declare>	;	<local_decl_menu>				
+505	<local_id_tail_menu>	=>	[	<]_tail_menu>						
+506	<local_id_tail_menu>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_menu>			
+507	<local_id_tail_menu>	=>	<assignment_op>	<value>	;	<statements_menu>				
+508	<local_id_tail_menu>	=>	<tail1>	;	<statements_menu>					
+509	<]_tail_menu>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_menu>		
+510	<]_tail_menu>	=>	<strict_piece_expr>	]	<accessor_tail>	<assignment_op>	<value>	;	<statements_menu>	
+511	<looping_st>	=>	<loop_pass>							
+512	<looping_st>	=>	<loop_repeat>							
+513	<looping_st>	=>	<loop_order>							
+514	<loop_pass>	=>	pass	(	<initialization>	<update>	<strict_flag_expr>	)	<loop_platter>	
+515	<initialization>	=>	id	<loop_init>	;					
+516	<loop_init>	=>	=	<strict_piece_expr>						
+517	<loop_init>	=>	λ							
+518	<update>	=>	id	<assignment_st>						
+519	<loop_platter>	=>	{	<local_decl_loop>	<statements_loop>	}				
+520	<local_decl_loop>	=>	piece	<piece_decl>	<local_decl_loop>					
+521	<local_decl_loop>	=>	chars	<chars_decl>	<local_decl_loop>					
+522	<local_decl_loop>	=>	sip	<sip_decl>	<local_decl_loop>					
+523	<local_decl_loop>	=>	flag	<flag_decl>	<local_decl_loop>					
+524	<local_decl_loop>	=>	id	<local_id_tail_loop>						
+525	<local_decl_loop>	=>	λ							
+526	<local_id_tail_loop>	=>	of	<table_declare>	;	<local_decl_loop>				
+527	<local_id_tail_loop>	=>	[	<]_tail_loop>						
+528	<local_id_tail_loop>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_loop>			
+529	<local_id_tail_loop>	=>	<assignment_op>	<value>	;	<statements_loop>				
+530	<local_id_tail_loop>	=>	<tail1>	;	<statements_loop>					
+531	<]_tail_loop>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_loop>		
+532	<]_tail_loop>	=>	<strict_piece_expr>	]	<accessor_tail>	<assignment_op>	<value>	;	<statements_loop>	
+533	<statements_loop>	=>	<id_statements_loop>	<statements_loop>						
+534	<statements_loop>	=>	<built-in_rec_call>	;	<statements_loop>					
+535	<statements_loop>	=>	<conditional_st_loop>	<statements_loop>						
+536	<statements_loop>	=>	<looping_st>	<statements_loop>						
+537	<statements_loop>	=>	<jump_st>	<statements_loop>						
+538	<statements_loop>	=>	λ							
+539	<id_statements_loop>	=>	id	<id_statements_ext>	<statements_loop>					
+540	<conditional_st_loop>	=>	<cond_check_loop>							
+541	<conditional_st_loop>	=>	<cond_menu_loop>							
+542	<cond_check_loop>	=>	check	(	<strict_flag_expr>	)	<loop_platter>	<alt_clause_loop>	<instead_clause_loop>	
+543	<alt_clause_loop>	=>	alt	(	<strict_flag_expr>	)	<loop_platter>	<alt_clause_loop>		
+544	<alt_clause_loop>	=>	λ							
+545	<instead_clause_loop>	=>	instead	<loop_platter>						
+546	<instead_clause_loop>	=>	λ							
+547	<cond_menu_loop>	=>	menu	(	<any_expr>	)	<menu_loop_platter>			
+548	<menu_loop_platter>	=>	{	<choice_clause_loop>	<usual_clause_loop>	}				
+549	<choice_clause_loop>	=>	choice	<choice_val>	:	<statements_loop>	<choice_clause_loop>			
+550	<choice_clause_loop>	=>	λ							
+551	<usual_clause_loop>	=>	usual	:	<statements_loop>					
+552	<usual_clause_loop>	=>	λ							
+553	<jump_st>	=>	<jump_next>							
+554	<jump_st>	=>	<jump_stop>							
+555	<jump_st>	=>	<jump_serve>							
+556	<jump_next>	=>	next	;						
+557	<jump_stop>	=>	stop	;						
+558	<jump_serve>	=>	serve	<value>	;					
+559	<loop_repeat>	=>	repeat	(	<strict_flag_expr>	)	<loop_platter>			
+560	<loop_order>	=>	order	<loop_platter>	repeat	(	<strict_flag_expr>	)	;	
+561	<usual_clause>	=>	usual	:	<statements_menu>					
+562	<usual_clause>	=>	λ							
