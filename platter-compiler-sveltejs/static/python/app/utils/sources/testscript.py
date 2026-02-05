@@ -204,8 +204,8 @@ start(){
   },
   {
     "number": 14,
-    "actual_output": "Syntax Error: Unexpected ':' at line 4, col 12. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected ':' at line 4, col 12. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 table of A = [ piece of a; piece of b; ];
@@ -318,8 +318,8 @@ start(){
   },
   {
     "number": 22,
-    "actual_output": "Unexpected '[' at line 4, col 15. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Unexpected '[' at line 4, col 15. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 piece[][] of grid = [1, 2];
@@ -489,8 +489,8 @@ start(){
   },
   {
     "number": 35,
-    "actual_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 4, col 5. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'serve', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', '}'.",
-    "expected_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 4, col 5. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'serve', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', '}'.",
+    "actual_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 4 col 5 - Invalid Lexeme: Invalid delimiter for reserved word 'repeat'",
+    "expected_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 4 col 5 - Invalid Lexeme: Invalid delimiter for reserved word 'repeat'",
     "code":  
     """
 piece of x = 3;
@@ -504,8 +504,8 @@ start(){
   },
   {
     "number": 36,
-    "actual_output": "Syntax Error: Unexpected ':' at line 10, col 12. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected ':' at line 10, col 12. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 table of Item = [
@@ -523,8 +523,8 @@ start(){
   },
   {
     "number": 37,
-    "actual_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 1, col 1. Expected start.",
-    "expected_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 1, col 1. Expected start.",
+    "actual_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 1 col 1 - Invalid Lexeme: Invalid delimiter for reserved word 'start'",
+    "expected_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 1 col 1 - Invalid Lexeme: Invalid delimiter for reserved word 'start'",
     "code":  
     """
 start[]{
@@ -534,8 +534,8 @@ start[]{
   },
   {
     "number": 38,
-    "actual_output": "Syntax Error: Unexpected '(' at line 6, col 14. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected '(' at line 6, col 14. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 prepare piece of inc(piece of x){
@@ -549,8 +549,8 @@ start(){
   },
   {
     "number": 39,
-    "actual_output": "Syntax Error: Unexpected '(' at line 9, col 19. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected '(' at line 9, col 19. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 piece of x = 5;
@@ -691,8 +691,8 @@ start() { tableType of m = field: ; }
   },
   {
     "number": 51,
-    "actual_output": "Syntax Error: Unexpected '[' at line 1, col 178. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected '[' at line 1, col 178. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 start() { piece[] of arr = [5,3,8,4,2]; piece of n = size(arr); pass(i=0; i+=1; i<n) { pass(j=0; j+=1; j<n-(1)) { check(arr[j] > arr[j+1]) { piece of temp = arr[j]; arr[j] = arr[j+1]; arr[j+1] = temp; } } } serve [arr]; }
@@ -700,8 +700,8 @@ start() { piece[] of arr = [5,3,8,4,2]; piece of n = size(arr); pass(i=0; i+=1; 
   },
   {
     "number": 52,
-    "actual_output": "Syntax Error: Unexpected '[' at line 13, col 19. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected '[' at line 13, col 19. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 start() {
@@ -726,8 +726,8 @@ start() {
   },
   {
     "number": 53,
-    "actual_output": "Syntax Error: Unexpected '[' at line 10, col 27. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected '[' at line 10, col 27. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 start() {
@@ -817,8 +817,8 @@ start() {
   },
   {
     "number": 57,
-    "actual_output": "Syntax Error: Unexpected '[' at line 6, col 21. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected '[' at line 6, col 21. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 start() {
@@ -873,8 +873,8 @@ start() {
   },
   {
     "number": 60,
-    "actual_output": "Syntax Error: Unexpected '[' at line 23, col 25. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ')', ',', ';'.",
-    "expected_output": "Syntax Error: Unexpected '[' at line 23, col 25. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ')', ',', ';'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
 prepare piece[] of mergeSort(piece[] of arr) {
@@ -965,8 +965,8 @@ start(){
   },
   {
     "number": 62,
-    "actual_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 2, col 3. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'serve', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', '}'.",
-    "expected_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 2, col 3. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'serve', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', '}'.",
+    "actual_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 2 col 3 - Invalid Lexeme: Invalid delimiter for reserved word 'prepare'",
+    "expected_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 2 col 3 - Invalid Lexeme: Invalid delimiter for reserved word 'prepare'",
     "code":  
     """
 start(){
@@ -976,8 +976,8 @@ start(){
   },
   {
     "number": 63,
-    "actual_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 1, col 1. Expected start.",
-    "expected_output": "Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 1, col 1. Expected start.",
+    "actual_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 1 col 1 - Invalid Lexeme: Invalid delimiter for reserved word 'prepare'",
+    "expected_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 1 col 1 - Invalid Lexeme: Invalid delimiter for reserved word 'prepare'",
     "code":  
     """
 prepare(){}
@@ -996,8 +996,8 @@ start(){}
   },
   {
     "number": 65,
-    "actual_output": "Syntax Error: Unexpected ')' at line 2, col 25. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip'.",
-    "expected_output": "Syntax Error: Unexpected ')' at line 2, col 25. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 14. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 14. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 piece of a; 
@@ -1011,8 +1011,8 @@ start(){}
   },
   {
     "number": 66,
-    "actual_output": "Syntax Error: Unexpected 'piece' at line 1, col 14. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip'.",
-    "expected_output": "Syntax Error: Unexpected 'piece' at line 1, col 14. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip'.",
+    "actual_output": "Syntax Error: Unexpected 'piece' at line 1, col 14. Expected '(', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'piece' at line 1, col 14. Expected '(', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 piece of a = piece
@@ -1021,8 +1021,8 @@ start(){}
   },
   {
     "number": 67,
-    "actual_output": "Syntax Error: Unexpected ':' at line 1, col 10. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', '['.",
-    "expected_output": "Syntax Error: Unexpected ':' at line 1, col 10. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', '['.",
+    "actual_output": "Syntax Error: Unexpected ':' at line 1, col 10. Expected '[', 'id', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected ':' at line 1, col 10. Expected '[', 'id', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 a of a = :
@@ -1044,8 +1044,8 @@ start(){
   },
   {
     "number": 69,
-    "actual_output": "Syntax Error: Unexpected ':' at line 22, col 34. Expected ',', '=', ']'.",
-    "expected_output": "Syntax Error: Unexpected ':' at line 22, col 34. Expected ',', '=', ']'.",
+    "actual_output": "Syntax Error: Unexpected ':' at line 22, col 34. Expected ']'.",
+    "expected_output": "Syntax Error: Unexpected ':' at line 22, col 34. Expected ']'.",
     "code":  
     """
   
@@ -1088,8 +1088,8 @@ start() {
   },
   {
     "number": 71,
-    "actual_output": "No Syntax Error",
-    "expected_output": "No Syntax Error",
+    "actual_output": "Syntax Error: Unexpected 'sip_lit' at line 2, col 18. Expected '(', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'sip_lit' at line 2, col 18. Expected '(', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 start() {
@@ -1146,65 +1146,75 @@ start(){
   },
   {
     "number": 75,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 3, col 25. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 3, col 25. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 15. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 15. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 start(){
-        sip of c = ((x*(x+1)*(x-2) - (3*x-5)*(x+4))*(x*x - 1)) / (((x-1)*(x-1) + (x+1)*(x+1))*(x*x + 1));
+  sip of c = (1 < 3 == 2);
 }
     """
   },
   {
     "number": 76,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 1, col 27. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 1, col 27. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected 'piece' at line 1, col 7. Expected ).",
+    "expected_output": "Syntax Error: Unexpected 'piece' at line 1, col 7. Expected ).",
     "code":  
     """
-sip of a = (((x*(x+2) - (x-1)*(x-1))*(x*(x-3) + 5) + (2*x+1)*(x+4)) /
- ((x*(x-2) + (x+1)*(x+1))*(x+3)));
-start(){}
+start(piece of x){
+	x = 1;
+}
     """
   },
   {
     "number": 77,
-    "actual_output": "No Syntax Error",
-    "expected_output": "No Syntax Error",
+    "actual_output": "Syntax Error: Unexpected 'prepare' at line 2, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'serve', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', '}'.",
+    "expected_output": "Syntax Error: Unexpected 'prepare' at line 2, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'serve', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', '}'.",
     "code":  
     """
-sip of a = (pow(x+3,2)+sqrt(cut(y,1,5)+4)-fact(cut(n,1,6)))/(1+pow(copy(x,2)-rand(),2))
-+sqrt(pow(cut(z,0,3),2)+copy(rand(),3));
-start(){}
+start(){
+	prepare piece of a(){}
+}
     """
   },
   {
     "number": 78,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 1, col 18. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 1, col 18. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
-sip of a = (pow(x-1,2) + sqrt(cut(y,0,4)) - fact(cut(n,1,5))) / (1 + copy(rand(),2))
-start(){}
+start(){
+	menu(a){
+    	choice 1:
+        choice 2:
+        	order{} repeat (a > 0);
+    }
+}
     """
   },
   {
     "number": 79,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 1, col 23. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 1, col 23. Expected '(', '[', ':', '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "No Syntax Error",
+    "expected_output": "No Syntax Error",
     "code":  
     """
-sip of a = ((x + pow(y-2,2))*(sqrt(cut(z,1,4)) - 1))
-/
-(1 + copy(rand(),2))
-- fact(cut(n,1,4));
-
-start(){}
+start(){
+	order{
+      menu(a){
+          choice 1:
+              next;
+              serve 1;
+          choice 2:
+              order{} repeat (a > 0);
+      }
+    } repeat(a > 3);
+}
     """
   },
   {
     "number": 80,
-    "actual_output": "No Syntax Error",
-    "expected_output": "No Syntax Error",
+    "actual_output": "Syntax Error: Unexpected 'pow' at line 1, col 12. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'pow' at line 1, col 12. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 sip of a = pow(x,2)/sqrt(cut(y,1,3)) + fact(n);
@@ -1213,8 +1223,8 @@ start(){}
   },
   {
     "number": 81,
-    "actual_output": "Syntax Error: Unexpected '}' at line 5, col 1. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected '}' at line 5, col 1. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 3, col 16. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 3, col 16. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 start() {
@@ -1258,8 +1268,8 @@ start() {
   },
   {
     "number": 84,
-    "actual_output": "Syntax Error: Unexpected '=' at line 3, col 7. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected '=' at line 3, col 7. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected '=' at line 2, col 7. Expected '*', '/', '%', '+', '-', ';', ']'.",
+    "expected_output": "Syntax Error: Unexpected '=' at line 2, col 7. Expected '*', '/', '%', '+', '-', ';', ']'.",
     "code":  
     """
 start() {
@@ -1269,8 +1279,8 @@ start() {
   },
   {
     "number": 85,
-    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 27. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 27. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 34. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 34. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
     "code":  
     """
 prepare piece of serving () {
@@ -1310,8 +1320,8 @@ start() {}
   },
   {
     "number": 88,
-    "actual_output": "Syntax Error: Unexpected 'id' at line 3, col 23. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
-    "expected_output": "Syntax Error: Unexpected 'id' at line 3, col 23. Expected '*', '/', '%', '+', '-', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', ',', ';', ')', ']'.",
+    "actual_output": "Syntax Error: Unexpected 'id' at line 2, col 23. Expected '*', '/', '%', '+', '-', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'id' at line 2, col 23. Expected '*', '/', '%', '+', '-', ';'.",
     "code":  
     """
 start() {
@@ -1321,8 +1331,8 @@ start() {
   },
   {
     "number": 89,
-    "actual_output": "No Syntax Error",
-    "expected_output": "No Syntax Error",
+    "actual_output": "Syntax Error: Unexpected '*' at line 2, col 49. Expected '==', '!=', 'and', 'or', ';'.",
+    "expected_output": "Syntax Error: Unexpected '*' at line 2, col 49. Expected '==', '!=', 'and', 'or', ';'.",
     "code":  
     """
 start() {
@@ -1332,8 +1342,8 @@ start() {
   },
   {
     "number": 90,
-    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 27. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip'.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 27. Expected 'not', '(', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip'.",
+    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 27. Expected '(', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 27. Expected '(', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 start() {
@@ -1364,8 +1374,8 @@ start() {
   },
   {
     "number": 92,
-    "actual_output": "Syntax Error: Unexpected '{' at line 3, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'next', 'stop', 'serve', '}', 'choice', 'usual'.",
-    "expected_output": "Syntax Error: Unexpected '{' at line 3, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'next', 'stop', 'serve', '}', 'choice', 'usual'.",
+    "actual_output": "Syntax Error: Unexpected '{' at line 3, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.",
+    "expected_output": "Syntax Error: Unexpected '{' at line 3, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.",
     "code":  
     """
 start() {
@@ -1389,8 +1399,8 @@ start() {
   },
   {
     "number": 94,
-    "actual_output": "Syntax Error: Unexpected 'chars' at line 5, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'next', 'stop', 'serve', '}', 'choice', 'usual'.",
-    "expected_output": "Syntax Error: Unexpected 'chars' at line 5, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'next', 'stop', 'serve', '}', 'choice', 'usual'.",
+    "actual_output": "Syntax Error: Unexpected 'chars' at line 6, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.",
+    "expected_output": "Syntax Error: Unexpected 'chars' at line 6, col 3. Expected 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.",
     "code":  
     """
 start() {
@@ -1462,8 +1472,8 @@ start() {
   },
   {
     "number": 99,
-    "actual_output": "No Syntax Error",
-    "expected_output": "No Syntax Error",
+    "actual_output": "Syntax Error: Unexpected 'pow' at line 2, col 28. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
+    "expected_output": "Syntax Error: Unexpected 'pow' at line 2, col 28. Expected 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '(', 'append', 'sort', 'reverse', 'remove'.",
     "code":  
     """
 start() {
@@ -1474,8 +1484,8 @@ start() {
   },
   {
     "number": 100,
-    "actual_output": "Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '<=', '>=', '<', '>', '==', '!=', ')', ',', 'and', 'or', ';'.",
-    "expected_output": "Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '<=', '>=', '<', '>', '==', '!=', ')', ',', 'and', 'or', ';'.",
+    "actual_output": "Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '<=', '>=', '<', '>', '==', '!=', 'and', 'or', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '<=', '>=', '<', '>', '==', '!=', 'and', 'or', ';'.",
     "code":  
     """
 table of animal = [ chars of sound; ];
@@ -1500,8 +1510,8 @@ start(){
   },
   {
     "number": 102,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 20. Expected '=', ',', ';'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 20. Expected '=', ',', ';'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 20. Expected '=', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 20. Expected '=', ';'.",
     "code":  
     """
 start(){
@@ -1511,8 +1521,8 @@ start(){
   },
   {
     "number": 103,
-    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 24. Expected '*', '/', '%', '+', '-', ',', ';'.",
-    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 24. Expected '*', '/', '%', '+', '-', ',', ';'.",
+    "actual_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 24. Expected '*', '/', '%', '+', '-', ';'.",
+    "expected_output": "Syntax Error: Unexpected 'piece_lit' at line 2, col 24. Expected '*', '/', '%', '+', '-', ';'.",
     "code":  
     """
 start(){
@@ -1728,8 +1738,8 @@ check(candy == 1){
   },
   {
     "number": 120,
-    "actual_output": "Syntax Error: Unexpected ';' at line 2, col 12. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
-    "expected_output": "Syntax Error: Unexpected ';' at line 2, col 12. Expected 'of', '[', ':', '=', '+=', '-=', '*=', '/=', '%=', '('.",
+    "actual_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 2 col 5 - Invalid Lexeme: Invalid delimiter for reserved word 'sip'",
+    "expected_output": "Syntax analysis not performed due to lexical errors:\n\nError at line 2 col 5 - Invalid Lexeme: Invalid delimiter for reserved word 'sip'",
     "code":  
     """
 start(){
