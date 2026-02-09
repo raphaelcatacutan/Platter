@@ -492,22 +492,25 @@ start() {
 		let analysisStatus = 'error';
 		let terminalOutput = '';
 
-		await analyzeLexical();
+		// Run lexical analysis first, skip logging to combine outputs
+		const lexicalResult = await analyzeLexical(true);
 
 		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
 			clearTerminal();
 
 			if (!pyodideReady) {
-				setTerminalError('Python runtime not ready');
-				return;
-			}
+				const errorMsg = 'Python runtime not ready';
+				setTerminalError(errorMsg);
+				analysisStatus = 'error';
+				terminalOutput = `${lexicalResult.output}\n${errorMsg}`;
+				// Continue to logging at the end
+			} else {
+				try {
+					// Set the code input in Python
+					pyodide.globals.set('code_input', codeInput);
 
-			try {
-				// Set the code input in Python
-				pyodide.globals.set('code_input', codeInput);
-
-				// Run syntax analysis
-				const result = await pyodide.runPythonAsync(`
+					// Run syntax analysis
+					const result = await pyodide.runPythonAsync(`
 import sys
 import re
 from app.lexer.lexer import Lexer
@@ -541,8 +544,9 @@ result
 
 				if (data.success) {
 					clearErrorMarkers();
-					const okMessage = data.message || 'Syntax analysis completed successfully';
-					setTerminalOk(okMessage);
+					const syntaxMessage = data.message || 'Syntax analysis completed successfully';
+					const okMessage = `${lexicalResult.output}\n${syntaxMessage}`;
+					setTerminalOk(syntaxMessage);
 					analysisStatus = 'success';
 					terminalOutput = okMessage;
 				} else {
@@ -557,23 +561,30 @@ result
 						};
 						addErrorMarkers([errorToken]);
 					}
-					const errorMessage = data.message || 'Syntax analysis failed';
-					setTerminalError(errorMessage);
+					const syntaxError = data.message || 'Syntax analysis failed';
+					const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+					setTerminalError(syntaxError);
 					analysisStatus = 'error';
 					terminalOutput = errorMessage;
 				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : 'Unknown error';
-				const errorMessage = `Syntax analysis failed: ${msg}`;
-				setTerminalError(errorMessage);
+				const syntaxError = `Syntax analysis failed: ${msg}`;
+				const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+				setTerminalError(syntaxError);
 				analysisStatus = 'error';
 				terminalOutput = errorMessage;
 			}
-		} else if (termMessages.length > 0) {
+		}
+	} else if (termMessages.length > 0) {
+			// Lexical errors found
+			const lexicalErrors = termMessages.map(m => m.text).join('; ');
 			termMessages = [
 				{ icon: errorIcon, text: 'Syntax analysis not performed due to lexical errors:' },
 				...termMessages
 			];
+			analysisStatus = 'error';
+			terminalOutput = `Lexical errors: ${lexicalErrors}`;
 		} else {
 			const notImplMessage = 'Syntax analysis not yet implemented';
 			setTerminalOk(notImplMessage);
@@ -595,21 +606,51 @@ result
 		});
 	}
 
-	async function analyzeLexical() {
+	async function analyzeLexical(skipLogging = false) {
 		normalizeCurlyQuotes();
-		activeTab = 'lexical';
+		activeTab = skipLogging ? activeTab : 'lexical';
 		const startTime = performance.now();
 		let analysisStatus = 'error';
 		let terminalOutput = '';
 
 		if (!codeInput) {
-			setTerminalError('Editor is empty');
-			return;
+			const errorMsg = 'Editor is empty';
+			setTerminalError(errorMsg);
+			terminalOutput = errorMsg;
+			
+			// Log even for early returns
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+			return { status: analysisStatus, output: terminalOutput };
 		}
 
 		if (!pyodideReady) {
-			setTerminalError('Python runtime not ready. Please wait...');
-			return;
+			const errorMsg = 'Python runtime not ready. Please wait...';
+			setTerminalError(errorMsg);
+			terminalOutput = errorMsg;
+			
+			// Log even for early returns
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+			return { status: analysisStatus, output: terminalOutput };
 		}
 
 		isAnalyzing = true;
@@ -758,17 +799,17 @@ tokens
 				termMessages = combinedErrors;
 				// Highlight errors in CodeMirror
 				addErrorMarkers(invalidTokens);
-				// also set a concise terminal summary
-				// keep lexer table OK message minimal
-				return;
+					// Update status and output for errors
+				analysisStatus = 'error';
+				terminalOutput = combinedErrors.map(e => e.text).join('; ');
+			} else {
+				clearErrorMarkers();
+
+				const okMessage = tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced';
+				setTerminalOk(okMessage);
+				analysisStatus = 'success';
+				terminalOutput = okMessage;
 			}
-
-			clearErrorMarkers();
-
-			const okMessage = tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced';
-			setTerminalOk(okMessage);
-			analysisStatus = 'success';
-			terminalOutput = okMessage;
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : 'Unknown error';
 			const errorMessage = `Lexical analysis failed: ${msg}`;
@@ -778,17 +819,22 @@ tokens
 		} finally {
 			isAnalyzing = false;
 
-			// Log the analysis
-			const duration = performance.now() - startTime;
-			addToLogBatch({
-				user_id: sessionId,
-				source_code: codeInput,
-				terminal_output: terminalOutput,
-				status: analysisStatus,
-				language: `lexical-v${appVersion}`,
-				duration_ms: Math.round(duration)
-			});
+			// Log the analysis only if not called from syntax analyzer
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
 		}
+
+		// Return the result for use by syntax analyzer
+		return { status: analysisStatus, output: terminalOutput };
 	}
 
 	function toggleTheme() {
@@ -829,7 +875,7 @@ tokens
 		<section class="left">
 			<!-- Toolbar row -->
 			<div class="toolbar">
-				<button class="pill {activeTab === 'lexical' ? 'active' : ''}" on:click={analyzeLexical}>
+				<button class="pill {activeTab === 'lexical' ? 'active' : ''}" on:click={() => analyzeLexical()}>
 					{#if theme === 'dark'}
 						<img class="icon" src={synSemLexIcon} alt="Lexical Icon" />
 					{:else}
