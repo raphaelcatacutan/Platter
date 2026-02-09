@@ -8,7 +8,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #2 ================
@@ -24,7 +24,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #3 ================
@@ -41,7 +41,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #4 ================
@@ -58,7 +58,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #5 ================
@@ -75,7 +75,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #6 ================
@@ -92,7 +92,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #7 ================
@@ -110,7 +110,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #8 ================
@@ -129,7 +129,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #9 ================
@@ -145,7 +145,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #10 ================
@@ -162,7 +162,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #11 ================
@@ -179,7 +179,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #12 ================
@@ -193,7 +193,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #13 ================
@@ -210,7 +210,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #14 ================
@@ -227,7 +227,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #15 ================
@@ -242,7 +242,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #16 ================
@@ -273,7 +273,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #18 ================
@@ -290,7 +290,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #19 ================
@@ -304,7 +304,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #20 ================
@@ -318,7 +318,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #21 ================
@@ -346,7 +346,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #23 ================
@@ -405,7 +405,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #27 ================
@@ -449,7 +449,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #30 ================
@@ -461,7 +461,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #31 ================
@@ -474,7 +474,7 @@ start(){
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'id' at line 1, col 16. Expected '*', '/', '%', '+', '-', ';'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'id' at line 1, col 16. Expected '*', '/', '%', '+', '-', ';'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'id' at line 1, col 16. Expected '*', '/', '%', '+', '-', ',', ';'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'id' at line 2, col 16. Expected '*', '/', '%', '+', '-', ',', ';'.
 =====================================
 
 ============ CODE #32 ================
@@ -516,7 +516,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #35 ================
@@ -556,7 +556,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #37 ================
@@ -588,7 +588,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #39 ================
@@ -607,7 +607,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #40 ================
@@ -619,7 +619,7 @@ start(){
     
 EXPECTED OUTPUT: Syntax Error: Unexpected ':' at line 2, col 16. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.
 ACTUAL OUTPUT: Syntax Error: Unexpected ':' at line 2, col 16. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ';'.
-SYNTAX OUTPUT: Syntax Error: Unexpected ':' at line 2, col 16. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ',', ';'.
+SYNTAX OUTPUT: Syntax Error: Unexpected ':' at line 3, col 16. Expected '*', '/', '%', '+', '-', '==', '!=', '<=', '>=', '<', '>', 'and', 'or', ',', ';'.
 =====================================
 
 ============ CODE #41 ================
@@ -634,7 +634,7 @@ bill("flag is: " + tochars(2 - size(array) > integers[0] and enabled == up));
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #42 ================
@@ -694,7 +694,7 @@ bill(tochars(topiece("32")-topiece(cut(12.56,2.0))));
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #47 ================
@@ -722,7 +722,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #49 ================
@@ -732,7 +732,7 @@ start() { piece of exprInit = 1 2; }
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'piece_lit' at line 1, col 33. Expected '*', '/', '%', '+', '-', ';'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'piece_lit' at line 1, col 33. Expected '*', '/', '%', '+', '-', ';'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'piece_lit' at line 1, col 33. Expected '*', '/', '%', '+', '-', ',', ';'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'piece_lit' at line 2, col 33. Expected '*', '/', '%', '+', '-', ',', ';'.
 =====================================
 
 ============ CODE #50 ================
@@ -752,7 +752,7 @@ start() { piece[] of arr = [5,3,8,4,2]; piece of n = size(arr); pass(i=0; i+=1; 
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #52 ================
@@ -779,7 +779,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #53 ================
@@ -804,7 +804,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #54 ================
@@ -826,7 +826,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #55 ================
@@ -856,7 +856,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #56 ================
@@ -874,7 +874,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #57 ================
@@ -892,7 +892,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #58 ================
@@ -912,7 +912,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #59 ================
@@ -933,7 +933,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #60 ================
@@ -1009,7 +1009,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #61 ================
@@ -1155,7 +1155,7 @@ start() {
     
 EXPECTED OUTPUT: Syntax Error: Unexpected ':' at line 22, col 34. Expected ']'.
 ACTUAL OUTPUT: Syntax Error: Unexpected ':' at line 22, col 34. Expected ']'.
-SYNTAX OUTPUT: Syntax Error: Unexpected ':' at line 22, col 34. Expected ',', ']'.
+SYNTAX OUTPUT: Syntax Error: Unexpected ':' at line 23, col 34. Expected ',', ']'.
 =====================================
 
 ============ CODE #70 ================
@@ -1167,7 +1167,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #71 ================
@@ -1194,7 +1194,7 @@ bill("flag is: " + tochars(2 - size(array) > integers[0] and enabled == up));
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #73 ================
@@ -1209,7 +1209,7 @@ bill(ans);
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #74 ================
@@ -1229,7 +1229,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #75 ================
@@ -1281,7 +1281,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #79 ================
@@ -1301,7 +1301,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #80 ================
@@ -1343,7 +1343,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #83 ================
@@ -1360,7 +1360,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #84 ================
@@ -1399,7 +1399,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #87 ================
@@ -1474,7 +1474,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #92 ================
@@ -1501,7 +1501,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #94 ================
@@ -1532,7 +1532,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #96 ================
@@ -1564,7 +1564,7 @@ start() {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #98 ================
@@ -1670,7 +1670,7 @@ piece of xx = 24 + 26;
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #106 ================
@@ -1688,7 +1688,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #107 ================
@@ -1706,7 +1706,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #108 ================
@@ -1718,7 +1718,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #109 ================
@@ -1770,7 +1770,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #113 ================
@@ -1799,7 +1799,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #115 ================
@@ -1835,7 +1835,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #118 ================
@@ -1853,7 +1853,7 @@ order {
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: None
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #119 ================

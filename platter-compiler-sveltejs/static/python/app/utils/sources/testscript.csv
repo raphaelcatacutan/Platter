@@ -800,7 +800,9 @@ start(){
         sip of a, b, c;
         piece of a;
 }
-","No Syntax Error","No Syntax Error",TRUE
+","No Syntax Error
+","No Syntax Error
+",TRUE
 115,three += one;,"Syntax Error: Unexpected '+=' at line 1, col 7. Expected 'of', '['.","Syntax Error: Unexpected '+=' at line 1, col 7. Expected 'of', '['.",TRUE
 116,"start(){
         piece of num = 2, c=3, x=10, y=5;

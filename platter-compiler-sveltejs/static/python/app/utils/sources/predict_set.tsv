@@ -193,13 +193,11 @@
 <univ_factor>	{ id, append, sort, reverse, remove }
 <univ_factor>	{ topiece, size, search, fact, pow, piece_lit }
 <univ_factor>	{ sqrt, rand, tosip, sip_lit }
-<univ_factor>	{ bill, take, copy, cut, tochars, chars_lit }
-<univ_factor>	{ matches, toflag, flag_lit }
 <univ_factor>	{ ( }
 <univ_add_tail>	{ + }
 <univ_add_tail>	{ - }
 <univ_add_tail>	{ ==, !=, <=, >=, <, >, and, or, ), ,, ; }
-<univ_term>	{ id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit, (, append, sort, reverse, remove }
+<univ_term>	{ id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, (, append, sort, reverse, remove }
 <univ_rel_gate>	{ == }
 <univ_rel_gate>	{ != }
 <univ_rel_gate>	{ <= }
@@ -209,7 +207,7 @@
 <univ_rel_gate>	{ and }
 <univ_rel_gate>	{ or }
 <univ_rel_gate>	{ ), ,, ; }
-<univ_expr>	{ id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit, (, append, sort, reverse, remove }
+<univ_expr>	{ id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, (, append, sort, reverse, remove }
 <paren_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
 <paren_dispatch>	{ sqrt, rand, tosip, sip_lit }
 <paren_dispatch>	{ bill, take, copy, cut, tochars, chars_lit }

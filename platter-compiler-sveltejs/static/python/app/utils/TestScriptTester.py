@@ -67,7 +67,7 @@ class TestParser():
                              script["code"], 
                              script["expected_output"], 
                              script["actual_output"],
-                             "Syntax OK" if result else None,
+                             None if result else "No Syntax Error",
                              f)
 
                 except SyntaxError as e:
