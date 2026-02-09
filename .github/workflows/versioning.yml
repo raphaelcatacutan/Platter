@@ -42,7 +42,7 @@ jobs:
       - name: Increment patch version
         id: increment
         run: |
-          NEW_PATCH=$(($${{ steps.read_version.outputs.patch }} + 1))
+          NEW_PATCH=$((${{ steps.read_version.outputs.patch }} + 1))
           echo "new_patch=$NEW_PATCH" >> $GITHUB_OUTPUT
           echo "new_version=${{ steps.read_version.outputs.major }}.${{ steps.read_version.outputs.minor }}.$NEW_PATCH" >> $GITHUB_OUTPUT
 
