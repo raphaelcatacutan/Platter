@@ -1,0 +1,79 @@
+name: Auto Version Increment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_run:
+    workflows: ["Run Tests"]
+    types:
+      - completed
+
+jobs:
+  increment-version:
+    runs-on: ubuntu-latest
+    # Only run if tests passed or on direct push to main
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Read current version
+        id: read_version
+        run: |
+          VERSION_FILE="platter-compiler-sveltejs/static/version.json"
+          MAJOR=$(jq -r '.major' $VERSION_FILE)
+          MINOR=$(jq -r '.minor' $VERSION_FILE)
+          PATCH=$(jq -r '.patch' $VERSION_FILE)
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+          echo "current_version=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+
+      - name: Increment patch version
+        id: increment
+        run: |
+          NEW_PATCH=$(($${{ steps.read_version.outputs.patch }} + 1))
+          echo "new_patch=$NEW_PATCH" >> $GITHUB_OUTPUT
+          echo "new_version=${{ steps.read_version.outputs.major }}.${{ steps.read_version.outputs.minor }}.$NEW_PATCH" >> $GITHUB_OUTPUT
+
+      - name: Update version.json
+        run: |
+          VERSION_FILE="platter-compiler-sveltejs/static/version.json"
+          jq --arg major "${{ steps.read_version.outputs.major }}" \
+             --arg minor "${{ steps.read_version.outputs.minor }}" \
+             --arg patch "${{ steps.increment.outputs.new_patch }}" \
+             '.major = ($major | tonumber) | .minor = ($minor | tonumber) | .patch = ($patch | tonumber)' \
+             $VERSION_FILE > tmp.json && mv tmp.json $VERSION_FILE
+
+      - name: Commit and push version bump
+        run: |
+          git add platter-compiler-sveltejs/static/version.json
+          git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.increment.outputs.new_version }} [skip ci]"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Git Tag
+        run: |
+          git tag -a "v${{ steps.increment.outputs.new_version }}" -m "Version ${{ steps.increment.outputs.new_version }}"
+          git push origin "v${{ steps.increment.outputs.new_version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "### Version Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous Version:** ${{ steps.read_version.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Version:** ${{ steps.increment.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Patch Increment:** +1" >> $GITHUB_STEP_SUMMARY

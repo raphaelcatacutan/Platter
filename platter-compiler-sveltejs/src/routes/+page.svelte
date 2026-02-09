@@ -41,6 +41,89 @@
 
 	export let data;
 
+	// Logger Service for Google Apps Script webhook
+	const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwkXRRIlnkZI2z5bXT08Lswe504TalqtJcA13CtbMZcgoH3EhYfWtJBlD4ql_hg9q4eWg/exec';
+	const BATCH_DELAY = 10000; // 10 seconds
+
+	let logBatch: any[] = [];
+	let logTimer: NodeJS.Timeout | null = null;
+
+	function addToLogBatch(logData: {
+		user_id?: string;
+		source_code: string;
+		terminal_output: string;
+		status: string;
+		language: string;
+		duration_ms: number;
+	}) {
+		logBatch.push(logData);
+
+		// Clear existing timer
+		if (logTimer) {
+			clearTimeout(logTimer);
+		}
+
+		// Set new timer to send logs after 10 seconds of inactivity
+		logTimer = setTimeout(() => {
+			sendLogBatch();
+		}, BATCH_DELAY);
+	}
+
+	async function sendLogBatch() {
+		if (logBatch.length === 0) return;
+
+		const logsToSend = [...logBatch];
+		logBatch = [];
+
+		try {
+			await fetch(WEBHOOK_URL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(logsToSend),
+				mode: 'no-cors' // Required for Google Apps Script
+			});
+			console.log('Logs sent successfully:', logsToSend.length);
+		} catch (error) {
+			console.error('Failed to send logs:', error);
+			// Re-add to batch if failed (optional)
+			// logBatch.unshift(...logsToSend);
+		}
+	}
+
+	// Send any remaining logs when component is destroyed
+	onDestroy(() => {
+		if (logTimer) {
+			clearTimeout(logTimer);
+		}
+		if (logBatch.length > 0) {
+			sendLogBatch();
+		}
+	});
+
+	// Generate unique session ID for tracking
+	function generateSessionId(): string {
+		const timestamp = Date.now();
+		// Create a simple hash from timestamp using base36 and add some randomness
+		const hash = (timestamp + Math.random() * 1000).toString(36).substring(2, 9);
+		return `user_${hash}`;
+	}
+
+	let sessionId = generateSessionId();
+
+	// Version tracking
+	let appVersion = '1.0.0';
+	async function fetchVersion() {
+		try {
+			const response = await fetch(`${data.basePath}/version.json`);
+			const versionData = await response.json();
+			appVersion = `${versionData.major}.${versionData.minor}.${versionData.patch}`;
+		} catch (err) {
+			console.warn('Failed to fetch version:', err);
+		}
+	}
+
 	let theme: 'dark' | 'light' = 'dark';
 	let activeTab: 'lexical' | 'syntax' | 'semantic' = 'lexical';
 
@@ -310,6 +393,9 @@ start() {
 
 			// Initialize Pyodide
 			await initPyodide();
+
+			// Fetch app version
+			await fetchVersion();
 		} catch (err) {
 			console.warn('Failed to load CodeMirror from CDN:', err);
 		}
@@ -402,6 +488,10 @@ start() {
 
 	async function analyzeSyntax() {
 		normalizeCurlyQuotes();
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
 		await analyzeLexical();
 
 		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
@@ -451,7 +541,10 @@ result
 
 				if (data.success) {
 					clearErrorMarkers();
-					setTerminalOk(data.message || 'Syntax analysis completed successfully');
+					const okMessage = data.message || 'Syntax analysis completed successfully';
+					setTerminalOk(okMessage);
+					analysisStatus = 'success';
+					terminalOutput = okMessage;
 				} else {
 					// Handle syntax errors with line/col information
 					if (data.error && data.error.line && data.error.col) {
@@ -464,11 +557,17 @@ result
 						};
 						addErrorMarkers([errorToken]);
 					}
-					setTerminalError(data.message || 'Syntax analysis failed');
+					const errorMessage = data.message || 'Syntax analysis failed';
+					setTerminalError(errorMessage);
+					analysisStatus = 'error';
+					terminalOutput = errorMessage;
 				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : 'Unknown error';
-				setTerminalError(`Syntax analysis failed: ${msg}`);
+				const errorMessage = `Syntax analysis failed: ${msg}`;
+				setTerminalError(errorMessage);
+				analysisStatus = 'error';
+				terminalOutput = errorMessage;
 			}
 		} else if (termMessages.length > 0) {
 			termMessages = [
@@ -476,15 +575,33 @@ result
 				...termMessages
 			];
 		} else {
-			setTerminalOk('Syntax analysis not yet implemented');
+			const notImplMessage = 'Syntax analysis not yet implemented';
+			setTerminalOk(notImplMessage);
+			analysisStatus = 'not-implemented';
+			terminalOutput = notImplMessage;
 		}
 
 		activeTab = 'syntax';
+
+		// Log the syntax analysis
+		const duration = performance.now() - startTime;
+		addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `syntax-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
 	}
 
 	async function analyzeLexical() {
 		normalizeCurlyQuotes();
 		activeTab = 'lexical';
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
 		if (!codeInput) {
 			setTerminalError('Editor is empty');
 			return;
@@ -648,14 +765,29 @@ tokens
 
 			clearErrorMarkers();
 
-			setTerminalOk(
-				tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced'
-			);
+			const okMessage = tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced';
+			setTerminalOk(okMessage);
+			analysisStatus = 'success';
+			terminalOutput = okMessage;
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : 'Unknown error';
-			setTerminalError(`Lexical analysis failed: ${msg}`);
+			const errorMessage = `Lexical analysis failed: ${msg}`;
+			setTerminalError(errorMessage);
+			analysisStatus = 'error';
+			terminalOutput = errorMessage;
 		} finally {
 			isAnalyzing = false;
+
+			// Log the analysis
+			const duration = performance.now() - startTime;
+			addToLogBatch({
+				user_id: sessionId,
+				source_code: codeInput,
+				terminal_output: terminalOutput,
+				status: analysisStatus,
+				language: `lexical-v${appVersion}`,
+				duration_ms: Math.round(duration)
+			});
 		}
 	}
 
