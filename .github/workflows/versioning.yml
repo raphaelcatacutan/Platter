@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
       - name: Configure Git
@@ -60,15 +60,11 @@ jobs:
           git add platter-compiler-sveltejs/static/version.json
           git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.increment.outputs.new_version }} [skip ci]"
           git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Git Tag
         run: |
           git tag -a "v${{ steps.increment.outputs.new_version }}" -m "Version ${{ steps.increment.outputs.new_version }}"
           git push origin "v${{ steps.increment.outputs.new_version }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         run: |
