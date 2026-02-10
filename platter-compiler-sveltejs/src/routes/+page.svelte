@@ -491,6 +491,9 @@ start() {
 			
 			// Restore cursor position
 			cmInstance.setCursor(cursor);
+			
+			// Update codeInput to ensure it's in sync
+			codeInput = normalized;
 		}
 	}
 
