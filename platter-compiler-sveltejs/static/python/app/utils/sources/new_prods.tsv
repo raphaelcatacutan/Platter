@@ -12,28 +12,28 @@
 12	<piece_ingredient_init>	=>	=	<strict_piece_expr>						
 13	<piece_ingredient_init>	=>	λ							
 14	<piece_id_tail>	=>	,	id	<piece_ingredient_init>	<piece_id_tail>				
-15	<chars_decl>	=>	of	<chars_id>	;					
-16	<chars_decl>	=>	<chars_array_decl>							
-17	<chars_id>	=>	id	<chars_ingredient_init>	<chars_id_tail>					
-18	<chars_ingredient_init>	=>	=	<strict_chars_expr>						
-19	<chars_ingredient_init>	=>	λ							
-20	<chars_id_tail>	=>	,	id	<chars_ingredient_init>	<chars_id_tail>				
-21	<chars_id_tail>	=>	λ							
-22	<sip_decl>	=>	of	<sip_id>	;					
-23	<sip_decl>	=>	<sip_array_decl>							
-24	<sip_id>	=>	id	<sip_ingredient_init>	<sip_id_tail>					
-25	<sip_ingredient_init>	=>	=	<strict_sip_expr>						
-26	<sip_ingredient_init>	=>	λ							
-27	<sip_id_tail>	=>	,	id	<sip_ingredient_init>	<sip_id_tail>				
-28	<sip_id_tail>	=>	λ							
-29	<flag_decl>	=>	of	<flag_id>	;					
-30	<flag_decl>	=>	<flag_array_decl>							
-31	<flag_id>	=>	id	<flag_ingredient_init>	<flag_id_tail>					
-32	<flag_ingredient_init>	=>	=	<strict_flag_expr>						
-33	<flag_ingredient_init>	=>	λ							
-34	<flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>				
-35	<flag_id_tail>	=>	λ							
-36	<piece_id_tail>	=>	λ							
+15	<piece_id_tail>	=>	λ							
+16	<chars_decl>	=>	of	<chars_id>	;					
+17	<chars_decl>	=>	<chars_array_decl>							
+18	<chars_id>	=>	id	<chars_ingredient_init>	<chars_id_tail>					
+19	<chars_ingredient_init>	=>	=	<strict_chars_expr>						
+20	<chars_ingredient_init>	=>	λ							
+21	<chars_id_tail>	=>	,	id	<chars_ingredient_init>	<chars_id_tail>				
+22	<chars_id_tail>	=>	λ							
+23	<sip_decl>	=>	of	<sip_id>	;					
+24	<sip_decl>	=>	<sip_array_decl>							
+25	<sip_id>	=>	id	<sip_ingredient_init>	<sip_id_tail>					
+26	<sip_ingredient_init>	=>	=	<strict_sip_expr>						
+27	<sip_ingredient_init>	=>	λ							
+28	<sip_id_tail>	=>	,	id	<sip_ingredient_init>	<sip_id_tail>				
+29	<sip_id_tail>	=>	λ							
+30	<flag_decl>	=>	of	<flag_id>	;					
+31	<flag_decl>	=>	<flag_array_decl>							
+32	<flag_id>	=>	id	<flag_ingredient_init>	<flag_id_tail>					
+33	<flag_ingredient_init>	=>	=	<strict_flag_expr>						
+34	<flag_ingredient_init>	=>	λ							
+35	<flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>				
+36	<flag_id_tail>	=>	λ							
 37	<piece_array_decl>	=>	<dimensions>	of	id	<piece_array_init>	<array_declare_tail_piece>		;	
 38	<sip_array_decl>	=>	<dimensions>	of	id	<sip_array_init>	<array_declare_tail_sip>		;	
 39	<chars_array_decl>	=>	<dimensions>	of	id	<chars_array_init>	<array_declare_tail_chars>		;	
@@ -189,7 +189,7 @@
 189	<assignment_op>	=>	/=							
 190	<assignment_op>	=>	%=							
 191	<statements>	=>	<id_statements>	<statements>						
-192	<statements>	=>	<built-in_rec_call>	;	<statements>					
+192	<statements>	=>	<built_in_rec_call>	;	<statements>					
 193	<statements>	=>	<conditional_st>	<statements>						
 194	<statements>	=>	<looping_st>	<statements>						
 195	<statements>	=>	<jump_serve>	<statements>						
@@ -200,25 +200,25 @@
 200	<tail1>	=>	<call_tail>							
 201	<call_tail>	=>	(	<flavor>	)					
 202	<assignment_st>	=>	<accessor_tail>	<assignment_op>	<value>	;				
-203	<built-in_rec_call>	=>	<built-in_rec>							
-204	<built-in_rec>	=>	append	(	<strict_array_expr>	,	<value>	)		
-205	<built-in_rec>	=>	bill	(	<strict_chars_expr>	)				
-206	<built-in_rec>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)
-207	<built-in_rec>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)		
-208	<built-in_rec>	=>	fact	(	<strict_piece_expr>	)				
-209	<built-in_rec>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)		
-210	<built-in_rec>	=>	pow	(	<strict_piece_expr>	,	<strict_piece_expr>	)		
-211	<built-in_rec>	=>	rand	(	)					
-212	<built-in_rec>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)		
-213	<built-in_rec>	=>	reverse	(	<strict_array_expr>	)				
-214	<built-in_rec>	=>	search	(	<strict_array_expr>	,	<value>	)		
-215	<built-in_rec>	=>	size	(	<strict_array_expr>	)				
-216	<built-in_rec>	=>	sort	(	<strict_array_expr>	)				
-217	<built-in_rec>	=>	sqrt	(	<strict_piece_expr>	)				
-218	<built-in_rec>	=>	take	(	)					
-219	<built-in_rec>	=>	tochars	(	<any_expr>	)				
-220	<built-in_rec>	=>	topiece	(	<any_expr>	)				
-221	<built-in_rec>	=>	tosip	(	<any_expr>	)				
+203	<built_in_rec_call>	=>	<built_in_rec>							
+204	<built_in_rec>	=>	append	(	<strict_array_expr>	,	<value>	)		
+205	<built_in_rec>	=>	bill	(	<strict_chars_expr>	)				
+206	<built_in_rec>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)
+207	<built_in_rec>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)		
+208	<built_in_rec>	=>	fact	(	<strict_piece_expr>	)				
+209	<built_in_rec>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)		
+210	<built_in_rec>	=>	pow	(	<strict_piece_expr>	,	<strict_piece_expr>	)		
+211	<built_in_rec>	=>	rand	(	)					
+212	<built_in_rec>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)		
+213	<built_in_rec>	=>	reverse	(	<strict_array_expr>	)				
+214	<built_in_rec>	=>	search	(	<strict_array_expr>	,	<value>	)		
+215	<built_in_rec>	=>	size	(	<strict_array_expr>	)				
+216	<built_in_rec>	=>	sort	(	<strict_array_expr>	)				
+217	<built_in_rec>	=>	sqrt	(	<strict_piece_expr>	)				
+218	<built_in_rec>	=>	take	(	)					
+219	<built_in_rec>	=>	tochars	(	<any_expr>	)				
+220	<built_in_rec>	=>	topiece	(	<any_expr>	)				
+221	<built_in_rec>	=>	tosip	(	<any_expr>	)				
 222	<conditional_st>	=>	<cond_check>							
 223	<conditional_st>	=>	<cond_menu>							
 224	<cond_check>	=>	check	(	<strict_flag_expr>	)	<platter>	<alt_clause>	<instead_clause>	
@@ -233,7 +233,7 @@
 233	<choice_val>	=>	piece_lit							
 234	<choice_val>	=>	chars_lit							
 235	<statements_menu>	=>	<id_statements_menu>	<statements_menu>						
-236	<statements_menu>	=>	<built-in_rec_call>	;	<statements_menu>					
+236	<statements_menu>	=>	<built_in_rec_call>	;	<statements_menu>					
 237	<statements_menu>	=>	<conditional_st_menu>	<statements_menu>						
 238	<statements_menu>	=>	<looping_st>	<statements_menu>						
 239	<statements_menu>	=>	<jump_stop>	<statements_menu>						
@@ -280,7 +280,7 @@
 280	<]_tail_loop>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_loop>		
 281	<]_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>			
 282	<statements_loop>	=>	<id_statements_loop>	<statements_loop>						
-283	<statements_loop>	=>	<built-in_rec_call>	;	<statements_loop>					
+283	<statements_loop>	=>	<built_in_rec_call>	;	<statements_loop>					
 284	<statements_loop>	=>	<conditional_st_loop>	<statements_loop>						
 285	<statements_loop>	=>	<looping_st>	<statements_loop>						
 286	<statements_loop>	=>	<jump_st>	<statements_loop>						
@@ -300,7 +300,7 @@
 300	<usual_clause_loop>	=>	usual	:	<choice_usual_loop_st>					
 301	<usual_clause_loop>	=>	λ							
 302	<choice_usual_loop_st>	=>	<id_statements_choice_usual_loop>	<choice_usual_loop_st>						
-303	<choice_usual_loop_st>	=>	<built-in_rec_call>	;	<choice_usual_loop_st>					
+303	<choice_usual_loop_st>	=>	<built_in_rec_call>	;	<choice_usual_loop_st>					
 304	<choice_usual_loop_st>	=>	<conditional_st_loop>	<choice_usual_loop_st>						
 305	<choice_usual_loop_st>	=>	<looping_st>	<choice_usual_loop_st>						
 306	<choice_usual_loop_st>	=>	<jump_st>	<choice_usual_loop_st>						
