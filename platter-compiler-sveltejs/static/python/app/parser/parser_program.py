@@ -383,9 +383,12 @@ class Parser():
     def id_tail(self):
         log.info("Enter: " + self.tokens[self.pos].type) # J
 
-        """ 41 <id_tail>	=>	<call_tailopt>	<accessor_tail> """
+        """ 40 <id_tail>	=>	<call_tailopt>	"""
         if self.tokens[self.pos].type in PREDICT_SET["<id_tail>"]:
             self.call_tailopt()
+        
+            """ 41 <id_tail>	=>	<accessor_tail> """
+        elif self.tokens[self.pos].type in PREDICT_SET["<id_tail>_1"]:
             self.accessor_tail()
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -465,10 +468,9 @@ class Parser():
             self.notation_val()
             self.parse_token("]")
             
-            """ 53 <value>	=>	<ret_array>	<value_tail> """
+            """ 53 <value>	=>	<ret_array> """
         elif self.tokens[self.pos].type in PREDICT_SET["<value>_7"]:
             self.ret_array()
-            self.value_tail()
             
             """ 54 <value>	=>	id	<id_tail>   <univ_mult_tail>	<univ_add_tail>	<univ_rel_gate> """
         elif self.tokens[self.pos].type in PREDICT_SET["<value>_8"]:
@@ -640,10 +642,9 @@ class Parser():
             self.id_()
             self.id_tail()
             
-            """ 156 <strict_datas_expr>	=>	<ret_array>     <opt_array_access>"""
+            """ 156 <strict_datas_expr>	=>	<ret_array>   """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_datas_expr>_2"]:
             self.ret_array()
-            self.opt_array_access()
 
         else: self.parse_token(PREDICT_SET_M["<strict_datas_expr>"])
 
@@ -701,30 +702,13 @@ class Parser():
             self.id_()
             self.id_tail()
         
-            """ 256 <strict_array_expr>	=>	<ret_array> <opt_array_access> """
+            """ 256 <strict_array_expr>	=>	<ret_array> """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_array_expr>_2"]:
             self.ret_array()    
-            self.opt_array_access()
         
         else: self.parse_token(PREDICT_SET_M["<strict_array_expr>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
-
-    def opt_array_access(self):
-        log.info("Enter: " + self.tokens[self.pos].type)
-
-        """ <opt_array_access>  =>  <array_accessor>    """
-        if self.tokens[self.pos].type in PREDICT_SET["<opt_array_access>"]:
-            self.array_accessor()
-
-            """ <opt_array_access>  =>  λ """
-        elif self.tokens[self.pos].type in PREDICT_SET["<opt_array_access>_1"]:
-            pass
-
-        else: self.parse_token(PREDICT_SET_M["<opt_array_access>"])
-
-        log.info("Exit: " + self.tokens[self.pos].type)
-
 
     def ret_chars(self):
         log.info("Enter: " + self.tokens[self.pos].type) # J
@@ -2128,24 +2112,6 @@ class Parser():
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
-    def value_tail(self):
-        log.info("Enter: " + self.tokens[self.pos].type) # J
-        
-        """ 265 <value_tail>    =>  <array_accessor>    <univ_mult_tail>    <univ_add_tail> <univ_rel_gate> """
-        if self.tokens[self.pos].type in PREDICT_SET["<value_tail>"]:
-            self.array_accessor()
-            self.univ_mult_tail()
-            self.univ_add_tail()
-            self.univ_rel_gate()
-
-            """ 266 <value_tail>    =>  λ   """
-        elif self.tokens[self.pos].type in PREDICT_SET["<value_tail>_1"]:
-            pass
-        
-        else: self.parse_token(PREDICT_SET_M["<value_tail>"])
-        
-        log.info("Exit: " + self.tokens[self.pos].type) # J
-
     def strict_piece_mult_tail(self):
         log.info("Enter: " + self.tokens[self.pos].type) # J
 
@@ -3509,7 +3475,6 @@ class Parser():
         """ 439 <tail1>	=>	<call_tail>	<accessor_tail> """
         if self.tokens[self.pos].type in PREDICT_SET["<tail1>"]:
             self.call_tail()
-            self.accessor_tail()
         else: self.parse_token(PREDICT_SET_M["<tail1>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
