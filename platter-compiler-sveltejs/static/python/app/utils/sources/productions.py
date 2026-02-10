@@ -1,7 +1,7 @@
 def strict_piece_expr_upd(self):
     log.info("Enter: " + self.tokens[self.pos].type) # J
 
-    """    1 <strict_piece_expr_upd>	=>	<strict_piece_term_upd>	<strict_piece_add_tail_upd>    """
+    """    517 <strict_piece_expr_upd>	=>	<strict_piece_term_upd>	<strict_piece_add_tail_upd>    """
     if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_expr_upd>"]:
         self.strict_piece_term_upd()
         self.strict_piece_add_tail_upd()
@@ -12,7 +12,7 @@ def strict_piece_expr_upd(self):
 def strict_piece_term_upd(self):
     log.info("Enter: " + self.tokens[self.pos].type) # J
 
-    """    2 <strict_piece_term_upd>	=>	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
+    """    518 <strict_piece_term_upd>	=>	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
     if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_term_upd>"]:
         self.strict_piece_factor_upd()
         self.strict_piece_mult_tail_upd()
@@ -23,16 +23,16 @@ def strict_piece_term_upd(self):
 def strict_piece_factor_upd(self):
     log.info("Enter: " + self.tokens[self.pos].type) # J
 
-    """    3 <strict_piece_factor_upd>	=>	<ret_piece_upd>    """
+    """    519 <strict_piece_factor_upd>	=>	<ret_piece_upd>    """
     if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_factor_upd>"]:
         self.ret_piece_upd()
 
-        """    4 <strict_piece_factor_upd>	=>	id	<id_tail>    """
+        """    520 <strict_piece_factor_upd>	=>	id	<id_tail>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_factor_upd>_1"]:
         self.parse_token("id")
         self.id_tail()
 
-        """    5 <strict_piece_factor_upd>	=>	(	<strict_piece_expr_upd>	)    """
+        """    521 <strict_piece_factor_upd>	=>	(	<strict_piece_expr_upd>	)    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_factor_upd>_2"]:
         self.parse_token("(")
         self.strict_piece_expr_upd()
@@ -45,21 +45,21 @@ def strict_piece_factor_upd(self):
 def ret_piece_upd(self):
     log.info("Enter: " + self.tokens[self.pos].type) # J
 
-    """    6 <ret_piece_upd>	=>	topiece	(	<any_expr>	)    """
+    """    522 <ret_piece_upd>	=>	topiece	(	<any_expr>	)    """
     if self.tokens[self.pos].type in PREDICT_SET["<ret_piece_upd>"]:
         self.parse_token("topiece")
         self.parse_token("(")
         self.any_expr()
         self.parse_token(")")
 
-        """    7 <ret_piece_upd>	=>	fact	(	<strict_piece_expr_upd>	)    """
+        """    523 <ret_piece_upd>	=>	fact	(	<strict_piece_expr_upd>	)    """
     elif self.tokens[self.pos].type in PREDICT_SET["<ret_piece_upd>_1"]:
         self.parse_token("fact")
         self.parse_token("(")
         self.strict_piece_expr_upd()
         self.parse_token(")")
 
-        """    8 <ret_piece_upd>	=>	pow	(	<strict_piece_expr_upd>	,	<strict_piece_expr_upd>	)    """
+        """    524 <ret_piece_upd>	=>	pow	(	<strict_piece_expr_upd>	,	<strict_piece_expr_upd>	)    """
     elif self.tokens[self.pos].type in PREDICT_SET["<ret_piece_upd>_2"]:
         self.parse_token("pow")
         self.parse_token("(")
@@ -68,7 +68,7 @@ def ret_piece_upd(self):
         self.strict_piece_expr_upd()
         self.parse_token(")")
 
-        """    9 <ret_piece_upd>	=>	piece_lit    """
+        """    525 <ret_piece_upd>	=>	piece_lit    """
     elif self.tokens[self.pos].type in PREDICT_SET["<ret_piece_upd>_3"]:
         self.parse_token("piece_lit")
 
@@ -79,21 +79,21 @@ def ret_piece_upd(self):
 def strict_piece_add_tail_upd(self):
     log.info("Enter: " + self.tokens[self.pos].type) # J
 
-    """    10 <strict_piece_add_tail_upd>	=>	+	<strict_piece_term_upd>	<strict_piece_add_tail_upd>    """
+    """    526 <strict_piece_add_tail_upd>	=>	+	<strict_piece_term_upd>	<strict_piece_add_tail_upd>    """
     if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_add_tail_upd>"]:
         self.parse_token("+")
         self.strict_piece_term_upd()
         self.strict_piece_add_tail_upd()
 
-        """    11 <strict_piece_add_tail_upd>	=>	-	<strict_piece_term_upd>	<strict_piece_add_tail_upd>    """
+        """    527 <strict_piece_add_tail_upd>	=>	-	<strict_piece_term_upd>	<strict_piece_add_tail_upd>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_add_tail_upd>_1"]:
         self.parse_token("-")
         self.strict_piece_term_upd()
         self.strict_piece_add_tail_upd()
 
-        """    12 <strict_piece_add_tail_upd>	=>	λ    """
+        """    528 <strict_piece_add_tail_upd>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_add_tail_upd>_2"]:
-        self.parse_token("λ")
+        pass
 
     else: self.parse_token(PREDICT_SET_M["<strict_piece_add_tail_upd>"])
 
@@ -102,27 +102,27 @@ def strict_piece_add_tail_upd(self):
 def strict_piece_mult_tail_upd(self):
     log.info("Enter: " + self.tokens[self.pos].type) # J
 
-    """    13 <strict_piece_mult_tail_upd>	=>	*	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
+    """    529 <strict_piece_mult_tail_upd>	=>	*	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
     if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_mult_tail_upd>"]:
         self.parse_token("*")
         self.strict_piece_factor_upd()
         self.strict_piece_mult_tail_upd()
 
-        """    14 <strict_piece_mult_tail_upd>	=>	/	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
+        """    530 <strict_piece_mult_tail_upd>	=>	/	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_mult_tail_upd>_1"]:
         self.parse_token("/")
         self.strict_piece_factor_upd()
         self.strict_piece_mult_tail_upd()
 
-        """    15 <strict_piece_mult_tail_upd>	=>	%	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
+        """    531 <strict_piece_mult_tail_upd>	=>	%	<strict_piece_factor_upd>	<strict_piece_mult_tail_upd>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_mult_tail_upd>_2"]:
         self.parse_token("%")
         self.strict_piece_factor_upd()
         self.strict_piece_mult_tail_upd()
 
-        """    16 <strict_piece_mult_tail_upd>	=>	λ    """
+        """    532 <strict_piece_mult_tail_upd>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_mult_tail_upd>_3"]:
-        self.parse_token("λ")
+        pass
 
     else: self.parse_token(PREDICT_SET_M["<strict_piece_mult_tail_upd>"])
 

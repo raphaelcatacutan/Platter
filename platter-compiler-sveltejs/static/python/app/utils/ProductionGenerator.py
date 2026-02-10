@@ -99,6 +99,10 @@ def _parse_tsv(tsv_path: Path) -> List[ProductionAlt]:
         # parts[2] is expected to be "=>", but we won't enforce it
         rhs = [p.strip() for p in parts[3:] if p.strip()]
 
+        # Treat lambda (empty production) as empty RHS
+        if len(rhs) == 1 and rhs[0] == "λ":
+            rhs = []
+            
         alts.append(ProductionAlt(prod_no=prod_no, lhs=lhs, rhs=rhs))
     return alts
 

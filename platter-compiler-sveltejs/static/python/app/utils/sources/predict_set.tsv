@@ -514,6 +514,22 @@
 <loop_init>	{ = }
 <loop_init>	{ ; }
 <update>	{ id }
+<strict_piece_expr_upd>	{ id, (, topiece, fact, pow, piece_lit }
+<strict_piece_term_upd>	{ id, (, topiece, fact, pow, piece_lit }
+<strict_piece_factor_upd>	{ topiece, fact, pow, piece_lit }
+<strict_piece_factor_upd>	{ id }
+<strict_piece_factor_upd>	{ ( }
+<ret_piece_upd>	{ topiece }
+<ret_piece_upd>	{ fact }
+<ret_piece_upd>	{ pow }
+<ret_piece_upd>	{ piece_lit }
+<strict_piece_add_tail_upd>	{ + }
+<strict_piece_add_tail_upd>	{ - }
+<strict_piece_add_tail_upd>	{ ;, ), , }
+<strict_piece_mult_tail_upd>	{ * }
+<strict_piece_mult_tail_upd>	{ / }
+<strict_piece_mult_tail_upd>	{ % }
+<strict_piece_mult_tail_upd>	{ +, -, ;, ), , }
 <loop_platter>	{ { }
 <local_decl_loop>	{ piece }
 <local_decl_loop>	{ chars }
