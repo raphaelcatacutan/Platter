@@ -1,4 +1,10 @@
-	
+piece of a = 0;
+piece[] of a = append(id, 1) ;
+sip of a = 2.0;
+sip[] of a = [1];
+chars of a = "a";
+piece of b = a[+];
+
 start() {
-    
+	a[1] += 1;
 }
