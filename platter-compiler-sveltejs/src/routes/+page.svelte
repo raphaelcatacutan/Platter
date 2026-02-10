@@ -116,7 +116,7 @@
 	let appVersion = '1.0.0';
 	async function fetchVersion() {
 		try {
-			const response = await fetch('/version.json');
+			const response = await fetch(`${data.basePath}/version.json`);
 			const versionData = await response.json();
 			appVersion = `${versionData.major}.${versionData.minor}.${versionData.patch}`;
 		} catch (err) {
