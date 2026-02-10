@@ -8,7 +8,7 @@ import logging as log
 
 # To disable logs, set level=log.CRITICAL. 
 # To enable logs, set level=log.DEBUG
-log.basicConfig(level=log.CRITICAL, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
+log.basicConfig(level=log.DEBUG, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
 
 class Parser():
     def __init__(self, tokens):
@@ -53,15 +53,12 @@ class Parser():
             filtered_tok = tok
             if isinstance(tok, list):
                 # If tok is a list of expected tokens, filter it
-                filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0) or (t == ',' and self.paren_counter <= 0))]
+                filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0))]
             elif tok == ')' and self.paren_counter <= 0:
                 # If expecting only ')', but no unclosed '(', don't show it
                 filtered_tok = []
             elif tok == ']' and self.bracket_counter <= 0:
                 # If expecting only ']', but no unclosed '[', don't show it
-                filtered_tok = []
-            elif tok == ',' and self.paren_counter <= 0:
-                # If expecting only ',', but no unclosed '(', don't show it
                 filtered_tok = []
             
             raise ErrorHandler("Unexpected_err", self.tokens[self.pos], filtered_tok if filtered_tok else tok)
@@ -390,7 +387,6 @@ class Parser():
         if self.tokens[self.pos].type in PREDICT_SET["<id_tail>"]:
             self.call_tailopt()
             self.accessor_tail()
-        else: self.parse_token(PREDICT_SET_M["<id_tail>"])
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
@@ -1621,16 +1617,8 @@ class Parser():
         elif self.tokens[self.pos].type in PREDICT_SET["<univ_factor>_2"]:
             self.ret_sip()
             
-            """ 181 <univ_factor>	=>	<ret_chars> """
-        elif self.tokens[self.pos].type in PREDICT_SET["<univ_factor>_3"]:
-            self.ret_chars()
-            
-            """ 182 <univ_factor>	=>	<ret_flag> """
-        elif self.tokens[self.pos].type in PREDICT_SET["<univ_factor>_4"]:
-            self.ret_flag()
-            
             """ 183 <univ_factor>	=>	(	<any_expr>	) """
-        elif self.tokens[self.pos].type in PREDICT_SET["<univ_factor>_5"]:
+        elif self.tokens[self.pos].type in PREDICT_SET["<univ_factor>_3"]:
             self.parse_token("(")
             self.any_expr()
             self.parse_token(")")

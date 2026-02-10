@@ -41,6 +41,89 @@
 
 	export let data;
 
+	// Logger Service for Google Apps Script webhook
+	const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwkXRRIlnkZI2z5bXT08Lswe504TalqtJcA13CtbMZcgoH3EhYfWtJBlD4ql_hg9q4eWg/exec';
+	const BATCH_DELAY = 10000; // 10 seconds
+
+	let logBatch: any[] = [];
+	let logTimer: NodeJS.Timeout | null = null;
+
+	function addToLogBatch(logData: {
+		user_id?: string;
+		source_code: string;
+		terminal_output: string;
+		status: string;
+		language: string;
+		duration_ms: number;
+	}) {
+		logBatch.push(logData);
+
+		// Clear existing timer
+		if (logTimer) {
+			clearTimeout(logTimer);
+		}
+
+		// Set new timer to send logs after 10 seconds of inactivity
+		logTimer = setTimeout(() => {
+			sendLogBatch();
+		}, BATCH_DELAY);
+	}
+
+	async function sendLogBatch() {
+		if (logBatch.length === 0) return;
+
+		const logsToSend = [...logBatch];
+		logBatch = [];
+
+		try {
+			await fetch(WEBHOOK_URL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(logsToSend),
+				mode: 'no-cors' // Required for Google Apps Script
+			});
+			console.log('Logs sent successfully:', logsToSend.length);
+		} catch (error) {
+			console.error('Failed to send logs:', error);
+			// Re-add to batch if failed (optional)
+			// logBatch.unshift(...logsToSend);
+		}
+	}
+
+	// Send any remaining logs when component is destroyed
+	onDestroy(() => {
+		if (logTimer) {
+			clearTimeout(logTimer);
+		}
+		if (logBatch.length > 0) {
+			sendLogBatch();
+		}
+	});
+
+	// Generate unique session ID for tracking
+	function generateSessionId(): string {
+		const timestamp = Date.now();
+		// Create a simple hash from timestamp using base36 and add some randomness
+		const hash = (timestamp + Math.random() * 1000).toString(36).substring(2, 9);
+		return `user_${hash}`;
+	}
+
+	let sessionId = generateSessionId();
+
+	// Version tracking
+	let appVersion = '1.0.0';
+	async function fetchVersion() {
+		try {
+			const response = await fetch('/version.json');
+			const versionData = await response.json();
+			appVersion = `${versionData.major}.${versionData.minor}.${versionData.patch}`;
+		} catch (err) {
+			console.warn('Failed to fetch version:', err);
+		}
+	}
+
 	let theme: 'dark' | 'light' = 'dark';
 	let activeTab: 'lexical' | 'syntax' | 'semantic' = 'lexical';
 
@@ -51,12 +134,13 @@ chars[] of names = ["Hello Platter", "Raph", "Jieco"];
 prepare sip of sips() { check(topiece(y) > x) { serve x;} instead {serve y;} }
 
 prepare piece of pieces() {
-	serve x;
+	 x =  x + 32 / 323 or up;
 }
 
 start() {
 	piece of z = topiece(topiece(sips()) + pieces());
 	serve z;
+    pass (i =0 ; i+=1; (i>4)) {  }
 }`;
 
 	type Token = { type: string; value: string; line: number; col: number };
@@ -309,6 +393,9 @@ start() {
 
 			// Initialize Pyodide
 			await initPyodide();
+
+			// Fetch app version
+			await fetchVersion();
 		} catch (err) {
 			console.warn('Failed to load CodeMirror from CDN:', err);
 		}
@@ -401,22 +488,29 @@ start() {
 
 	async function analyzeSyntax() {
 		normalizeCurlyQuotes();
-		await analyzeLexical();
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
+		// Run lexical analysis first, skip logging to combine outputs
+		const lexicalResult = await analyzeLexical(true);
 
 		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
 			clearTerminal();
 
 			if (!pyodideReady) {
-				setTerminalError('Python runtime not ready');
-				return;
-			}
+				const errorMsg = 'Python runtime not ready';
+				setTerminalError(errorMsg);
+				analysisStatus = 'error';
+				terminalOutput = `${lexicalResult.output}\n${errorMsg}`;
+				// Continue to logging at the end
+			} else {
+				try {
+					// Set the code input in Python
+					pyodide.globals.set('code_input', codeInput);
 
-			try {
-				// Set the code input in Python
-				pyodide.globals.set('code_input', codeInput);
-
-				// Run syntax analysis
-				const result = await pyodide.runPythonAsync(`
+					// Run syntax analysis
+					const result = await pyodide.runPythonAsync(`
 import sys
 import re
 from app.lexer.lexer import Lexer
@@ -450,7 +544,11 @@ result
 
 				if (data.success) {
 					clearErrorMarkers();
-					setTerminalOk(data.message || 'Syntax analysis completed successfully');
+					const syntaxMessage = data.message || 'Syntax analysis completed successfully';
+					const okMessage = `${lexicalResult.output}\n${syntaxMessage}`;
+					setTerminalOk(syntaxMessage);
+					analysisStatus = 'success';
+					terminalOutput = okMessage;
 				} else {
 					// Handle syntax errors with line/col information
 					if (data.error && data.error.line && data.error.col) {
@@ -463,35 +561,96 @@ result
 						};
 						addErrorMarkers([errorToken]);
 					}
-					setTerminalError(data.message || 'Syntax analysis failed');
+					const syntaxError = data.message || 'Syntax analysis failed';
+					const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+					setTerminalError(syntaxError);
+					analysisStatus = 'error';
+					terminalOutput = errorMessage;
 				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : 'Unknown error';
-				setTerminalError(`Syntax analysis failed: ${msg}`);
+				const syntaxError = `Syntax analysis failed: ${msg}`;
+				const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+				setTerminalError(syntaxError);
+				analysisStatus = 'error';
+				terminalOutput = errorMessage;
 			}
-		} else if (termMessages.length > 0) {
+		}
+	} else if (termMessages.length > 0) {
+			// Lexical errors found
+			const lexicalErrors = termMessages.map(m => m.text).join('; ');
 			termMessages = [
 				{ icon: errorIcon, text: 'Syntax analysis not performed due to lexical errors:' },
 				...termMessages
 			];
+			analysisStatus = 'error';
+			terminalOutput = `Lexical errors: ${lexicalErrors}`;
 		} else {
-			setTerminalOk('Syntax analysis not yet implemented');
+			const notImplMessage = 'Syntax analysis not yet implemented';
+			setTerminalOk(notImplMessage);
+			analysisStatus = 'not-implemented';
+			terminalOutput = notImplMessage;
 		}
 
 		activeTab = 'syntax';
+
+		// Log the syntax analysis
+		const duration = performance.now() - startTime;
+		addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `syntax-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
 	}
 
-	async function analyzeLexical() {
+	async function analyzeLexical(skipLogging = false) {
 		normalizeCurlyQuotes();
-		activeTab = 'lexical';
+		activeTab = skipLogging ? activeTab : 'lexical';
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
 		if (!codeInput) {
-			setTerminalError('Editor is empty');
-			return;
+			const errorMsg = 'Editor is empty';
+			setTerminalError(errorMsg);
+			terminalOutput = errorMsg;
+			
+			// Log even for early returns
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+			return { status: analysisStatus, output: terminalOutput };
 		}
 
 		if (!pyodideReady) {
-			setTerminalError('Python runtime not ready. Please wait...');
-			return;
+			const errorMsg = 'Python runtime not ready. Please wait...';
+			setTerminalError(errorMsg);
+			terminalOutput = errorMsg;
+			
+			// Log even for early returns
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+			return { status: analysisStatus, output: terminalOutput };
 		}
 
 		isAnalyzing = true;
@@ -640,22 +799,42 @@ tokens
 				termMessages = combinedErrors;
 				// Highlight errors in CodeMirror
 				addErrorMarkers(invalidTokens);
-				// also set a concise terminal summary
-				// keep lexer table OK message minimal
-				return;
+					// Update status and output for errors
+				analysisStatus = 'error';
+				terminalOutput = combinedErrors.map(e => e.text).join('; ');
+			} else {
+				clearErrorMarkers();
+
+				const okMessage = tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced';
+				setTerminalOk(okMessage);
+				analysisStatus = 'success';
+				terminalOutput = okMessage;
 			}
-
-			clearErrorMarkers();
-
-			setTerminalOk(
-				tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced'
-			);
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : 'Unknown error';
-			setTerminalError(`Lexical analysis failed: ${msg}`);
+			const errorMessage = `Lexical analysis failed: ${msg}`;
+			setTerminalError(errorMessage);
+			analysisStatus = 'error';
+			terminalOutput = errorMessage;
 		} finally {
 			isAnalyzing = false;
+
+			// Log the analysis only if not called from syntax analyzer
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
 		}
+
+		// Return the result for use by syntax analyzer
+		return { status: analysisStatus, output: terminalOutput };
 	}
 
 	function toggleTheme() {
@@ -696,7 +875,7 @@ tokens
 		<section class="left">
 			<!-- Toolbar row -->
 			<div class="toolbar">
-				<button class="pill {activeTab === 'lexical' ? 'active' : ''}" on:click={analyzeLexical}>
+				<button class="pill {activeTab === 'lexical' ? 'active' : ''}" on:click={() => analyzeLexical()}>
 					{#if theme === 'dark'}
 						<img class="icon" src={synSemLexIcon} alt="Lexical Icon" />
 					{:else}
