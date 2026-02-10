@@ -53,7 +53,7 @@ class Parser():
         else:
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: INVALID!\n") # J
             if tok != self.error_arr :  self.error_arr.extend(tok)
-            log.info("STACK: " + str(self.error_arr)) # J
+            log.info("STACK: " + str(self.error_arr) + "\n") # J
             # Filter out closing delimiters from expected tokens if there are no unclosed pairs
             # filtered_tok = tok
             # if isinstance(tok, list):
