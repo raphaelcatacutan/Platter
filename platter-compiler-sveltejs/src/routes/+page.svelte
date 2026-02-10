@@ -395,7 +395,7 @@ start() {
 					mode: 'platter',
 					extraKeys: {
 						'Ctrl-Enter': function() {
-							analyzeSemantic();
+							analyzeSyntax();
 						}
 					}
 				});
