@@ -22,8 +22,8 @@ class Parser():
         
         self.pos = 0
         # Track parenthesis and bracket balancing
-        self.paren_counter = 0
-        self.bracket_counter = 0
+        # self.paren_counter = 0
+        # self.bracket_counter = 0
     
     def parse_token(self, tok):
         """Parse and consume a specific token type"""
@@ -34,15 +34,15 @@ class Parser():
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: MATCH!") # J
             
             # Track opening parenthesis and brackets
-            if tok == '(':
-                self.paren_counter += 1
-            elif tok == '[':
-                self.bracket_counter += 1
-            # Track closing parenthesis and brackets
-            elif tok == ')':
-                self.paren_counter -= 1
-            elif tok == ']':
-                self.bracket_counter -= 1
+            # if tok == '(':
+            #     self.paren_counter += 1
+            # elif tok == '[':
+            #     self.bracket_counter += 1
+            # # Track closing parenthesis and brackets
+            # elif tok == ')':
+            #     self.paren_counter -= 1
+            # elif tok == ']':
+            #     self.bracket_counter -= 1
             
             self.pos += 1
 
@@ -50,18 +50,18 @@ class Parser():
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: INVALID!\n") # J
             
             # Filter out closing delimiters from expected tokens if there are no unclosed pairs
-            filtered_tok = tok
-            if isinstance(tok, list):
-                # If tok is a list of expected tokens, filter it
-                filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0))]
-            elif tok == ')' and self.paren_counter <= 0:
-                # If expecting only ')', but no unclosed '(', don't show it
-                filtered_tok = []
-            elif tok == ']' and self.bracket_counter <= 0:
-                # If expecting only ']', but no unclosed '[', don't show it
-                filtered_tok = []
+            # filtered_tok = tok
+            # if isinstance(tok, list):
+            #     # If tok is a list of expected tokens, filter it
+            #     filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0))]
+            # elif tok == ')' and self.paren_counter <= 0:
+            #     # If expecting only ')', but no unclosed '(', don't show it
+            #     filtered_tok = []
+            # elif tok == ']' and self.bracket_counter <= 0:
+            #     # If expecting only ']', but no unclosed '[', don't show it
+            #     filtered_tok = []
             
-            raise ErrorHandler("Unexpected_err", self.tokens[self.pos], filtered_tok if filtered_tok else tok)
+            raise ErrorHandler("Unexpected_err", self.tokens[self.pos], tok) # filtered_tok if filtered_tok else tok
 
     def parse_program(self):
         """ 1 <program> -> <global_decl> <recipe_decl> start() <platter>"""
