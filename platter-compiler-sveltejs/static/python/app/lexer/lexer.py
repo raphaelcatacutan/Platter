@@ -82,8 +82,6 @@ class Lexer(LexerBase, LexerKeywords, LexerOperators, LexerIdentifier, LexerChar
 
 if __name__ == "__main__":
 
-    def set_clipboard(text: str):
-        subprocess.run("clip", universal_newlines=True, input=text)
 
 
     filepath = "./tests/sample_program.txt"
@@ -101,6 +99,8 @@ if __name__ == "__main__":
         if t.type not in ("comment", "space", "newline", "tab") or include_whitespace
     ]
 
+    def set_clipboard(text: str):
+        subprocess.run("clip", universal_newlines=True, input=text)
     print("\n\nTOKENS:")
     pprint(tokens)
     set_clipboard((" ".join(t.type for t in tokens if not "comment" in t.type )))   
