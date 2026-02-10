@@ -404,12 +404,12 @@ start() {
 					codeInput = cmInstance.getValue();
 				});
 			}
+			// Fetch app version
+			await fetchVersion();
 
 			// Initialize Pyodide
 			await initPyodide();
 
-			// Fetch app version
-			await fetchVersion();
 		} catch (err) {
 			console.warn('Failed to load CodeMirror from CDN:', err);
 		}
