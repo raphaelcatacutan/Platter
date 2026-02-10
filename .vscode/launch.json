@@ -1,16 +1,15 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Run Any Python File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/platter-compiler-sveltejs/static/python",
-            "env": {
-                "PYTHONPATH": "."
-            }
-        }
-    ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Python Debugger: Module",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "tests.cfg_visual",
+			"env": {
+				"PYTHONPATH": "."
+			},
+			"cwd": "${workspaceFolder}/platter-compiler-sveltejs/static/python"
+		}
+	]
 }
