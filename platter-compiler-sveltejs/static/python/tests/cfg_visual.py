@@ -191,7 +191,7 @@ class TableDrivenParser:
         result = set()
         all_nullable = True
         
-        for symbol in sequence:
+        for i, symbol in enumerate(sequence):
             if symbol == 'λ' or symbol == '':
                 continue
             
@@ -249,11 +249,11 @@ class TableDrivenParser:
                 if current == '$':
                     return True, "No Syntax Error"
                 else:
-                    expected = self.get_expected_tokens(stack)
-                    expected_str = ', '.join([f"'{t}'" for t in expected])
-                    error_msg = f"Unexpected '{current}', expected {expected_str}"
-                    trace.append(f"{stack_view:<40} {input_view:<30} ERROR: {error_msg:<50}")
-                    return False, "\n".join(trace)
+                    token_obj = self.tokens[cursor] if cursor < len(self.tokens) else self.tokens[-1]
+                    error_msg = f"Syntax Error: Unexpected '{current}' at line {token_obj.line}, col {token_obj.col}. Expected end of input."
+                    trace.append(f"{stack_view:<40} {input_view:<30} ERROR: unexpected '{current}', expected end of input")
+                    set_clipboard(f":{token_obj.line}:{token_obj.col}")
+                    return False, error_msg
             
             # Match terminal
             if top == current:
@@ -266,8 +266,10 @@ class TableDrivenParser:
                 rule = self.parse_table.get(top, {}).get(current)
                 
                 if not rule:
-                    expected = self.get_expected_tokens(stack)
-                    expected_list = ', '.join([f"'{t}'" for t in expected])
+                    # Compute expected tokens from FIRST of reversed stack
+                    expected = self.get_expected_tokens(stack, debug=False)
+                    
+                    expected_list = ', '.join([f"'{t}'" for t in sorted(expected)])
                     token_obj = self.tokens[cursor] if cursor < len(self.tokens) else self.tokens[-1]
                     error_msg = f"Syntax Error: Unexpected '{current}' at line {token_obj.line}, col {token_obj.col}. Expected {expected_list}."
                     set_clipboard(f":{token_obj.line}:{token_obj.col}")
@@ -283,30 +285,73 @@ class TableDrivenParser:
                 rule_str = f"Expand {top} → {' '.join(rule) if rule and rule[0] != 'λ' else 'ε'}"
                 trace.append(f"{stack_view:<40} {input_view:<30} {rule_str:<50}")
             else:
-                # Unexpected situation
-                expected = self.get_expected_tokens(stack)
+                # Terminal mismatch: include the literal terminal AND alternatives from nullable NTs
+                alternatives = self.get_expected_tokens(stack, debug=False, skip_top=True)
+                expected = sorted(set([top] + alternatives))
+                
                 expected_list = ', '.join([f"'{t}'" for t in expected])
                 token_obj = self.tokens[cursor] if cursor < len(self.tokens) else self.tokens[-1]
                 error_msg = f"Syntax Error: Unexpected '{current}' at line {token_obj.line}, col {token_obj.col}. Expected {expected_list}."
+                trace.append(f"{stack_view:<40} {input_view:<30} ERROR: unexpected '{current}', expected {expected_list}")
                 set_clipboard(f":{token_obj.line}:{token_obj.col}")
                 return False, error_msg
         
         return False, "Unexpected end of parse"
     
-    def get_expected_tokens(self, stack):
+    def get_expected_tokens(self, stack, debug=False, skip_top=False):
         """Compute expected tokens based on current stack (context-aware).
         
         This is the key difference from the recursive descent parser!
         We compute FIRST of the remaining parse sequence.
+        
+        Args:
+            stack: The parser stack
+            debug: Print debug information
+            skip_top: Skip the top element and collect from nullable NTs only
         """
         # Reverse stack to get proper sequence
         sequence = list(reversed(stack))
+        
+        # For terminal mismatch, collect FIRST from nullable NTs only, don't continue to next terminal
+        if skip_top and len(sequence) > 0:
+            result = set()
+            # Skip the mismatched terminal
+            for symbol in sequence[1:]:
+                # Stop at next terminal (don't include it)
+                if symbol not in self.non_terminals and symbol not in ('λ', '', '$'):
+                    break
+                # Collect FIRST from non-terminals
+                if symbol in self.non_terminals:
+                    first_sym = self.first_sets.get(symbol, set())
+                    result.update(first_sym - {'λ'})
+                    # Stop if not nullable
+                    if 'λ' not in first_sym:
+                        break
+            
+            if debug:
+                print(f"\n   DEBUG get_expected_tokens (skip_top=True):")
+                print(f"     Original stack (bottom→top): {' → '.join(stack)}")
+                print(f"     Collected from nullable NTs: {result}")
+            
+            return [t for t in result if t not in ('λ', '', '$')]
+        
+        # Normal case: compute FIRST of full sequence
         expected = self.get_first_seq(sequence)
         
-        # Filter out lambda
-        return [t for t in expected if t not in ('λ', '')]
+        if debug:
+            print(f"\n   DEBUG get_expected_tokens:")
+            print(f"     Original stack (bottom→top): {' → '.join(stack)}")
+            print(f"     Sequence for FIRST: {' → '.join(sequence)}")
+            print(f"     FIRST result: {expected}")
+        
+        # Filter out lambda and $
+        result = [t for t in expected if t not in ('λ', '', '$')]
+        if debug:
+            print(f"     Final expected tokens: {sorted(result)}")
+        return result
     
     def get_expected(self):
+        """Get list of expected tokens at the point of syntax error."""
         # Tokenize input
         token_strings = [t.value if t.type == 'EOF' else t.type for t in self.tokens]
         
@@ -328,6 +373,7 @@ class TableDrivenParser:
                 if current == '$':
                     return []  # No error
                 else:
+                    # Use FIRST of stack for context-aware expected tokens
                     expected = self.get_expected_tokens(stack)
                     return expected
             
@@ -340,6 +386,7 @@ class TableDrivenParser:
                 rule = self.parse_table.get(top, {}).get(current)
                 
                 if not rule:
+                    # Use FIRST of stack for context-aware expected tokens
                     expected = self.get_expected_tokens(stack)
                     return expected
                 
@@ -350,7 +397,7 @@ class TableDrivenParser:
                     for i in range(len(rule) - 1, -1, -1):
                         stack.append(rule[i])
             else:
-                # Unexpected situation
+                # Terminal mismatch: compute context-aware expected tokens
                 expected = self.get_expected_tokens(stack)
                 return expected
         

@@ -490,7 +490,7 @@
               
               if (!rule) {
                 const expectedArray = [...getFirstSeq(stack.reverse())].filter(t => t !== 'λ');
-                console.log(" ".join(stack))
+                console.log(stack.join(" "))
                 const expectedMsg = expectedArray.length > 0 
                   ? `expected [${expectedArray.map(e => `'${e}'`).join(', ')}]`
                   : 'no valid tokens in current context';
