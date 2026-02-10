@@ -15,7 +15,8 @@
 		"parser": "cls && cd ./platter-compiler-sveltejs/static/python && python -m app.parser.parser_program", 
 		"p_test": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.ScriptTransformer && python -m app.utils.TestScriptTester",
 		"t_predict": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.PredictSetTransformer && python -m app.utils.PredictSetTransformer m",
-		"t_script": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.ScriptTransformer"
+		"t_script": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.ScriptTransformer",
+		"g_prod": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.ProductionGenerator"
 	},
 	"repository": {
 		"type": "git",

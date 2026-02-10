@@ -116,7 +116,7 @@
 	let appVersion = '1.0.0';
 	async function fetchVersion() {
 		try {
-			const response = await fetch('/version.json');
+			const response = await fetch(`${data.basePath}/version.json`);
 			const versionData = await response.json();
 			appVersion = `${versionData.major}.${versionData.minor}.${versionData.patch}`;
 		} catch (err) {
@@ -324,18 +324,32 @@ start() {
 							if (stream.eatSpace()) return null;
 							
 							// Comments
-							if (stream.match(/\/\/.*/)) return 'comment';
-							if (stream.match(/\/\*/)) {
-								state.inComment = true;
-								return 'comment';
-							}
-							if (state.inComment) {
-								if (stream.match(/.*?\*\//)) {
+							// Single line comment: # followed by space
+							if (stream.match(/^#\s.*/)) return 'comment';
+							
+							// Multi-line comment start: ##
+							if (stream.match(/^##/)) {
+								if (state.inComment) {
+									// End multi-line comment
 									state.inComment = false;
 								} else {
-									stream.skipToEnd();
+									// Start multi-line comment
+									state.inComment = true;
 								}
 								return 'comment';
+							}
+							
+							// Inside multi-line comment
+							if (state.inComment) {
+								// Check if ## appears on this line to end comment
+								if (stream.match(/^.*?(?=##)/)) {
+									// Found ##, will be handled on next token call
+									return 'comment';
+								} else {
+									// No ## found, consume rest of line
+									stream.skipToEnd();
+									return 'comment';
+								}
 							}
 							
 							// String literals
@@ -381,7 +395,7 @@ start() {
 					mode: 'platter',
 					extraKeys: {
 						'Ctrl-Enter': function() {
-							analyzeSemantic();
+							analyzeSyntax();
 						}
 					}
 				});
@@ -390,12 +404,12 @@ start() {
 					codeInput = cmInstance.getValue();
 				});
 			}
+			// Fetch app version
+			await fetchVersion();
 
 			// Initialize Pyodide
 			await initPyodide();
 
-			// Fetch app version
-			await fetchVersion();
 		} catch (err) {
 			console.warn('Failed to load CodeMirror from CDN:', err);
 		}
@@ -477,6 +491,9 @@ start() {
 			
 			// Restore cursor position
 			cmInstance.setCursor(cursor);
+			
+			// Update codeInput to ensure it's in sync
+			codeInput = normalized;
 		}
 	}
 
@@ -1541,9 +1558,9 @@ tokens
 		color: #d4d4d4 !important;
 	}
 
-	/* Comments - Green */
+	/* Comments - Grey */
 	:global(.ide[data-theme='dark'] .CodeMirror .cm-comment) {
-		color: #6a9955 !important;
+		color: #999999 !important;
 		font-style: italic !important;
 	}
 
@@ -1590,7 +1607,7 @@ tokens
 	}
 
 	:global(.ide[data-theme='light'] .CodeMirror .cm-comment) {
-		color: #006600 !important;
+		color: #666666 !important;
 		font-style: italic !important;
 	}
 </style>
