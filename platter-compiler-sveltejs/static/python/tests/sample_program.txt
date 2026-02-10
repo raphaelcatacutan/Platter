@@ -1,3 +1,3 @@
-start(){
-bill("flag is: " tochars(2));
+start() {
+	chars of a = x x> and "Hello";
 }

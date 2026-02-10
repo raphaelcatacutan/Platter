@@ -107,7 +107,7 @@ def piece_id_tail(self):
         self.piece_ingredient_init()
         self.piece_id_tail()
 
-        """    36 <piece_id_tail>	=>	    """
+        """    15 <piece_id_tail>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<piece_id_tail>_1"]:
         pass
 
@@ -119,13 +119,13 @@ def chars_decl(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    15 <chars_decl>	=>	of	<chars_id>	;    """
+    """    16 <chars_decl>	=>	of	<chars_id>	;    """
     if self.tokens[self.pos].type in PREDICT_SET["<chars_decl>"]:
         self.parse_token("of")
         self.chars_id()
         self.parse_token(";")
 
-        """    16 <chars_decl>	=>	<chars_array_decl>    """
+        """    17 <chars_decl>	=>	<chars_array_decl>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<chars_decl>_1"]:
         self.chars_array_decl()
 
@@ -138,7 +138,7 @@ def chars_id(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    17 <chars_id>	=>	id	<chars_ingredient_init>	<chars_id_tail>    """
+    """    18 <chars_id>	=>	id	<chars_ingredient_init>	<chars_id_tail>    """
     if self.tokens[self.pos].type in PREDICT_SET["<chars_id>"]:
         self.parse_token("id")
         self.chars_ingredient_init()
@@ -152,12 +152,12 @@ def chars_ingredient_init(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    18 <chars_ingredient_init>	=>	=	<strict_chars_expr>    """
+    """    19 <chars_ingredient_init>	=>	=	<strict_chars_expr>    """
     if self.tokens[self.pos].type in PREDICT_SET["<chars_ingredient_init>"]:
         self.parse_token("=")
         self.strict_chars_expr()
 
-        """    19 <chars_ingredient_init>	=>	    """
+        """    20 <chars_ingredient_init>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<chars_ingredient_init>_1"]:
         pass
 
@@ -169,14 +169,14 @@ def chars_id_tail(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    20 <chars_id_tail>	=>	,	id	<chars_ingredient_init>	<chars_id_tail>    """
+    """    21 <chars_id_tail>	=>	,	id	<chars_ingredient_init>	<chars_id_tail>    """
     if self.tokens[self.pos].type in PREDICT_SET["<chars_id_tail>"]:
         self.parse_token(",")
         self.parse_token("id")
         self.chars_ingredient_init()
         self.chars_id_tail()
 
-        """    21 <chars_id_tail>	=>	    """
+        """    22 <chars_id_tail>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<chars_id_tail>_1"]:
         pass
 
@@ -188,13 +188,13 @@ def sip_decl(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    22 <sip_decl>	=>	of	<sip_id>	;    """
+    """    23 <sip_decl>	=>	of	<sip_id>	;    """
     if self.tokens[self.pos].type in PREDICT_SET["<sip_decl>"]:
         self.parse_token("of")
         self.sip_id()
         self.parse_token(";")
 
-        """    23 <sip_decl>	=>	<sip_array_decl>    """
+        """    24 <sip_decl>	=>	<sip_array_decl>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<sip_decl>_1"]:
         self.sip_array_decl()
 
@@ -207,7 +207,7 @@ def sip_id(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    24 <sip_id>	=>	id	<sip_ingredient_init>	<sip_id_tail>    """
+    """    25 <sip_id>	=>	id	<sip_ingredient_init>	<sip_id_tail>    """
     if self.tokens[self.pos].type in PREDICT_SET["<sip_id>"]:
         self.parse_token("id")
         self.sip_ingredient_init()
@@ -221,12 +221,12 @@ def sip_ingredient_init(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    25 <sip_ingredient_init>	=>	=	<strict_sip_expr>    """
+    """    26 <sip_ingredient_init>	=>	=	<strict_sip_expr>    """
     if self.tokens[self.pos].type in PREDICT_SET["<sip_ingredient_init>"]:
         self.parse_token("=")
         self.strict_sip_expr()
 
-        """    26 <sip_ingredient_init>	=>	    """
+        """    27 <sip_ingredient_init>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<sip_ingredient_init>_1"]:
         pass
 
@@ -238,14 +238,14 @@ def sip_id_tail(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    27 <sip_id_tail>	=>	,	id	<sip_ingredient_init>	<sip_id_tail>    """
+    """    28 <sip_id_tail>	=>	,	id	<sip_ingredient_init>	<sip_id_tail>    """
     if self.tokens[self.pos].type in PREDICT_SET["<sip_id_tail>"]:
         self.parse_token(",")
         self.parse_token("id")
         self.sip_ingredient_init()
         self.sip_id_tail()
 
-        """    28 <sip_id_tail>	=>	    """
+        """    29 <sip_id_tail>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<sip_id_tail>_1"]:
         pass
 
@@ -257,13 +257,13 @@ def flag_decl(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    29 <flag_decl>	=>	of	<flag_id>	;    """
+    """    30 <flag_decl>	=>	of	<flag_id>	;    """
     if self.tokens[self.pos].type in PREDICT_SET["<flag_decl>"]:
         self.parse_token("of")
         self.flag_id()
         self.parse_token(";")
 
-        """    30 <flag_decl>	=>	<flag_array_decl>    """
+        """    31 <flag_decl>	=>	<flag_array_decl>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<flag_decl>_1"]:
         self.flag_array_decl()
 
@@ -276,7 +276,7 @@ def flag_id(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    31 <flag_id>	=>	id	<flag_ingredient_init>	<flag_id_tail>    """
+    """    32 <flag_id>	=>	id	<flag_ingredient_init>	<flag_id_tail>    """
     if self.tokens[self.pos].type in PREDICT_SET["<flag_id>"]:
         self.parse_token("id")
         self.flag_ingredient_init()
@@ -290,12 +290,12 @@ def flag_ingredient_init(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    32 <flag_ingredient_init>	=>	=	<strict_flag_expr>    """
+    """    33 <flag_ingredient_init>	=>	=	<strict_flag_expr>    """
     if self.tokens[self.pos].type in PREDICT_SET["<flag_ingredient_init>"]:
         self.parse_token("=")
         self.strict_flag_expr()
 
-        """    33 <flag_ingredient_init>	=>	    """
+        """    34 <flag_ingredient_init>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<flag_ingredient_init>_1"]:
         pass
 
@@ -307,14 +307,14 @@ def flag_id_tail(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    34 <flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>    """
+    """    35 <flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>    """
     if self.tokens[self.pos].type in PREDICT_SET["<flag_id_tail>"]:
         self.parse_token(",")
         self.parse_token("id")
         self.flag_ingredient_init()
         self.flag_id_tail()
 
-        """    35 <flag_id_tail>	=>	    """
+        """    36 <flag_id_tail>	=>	    """
     elif self.tokens[self.pos].type in PREDICT_SET["<flag_id_tail>_1"]:
         pass
 
@@ -1697,7 +1697,7 @@ def statements(self):
         self.id_statements()
         self.statements()
 
-        """    192 <statements>	=>	<built-in_rec_call>	;	<statements>    """
+        """    192 <statements>	=>	<built_in_rec_call>	;	<statements>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<statements>_1"]:
         self.built_in_rec_call()
         self.parse_token(";")
@@ -1803,8 +1803,8 @@ def built_in_rec_call(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    203 <built-in_rec_call>	=>	<built-in_rec>    """
-    if self.tokens[self.pos].type in PREDICT_SET["<built-in_rec_call>"]:
+    """    203 <built_in_rec_call>	=>	<built_in_rec>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<built_in_rec_call>"]:
         self.built_in_rec()
     else: self.parse_token(self.error_arr)
 
@@ -1815,8 +1815,8 @@ def built_in_rec(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    204 <built-in_rec>	=>	append	(	<strict_array_expr>	,	<value>	)    """
-    if self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>"]:
+    """    204 <built_in_rec>	=>	append	(	<strict_array_expr>	,	<value>	)    """
+    if self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>"]:
         self.parse_token("append")
         self.parse_token("(")
         self.strict_array_expr()
@@ -1824,15 +1824,15 @@ def built_in_rec(self):
         self.value()
         self.parse_token(")")
 
-        """    205 <built-in_rec>	=>	bill	(	<strict_chars_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_1"]:
+        """    205 <built_in_rec>	=>	bill	(	<strict_chars_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_1"]:
         self.parse_token("bill")
         self.parse_token("(")
         self.strict_chars_expr()
         self.parse_token(")")
 
-        """    206 <built-in_rec>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_2"]:
+        """    206 <built_in_rec>	=>	copy	(	<strict_chars_expr>	,	<strict_piece_expr>	,	<strict_piece_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_2"]:
         self.parse_token("copy")
         self.parse_token("(")
         self.strict_chars_expr()
@@ -1842,8 +1842,8 @@ def built_in_rec(self):
         self.strict_piece_expr()
         self.parse_token(")")
 
-        """    207 <built-in_rec>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_3"]:
+        """    207 <built_in_rec>	=>	cut	(	<strict_sip_expr>	,	<strict_sip_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_3"]:
         self.parse_token("cut")
         self.parse_token("(")
         self.strict_sip_expr()
@@ -1851,15 +1851,15 @@ def built_in_rec(self):
         self.strict_sip_expr()
         self.parse_token(")")
 
-        """    208 <built-in_rec>	=>	fact	(	<strict_piece_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_4"]:
+        """    208 <built_in_rec>	=>	fact	(	<strict_piece_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_4"]:
         self.parse_token("fact")
         self.parse_token("(")
         self.strict_piece_expr()
         self.parse_token(")")
 
-        """    209 <built-in_rec>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_5"]:
+        """    209 <built_in_rec>	=>	matches	(	<strict_datas_expr>	,	<strict_datas_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_5"]:
         self.parse_token("matches")
         self.parse_token("(")
         self.strict_datas_expr()
@@ -1867,8 +1867,8 @@ def built_in_rec(self):
         self.strict_datas_expr()
         self.parse_token(")")
 
-        """    210 <built-in_rec>	=>	pow	(	<strict_piece_expr>	,	<strict_piece_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_6"]:
+        """    210 <built_in_rec>	=>	pow	(	<strict_piece_expr>	,	<strict_piece_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_6"]:
         self.parse_token("pow")
         self.parse_token("(")
         self.strict_piece_expr()
@@ -1876,14 +1876,14 @@ def built_in_rec(self):
         self.strict_piece_expr()
         self.parse_token(")")
 
-        """    211 <built-in_rec>	=>	rand	(	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_7"]:
+        """    211 <built_in_rec>	=>	rand	(	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_7"]:
         self.parse_token("rand")
         self.parse_token("(")
         self.parse_token(")")
 
-        """    212 <built-in_rec>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_8"]:
+        """    212 <built_in_rec>	=>	remove	(	<strict_array_expr>	,	<strict_piece_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_8"]:
         self.parse_token("remove")
         self.parse_token("(")
         self.strict_array_expr()
@@ -1891,15 +1891,15 @@ def built_in_rec(self):
         self.strict_piece_expr()
         self.parse_token(")")
 
-        """    213 <built-in_rec>	=>	reverse	(	<strict_array_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_9"]:
+        """    213 <built_in_rec>	=>	reverse	(	<strict_array_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_9"]:
         self.parse_token("reverse")
         self.parse_token("(")
         self.strict_array_expr()
         self.parse_token(")")
 
-        """    214 <built-in_rec>	=>	search	(	<strict_array_expr>	,	<value>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_10"]:
+        """    214 <built_in_rec>	=>	search	(	<strict_array_expr>	,	<value>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_10"]:
         self.parse_token("search")
         self.parse_token("(")
         self.strict_array_expr()
@@ -1907,49 +1907,49 @@ def built_in_rec(self):
         self.value()
         self.parse_token(")")
 
-        """    215 <built-in_rec>	=>	size	(	<strict_array_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_11"]:
+        """    215 <built_in_rec>	=>	size	(	<strict_array_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_11"]:
         self.parse_token("size")
         self.parse_token("(")
         self.strict_array_expr()
         self.parse_token(")")
 
-        """    216 <built-in_rec>	=>	sort	(	<strict_array_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_12"]:
+        """    216 <built_in_rec>	=>	sort	(	<strict_array_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_12"]:
         self.parse_token("sort")
         self.parse_token("(")
         self.strict_array_expr()
         self.parse_token(")")
 
-        """    217 <built-in_rec>	=>	sqrt	(	<strict_piece_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_13"]:
+        """    217 <built_in_rec>	=>	sqrt	(	<strict_piece_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_13"]:
         self.parse_token("sqrt")
         self.parse_token("(")
         self.strict_piece_expr()
         self.parse_token(")")
 
-        """    218 <built-in_rec>	=>	take	(	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_14"]:
+        """    218 <built_in_rec>	=>	take	(	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_14"]:
         self.parse_token("take")
         self.parse_token("(")
         self.parse_token(")")
 
-        """    219 <built-in_rec>	=>	tochars	(	<any_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_15"]:
+        """    219 <built_in_rec>	=>	tochars	(	<any_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_15"]:
         self.parse_token("tochars")
         self.parse_token("(")
         self.any_expr()
         self.parse_token(")")
 
-        """    220 <built-in_rec>	=>	topiece	(	<any_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_16"]:
+        """    220 <built_in_rec>	=>	topiece	(	<any_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_16"]:
         self.parse_token("topiece")
         self.parse_token("(")
         self.any_expr()
         self.parse_token(")")
 
-        """    221 <built-in_rec>	=>	tosip	(	<any_expr>	)    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<built-in_rec>_17"]:
+        """    221 <built_in_rec>	=>	tosip	(	<any_expr>	)    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<built_in_rec>_17"]:
         self.parse_token("tosip")
         self.parse_token("(")
         self.any_expr()
@@ -2110,7 +2110,7 @@ def statements_menu(self):
         self.id_statements_menu()
         self.statements_menu()
 
-        """    236 <statements_menu>	=>	<built-in_rec_call>	;	<statements_menu>    """
+        """    236 <statements_menu>	=>	<built_in_rec_call>	;	<statements_menu>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<statements_menu>_1"]:
         self.built_in_rec_call()
         self.parse_token(";")
@@ -2536,7 +2536,7 @@ def statements_loop(self):
         self.id_statements_loop()
         self.statements_loop()
 
-        """    283 <statements_loop>	=>	<built-in_rec_call>	;	<statements_loop>    """
+        """    283 <statements_loop>	=>	<built_in_rec_call>	;	<statements_loop>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<statements_loop>_1"]:
         self.built_in_rec_call()
         self.parse_token(";")
@@ -2730,7 +2730,7 @@ def choice_usual_loop_st(self):
         self.id_statements_choice_usual_loop()
         self.choice_usual_loop_st()
 
-        """    303 <choice_usual_loop_st>	=>	<built-in_rec_call>	;	<choice_usual_loop_st>    """
+        """    303 <choice_usual_loop_st>	=>	<built_in_rec_call>	;	<choice_usual_loop_st>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<choice_usual_loop_st>_1"]:
         self.built_in_rec_call()
         self.parse_token(";")
