@@ -86,6 +86,7 @@ class Parser():
         if self.pos < len(self.tokens) and self.tokens[self.pos].type != "EOF":
             raise ErrorHandler("ExpectedEOF_err", self.tokens[self.pos], None)
 
+
     def global_decl(self):
         log.info("Enter: " + self.tokens[self.pos].type) # J
 
@@ -205,12 +206,12 @@ class Parser():
             self.ret_flag()
             self.flag_logic_tail()
 
-            """    18 <any_expr>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_bridge>    """
+            """    18 <any_expr>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_4"]:
             self.id_()
             self.univ_mult_tail()
             self.univ_add_tail()
-            self.univ_bridge()
+            self.univ_rel_gate()
 
             """    19 <any_expr>	=>	(	<paren_dispatch>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_5"]:

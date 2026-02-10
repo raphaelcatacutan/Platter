@@ -15,7 +15,7 @@
 15	<any_expr>	=>	<ret_sip>	<sip_mult_tail>	<sip_add_tail>	<sip_rel_gate>				
 16	<any_expr>	=>	<ret_chars>	<chars_add_tail>	<chars_rel_gate>					
 17	<any_expr>	=>	<ret_flag>	<flag_logic_tail>						
-18	<any_expr>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_bridge>				
+18	<any_expr>	=>	<id>	<univ_mult_tail>	<univ_add_tail>	<univ_rel_gate>				
 19	<any_expr>	=>	(	<paren_dispatch>						
 20	<any_expr>	=>	not	<must_be_flag>						
 21	<piece_mult_tail>	=>	*	<piece_factor>	<piece_mult_tail>					
