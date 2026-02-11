@@ -126,15 +126,15 @@ def format_entry(number: int, actual: str, expected: str, code: str) -> str:
     if expected_repr.startswith("'") and expected_repr.endswith("'"):
         expected_repr = '"' + expected_repr[1:-1].replace('"', r"\"") + '"'
 
+    
+    if (number == 9): print(f"{code}")
     return (
-        "  {\n"
-        f'    "number": {number},\n'
-        f'    "actual_output": {actual_repr},\n'
-        f'    "expected_output": {expected_repr},\n'
-        '    "code":  \n'
-        "    \"\"\"\n"
-        f"{code}\n"
-        "    \"\"\"\n"
+        "  {\n" +
+        f'    "number": {number},\n'+
+        f'    "actual_output": {actual_repr},\n'+
+        f'    "expected_output": {expected_repr},\n'+
+        '    "code":  \n'+
+        f"    \"\"\"{code}\"\"\""+
         "  }"
     )
 

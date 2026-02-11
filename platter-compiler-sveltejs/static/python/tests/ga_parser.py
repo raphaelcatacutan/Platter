@@ -16,8 +16,8 @@ def check_parse(script: dict[str, Any]):
     """
     lexer = Lexer(script["code"])
     tokens = lexer.tokenize()
-    parser = Parser(tokens)
     try:
+        parser = Parser(tokens)
         parser.parse_program()
         return "No Syntax Error"
     except Exception as e:
