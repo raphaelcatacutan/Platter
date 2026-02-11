@@ -47,7 +47,6 @@ class Parser():
             #     self.bracket_counter -= 1
             
             self.pos += 1
-            log.info(f"")
             self.error_arr.clear() # err
             
         else:
@@ -1730,7 +1729,7 @@ class Parser():
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def __tail(self):
-        self.appendF(FIRST_SET["<__tail>"])
+        self.appendF(FIRST_SET["<]_tail>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
@@ -2392,7 +2391,7 @@ class Parser():
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def __tail_menu(self):
-        self.appendF(FIRST_SET["<__tail_menu>"])
+        self.appendF(FIRST_SET["<]_tail_menu>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
@@ -2602,7 +2601,7 @@ class Parser():
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def __tail_loop(self):
-        self.appendF(FIRST_SET["<__tail_loop>"])
+        self.appendF(FIRST_SET["<]_tail_loop>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
