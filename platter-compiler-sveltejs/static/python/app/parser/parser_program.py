@@ -56,34 +56,26 @@ class Parser():
         self.error_arr.extend(first_set)
 
     def parse_program(self):
-        self.appendF(FIRST_SET["<program>"]) # err
-        log.info("Enter: " + self.tokens[self.pos].type) # J
-        log.info("STACK: " + str(self.error_arr)) # J
+        self.appendF(FIRST_SET["<program>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
 
-        """ 1 <program> -> <global_decl> <recipe_decl> start() <platter>"""
-        # Parse global declarations
-        while self.pos < len(self.tokens) and self.tokens[self.pos].type in ['piece', 'chars', 'sip', 'flag', 'table', 'id']:
+        """    1 <program>	=>	<global_decl>	<recipe_decl>	start	(	)	<platter>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<program>"]:
             self.global_decl()
-            self.error_arr.clear()
-            self.appendF(FIRST_SET["<program>"])
-        
-        # Parse recipe declarations (prepare functions)
-        while self.pos < len(self.tokens) and self.tokens[self.pos].type in ['prepare']:
             self.recipe_decl()
-
-        # Parse start() platter
-        if self.pos >= len(self.tokens):
-            raise ErrorHandler("EOF", None, "start")
-
-        self.parse_token("start")
-        self.parse_token("(")
-        self.parse_token(")")
-        self.platter()
+            self.parse_token("start")
+            self.parse_token("(")
+            self.parse_token(")")
+            self.platter()
+        else: self.parse_token(self.error_arr)
         
         # Ensure we've consumed all tokens (should be at EOF token now)
         if self.pos < len(self.tokens) and self.tokens[self.pos].type != "EOF":
             raise ErrorHandler("ExpectedEOF_err", self.tokens[self.pos], None)
-        
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
     def global_decl(self):
         self.appendF(FIRST_SET["<global_decl>"])
         log.info("Enter: " + self.tokens[self.pos].type)
@@ -127,7 +119,6 @@ class Parser():
             """    8 <global_decl>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<global_decl>_6"]:
             pass
-
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 

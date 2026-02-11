@@ -670,7 +670,7 @@ serve x;
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'serve' at line 2, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'serve' at line 2, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'serve' at line 3, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'start'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'serve' at line 2, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 =====================================
 
 ============ CODE #48 ================
@@ -1982,7 +1982,7 @@ piece of x = 42;
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'EOF' at line 1, col 16. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'EOF' at line 2, col 16. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'start'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'EOF' at line 2, col 16. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 =====================================
 
 ============ CODE #130 ================
@@ -1996,7 +1996,7 @@ remove([1, 2, 3], 1);
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'remove' at line 5, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'remove' at line 5, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'remove' at line 6, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'start'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'remove' at line 6, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 =====================================
 
 ============ CODE #131 ================
@@ -2038,7 +2038,7 @@ table of Vector3= [
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'EOF' at line 5, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'EOF' at line 5, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'EOF' at line 6, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'start'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'EOF' at line 6, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 =====================================
 
 ============ CODE #134 ================
