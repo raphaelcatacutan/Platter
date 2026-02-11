@@ -1,0 +1,95 @@
+
+table of P = [
+    piece of x;
+    piece of y;
+];
+table of S = [ piece of v; ];
+table of A = [ piece of a; piece of b; ];
+table of Dim = [ piece of w; ];
+table of Box = [ Dim of d; ];table of Item = [ piece of id; ];
+table of T = [ piece of v; ];table of Node = [ piece of v; ];
+prepare piece of sum(A of x){
+    serve x:a + x:b;
+}
+start(){
+    piece of a = 5, b = 3;
+    piece of x = 4, y = 9;
+    piece of n = 12345, c = 0;
+    piece of n = 123, r = 0;
+    piece of n = 11;
+    piece of a = 3, b = 9, c = 6, m;
+    piece of i = 65;
+    piece of n = 5, f = 1;
+    piece of x = 10;
+    piece of p = x;
+    piece of n = 13, c = 0; 
+    Box of b = [d = [w = 15;];];Item[] of list = [[id=10;], [id=20;]];piece[] of a = [1, 2, 3];
+    piece of i = 2;
+    Node[] of nodes = [[v=1;], [v=2;], [v=3;]];
+    P of p = [x = 3; y = 7;];
+    S[] of s = [
+        [v = 1;], 
+        [v = 2;], 
+        [v = 3;]
+    ];
+    chars of printing = tochars(s[0]:v + s[1]:v + s[2]:v);
+    piece of n = 121, t = n, r = 0; 
+    A of t = [a = 4; b = 6;];
+    T of a = [v = 5;], b = [v = 8;];
+    bill(tochars(size(nodes)));
+    repeat(i >= 0){
+        bill(tochars(a[i]) + " ");
+        i -= 1;
+    bill(tochars(list[1]:id));
+    bill(tochars(b:d:w + 5));
+    repeat(n > 0){
+        c += n % 2;
+        n /= 2;
+    }
+    bill(tochars(c));
+    bill(tochars(p + 5));
+    repeat(n > 0){
+        f *= n;
+        n -= 1;
+    }
+    bill(tochars(f));
+    repeat(i <= 69){
+        bill(tochars(i) + " ");
+        i += 1;
+    }bill(tochars(a:v < b:v));
+    bill(tochars(sum(t)));
+    repeat(t != 0){
+        r = r * 10 + t % 10;
+        t /= 10;
+    }
+    bill(tochars(r == n));
+    bill(printing);
+    check(a > b){
+        check(a > c){ m = a; } instead { m = c; }
+    } instead {
+        check(b > c){ m = b; } instead { m = c; }
+    }
+    bill(tochars(m));
+    check(n % 2 != 0){
+        bill("odd");
+    } instead {
+        bill("even");
+    }
+    repeat(n != 0){
+        r = r * 10 + n % 10;
+        n /= 10;
+    }
+    bill(tochars(r));
+    bill(tochars(p:x + p:y));
+    repeat(n != 0){
+        c += 1;
+        n /= 10;
+    }
+    bill(tochars(c));
+    x = x + y;
+    y = x - y;
+    x = x - y;
+    bill(tochars(x) + " " + tochars(y));
+    bill(tochars((a*a + b*b) > 30));
+	}
+}

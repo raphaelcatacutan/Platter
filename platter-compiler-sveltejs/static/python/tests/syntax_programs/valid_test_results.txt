@@ -1,19 +1,8 @@
 ======================================================================
-VALID PARSER TEST SUMMARY: 9/13 tests passed
+VALID PARSER TEST SUMMARY: 12/16 tests passed
 ======================================================================
 
 FAILURES: These files should parse successfully but failed
-
-[FAILED] any_expr_valid.platter
-----------------------------------------------------------------------
-Code:
-    1 | start() {
-    2 |     j = (x + 12.32 > 32.2);
-    3 | }
-
-Error Output:
-Syntax Error: Unexpected '>' at line 2, col 20. Expected '+', '-', '*', '/', ')'.
-======================================================================
 
 [FAILED] arith_log_rel_valid.platter
 ----------------------------------------------------------------------
@@ -48,7 +37,7 @@ Code:
    28 | }
 
 Error Output:
-Syntax Error: Unexpected '==' at line 12, col 23. Expected 'and', 'or', ',', ';'.
+Syntax Error: Unexpected '==' at line 12, col 29. Expected '(', '[', ':', '+', '-', '*', '/', '%', ')'.
 ======================================================================
 
 [FAILED] complex_any_expr.platter
@@ -106,6 +95,21 @@ Code:
    31 | }
 
 Error Output:
-Syntax Error: Unexpected 'or' at line 3, col 20. Expected ')'.
+Syntax Error: Unexpected ')' at line 6, col 30. Expected '+', '-', '*', '/', '%', '==', '!=', '>', '<', '>=', '<='.
+======================================================================
+
+[FAILED] floyd_issue_valid.platter
+----------------------------------------------------------------------
+Code:
+    1 | start(){
+    2 |     flag of j = (x / y > 12) and (x < z) and up or not down and (5+ 2) >= 7 or not down;
+    3 |     flag of b = ((up) or (up or down)) == up;
+    4 |     flag of c = not (4 % 2 == 1);
+    5 |     flag of id = ( id + id > piece_lit ) == ( id < id );
+    6 |     j = (x + 12.32 > 32.2);
+    7 | }
+
+Error Output:
+Syntax Error: Unexpected '<' at line 5, col 50. Expected '(', '[', ':', '+', '-', '*', '/', '%', ')'.
 ======================================================================
 
