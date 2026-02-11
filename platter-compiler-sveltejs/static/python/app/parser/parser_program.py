@@ -64,6 +64,8 @@ class Parser():
         # Parse global declarations
         while self.pos < len(self.tokens) and self.tokens[self.pos].type in ['piece', 'chars', 'sip', 'flag', 'table', 'id']:
             self.global_decl()
+            self.error_arr.clear()
+            self.appendF(FIRST_SET["<program>"])
         
         # Parse recipe declarations (prepare functions)
         while self.pos < len(self.tokens) and self.tokens[self.pos].type in ['prepare']:
@@ -72,7 +74,7 @@ class Parser():
         # Parse start() platter
         if self.pos >= len(self.tokens):
             raise ErrorHandler("EOF", None, "start")
-        
+
         self.parse_token("start")
         self.parse_token("(")
         self.parse_token(")")
@@ -81,7 +83,7 @@ class Parser():
         # Ensure we've consumed all tokens (should be at EOF token now)
         if self.pos < len(self.tokens) and self.tokens[self.pos].type != "EOF":
             raise ErrorHandler("ExpectedEOF_err", self.tokens[self.pos], None)
-
+        
     def global_decl(self):
         self.appendF(FIRST_SET["<global_decl>"])
         log.info("Enter: " + self.tokens[self.pos].type)
