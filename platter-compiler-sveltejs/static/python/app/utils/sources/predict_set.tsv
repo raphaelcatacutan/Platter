@@ -11,123 +11,54 @@
 <piece_id>	{ id }
 <piece_ingredient_init>	{ = }
 <piece_ingredient_init>	{ ,, ; }
-<piece_id_tail>	{ , }
-<piece_id_tail>	{ ; }
-<chars_decl>	{ of }
-<chars_decl>	{ [ }
-<chars_id>	{ id }
-<chars_ingredient_init>	{ = }
-<chars_ingredient_init>	{ ,, ; }
-<chars_id_tail>	{ , }
-<chars_id_tail>	{ ; }
-<sip_decl>	{ of }
-<sip_decl>	{ [ }
-<sip_id>	{ id }
-<sip_ingredient_init>	{ = }
-<sip_ingredient_init>	{ ,, ; }
-<sip_id_tail>	{ , }
-<sip_id_tail>	{ ; }
-<flag_decl>	{ of }
-<flag_decl>	{ [ }
-<flag_id>	{ id }
-<flag_ingredient_init>	{ = }
-<flag_ingredient_init>	{ ,, ; }
-<flag_id_tail>	{ , }
-<flag_id_tail>	{ ; }
-<piece_array_decl>	{ [ }
-<sip_array_decl>	{ [ }
-<chars_array_decl>	{ [ }
-<flag_array_decl>	{ [ }
-<table_array_decl>	{ [ }
-<piece_array_val>	{ id }
-<piece_array_val>	{ append, sort, reverse, remove }
-<piece_array_val>	{ [ }
-<piece_array_init>	{ = }
-<piece_array_init>	{ ,, ; }
-<sip_array_val>	{ id }
-<sip_array_val>	{ append, sort, reverse, remove }
-<sip_array_val>	{ [ }
-<sip_array_init>	{ = }
-<sip_array_init>	{ ,, ; }
-<chars_array_val>	{ id }
-<chars_array_val>	{ append, sort, reverse, remove }
-<chars_array_val>	{ [ }
-<chars_array_init>	{ = }
-<chars_array_init>	{ ,, ; }
-<flag_array_val>	{ id }
-<flag_array_val>	{ append, sort, reverse, remove }
-<flag_array_val>	{ [ }
-<flag_array_init>	{ = }
-<flag_array_init>	{ ,, ; }
-<table_array_val>	{ id }
-<table_array_val>	{ append, sort, reverse, remove }
-<table_array_val>	{ [ }
-<table_array_init>	{ = }
-<table_array_init>	{ ,, ; }
-<array_declare_tail_piece>	{ , }
-<array_declare_tail_piece>	{ ; }
-<array_declare_tail_sip>	{ , }
-<array_declare_tail_sip>	{ ; }
-<array_declare_tail_flag>	{ , }
-<array_declare_tail_flag>	{ ; }
-<array_declare_tail_chars>	{ , }
-<array_declare_tail_chars>	{ ; }
-<array_declare_tail_table>	{ , }
-<array_declare_tail_table>	{ ; }
-<dimensions>	{ [ }
-<dimensions_tail>	{ [ }
-<dimensions_tail>	{ of }
-<flavor>	{ [, id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit, (, not, append, sort, reverse, remove }
+<strict_piece_expr>	{ (, topiece, size, search, fact, pow, piece_lit, id }
+<strict_piece_term>	{ (, topiece, size, search, fact, pow, piece_lit, id }
+<strict_piece_factor>	{ topiece, size, search, fact, pow, piece_lit }
+<strict_piece_factor>	{ id }
+<strict_piece_factor>	{ ( }
+<ret_piece>	{ topiece }
+<ret_piece>	{ size }
+<ret_piece>	{ search }
+<ret_piece>	{ fact }
+<ret_piece>	{ pow }
+<ret_piece>	{ piece_lit }
+<any_expr>	{ id }
+<any_expr>	{ topiece, size, search, fact, pow, piece_lit }
+<any_expr>	{ sqrt, rand, tosip, sip_lit }
+<any_expr>	{ bill, take, copy, cut, tochars, chars_lit }
+<any_expr>	{ matches, toflag, flag_lit }
+<any_expr>	{ ( }
+<any_expr>	{ not }
+<id>	{ id }
+<id_tail>	{ (, *, /, %, +, -, ,, ;, and, or, ==, !=, >, <, >=, <=, ), ] }
+<id_tail>	{ [, :, *, /, %, +, -, ,, ;, and, or, ==, !=, >, <, >=, <=, ), ] }
+<call_tailopt>	{ ( }
+<call_tailopt>	{ *, /, %, +, -, ,, ;, and, or, ==, !=, >, <, >=, <=, ), ] }
+<flavor>	{ topiece, size, search, fact, pow, piece_lit, (, not, [, id, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit, append, sort, reverse, remove }
 <flavor>	{ ) }
-<value>	{ id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit, (, not }
+<value>	{ topiece, size, search, fact, pow, piece_lit, (, not, id, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit }
 <value>	{ append, sort, reverse, remove }
 <value>	{ [ }
-<notation_val>	{ piece_lit, sip_lit, flag_lit, chars_lit, [ }
-<notation_val>	{ id }
-<notation_val>	{ ] }
+<ret_array>	{ append }
+<ret_array>	{ sort }
+<ret_array>	{ reverse }
+<ret_array>	{ remove }
+<strict_array_expr>	{ [ }
+<strict_array_expr>	{ id }
+<strict_array_expr>	{ append, sort, reverse, remove }
+<array_element_id>	{ id }
+<array_element_id>	{ piece_lit, sip_lit, flag_lit, chars_lit, [ }
+<array_element_id>	{ ] }
+<element_value_tail>	{ , }
+<element_value_tail>	{ ] }
 <array_element>	{ piece_lit }
 <array_element>	{ sip_lit }
 <array_element>	{ flag_lit }
 <array_element>	{ chars_lit }
 <array_element>	{ [ }
-<element_value_tail>	{ , }
-<element_value_tail>	{ ] }
-<array_element_id>	{ id }
-<array_element_id>	{ piece_lit, sip_lit, flag_lit, chars_lit, [ }
-<array_element_id>	{ ] }
-<array_element_piece>	{ id }
-<array_element_piece>	{ piece_lit }
-<array_element_piece>	{ [ }
-<array_element_piece_opt>	{ id, piece_lit, [ }
-<array_element_piece_opt>	{ ] }
-<element_piece_tail>	{ , }
-<element_piece_tail>	{ ] }
-<array_element_sip>	{ id }
-<array_element_sip>	{ sip_lit }
-<array_element_sip>	{ [ }
-<array_element_sip_opt>	{ id, sip_lit, [ }
-<array_element_sip_opt>	{ ] }
-<element_sip_tail>	{ , }
-<element_sip_tail>	{ ] }
-<array_element_chars>	{ id }
-<array_element_chars>	{ chars_lit }
-<array_element_chars>	{ [ }
-<array_element_chars_opt>	{ id, chars_lit, [ }
-<array_element_chars_opt>	{ ] }
-<element_chars_tail>	{ , }
-<element_chars_tail>	{ ] }
-<array_element_flag>	{ id }
-<array_element_flag>	{ flag_lit }
-<array_element_flag>	{ [ }
-<array_element_flag_opt>	{ id, flag_lit, [ }
-<array_element_flag_opt>	{ ] }
-<element_flag_tail>	{ , }
-<element_flag_tail>	{ ] }
-<array_element_table>	{ [, id }
-<array_element_table_opt>	{ [, id }
-<array_element_table_opt>	{ ] }
-<element_table_tail>	{ , }
-<element_table_tail>	{ ] }
+<notation_val>	{ piece_lit, sip_lit, flag_lit, chars_lit, [ }
+<notation_val>	{ id }
+<notation_val>	{ ] }
 <array_or_table>	{ , }
 <array_or_table>	{ = }
 <array_or_table>	{ ] }
@@ -137,11 +68,376 @@
 <flavor_tail>	{ ) }
 <accessor_tail>	{ [ }
 <accessor_tail>	{ : }
-<accessor_tail>	{ =, +=, -=, *=, /=, %=, ,, ), ;, +, -, *, /, %, and, or, ==, !=, >, <, >=, <=, ] }
+<accessor_tail>	{ *, /, %, +, -, ,, ;, and, or, ==, !=, >, <, >=, <=, ), =, +=, -=, *=, /=, %=, ] }
 <array_accessor>	{ [ }
 <array_accessor_val>	{ piece_lit }
 <array_accessor_val>	{ id }
 <table_accessor>	{ : }
+<univ_ambig_tail>	{ + }
+<univ_ambig_tail>	{ - }
+<univ_ambig_tail>	{ * }
+<univ_ambig_tail>	{ / }
+<univ_ambig_tail>	{ % }
+<univ_ambig_tail>	{ ==, !=, >, <, >=, <= }
+<univ_ambig_tail>	{ and }
+<univ_ambig_tail>	{ or }
+<univ_ambig_tail>	{ ), ,, ; }
+<univ_ambig_branch>	{ id }
+<univ_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<univ_ambig_branch>	{ sqrt, rand, tosip, sip_lit }
+<univ_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<univ_ambig_branch>	{ ( }
+<univ_piece_tail>	{ + }
+<univ_piece_tail>	{ - }
+<univ_piece_tail>	{ * }
+<univ_piece_tail>	{ / }
+<univ_piece_tail>	{ % }
+<univ_piece_tail>	{ ==, !=, >, <, >=, <= }
+<univ_piece_tail>	{ ), ,, ; }
+<rel_op>	{ == }
+<rel_op>	{ != }
+<rel_op>	{ > }
+<rel_op>	{ < }
+<rel_op>	{ >= }
+<rel_op>	{ <= }
+<univ_bool_tail>	{ and }
+<univ_bool_tail>	{ or }
+<univ_bool_tail>	{ ), ,, ; }
+<strict_flag_expr>	{ id, topiece, size, search, fact, pow, piece_lit, not, (, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit }
+<strict_flag_term>	{ id, topiece, size, search, fact, pow, piece_lit, not, (, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit }
+<strict_flag_factor>	{ id }
+<strict_flag_factor>	{ topiece, size, search, fact, pow, piece_lit }
+<strict_flag_factor>	{ sqrt, rand, tosip, sip_lit }
+<strict_flag_factor>	{ bill, take, copy, cut, tochars, chars_lit }
+<strict_flag_factor>	{ matches, toflag, flag_lit }
+<strict_flag_factor>	{ not }
+<strict_flag_factor>	{ ( }
+<lhs_ambig_tail>	{ + }
+<lhs_ambig_tail>	{ - }
+<lhs_ambig_tail>	{ * }
+<lhs_ambig_tail>	{ / }
+<lhs_ambig_tail>	{ % }
+<lhs_ambig_tail>	{ ==, !=, >, <, >=, <= }
+<lhs_ambig_tail>	{ and }
+<lhs_ambig_tail>	{ or }
+<lhs_ambig_tail>	{ and, ), or, ,, ; }
+<ambig_calc_branch>	{ id }
+<ambig_calc_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<ambig_calc_branch>	{ sqrt, rand, tosip, sip_lit }
+<ambig_calc_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<ambig_calc_branch>	{ ( }
+<lhs_ambig_tail_no_lambda>	{ + }
+<lhs_ambig_tail_no_lambda>	{ - }
+<lhs_ambig_tail_no_lambda>	{ * }
+<lhs_ambig_tail_no_lambda>	{ / }
+<lhs_ambig_tail_no_lambda>	{ % }
+<lhs_ambig_tail_no_lambda>	{ ==, !=, >, <, >=, <= }
+<lhs_piece_tail>	{ + }
+<lhs_piece_tail>	{ - }
+<lhs_piece_tail>	{ * }
+<lhs_piece_tail>	{ / }
+<lhs_piece_tail>	{ % }
+<lhs_piece_tail>	{ ==, !=, >, <, >=, <= }
+<strict_ambig_rhs>	{ id }
+<strict_ambig_rhs>	{ topiece, size, search, fact, pow, piece_lit }
+<strict_ambig_rhs>	{ sqrt, rand, tosip, sip_lit }
+<strict_ambig_rhs>	{ bill, take, copy, cut, tochars, chars_lit }
+<strict_ambig_rhs>	{ ( }
+<val_ambig_tail>	{ + }
+<val_ambig_tail>	{ - }
+<val_ambig_tail>	{ * }
+<val_ambig_tail>	{ / }
+<val_ambig_tail>	{ % }
+<val_ambig_tail>	{ and, or, ), ,, ; }
+<paren_ambig_branch_val>	{ id }
+<paren_ambig_branch_val>	{ topiece, size, search, fact, pow, piece_lit }
+<paren_ambig_branch_val>	{ sqrt, rand, tosip, sip_lit }
+<paren_ambig_branch_val>	{ bill, take, copy, cut, tochars, chars_lit }
+<paren_ambig_branch_val>	{ ( }
+<paren_ambig_tail_val>	{ + }
+<paren_ambig_tail_val>	{ - }
+<paren_ambig_tail_val>	{ * }
+<paren_ambig_tail_val>	{ ) }
+<paren_piece_tail_val>	{ + }
+<paren_piece_tail_val>	{ - }
+<paren_piece_tail_val>	{ * }
+<paren_piece_tail_val>	{ ) }
+<val_piece_tail>	{ + }
+<val_piece_tail>	{ - }
+<val_piece_tail>	{ * }
+<val_piece_tail>	{ / }
+<val_piece_tail>	{ % }
+<val_piece_tail>	{ and, or, ), ,, ; }
+<ret_sip>	{ sqrt }
+<ret_sip>	{ rand }
+<ret_sip>	{ tosip }
+<ret_sip>	{ sip_lit }
+<paren_sip_tail_val>	{ + }
+<paren_sip_tail_val>	{ - }
+<paren_sip_tail_val>	{ * }
+<paren_sip_tail_val>	{ ) }
+<strict_sip_factor>	{ id }
+<strict_sip_factor>	{ sqrt, rand, tosip, sip_lit }
+<strict_sip_factor>	{ ( }
+<strict_sip_expr>	{ id, sqrt, rand, tosip, sip_lit, ( }
+<strict_sip_term>	{ id, sqrt, rand, tosip, sip_lit, ( }
+<strict_sip_mult_tail>	{ * }
+<strict_sip_mult_tail>	{ / }
+<strict_sip_mult_tail>	{ +, -, ), ,, and, or, *, /, %, ==, !=, >, <, >=, <=, ; }
+<strict_sip_add_tail>	{ + }
+<strict_sip_add_tail>	{ - }
+<strict_sip_add_tail>	{ ), ,, and, or, +, -, *, /, %, ==, !=, >, <, >=, <=, ; }
+<val_sip_tail>	{ + }
+<val_sip_tail>	{ - }
+<val_sip_tail>	{ * }
+<val_sip_tail>	{ / }
+<val_sip_tail>	{ % }
+<val_sip_tail>	{ and, or, ), ,, ; }
+<ret_chars>	{ bill }
+<ret_chars>	{ take }
+<ret_chars>	{ copy }
+<ret_chars>	{ cut }
+<ret_chars>	{ tochars }
+<ret_chars>	{ chars_lit }
+<strict_chars_expr>	{ bill, take, copy, cut, tochars, chars_lit, id, ( }
+<strict_chars_factor>	{ bill, take, copy, cut, tochars, chars_lit }
+<strict_chars_factor>	{ id }
+<strict_chars_factor>	{ ( }
+<strict_chars_add_tail>	{ + }
+<strict_chars_add_tail>	{ ), ,, and, or, +, ==, !=, >, <, >=, <=, ; }
+<paren_str_tail_val>	{ + }
+<paren_str_tail_val>	{ ) }
+<strict_string_factor>	{ id }
+<strict_string_factor>	{ bill, take, copy, cut, tochars, chars_lit }
+<strict_string_factor>	{ ( }
+<paren_dispatch_val_str>	{ id }
+<paren_dispatch_val_str>	{ bill, take, copy, cut, tochars, chars_lit }
+<paren_dispatch_val_str>	{ ( }
+<val_str_tail>	{ + }
+<val_str_tail>	{ and, or, ), ,, ;, +, ==, !=, >, <, >=, <= }
+<paren_dispatch_val>	{ id }
+<paren_dispatch_val>	{ topiece, size, search, fact, pow, piece_lit }
+<paren_dispatch_val>	{ sqrt, rand, tosip, sip_lit }
+<paren_dispatch_val>	{ bill, take, copy, cut, tochars, chars_lit }
+<paren_dispatch_val>	{ ( }
+<lhs_sip_tail>	{ + }
+<lhs_sip_tail>	{ - }
+<lhs_sip_tail>	{ * }
+<lhs_sip_tail>	{ / }
+<lhs_sip_tail>	{ % }
+<lhs_sip_tail>	{ ==, !=, >, <, >=, <= }
+<lhs_str_tail>	{ + }
+<lhs_str_tail>	{ ==, !=, >, <, >=, <= }
+<paren_dispatch_lhs_no_lambda>	{ id }
+<paren_dispatch_lhs_no_lambda>	{ topiece, size, search, fact, pow, piece_lit }
+<paren_dispatch_lhs_no_lambda>	{ sqrt, rand, tosip, sip_lit }
+<paren_dispatch_lhs_no_lambda>	{ bill, take, copy, cut, tochars, chars_lit }
+<paren_dispatch_lhs_no_lambda>	{ ( }
+<paren_ambig_tail_lhs>	{ + }
+<paren_ambig_tail_lhs>	{ - }
+<paren_ambig_tail_lhs>	{ * }
+<paren_ambig_tail_lhs>	{ ) }
+<paren_ambig_tail_lhs>	{ ==, !=, >, <, >=, <= }
+<paren_ambig_tail_lhs>	{ and }
+<paren_ambig_tail_lhs>	{ or }
+<paren_ambig_branch_lhs>	{ id }
+<paren_ambig_branch_lhs>	{ topiece, size, search, fact, pow, piece_lit }
+<paren_ambig_branch_lhs>	{ sqrt, rand, tosip, sip_lit }
+<paren_ambig_branch_lhs>	{ bill, take, copy, cut, tochars, chars_lit }
+<paren_ambig_branch_lhs>	{ ( }
+<paren_piece_tail_lhs>	{ + }
+<paren_piece_tail_lhs>	{ - }
+<paren_piece_tail_lhs>	{ * }
+<paren_piece_tail_lhs>	{ ) }
+<paren_piece_tail_lhs>	{ ==, !=, >, <, >=, <= }
+<lhs_bool_tail>	{ and }
+<lhs_bool_tail>	{ or }
+<lhs_bool_tail>	{ and, ), or, ,, ; }
+<strict_flag_and_tail>	{ and }
+<strict_flag_and_tail>	{ ), or, and, ,, ; }
+<strict_flag_or_tail>	{ or }
+<strict_flag_or_tail>	{ ), and, or, ,, ; }
+<paren_sip_tail_lhs>	{ + }
+<paren_sip_tail_lhs>	{ - }
+<paren_sip_tail_lhs>	{ * }
+<paren_sip_tail_lhs>	{ ) }
+<paren_sip_tail_lhs>	{ ==, !=, >, <, >=, <= }
+<paren_str_tail_lhs>	{ + }
+<paren_str_tail_lhs>	{ ) }
+<paren_str_tail_lhs>	{ ==, !=, >, <, >=, <= }
+<paren_dispatch_lhs>	{ id }
+<paren_dispatch_lhs>	{ topiece, size, search, fact, pow, piece_lit }
+<paren_dispatch_lhs>	{ sqrt, rand, tosip, sip_lit }
+<paren_dispatch_lhs>	{ bill, take, copy, cut, tochars, chars_lit }
+<paren_dispatch_lhs>	{ matches, toflag, flag_lit }
+<paren_dispatch_lhs>	{ not }
+<paren_dispatch_lhs>	{ ( }
+<ret_flag>	{ matches }
+<ret_flag>	{ toflag }
+<ret_flag>	{ flag_lit }
+<strict_datas_expr>	{ [ }
+<strict_datas_expr>	{ id }
+<strict_datas_expr>	{ append, sort, reverse, remove }
+<univ_sip_tail>	{ + }
+<univ_sip_tail>	{ - }
+<univ_sip_tail>	{ * }
+<univ_sip_tail>	{ / }
+<univ_sip_tail>	{ % }
+<univ_sip_tail>	{ ==, !=, >, <, >=, <= }
+<univ_sip_tail>	{ ), ,, ; }
+<univ_str_tail>	{ + }
+<univ_str_tail>	{ ==, !=, >, <, >=, <= }
+<univ_str_tail>	{ ), ,, ; }
+<univ_paren_dispatch>	{ id }
+<univ_paren_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
+<univ_paren_dispatch>	{ sqrt, rand, tosip, sip_lit }
+<univ_paren_dispatch>	{ bill, take, copy, cut, tochars, chars_lit }
+<univ_paren_dispatch>	{ matches, toflag, flag_lit }
+<univ_paren_dispatch>	{ not }
+<univ_paren_dispatch>	{ ( }
+<univ_paren_ambig_tail>	{ + }
+<univ_paren_ambig_tail>	{ - }
+<univ_paren_ambig_tail>	{ * }
+<univ_paren_ambig_tail>	{ / }
+<univ_paren_ambig_tail>	{ % }
+<univ_paren_ambig_tail>	{ ==, !=, >, <, >=, <= }
+<univ_paren_ambig_tail>	{ ) }
+<univ_paren_ambig_branch>	{ id }
+<univ_paren_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<univ_paren_ambig_branch>	{ sqrt, rand, tosip, sip_lit }
+<univ_paren_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<univ_paren_ambig_branch>	{ ( }
+<univ_paren_piece_tail>	{ + }
+<univ_paren_piece_tail>	{ - }
+<univ_paren_piece_tail>	{ * }
+<univ_paren_piece_tail>	{ / }
+<univ_paren_piece_tail>	{ % }
+<univ_paren_piece_tail>	{ ) }
+<univ_paren_sip_tail>	{ + }
+<univ_paren_sip_tail>	{ - }
+<univ_paren_sip_tail>	{ * }
+<univ_paren_sip_tail>	{ / }
+<univ_paren_sip_tail>	{ ) }
+<univ_paren_str_tail>	{ + }
+<univ_paren_str_tail>	{ ) }
+<univ_paren_ambig_numeric_branch>	{ id }
+<univ_paren_ambig_numeric_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<univ_paren_ambig_numeric_branch>	{ sqrt, rand, tosip, sip_lit }
+<univ_paren_ambig_numeric_branch>	{ ( }
+<univ_paren_ambig_numeric_tail>	{ + }
+<univ_paren_ambig_numeric_tail>	{ - }
+<univ_paren_ambig_numeric_tail>	{ * }
+<univ_paren_ambig_numeric_tail>	{ / }
+<univ_paren_ambig_numeric_tail>	{ % }
+<univ_paren_ambig_numeric_tail>	{ ) }
+<univ_ambig_numeric_tail>	{ + }
+<univ_ambig_numeric_tail>	{ - }
+<univ_ambig_numeric_tail>	{ * }
+<univ_ambig_numeric_tail>	{ / }
+<univ_ambig_numeric_tail>	{ % }
+<univ_ambig_numeric_tail>	{ ==, !=, >, <, >=, <= }
+<univ_ambig_numeric_tail>	{ ), ,, ; }
+<univ_ambig_numeric_branch>	{ id }
+<univ_ambig_numeric_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<univ_ambig_numeric_branch>	{ sqrt, rand, tosip, sip_lit }
+<univ_ambig_numeric_branch>	{ ( }
+<univ_paren_dispatch_numeric>	{ id }
+<univ_paren_dispatch_numeric>	{ topiece, size, search, fact, pow, piece_lit }
+<univ_paren_dispatch_numeric>	{ sqrt, rand, tosip, sip_lit }
+<univ_paren_dispatch_numeric>	{ ( }
+<strict_piece_mult_tail>	{ * }
+<strict_piece_mult_tail>	{ / }
+<strict_piece_mult_tail>	{ % }
+<strict_piece_mult_tail>	{ +, -, ,, ;, ), *, /, %, ==, !=, >, <, >=, <=, and, or }
+<strict_piece_add_tail>	{ + }
+<strict_piece_add_tail>	{ - }
+<strict_piece_add_tail>	{ ,, ;, ), +, -, *, /, %, ==, !=, >, <, >=, <=, and, or }
+<piece_id_tail>	{ , }
+<piece_id_tail>	{ ; }
+<piece_array_decl>	{ [ }
+<dimensions>	{ [ }
+<dimensions_tail>	{ [ }
+<dimensions_tail>	{ of }
+<piece_array_init>	{ = }
+<piece_array_init>	{ ,, ; }
+<piece_array_val>	{ id }
+<piece_array_val>	{ append, sort, reverse, remove }
+<piece_array_val>	{ [ }
+<array_element_piece_opt>	{ id, piece_lit, [ }
+<array_element_piece_opt>	{ ] }
+<array_element_piece>	{ id }
+<array_element_piece>	{ piece_lit }
+<array_element_piece>	{ [ }
+<element_piece_tail>	{ , }
+<element_piece_tail>	{ ] }
+<array_declare_tail_piece>	{ , }
+<array_declare_tail_piece>	{ ; }
+<chars_decl>	{ of }
+<chars_decl>	{ [ }
+<chars_id>	{ id }
+<chars_ingredient_init>	{ = }
+<chars_ingredient_init>	{ ,, ; }
+<chars_id_tail>	{ , }
+<chars_id_tail>	{ ; }
+<chars_array_decl>	{ [ }
+<chars_array_init>	{ = }
+<chars_array_init>	{ ,, ; }
+<chars_array_val>	{ id }
+<chars_array_val>	{ append, sort, reverse, remove }
+<chars_array_val>	{ [ }
+<array_element_chars_opt>	{ id, chars_lit, [ }
+<array_element_chars_opt>	{ ] }
+<array_element_chars>	{ id }
+<array_element_chars>	{ chars_lit }
+<array_element_chars>	{ [ }
+<element_chars_tail>	{ , }
+<element_chars_tail>	{ ] }
+<array_declare_tail_chars>	{ , }
+<array_declare_tail_chars>	{ ; }
+<sip_decl>	{ of }
+<sip_decl>	{ [ }
+<sip_id>	{ id }
+<sip_ingredient_init>	{ = }
+<sip_ingredient_init>	{ ,, ; }
+<sip_id_tail>	{ , }
+<sip_id_tail>	{ ; }
+<sip_array_decl>	{ [ }
+<sip_array_init>	{ = }
+<sip_array_init>	{ ,, ; }
+<sip_array_val>	{ id }
+<sip_array_val>	{ append, sort, reverse, remove }
+<sip_array_val>	{ [ }
+<array_element_sip_opt>	{ id, sip_lit, [ }
+<array_element_sip_opt>	{ ] }
+<array_element_sip>	{ id }
+<array_element_sip>	{ sip_lit }
+<array_element_sip>	{ [ }
+<element_sip_tail>	{ , }
+<element_sip_tail>	{ ] }
+<array_declare_tail_sip>	{ , }
+<array_declare_tail_sip>	{ ; }
+<flag_decl>	{ of }
+<flag_decl>	{ [ }
+<flag_id>	{ id }
+<flag_ingredient_init>	{ = }
+<flag_ingredient_init>	{ ,, ; }
+<flag_id_tail>	{ , }
+<flag_id_tail>	{ ; }
+<flag_array_decl>	{ [ }
+<flag_array_init>	{ = }
+<flag_array_init>	{ ,, ; }
+<flag_array_val>	{ id }
+<flag_array_val>	{ append, sort, reverse, remove }
+<flag_array_val>	{ [ }
+<array_element_flag_opt>	{ id, flag_lit, [ }
+<array_element_flag_opt>	{ ] }
+<array_element_flag>	{ id }
+<array_element_flag>	{ flag_lit }
+<array_element_flag>	{ [ }
+<element_flag_tail>	{ , }
+<element_flag_tail>	{ ] }
+<array_declare_tail_flag>	{ , }
+<array_declare_tail_flag>	{ ; }
 <table_prototype>	{ table }
 <required_decl>	{ piece, sip, flag, chars, id }
 <decl_head>	{ piece, sip, flag, chars, id }
@@ -161,6 +457,19 @@
 <strict_table_expr>	{ id }
 <table_declare_tail>	{ , }
 <table_declare_tail>	{ ; }
+<table_array_decl>	{ [ }
+<table_array_init>	{ = }
+<table_array_init>	{ ,, ; }
+<table_array_val>	{ id }
+<table_array_val>	{ append, sort, reverse, remove }
+<table_array_val>	{ [ }
+<array_element_table_opt>	{ [, id }
+<array_element_table_opt>	{ ] }
+<array_element_table>	{ [, id }
+<element_table_tail>	{ , }
+<element_table_tail>	{ ] }
+<array_declare_tail_table>	{ , }
+<array_declare_tail_table>	{ ; }
 <recipe_decl>	{ prepare }
 <recipe_decl>	{ start }
 <serve_type>	{ piece, sip, flag, chars, id }
@@ -227,6 +536,44 @@
 <instead_clause>	{ instead }
 <instead_clause>	{ id, serve, append, bill, copy, cut, fact, matches, pow, rand, remove, reverse, search, size, sort, sqrt, take, tochars, topiece, tosip, check, menu, pass, repeat, order, }, stop, choice, usual }
 <cond_menu>	{ menu }
+<strict_piece_chars_expr>	{ id }
+<strict_piece_chars_expr>	{ topiece, size, search, fact, pow, piece_lit }
+<strict_piece_chars_expr>	{ bill, take, copy, cut, tochars, chars_lit }
+<strict_piece_chars_expr>	{ ( }
+<pc_ambig_tail>	{ + }
+<pc_ambig_tail>	{ - }
+<pc_ambig_tail>	{ * }
+<pc_ambig_tail>	{ / }
+<pc_ambig_tail>	{ % }
+<pc_ambig_tail>	{ ) }
+<pc_ambig_branch>	{ id }
+<pc_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<pc_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<pc_ambig_branch>	{ ( }
+<pc_piece_tail>	{ *, /, %, +, -, ) }
+<pc_chars_tail>	{ +, ) }
+<pc_paren_dispatch>	{ id }
+<pc_paren_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
+<pc_paren_dispatch>	{ bill, take, copy, cut, tochars, chars_lit }
+<pc_paren_dispatch>	{ ( }
+<pc_paren_ambig_tail_inner>	{ + }
+<pc_paren_ambig_tail_inner>	{ - }
+<pc_paren_ambig_tail_inner>	{ * }
+<pc_paren_ambig_tail_inner>	{ / }
+<pc_paren_ambig_tail_inner>	{ % }
+<pc_paren_ambig_tail_inner>	{ ) }
+<pc_paren_ambig_branch>	{ id }
+<pc_paren_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<pc_paren_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<pc_paren_ambig_branch>	{ ( }
+<pc_paren_piece_tail_inner>	{ + }
+<pc_paren_piece_tail_inner>	{ - }
+<pc_paren_piece_tail_inner>	{ * }
+<pc_paren_piece_tail_inner>	{ / }
+<pc_paren_piece_tail_inner>	{ % }
+<pc_paren_piece_tail_inner>	{ ) }
+<pc_paren_chars_tail_inner>	{ + }
+<pc_paren_chars_tail_inner>	{ ) }
 <menu_platter>	{ { }
 <choice_clause>	{ choice }
 <choice_clause>	{ usual, } }
@@ -297,8 +644,6 @@
 <menu_loop_platter>	{ { }
 <choice_clause_loop>	{ choice }
 <choice_clause_loop>	{ usual, } }
-<usual_clause_loop>	{ usual }
-<usual_clause_loop>	{ } }
 <choice_usual_loop_st>	{ id }
 <choice_usual_loop_st>	{ append, bill, copy, cut, fact, matches, pow, rand, remove, reverse, search, size, sort, sqrt, take, tochars, topiece, tosip }
 <choice_usual_loop_st>	{ check, menu }
@@ -312,369 +657,9 @@
 <jump_next>	{ next }
 <jump_stop>	{ stop }
 <jump_serve>	{ serve }
+<usual_clause_loop>	{ usual }
+<usual_clause_loop>	{ } }
 <loop_repeat>	{ repeat }
 <loop_order>	{ order }
 <usual_clause>	{ usual }
 <usual_clause>	{ } }
-<strict_flag_expr>	{ not, (, id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit }
-<strict_flag_or_tail>	{ or }
-<strict_flag_or_tail>	{ ,, ;, ), and, or }
-<strict_flag_term>	{ not, (, id, topiece, size, search, fact, pow, piece_lit, sqrt, rand, tosip, sip_lit, bill, take, copy, cut, tochars, chars_lit, matches, toflag, flag_lit }
-<strict_flag_and_tail>	{ and }
-<strict_flag_and_tail>	{ or, ,, ;, ), and }
-<strict_flag_factor>	{ id }
-<strict_flag_factor>	{ topiece, size, search, fact, pow, piece_lit }
-<strict_flag_factor>	{ sqrt, rand, tosip, sip_lit }
-<strict_flag_factor>	{ bill, take, copy, cut, tochars, chars_lit }
-<strict_flag_factor>	{ matches, toflag, flag_lit }
-<strict_flag_factor>	{ not }
-<strict_flag_factor>	{ ( }
-<lhs_piece_tail>	{ + }
-<lhs_piece_tail>	{ - }
-<lhs_piece_tail>	{ * }
-<lhs_piece_tail>	{ / }
-<lhs_piece_tail>	{ % }
-<lhs_piece_tail>	{ ==, !=, >, <, >=, <= }
-<lhs_sip_tail>	{ + }
-<lhs_sip_tail>	{ - }
-<lhs_sip_tail>	{ * }
-<lhs_sip_tail>	{ / }
-<lhs_sip_tail>	{ % }
-<lhs_sip_tail>	{ ==, !=, >, <, >=, <= }
-<lhs_str_tail>	{ + }
-<lhs_str_tail>	{ ==, !=, >, <, >=, <= }
-<lhs_ambig_tail>	{ + }
-<lhs_ambig_tail>	{ - }
-<lhs_ambig_tail>	{ * }
-<lhs_ambig_tail>	{ / }
-<lhs_ambig_tail>	{ % }
-<lhs_ambig_tail>	{ ==, !=, >, <, >=, <= }
-<lhs_ambig_tail>	{ and }
-<lhs_ambig_tail>	{ or }
-<lhs_ambig_tail>	{ and, or, ,, ;, ) }
-<ambig_calc_branch>	{ id }
-<ambig_calc_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<ambig_calc_branch>	{ sqrt, rand, tosip, sip_lit }
-<ambig_calc_branch>	{ bill, take, copy, cut, tochars, chars_lit }
-<ambig_calc_branch>	{ ( }
-<lhs_ambig_tail_no_lambda>	{ + }
-<lhs_ambig_tail_no_lambda>	{ - }
-<lhs_ambig_tail_no_lambda>	{ * }
-<lhs_ambig_tail_no_lambda>	{ / }
-<lhs_ambig_tail_no_lambda>	{ % }
-<lhs_ambig_tail_no_lambda>	{ ==, !=, >, <, >=, <= }
-<strict_string_factor>	{ id }
-<strict_string_factor>	{ bill, take, copy, cut, tochars, chars_lit }
-<strict_string_factor>	{ ( }
-<strict_ambig_rhs>	{ id }
-<strict_ambig_rhs>	{ topiece, size, search, fact, pow, piece_lit }
-<strict_ambig_rhs>	{ sqrt, rand, tosip, sip_lit }
-<strict_ambig_rhs>	{ bill, take, copy, cut, tochars, chars_lit }
-<strict_ambig_rhs>	{ ( }
-<paren_dispatch_lhs>	{ id }
-<paren_dispatch_lhs>	{ topiece, size, search, fact, pow, piece_lit }
-<paren_dispatch_lhs>	{ sqrt, rand, tosip, sip_lit }
-<paren_dispatch_lhs>	{ bill, take, copy, cut, tochars, chars_lit }
-<paren_dispatch_lhs>	{ matches, toflag, flag_lit }
-<paren_dispatch_lhs>	{ not }
-<paren_dispatch_lhs>	{ ( }
-<paren_piece_tail_lhs>	{ + }
-<paren_piece_tail_lhs>	{ - }
-<paren_piece_tail_lhs>	{ * }
-<paren_piece_tail_lhs>	{ ) }
-<paren_piece_tail_lhs>	{ ==, !=, >, <, >=, <= }
-<paren_sip_tail_lhs>	{ + }
-<paren_sip_tail_lhs>	{ - }
-<paren_sip_tail_lhs>	{ * }
-<paren_sip_tail_lhs>	{ ) }
-<paren_sip_tail_lhs>	{ ==, !=, >, <, >=, <= }
-<paren_ambig_tail_lhs>	{ + }
-<paren_ambig_tail_lhs>	{ - }
-<paren_ambig_tail_lhs>	{ * }
-<paren_ambig_tail_lhs>	{ ) }
-<paren_ambig_tail_lhs>	{ ==, !=, >, <, >=, <= }
-<paren_ambig_tail_lhs>	{ and }
-<paren_ambig_tail_lhs>	{ or }
-<paren_ambig_branch_lhs>	{ id }
-<paren_ambig_branch_lhs>	{ topiece, size, search, fact, pow, piece_lit }
-<paren_ambig_branch_lhs>	{ sqrt, rand, tosip, sip_lit }
-<paren_ambig_branch_lhs>	{ bill, take, copy, cut, tochars, chars_lit }
-<paren_ambig_branch_lhs>	{ ( }
-<paren_str_tail_lhs>	{ + }
-<paren_str_tail_lhs>	{ ) }
-<paren_str_tail_lhs>	{ ==, !=, >, <, >=, <= }
-<paren_dispatch_val>	{ id }
-<paren_dispatch_val>	{ topiece, size, search, fact, pow, piece_lit }
-<paren_dispatch_val>	{ sqrt, rand, tosip, sip_lit }
-<paren_dispatch_val>	{ bill, take, copy, cut, tochars, chars_lit }
-<paren_dispatch_val>	{ ( }
-<paren_piece_tail_val>	{ + }
-<paren_piece_tail_val>	{ - }
-<paren_piece_tail_val>	{ * }
-<paren_piece_tail_val>	{ ) }
-<paren_sip_tail_val>	{ + }
-<paren_sip_tail_val>	{ - }
-<paren_sip_tail_val>	{ * }
-<paren_sip_tail_val>	{ ) }
-<paren_str_tail_val>	{ + }
-<paren_str_tail_val>	{ ) }
-<paren_ambig_tail_val>	{ + }
-<paren_ambig_tail_val>	{ - }
-<paren_ambig_tail_val>	{ * }
-<paren_ambig_tail_val>	{ ) }
-<paren_ambig_branch_val>	{ id }
-<paren_ambig_branch_val>	{ topiece, size, search, fact, pow, piece_lit }
-<paren_ambig_branch_val>	{ sqrt, rand, tosip, sip_lit }
-<paren_ambig_branch_val>	{ bill, take, copy, cut, tochars, chars_lit }
-<paren_ambig_branch_val>	{ ( }
-<val_piece_tail>	{ + }
-<val_piece_tail>	{ - }
-<val_piece_tail>	{ * }
-<val_piece_tail>	{ / }
-<val_piece_tail>	{ % }
-<val_piece_tail>	{ and, or, ,, ;, ) }
-<val_sip_tail>	{ + }
-<val_sip_tail>	{ - }
-<val_sip_tail>	{ * }
-<val_sip_tail>	{ / }
-<val_sip_tail>	{ % }
-<val_sip_tail>	{ and, or, ,, ;, ) }
-<val_str_tail>	{ + }
-<val_str_tail>	{ and, or, ,, ;, ), +, ==, !=, >, <, >=, <= }
-<val_ambig_tail>	{ + }
-<val_ambig_tail>	{ - }
-<val_ambig_tail>	{ * }
-<val_ambig_tail>	{ / }
-<val_ambig_tail>	{ % }
-<val_ambig_tail>	{ and, or, ,, ;, ) }
-<paren_dispatch_val_piece>	{ id }
-<paren_dispatch_val_piece>	{ topiece, size, search, fact, pow, piece_lit }
-<paren_dispatch_val_piece>	{ ( }
-<paren_dispatch_val_sip>	{ id }
-<paren_dispatch_val_sip>	{ sqrt, rand, tosip, sip_lit }
-<paren_dispatch_val_sip>	{ ( }
-<paren_dispatch_val_str>	{ id }
-<paren_dispatch_val_str>	{ bill, take, copy, cut, tochars, chars_lit }
-<paren_dispatch_val_str>	{ ( }
-<paren_dispatch_lhs_no_lambda>	{ id }
-<paren_dispatch_lhs_no_lambda>	{ topiece, size, search, fact, pow, piece_lit }
-<paren_dispatch_lhs_no_lambda>	{ sqrt, rand, tosip, sip_lit }
-<paren_dispatch_lhs_no_lambda>	{ bill, take, copy, cut, tochars, chars_lit }
-<paren_dispatch_lhs_no_lambda>	{ ( }
-<lhs_bool_tail>	{ and }
-<lhs_bool_tail>	{ or }
-<lhs_bool_tail>	{ and, or, ,, ;, ) }
-<rel_op>	{ == }
-<rel_op>	{ != }
-<rel_op>	{ > }
-<rel_op>	{ < }
-<rel_op>	{ >= }
-<rel_op>	{ <= }
-<strict_chars_expr>	{ (, bill, take, copy, cut, tochars, chars_lit, id }
-<strict_chars_factor>	{ bill, take, copy, cut, tochars, chars_lit }
-<strict_chars_factor>	{ id }
-<strict_chars_factor>	{ ( }
-<strict_chars_add_tail>	{ + }
-<strict_chars_add_tail>	{ ,, ;, ), and, or, +, ==, !=, >, <, >=, <= }
-<strict_piece_expr>	{ (, topiece, size, search, fact, pow, piece_lit, id }
-<strict_piece_term>	{ (, topiece, size, search, fact, pow, piece_lit, id }
-<strict_piece_factor>	{ topiece, size, search, fact, pow, piece_lit }
-<strict_piece_factor>	{ id }
-<strict_piece_factor>	{ ( }
-<strict_piece_mult_tail>	{ * }
-<strict_piece_mult_tail>	{ / }
-<strict_piece_mult_tail>	{ % }
-<strict_piece_mult_tail>	{ +, -, ,, ;, ), and, or, *, /, %, ==, !=, >, <, >=, <= }
-<strict_piece_add_tail>	{ + }
-<strict_piece_add_tail>	{ - }
-<strict_piece_add_tail>	{ ,, ;, ), and, or, +, -, *, /, %, ==, !=, >, <, >=, <= }
-<strict_sip_expr>	{ (, id, sqrt, rand, tosip, sip_lit }
-<strict_sip_term>	{ (, id, sqrt, rand, tosip, sip_lit }
-<strict_sip_factor>	{ id }
-<strict_sip_factor>	{ sqrt, rand, tosip, sip_lit }
-<strict_sip_factor>	{ ( }
-<strict_sip_mult_tail>	{ * }
-<strict_sip_mult_tail>	{ / }
-<strict_sip_mult_tail>	{ +, -, ,, ;, ), and, or, *, /, %, ==, !=, >, <, >=, <= }
-<strict_sip_add_tail>	{ + }
-<strict_sip_add_tail>	{ - }
-<strict_sip_add_tail>	{ ,, ;, ), and, or, +, -, *, /, %, ==, !=, >, <, >=, <= }
-<ret_flag>	{ matches }
-<ret_flag>	{ toflag }
-<ret_flag>	{ flag_lit }
-<ret_chars>	{ bill }
-<ret_chars>	{ take }
-<ret_chars>	{ copy }
-<ret_chars>	{ cut }
-<ret_chars>	{ tochars }
-<ret_chars>	{ chars_lit }
-<ret_piece>	{ topiece }
-<ret_piece>	{ size }
-<ret_piece>	{ search }
-<ret_piece>	{ fact }
-<ret_piece>	{ pow }
-<ret_piece>	{ piece_lit }
-<ret_sip>	{ sqrt }
-<ret_sip>	{ rand }
-<ret_sip>	{ tosip }
-<ret_sip>	{ sip_lit }
-<ret_array>	{ append }
-<ret_array>	{ sort }
-<ret_array>	{ reverse }
-<ret_array>	{ remove }
-<strict_datas_expr>	{ [ }
-<strict_datas_expr>	{ id }
-<strict_datas_expr>	{ append, sort, reverse, remove }
-<strict_array_expr>	{ [ }
-<strict_array_expr>	{ id }
-<strict_array_expr>	{ append, sort, reverse, remove }
-<id>	{ id }
-<id_tail>	{ (, ,, ), ;, +, -, *, /, %, and, or, ==, !=, >, <, >=, <=, ] }
-<id_tail>	{ [, :, ,, ), ;, +, -, *, /, %, and, or, ==, !=, >, <, >=, <=, ] }
-<call_tailopt>	{ ( }
-<call_tailopt>	{ ,, ), ;, +, -, *, /, %, and, or, ==, !=, >, <, >=, <=, ] }
-<any_expr>	{ id }
-<any_expr>	{ topiece, size, search, fact, pow, piece_lit }
-<any_expr>	{ sqrt, rand, tosip, sip_lit }
-<any_expr>	{ bill, take, copy, cut, tochars, chars_lit }
-<any_expr>	{ matches, toflag, flag_lit }
-<any_expr>	{ ( }
-<any_expr>	{ not }
-<univ_ambig_tail>	{ + }
-<univ_ambig_tail>	{ - }
-<univ_ambig_tail>	{ * }
-<univ_ambig_tail>	{ / }
-<univ_ambig_tail>	{ % }
-<univ_ambig_tail>	{ ==, !=, >, <, >=, <= }
-<univ_ambig_tail>	{ and }
-<univ_ambig_tail>	{ or }
-<univ_ambig_tail>	{ ,, ), ; }
-<univ_ambig_branch>	{ id }
-<univ_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_ambig_branch>	{ sqrt, rand, tosip, sip_lit }
-<univ_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
-<univ_ambig_branch>	{ ( }
-<univ_ambig_numeric_branch>	{ id }
-<univ_ambig_numeric_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_ambig_numeric_branch>	{ sqrt, rand, tosip, sip_lit }
-<univ_ambig_numeric_branch>	{ ( }
-<univ_ambig_numeric_tail>	{ + }
-<univ_ambig_numeric_tail>	{ - }
-<univ_ambig_numeric_tail>	{ * }
-<univ_ambig_numeric_tail>	{ / }
-<univ_ambig_numeric_tail>	{ % }
-<univ_ambig_numeric_tail>	{ ==, !=, >, <, >=, <= }
-<univ_ambig_numeric_tail>	{ ,, ), ; }
-<univ_piece_tail>	{ + }
-<univ_piece_tail>	{ - }
-<univ_piece_tail>	{ * }
-<univ_piece_tail>	{ / }
-<univ_piece_tail>	{ % }
-<univ_piece_tail>	{ ==, !=, >, <, >=, <= }
-<univ_piece_tail>	{ ,, ), ; }
-<univ_sip_tail>	{ + }
-<univ_sip_tail>	{ - }
-<univ_sip_tail>	{ * }
-<univ_sip_tail>	{ / }
-<univ_sip_tail>	{ % }
-<univ_sip_tail>	{ ==, !=, >, <, >=, <= }
-<univ_sip_tail>	{ ,, ), ; }
-<univ_str_tail>	{ + }
-<univ_str_tail>	{ ==, !=, >, <, >=, <= }
-<univ_str_tail>	{ ,, ), ; }
-<univ_bool_tail>	{ and }
-<univ_bool_tail>	{ or }
-<univ_bool_tail>	{ ,, ), ; }
-<univ_paren_dispatch>	{ id }
-<univ_paren_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_paren_dispatch>	{ sqrt, rand, tosip, sip_lit }
-<univ_paren_dispatch>	{ bill, take, copy, cut, tochars, chars_lit }
-<univ_paren_dispatch>	{ matches, toflag, flag_lit }
-<univ_paren_dispatch>	{ not }
-<univ_paren_dispatch>	{ ( }
-<univ_paren_dispatch_numeric>	{ id }
-<univ_paren_dispatch_numeric>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_paren_dispatch_numeric>	{ sqrt, rand, tosip, sip_lit }
-<univ_paren_dispatch_numeric>	{ ( }
-<univ_paren_dispatch_piece>	{ id }
-<univ_paren_dispatch_piece>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_paren_dispatch_piece>	{ ( }
-<univ_paren_dispatch_sip>	{ id }
-<univ_paren_dispatch_sip>	{ sqrt, rand, tosip, sip_lit }
-<univ_paren_dispatch_sip>	{ ( }
-<univ_paren_dispatch_str>	{ id }
-<univ_paren_dispatch_str>	{ bill, take, copy, cut, tochars, chars_lit }
-<univ_paren_dispatch_str>	{ ( }
-<univ_paren_ambig_tail>	{ + }
-<univ_paren_ambig_tail>	{ - }
-<univ_paren_ambig_tail>	{ * }
-<univ_paren_ambig_tail>	{ / }
-<univ_paren_ambig_tail>	{ % }
-<univ_paren_ambig_tail>	{ ==, !=, >, <, >=, <= }
-<univ_paren_ambig_tail>	{ ) }
-<univ_paren_ambig_branch>	{ id }
-<univ_paren_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_paren_ambig_branch>	{ sqrt, rand, tosip, sip_lit }
-<univ_paren_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
-<univ_paren_ambig_branch>	{ ( }
-<univ_paren_ambig_numeric_tail>	{ + }
-<univ_paren_ambig_numeric_tail>	{ - }
-<univ_paren_ambig_numeric_tail>	{ * }
-<univ_paren_ambig_numeric_tail>	{ / }
-<univ_paren_ambig_numeric_tail>	{ % }
-<univ_paren_ambig_numeric_tail>	{ ) }
-<univ_paren_ambig_numeric_branch>	{ id }
-<univ_paren_ambig_numeric_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<univ_paren_ambig_numeric_branch>	{ sqrt, rand, tosip, sip_lit }
-<univ_paren_ambig_numeric_branch>	{ ( }
-<univ_paren_piece_tail>	{ + }
-<univ_paren_piece_tail>	{ - }
-<univ_paren_piece_tail>	{ * }
-<univ_paren_piece_tail>	{ / }
-<univ_paren_piece_tail>	{ % }
-<univ_paren_piece_tail>	{ ) }
-<univ_paren_sip_tail>	{ + }
-<univ_paren_sip_tail>	{ - }
-<univ_paren_sip_tail>	{ * }
-<univ_paren_sip_tail>	{ / }
-<univ_paren_sip_tail>	{ ) }
-<univ_paren_str_tail>	{ + }
-<univ_paren_str_tail>	{ ) }
-<strict_piece_chars_expr>	{ id }
-<strict_piece_chars_expr>	{ topiece, size, search, fact, pow, piece_lit }
-<strict_piece_chars_expr>	{ bill, take, copy, cut, tochars, chars_lit }
-<strict_piece_chars_expr>	{ ( }
-<pc_piece_tail>	{ *, /, %, +, -, ) }
-<pc_chars_tail>	{ +, ) }
-<pc_ambig_tail>	{ + }
-<pc_ambig_tail>	{ - }
-<pc_ambig_tail>	{ * }
-<pc_ambig_tail>	{ / }
-<pc_ambig_tail>	{ % }
-<pc_ambig_tail>	{ ) }
-<pc_ambig_branch>	{ id }
-<pc_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<pc_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
-<pc_ambig_branch>	{ ( }
-<pc_paren_dispatch>	{ id }
-<pc_paren_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
-<pc_paren_dispatch>	{ bill, take, copy, cut, tochars, chars_lit }
-<pc_paren_dispatch>	{ ( }
-<pc_paren_piece_tail_inner>	{ + }
-<pc_paren_piece_tail_inner>	{ - }
-<pc_paren_piece_tail_inner>	{ * }
-<pc_paren_piece_tail_inner>	{ / }
-<pc_paren_piece_tail_inner>	{ % }
-<pc_paren_piece_tail_inner>	{ ) }
-<pc_paren_chars_tail_inner>	{ + }
-<pc_paren_chars_tail_inner>	{ ) }
-<pc_paren_ambig_tail_inner>	{ + }
-<pc_paren_ambig_tail_inner>	{ - }
-<pc_paren_ambig_tail_inner>	{ * }
-<pc_paren_ambig_tail_inner>	{ / }
-<pc_paren_ambig_tail_inner>	{ % }
-<pc_paren_ambig_tail_inner>	{ ) }
-<pc_paren_ambig_branch>	{ id }
-<pc_paren_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
-<pc_paren_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
-<pc_paren_ambig_branch>	{ ( }
