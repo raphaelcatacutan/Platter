@@ -176,12 +176,12 @@
 176	<local_decl>	=>	id	<local_id_tail>						
 177	<local_decl>	=>	λ							
 178	<local_id_tail>	=>	of	<table_declare>	;	<local_decl>				
-179	<local_id_tail>	=>	[	<]_tail>						
+179	<local_id_tail>	=>	[	<endsb_tail>						
 180	<local_id_tail>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements>			
 181	<local_id_tail>	=>	<assignment_op>	<value>	;	<statements>				
 182	<local_id_tail>	=>	<tail1>	;	<statements>					
-183	<]_tail>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl>		
-184	<]_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>			
+183	<endsb_tail>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl>	
+184	<endsb_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>			
 185	<assignment_op>	=>	=							
 186	<assignment_op>	=>	+=							
 187	<assignment_op>	=>	-=							
@@ -250,13 +250,13 @@
 250	<local_decl_menu>	=>	flag	<flag_decl>	<local_decl_menu>					
 251	<local_decl_menu>	=>	id	<local_id_tail_menu>						
 252	<local_decl_menu>	=>	λ							
-253	<local_id_tail_menu>	=>	of	<table_declare>	;	<local_decl_menu>				
-254	<local_id_tail_menu>	=>	[	<]_tail_menu>						
+253	<local_id_tail_menu>	=>	of	<table_declare>		;	<local_decl_menu>			
+254	<local_id_tail_menu>	=>	[	<endsb_tail_menu>						
 255	<local_id_tail_menu>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_menu>			
 256	<local_id_tail_menu>	=>	<assignment_op>	<value>	;	<statements_menu>				
 257	<local_id_tail_menu>	=>	<tail1>	;	<statements_menu>					
-258	<]_tail_menu>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_menu>		
-259	<]_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>			
+258	<endsb_tail_menu>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl_menu>	
+259	<endsb_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>			
 260	<looping_st>	=>	<loop_pass>							
 261	<looping_st>	=>	<loop_repeat>							
 262	<looping_st>	=>	<loop_order>							
@@ -273,12 +273,12 @@
 273	<local_decl_loop>	=>	id	<local_id_tail_loop>						
 274	<local_decl_loop>	=>	λ							
 275	<local_id_tail_loop>	=>	of	<table_declare>	;	<local_decl_loop>				
-276	<local_id_tail_loop>	=>	[	<]_tail_loop>						
+276	<local_id_tail_loop>	=>	[	<endsb_tail_loop>						
 277	<local_id_tail_loop>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_loop>			
 278	<local_id_tail_loop>	=>	<assignment_op>	<value>	;	<statements_loop>				
 279	<local_id_tail_loop>	=>	<tail1>	;	<statements_loop>					
-280	<]_tail_loop>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_loop>		
-281	<]_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>			
+280	<endsb_tail_loop>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl_loop>	
+281	<endsb_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>			
 282	<statements_loop>	=>	<id_statements_loop>	<statements_loop>						
 283	<statements_loop>	=>	<built_in_rec_call>	;	<statements_loop>					
 284	<statements_loop>	=>	<conditional_st_loop>	<statements_loop>						
