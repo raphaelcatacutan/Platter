@@ -472,6 +472,9 @@
               break;
             }
 
+            console.log(JSON.stringify(parseTable[top], null, 4))
+            console.log(curr)
+            console.log("----------------")
             if (top === curr) {
               stack.pop();
               const treeNode = treeStack.pop();
@@ -487,6 +490,8 @@
               
               if (!rule) {
                 const expectedArray = [...getFirstSeq(stack.reverse())].filter(t => t !== 'λ');
+                // const expectedArray = Object.keys(parseTable[top])
+                console.log(stack.join(" "))
                 const expectedMsg = expectedArray.length > 0 
                   ? `expected [${expectedArray.map(e => `'${e}'`).join(', ')}]`
                   : 'no valid tokens in current context';
@@ -510,8 +515,8 @@
                 currentTreeNode.children.push({ symbol: 'λ', children: [], isTerminal: true });
               }
               const ruleStr = rule.length && rule[0] !== 'λ' 
-                ? `Expand ${top} → ${rule.join(' ')}` 
-                : `Expand ${top} → ε (epsilon)`;
+                ? `Expand '${top}' → ${rule.join(' ')}` 
+                : `Expand '${top}' → ε (epsilon)`;
               appendLog(sView, iView, ruleStr);
             }
             else {

@@ -1,0 +1,58 @@
+piece of counter;
+flag of isReady;                                                                                                                      
+sip of a,b,c;
+piece of globalVariable;
+
+chars of name = "John Doe";
+sip of x = 1.25, y = 3.50;
+piece of x = 5, y, z = 15;
+flag of isActive = up;
+piece of y = 5;
+
+piece[] of numbers;
+sip[][] of matrix;
+chars[] of words;
+flag[] of toggles;
+Student[] of classList;
+
+piece[] of anotherArray = [4, 5, 6];
+piece[][] of matrix = [];
+piece[][] of matrix = [
+  [1, 2, 3],
+  [4, 5, 6]
+];
+chars[] of texts = [
+    "A literal chars",
+    "Another literal chars"
+];
+table of Student = [
+     chars of name;
+     piece of age;
+];
+Student[] of PLM = [
+    [
+        name = "Maria";
+        age = 10;
+    ],
+    [
+        name = "James";
+        age = 20;
+    ]
+];
+
+start(){
+piece of globalVariable;
+# valid local identifier override
+piece of
+func;
+nums = anotherArray;
+addArr = sipArray[0]+
+sipArray[1]+
+sipArray[2]+
+matrix[examplePiece]+
+pieceArray [1] +
+matrix[0][1]+
+sipArray[0];
+
+}
+

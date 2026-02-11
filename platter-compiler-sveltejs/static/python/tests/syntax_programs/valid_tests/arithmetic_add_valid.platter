@@ -1,0 +1,6 @@
+start() {
+	piece of a = id + 1;
+	sip of a =  id + 1.0;
+	chars of a = id + "chars";
+	flag of a = up;
+}

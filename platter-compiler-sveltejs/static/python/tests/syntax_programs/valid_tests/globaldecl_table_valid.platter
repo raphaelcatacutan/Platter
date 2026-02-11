@@ -1,0 +1,52 @@
+table of Vector3= [
+  piece of x;
+  piece of y;
+  piece of z;
+];
+table of Course = [ 
+  chars of title; 
+  sip of grade; 
+  flag of isActive; 
+];
+table of Instructor = [ chars of name; ];
+table of Instructor = [
+  chars  of name;
+];
+table of Subject = [
+  chars of code;
+  Instructor of teacher;
+];
+table of Student = [ chars of name; piece of age; ];
+table of School = [ chars of schoolName; Student[] of students; ];
+Student of example;
+Course of existingPrototype;
+Student of s1;
+Student of repeatedPrototype;
+Vector3 of v1; Vector3 of v2;
+Vector3 of _;
+Student of uninitialized;
+Student of normal = [ 
+   name = "Maria"; 
+    age = 18; 
+];
+Course of notOrdered = [  
+  grade = 1.75; 
+  title = "Intro to CS"; 
+];
+Instructor of empty = [ ];
+Vector3 of incomplete = [ x = 0; ];
+Instructor of p1 = [
+        name = "Jacob";
+], p2 = [
+        name = "Andrew";
+];
+
+start(){
+	tableAdd = s1:name+
+s1:course:title+
+c1:title+
+s1:age+
+s1:course:grade;
+
+
+}

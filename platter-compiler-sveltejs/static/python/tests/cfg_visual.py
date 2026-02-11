@@ -6,9 +6,26 @@ used in cfg_visual.html. It provides better error messages by computing
 context-aware expected tokens based on the full parsing stack.
 """
 
+import logging as log
+from pprint import pprint
+import subprocess
 from app.lexer.token import Token
 from app.lexer.lexer import Lexer
+from app.parser.parser_program import Parser
 from app.utils.FileHandler import run_file
+
+# Global flag to enable/disable clipboard copy on syntax errors
+COPY_ERROR_TO_CLIPBOARD = True
+
+
+def set_clipboard(text):
+    """Copy text to clipboard on Windows."""
+    if not COPY_ERROR_TO_CLIPBOARD:
+        return
+    try:
+        subprocess.run('clip', input=text.encode('utf-16le'), check=True, shell=True)
+    except Exception:
+        pass  # Silently fail if clipboard isn't available
 
 
 class TableDrivenParser:
@@ -40,6 +57,7 @@ class TableDrivenParser:
         
         # Parse grammar from TSV
         self.parse_grammar(grammar_file)
+        self.check_undefined_non_terminals()
         self.build_ll1_table()
     
     def parse_grammar(self, grammar_file):
@@ -82,6 +100,25 @@ class TableDrivenParser:
                 for token in rhs:
                     if token.startswith('<') and token not in self.non_terminals:
                         self.terminals.add(token)
+    
+    def check_undefined_non_terminals(self):
+        """Check for non-terminals that are referenced but not defined."""
+        # Collect all symbols that look like non-terminals from RHS
+        referenced = set()
+        for lhs in self.grammar.keys():
+            for rhs in self.grammar[lhs]:
+                for token in rhs:
+                    if token.startswith('<') and token.endswith('>'):
+                        referenced.add(token)
+        
+        # Find undefined non-terminals (referenced but not in grammar)
+        undefined = referenced - self.non_terminals
+        
+        if undefined:
+            print("\n⚠️  Undefined Non-Terminals (referenced but not defined):")
+            for nt in sorted(undefined):
+                print(f"   - {nt}")
+            print()
     
     def build_ll1_table(self):
         """Build LL(1) parsing table with FIRST/FOLLOW sets."""
@@ -156,7 +193,7 @@ class TableDrivenParser:
         result = set()
         all_nullable = True
         
-        for symbol in sequence:
+        for i, symbol in enumerate(sequence):
             if symbol == 'λ' or symbol == '':
                 continue
             
@@ -214,11 +251,11 @@ class TableDrivenParser:
                 if current == '$':
                     return True, "No Syntax Error"
                 else:
-                    expected = self.get_expected_tokens(stack)
-                    expected_str = ', '.join([f"'{t}'" for t in expected])
-                    error_msg = f"Unexpected '{current}', expected {expected_str}"
-                    trace.append(f"{stack_view:<40} {input_view:<30} ERROR: {error_msg:<50}")
-                    return False, "\n".join(trace)
+                    token_obj = self.tokens[cursor] if cursor < len(self.tokens) else self.tokens[-1]
+                    error_msg = f"Syntax Error: Unexpected '{current}' at line {token_obj.line}, col {token_obj.col}. Expected end of input."
+                    trace.append(f"{stack_view:<40} {input_view:<30} ERROR: unexpected '{current}', expected end of input")
+                    set_clipboard(f":{token_obj.line}:{token_obj.col}")
+                    return False, error_msg
             
             # Match terminal
             if top == current:
@@ -231,10 +268,13 @@ class TableDrivenParser:
                 rule = self.parse_table.get(top, {}).get(current)
                 
                 if not rule:
-                    expected = self.get_expected_tokens(stack)
-                    expected_list = ', '.join([f"'{t}'" for t in expected])
+                    # Compute expected tokens from FIRST of reversed stack
+                    expected = self.get_expected_tokens(stack, debug=False)
+                    
+                    expected_list = ', '.join([f"'{t}'" for t in sorted(expected)])
                     token_obj = self.tokens[cursor] if cursor < len(self.tokens) else self.tokens[-1]
                     error_msg = f"Syntax Error: Unexpected '{current}' at line {token_obj.line}, col {token_obj.col}. Expected {expected_list}."
+                    set_clipboard(f":{token_obj.line}:{token_obj.col}")
                     return False, error_msg
                 
                 stack.pop()
@@ -247,29 +287,73 @@ class TableDrivenParser:
                 rule_str = f"Expand {top} → {' '.join(rule) if rule and rule[0] != 'λ' else 'ε'}"
                 trace.append(f"{stack_view:<40} {input_view:<30} {rule_str:<50}")
             else:
-                # Unexpected situation
-                expected = self.get_expected_tokens(stack)
+                # Terminal mismatch: include the literal terminal AND alternatives from nullable NTs
+                alternatives = self.get_expected_tokens(stack, debug=False, skip_top=True)
+                expected = sorted(set([top] + alternatives))
+                
                 expected_list = ', '.join([f"'{t}'" for t in expected])
                 token_obj = self.tokens[cursor] if cursor < len(self.tokens) else self.tokens[-1]
                 error_msg = f"Syntax Error: Unexpected '{current}' at line {token_obj.line}, col {token_obj.col}. Expected {expected_list}."
+                trace.append(f"{stack_view:<40} {input_view:<30} ERROR: unexpected '{current}', expected {expected_list}")
+                set_clipboard(f":{token_obj.line}:{token_obj.col}")
                 return False, error_msg
         
         return False, "Unexpected end of parse"
     
-    def get_expected_tokens(self, stack):
+    def get_expected_tokens(self, stack, debug=False, skip_top=False):
         """Compute expected tokens based on current stack (context-aware).
         
         This is the key difference from the recursive descent parser!
         We compute FIRST of the remaining parse sequence.
+        
+        Args:
+            stack: The parser stack
+            debug: Print debug information
+            skip_top: Skip the top element and collect from nullable NTs only
         """
         # Reverse stack to get proper sequence
         sequence = list(reversed(stack))
+        
+        # For terminal mismatch, collect FIRST from nullable NTs only, don't continue to next terminal
+        if skip_top and len(sequence) > 0:
+            result = set()
+            # Skip the mismatched terminal
+            for symbol in sequence[1:]:
+                # Stop at next terminal (don't include it)
+                if symbol not in self.non_terminals and symbol not in ('λ', '', '$'):
+                    break
+                # Collect FIRST from non-terminals
+                if symbol in self.non_terminals:
+                    first_sym = self.first_sets.get(symbol, set())
+                    result.update(first_sym - {'λ'})
+                    # Stop if not nullable
+                    if 'λ' not in first_sym:
+                        break
+            
+            if debug:
+                print(f"\n   DEBUG get_expected_tokens (skip_top=True):")
+                print(f"     Original stack (bottom→top): {' → '.join(stack)}")
+                print(f"     Collected from nullable NTs: {result}")
+            
+            return [t for t in result if t not in ('λ', '', '$')]
+        
+        # Normal case: compute FIRST of full sequence
         expected = self.get_first_seq(sequence)
         
-        # Filter out lambda
-        return sorted([t for t in expected if t not in ('λ', '')])
+        if debug:
+            print(f"\n   DEBUG get_expected_tokens:")
+            print(f"     Original stack (bottom→top): {' → '.join(stack)}")
+            print(f"     Sequence for FIRST: {' → '.join(sequence)}")
+            print(f"     FIRST result: {expected}")
+        
+        # Filter out lambda and $
+        result = [t for t in expected if t not in ('λ', '', '$')]
+        if debug:
+            print(f"     Final expected tokens: {sorted(result)}")
+        return result
     
     def get_expected(self):
+        """Get list of expected tokens at the point of syntax error."""
         # Tokenize input
         token_strings = [t.value if t.type == 'EOF' else t.type for t in self.tokens]
         
@@ -291,6 +375,7 @@ class TableDrivenParser:
                 if current == '$':
                     return []  # No error
                 else:
+                    # Use FIRST of stack for context-aware expected tokens
                     expected = self.get_expected_tokens(stack)
                     return expected
             
@@ -303,6 +388,7 @@ class TableDrivenParser:
                 rule = self.parse_table.get(top, {}).get(current)
                 
                 if not rule:
+                    # Use FIRST of stack for context-aware expected tokens
                     expected = self.get_expected_tokens(stack)
                     return expected
                 
@@ -313,7 +399,7 @@ class TableDrivenParser:
                     for i in range(len(rule) - 1, -1, -1):
                         stack.append(rule[i])
             else:
-                # Unexpected situation
+                # Terminal mismatch: compute context-aware expected tokens
                 expected = self.get_expected_tokens(stack)
                 return expected
         
@@ -322,10 +408,10 @@ class TableDrivenParser:
 
 if __name__ == "__main__":
     """Test the table-driven parser."""
-    grammar_file = "app/utils/sources/test.tsv"
-    filepath = "./tests/sample_program.txt"
 
+    filepath = "./tests/sample_program.txt"
     include_whitespace = False # choice == 'y'
+
 
     with open(filepath, "r", encoding="utf-8") as f:
         source = f.read()
@@ -338,11 +424,117 @@ if __name__ == "__main__":
         if t.type not in ("comment", "space", "newline", "tab") or include_whitespace
     ]
     
+    grammar_file = "app/utils/sources/test.tsv"
     try:
+        print("\n\nLEXICAL:")
+        pprint(tokens)
+        print((" ".join(t.type for t in tokens if not "comment" in t.type )))
+        set_clipboard((" ".join(t.type for t in tokens if not "comment" in t.type )))   
         parser = TableDrivenParser(grammar_file, tokens)
-        success, message = parser.parse()
+        a, html_error = parser.parse()
+        print("\n\nHTML SYNTAX:")
+        print(html_error)
+        filepath = "parser.platter"
         
-        print(message)
+        
+        print("\n\nPYTHON SYNTAX:")
+        log.disable(log.WARNING) 
+        parser = Parser(tokens)
+        python_error = None
+        try:
+            parser.parse_program()
+            python_error = "No Syntax Error"
+            print(python_error)
+        except SyntaxError as e:
+            python_error = str(e)
+            print(python_error)
+
+
+        # Compare the two error messages semantically
+        def parse_syntax_error(error_msg):
+            """Parse syntax error message and extract components."""
+            import re
+            if error_msg == "No Syntax Error":
+                return None
+            
+            # Pattern: Syntax Error: Unexpected 'X' at line N, col M. Expected ...
+            match = re.match(
+                r"Syntax Error: Unexpected '([^']+)' at line (\d+), col (\d+)\. Expected (.+)\.",
+                error_msg
+            )
+            if not match:
+                return None
+            
+            unexpected = match.group(1)
+            line = int(match.group(2))
+            col = int(match.group(3))
+            expected_str = match.group(4)
+            
+            # Parse expected tokens (may be quoted or not)
+            expected_tokens = set()
+            for token in re.findall(r"'([^']+)'", expected_str):
+                expected_tokens.add(token)
+            
+            return {
+                'unexpected': unexpected,
+                'line': line,
+                'col': col,
+                'expected': expected_tokens
+            }
+        
+        def compare_syntax_errors(html_error, python_error):
+            """Compare two syntax error messages semantically."""
+            html_parsed = parse_syntax_error(html_error)
+            python_parsed = parse_syntax_error(python_error)
+            
+            # Both are "No Syntax Error"
+            if html_parsed is None and python_parsed is None:
+                if html_error == python_error == "No Syntax Error":
+                    return True, "✓ Both parsers succeeded (no errors)"
+                return False, "✗ Could not parse one or both error messages"
+            
+            # One has error, other doesn't
+            if html_parsed is None or python_parsed is None:
+                return False, "✗ One parser has error, the other doesn't"
+            
+            # Compare components
+            matches = []
+            differences = []
+            
+            if html_parsed['unexpected'] == python_parsed['unexpected']:
+                matches.append(f"✓ Unexpected token: '{html_parsed['unexpected']}'")
+            else:
+                differences.append(f"✗ Unexpected token differs: '{html_parsed['unexpected']}' vs '{python_parsed['unexpected']}'")
+            
+            if html_parsed['line'] == python_parsed['line']:
+                matches.append(f"✓ Line: {html_parsed['line']}")
+            else:
+                differences.append(f"✗ Line differs: {html_parsed['line']} vs {python_parsed['line']}")
+            
+            if html_parsed['col'] == python_parsed['col']:
+                matches.append(f"✓ Column: {html_parsed['col']}")
+            else:
+                differences.append(f"✗ Column differs: {html_parsed['col']} vs {python_parsed['col']}")
+            
+            if html_parsed['expected'] == python_parsed['expected']:
+                matches.append(f"✓ Expected tokens: {sorted(html_parsed['expected'])}")
+            else:
+                differences.append(f"✗ Expected tokens differ:")
+                differences.append(f"  HTML:   {sorted(html_parsed['expected'])}")
+                differences.append(f"  Python: {sorted(python_parsed['expected'])}")
+            
+            are_same = len(differences) == 0
+            
+            result = "\n".join(matches + differences)
+            return are_same, result
+        
+        # Perform comparison
+        are_same, comparison = compare_syntax_errors(html_error, python_error)
+        if are_same:
+            print("\nIDENTICAL")
+        else:
+            print("\nDIFFERENT")
+        
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback

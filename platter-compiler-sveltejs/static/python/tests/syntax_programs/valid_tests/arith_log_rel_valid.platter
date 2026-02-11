@@ -1,0 +1,28 @@
+start() {
+    flag of b = not a and not b;
+    flag of b = not (up or down);
+    flag of b = up or not not down;
+    flag of b = not a or not b and c or not x ;
+    flag of b = a or b ;
+    flag of b = not y and not z ;  
+    flag of b = upArray[0] or upArray[0] ;
+    
+    flag of b = a == 3; 
+	flag of b = "Hello" == "Hello";
+	# flag of b = (x <= y) == (x == z);  		paren error
+	flag of b = tosip(p) <= r;
+	# flag of b = (a>b)==(b<p);					paren error
+	flag of b = flagArray[0] != flagArray[1];
+
+
+	bill(tochars(x + c * y));
+	bill(tochars((x - y) % num   ));
+	bill(tochars(x / num + y  ));
+	bill(tochars((c - num) * (x - y)   ));
+	bill(tochars(sip2 / sip1 + sip3   ));
+	bill(tochars((sip3 - sip2) * sip1 ));
+	bill(tochars((x % c) + (y % num) ));
+	bill(tochars(numArray[0] + numArray[1] ));
+    a = numArray[0] + sipArray[0];
+    
+}

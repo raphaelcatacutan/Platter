@@ -1,0 +1,3 @@
+start(){
+	flag of a = id and (1+2) != (1-(3));
+}

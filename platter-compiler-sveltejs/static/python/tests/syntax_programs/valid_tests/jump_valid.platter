@@ -1,0 +1,52 @@
+start(){
+    pass(a = 3; a-=1; a > 0){
+       next;
+  }
+  repeat(up){
+       next;
+  }
+  order{
+       next;
+  } repeat(a > 5);
+  pass(a = 3; a-=1; a > 0){
+       check(y == 3){
+            next;
+       }
+  }
+  repeat(up){
+       menu("a"){
+            choice "b":
+                 next;
+      }
+  }
+
+  pass(y = 5; y-=1; y >= 0){
+       stop;
+  }
+  repeat(up){
+       stop;
+  }
+  order{
+       stop;
+  } repeat(x > 5);
+  pass(y = 5; y-=1; y >= 0){
+       check(y == 3){
+            stop;
+       }
+  }
+  menu(1){
+      choice 1:
+            stop;
+      usual: 
+           check(x == y){
+                stop;
+            }
+            stop;
+  }
+  repeat(up){
+       menu("a"){
+            choice "b":
+                 stop;
+      }
+  }
+}
