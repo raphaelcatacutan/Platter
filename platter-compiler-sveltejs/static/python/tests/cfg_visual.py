@@ -6,10 +6,12 @@ used in cfg_visual.html. It provides better error messages by computing
 context-aware expected tokens based on the full parsing stack.
 """
 
+import logging as log
 from pprint import pprint
 import subprocess
 from app.lexer.token import Token
 from app.lexer.lexer import Lexer
+from app.parser.parser_program import Parser
 from app.utils.FileHandler import run_file
 
 # Global flag to enable/disable clipboard copy on syntax errors
@@ -429,9 +431,110 @@ if __name__ == "__main__":
         print((" ".join(t.type for t in tokens if not "comment" in t.type )))
         set_clipboard((" ".join(t.type for t in tokens if not "comment" in t.type )))   
         parser = TableDrivenParser(grammar_file, tokens)
-        a, e = parser.parse()
-        print("\n\nSYNTAX:")
-        print(e)
+        a, html_error = parser.parse()
+        print("\n\nHTML SYNTAX:")
+        print(html_error)
+        filepath = "parser.platter"
+        
+        
+        print("\n\nPYTHON SYNTAX:")
+        log.disable(log.WARNING) 
+        parser = Parser(tokens)
+        python_error = None
+        try:
+            parser.parse_program()
+            python_error = "No Syntax Error"
+            print(python_error)
+        except SyntaxError as e:
+            python_error = str(e)
+            print(python_error)
+
+
+        # Compare the two error messages semantically
+        def parse_syntax_error(error_msg):
+            """Parse syntax error message and extract components."""
+            import re
+            if error_msg == "No Syntax Error":
+                return None
+            
+            # Pattern: Syntax Error: Unexpected 'X' at line N, col M. Expected ...
+            match = re.match(
+                r"Syntax Error: Unexpected '([^']+)' at line (\d+), col (\d+)\. Expected (.+)\.",
+                error_msg
+            )
+            if not match:
+                return None
+            
+            unexpected = match.group(1)
+            line = int(match.group(2))
+            col = int(match.group(3))
+            expected_str = match.group(4)
+            
+            # Parse expected tokens (may be quoted or not)
+            expected_tokens = set()
+            for token in re.findall(r"'([^']+)'", expected_str):
+                expected_tokens.add(token)
+            
+            return {
+                'unexpected': unexpected,
+                'line': line,
+                'col': col,
+                'expected': expected_tokens
+            }
+        
+        def compare_syntax_errors(html_error, python_error):
+            """Compare two syntax error messages semantically."""
+            html_parsed = parse_syntax_error(html_error)
+            python_parsed = parse_syntax_error(python_error)
+            
+            # Both are "No Syntax Error"
+            if html_parsed is None and python_parsed is None:
+                if html_error == python_error == "No Syntax Error":
+                    return True, "✓ Both parsers succeeded (no errors)"
+                return False, "✗ Could not parse one or both error messages"
+            
+            # One has error, other doesn't
+            if html_parsed is None or python_parsed is None:
+                return False, "✗ One parser has error, the other doesn't"
+            
+            # Compare components
+            matches = []
+            differences = []
+            
+            if html_parsed['unexpected'] == python_parsed['unexpected']:
+                matches.append(f"✓ Unexpected token: '{html_parsed['unexpected']}'")
+            else:
+                differences.append(f"✗ Unexpected token differs: '{html_parsed['unexpected']}' vs '{python_parsed['unexpected']}'")
+            
+            if html_parsed['line'] == python_parsed['line']:
+                matches.append(f"✓ Line: {html_parsed['line']}")
+            else:
+                differences.append(f"✗ Line differs: {html_parsed['line']} vs {python_parsed['line']}")
+            
+            if html_parsed['col'] == python_parsed['col']:
+                matches.append(f"✓ Column: {html_parsed['col']}")
+            else:
+                differences.append(f"✗ Column differs: {html_parsed['col']} vs {python_parsed['col']}")
+            
+            if html_parsed['expected'] == python_parsed['expected']:
+                matches.append(f"✓ Expected tokens: {sorted(html_parsed['expected'])}")
+            else:
+                differences.append(f"✗ Expected tokens differ:")
+                differences.append(f"  HTML:   {sorted(html_parsed['expected'])}")
+                differences.append(f"  Python: {sorted(python_parsed['expected'])}")
+            
+            are_same = len(differences) == 0
+            
+            result = "\n".join(matches + differences)
+            return are_same, result
+        
+        # Perform comparison
+        are_same, comparison = compare_syntax_errors(html_error, python_error)
+        if are_same:
+            print("\nIDENTICAL")
+        else:
+            print("\nDIFFERENT")
+        
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
