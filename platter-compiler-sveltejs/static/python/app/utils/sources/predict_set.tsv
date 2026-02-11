@@ -640,3 +640,41 @@
 <univ_paren_sip_tail>	{ ) }
 <univ_paren_str_tail>	{ + }
 <univ_paren_str_tail>	{ ) }
+<strict_piece_chars_expr>	{ id }
+<strict_piece_chars_expr>	{ topiece, size, search, fact, pow, piece_lit }
+<strict_piece_chars_expr>	{ bill, take, copy, cut, tochars, chars_lit }
+<strict_piece_chars_expr>	{ ( }
+<pc_piece_tail>	{ *, /, %, +, -, ) }
+<pc_chars_tail>	{ +, ) }
+<pc_ambig_tail>	{ + }
+<pc_ambig_tail>	{ - }
+<pc_ambig_tail>	{ * }
+<pc_ambig_tail>	{ / }
+<pc_ambig_tail>	{ % }
+<pc_ambig_tail>	{ ) }
+<pc_ambig_branch>	{ id }
+<pc_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<pc_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<pc_ambig_branch>	{ ( }
+<pc_paren_dispatch>	{ id }
+<pc_paren_dispatch>	{ topiece, size, search, fact, pow, piece_lit }
+<pc_paren_dispatch>	{ bill, take, copy, cut, tochars, chars_lit }
+<pc_paren_dispatch>	{ ( }
+<pc_paren_piece_tail_inner>	{ + }
+<pc_paren_piece_tail_inner>	{ - }
+<pc_paren_piece_tail_inner>	{ * }
+<pc_paren_piece_tail_inner>	{ / }
+<pc_paren_piece_tail_inner>	{ % }
+<pc_paren_piece_tail_inner>	{ ) }
+<pc_paren_chars_tail_inner>	{ + }
+<pc_paren_chars_tail_inner>	{ ) }
+<pc_paren_ambig_tail_inner>	{ + }
+<pc_paren_ambig_tail_inner>	{ - }
+<pc_paren_ambig_tail_inner>	{ * }
+<pc_paren_ambig_tail_inner>	{ / }
+<pc_paren_ambig_tail_inner>	{ % }
+<pc_paren_ambig_tail_inner>	{ ) }
+<pc_paren_ambig_branch>	{ id }
+<pc_paren_ambig_branch>	{ topiece, size, search, fact, pow, piece_lit }
+<pc_paren_ambig_branch>	{ bill, take, copy, cut, tochars, chars_lit }
+<pc_paren_ambig_branch>	{ ( }

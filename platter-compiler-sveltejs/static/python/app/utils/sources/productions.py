@@ -1,20 +1,3 @@
-def program(self):
-    self.appendF(FIRST_SET["<program>"])
-    log.info("Enter: " + self.tokens[self.pos].type)
-    log.info("STACK: " + str(self.error_arr))
-
-    """    1 <program>	=>	<global_decl>	<recipe_decl>	start	(	)	<platter>    """
-    if self.tokens[self.pos].type in PREDICT_SET["<program>"]:
-        self.global_decl()
-        self.recipe_decl()
-        self.parse_token("start")
-        self.parse_token("(")
-        self.parse_token(")")
-        self.platter()
-    else: self.parse_token(self.error_arr)
-
-    log.info("Exit: " + self.tokens[self.pos].type) # J
-
 def global_decl(self):
     self.appendF(FIRST_SET["<global_decl>"])
     log.info("Enter: " + self.tokens[self.pos].type)
@@ -2055,11 +2038,11 @@ def cond_menu(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    229 <cond_menu>	=>	menu	(	<any_expr>	)	<menu_platter>    """
+    """    229 <cond_menu>	=>	menu	(	<strict_piece_chars_expr>	)	<menu_platter>    """
     if self.tokens[self.pos].type in PREDICT_SET["<cond_menu>"]:
         self.parse_token("menu")
         self.parse_token("(")
-        self.any_expr()
+        self.strict_piece_chars_expr()
         self.parse_token(")")
         self.menu_platter()
     else: self.parse_token(self.error_arr)
@@ -2676,11 +2659,11 @@ def cond_menu_loop(self):
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    296 <cond_menu_loop>	=>	menu	(	<any_expr>	)	<menu_loop_platter>    """
+    """    296 <cond_menu_loop>	=>	menu	(	<strict_piece_chars_expr>	)	<menu_loop_platter>    """
     if self.tokens[self.pos].type in PREDICT_SET["<cond_menu_loop>"]:
         self.parse_token("menu")
         self.parse_token("(")
-        self.any_expr()
+        self.strict_piece_chars_expr()
         self.parse_token(")")
         self.menu_loop_platter()
     else: self.parse_token(self.error_arr)
@@ -5339,6 +5322,298 @@ def univ_paren_str_tail(self):
     elif self.tokens[self.pos].type in PREDICT_SET["<univ_paren_str_tail>_1"]:
         self.parse_token(")")
         self.univ_str_tail()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def strict_piece_chars_expr(self):
+    self.appendF(FIRST_SET["<strict_piece_chars_expr>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    666 <strict_piece_chars_expr>	=>	<id>	<pc_ambig_tail>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>"]:
+        self.id_()
+        self.pc_ambig_tail()
+
+        """    667 <strict_piece_chars_expr>	=>	<ret_piece>	<pc_piece_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_1"]:
+        self.ret_piece()
+        self.pc_piece_tail()
+
+        """    668 <strict_piece_chars_expr>	=>	<ret_chars>	<pc_chars_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_2"]:
+        self.ret_chars()
+        self.pc_chars_tail()
+
+        """    669 <strict_piece_chars_expr>	=>	(	<pc_paren_dispatch>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_3"]:
+        self.parse_token("(")
+        self.pc_paren_dispatch()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_piece_tail(self):
+    self.appendF(FIRST_SET["<pc_piece_tail>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    670 <pc_piece_tail>	=>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_piece_tail>"]:
+        self.strict_piece_mult_tail()
+        self.strict_piece_add_tail()
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_chars_tail(self):
+    self.appendF(FIRST_SET["<pc_chars_tail>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    671 <pc_chars_tail>	=>	<strict_chars_add_tail>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_chars_tail>"]:
+        self.strict_chars_add_tail()
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_ambig_tail(self):
+    self.appendF(FIRST_SET["<pc_ambig_tail>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    672 <pc_ambig_tail>	=>	+	<pc_ambig_branch>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>"]:
+        self.parse_token("+")
+        self.pc_ambig_branch()
+
+        """    673 <pc_ambig_tail>	=>	-	<strict_piece_term>	<strict_piece_add_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_1"]:
+        self.parse_token("-")
+        self.strict_piece_term()
+        self.strict_piece_add_tail()
+
+        """    674 <pc_ambig_tail>	=>	*	<strict_piece_factor>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_2"]:
+        self.parse_token("*")
+        self.strict_piece_factor()
+        self.strict_piece_mult_tail()
+        self.strict_piece_add_tail()
+
+        """    675 <pc_ambig_tail>	=>	/	<strict_piece_factor>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_3"]:
+        self.parse_token("/")
+        self.strict_piece_factor()
+        self.strict_piece_mult_tail()
+        self.strict_piece_add_tail()
+
+        """    676 <pc_ambig_tail>	=>	%	<strict_piece_factor>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_4"]:
+        self.parse_token("%")
+        self.strict_piece_factor()
+        self.strict_piece_mult_tail()
+        self.strict_piece_add_tail()
+
+        """    677 <pc_ambig_tail>	=>	    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_5"]:
+        pass
+
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_ambig_branch(self):
+    self.appendF(FIRST_SET["<pc_ambig_branch>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    678 <pc_ambig_branch>	=>	<id>	<pc_ambig_tail>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>"]:
+        self.id_()
+        self.pc_ambig_tail()
+
+        """    679 <pc_ambig_branch>	=>	<ret_piece>	<pc_piece_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>_1"]:
+        self.ret_piece()
+        self.pc_piece_tail()
+
+        """    680 <pc_ambig_branch>	=>	<ret_chars>	<pc_chars_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>_2"]:
+        self.ret_chars()
+        self.pc_chars_tail()
+
+        """    681 <pc_ambig_branch>	=>	(	<pc_paren_dispatch>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>_3"]:
+        self.parse_token("(")
+        self.pc_paren_dispatch()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_paren_dispatch(self):
+    self.appendF(FIRST_SET["<pc_paren_dispatch>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    682 <pc_paren_dispatch>	=>	<id>	<pc_paren_ambig_tail_inner>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>"]:
+        self.id_()
+        self.pc_paren_ambig_tail_inner()
+
+        """    683 <pc_paren_dispatch>	=>	<ret_piece>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>_1"]:
+        self.ret_piece()
+        self.pc_paren_piece_tail_inner()
+
+        """    684 <pc_paren_dispatch>	=>	<ret_chars>	<pc_paren_chars_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>_2"]:
+        self.ret_chars()
+        self.pc_paren_chars_tail_inner()
+
+        """    685 <pc_paren_dispatch>	=>	(	<pc_paren_dispatch>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>_3"]:
+        self.parse_token("(")
+        self.pc_paren_dispatch()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_paren_piece_tail_inner(self):
+    self.appendF(FIRST_SET["<pc_paren_piece_tail_inner>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    686 <pc_paren_piece_tail_inner>	=>	+	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>"]:
+        self.parse_token("+")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    687 <pc_paren_piece_tail_inner>	=>	-	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_1"]:
+        self.parse_token("-")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    688 <pc_paren_piece_tail_inner>	=>	*	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_2"]:
+        self.parse_token("*")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    689 <pc_paren_piece_tail_inner>	=>	/	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_3"]:
+        self.parse_token("/")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    690 <pc_paren_piece_tail_inner>	=>	%	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_4"]:
+        self.parse_token("%")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    691 <pc_paren_piece_tail_inner>	=>	)	<pc_piece_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_5"]:
+        self.parse_token(")")
+        self.pc_piece_tail()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_paren_chars_tail_inner(self):
+    self.appendF(FIRST_SET["<pc_paren_chars_tail_inner>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    692 <pc_paren_chars_tail_inner>	=>	+	<strict_chars_factor>	<pc_paren_chars_tail_inner>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_chars_tail_inner>"]:
+        self.parse_token("+")
+        self.strict_chars_factor()
+        self.pc_paren_chars_tail_inner()
+
+        """    693 <pc_paren_chars_tail_inner>	=>	)	<pc_chars_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_chars_tail_inner>_1"]:
+        self.parse_token(")")
+        self.pc_chars_tail()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_paren_ambig_tail_inner(self):
+    self.appendF(FIRST_SET["<pc_paren_ambig_tail_inner>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    694 <pc_paren_ambig_tail_inner>	=>	+	<pc_paren_ambig_branch>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>"]:
+        self.parse_token("+")
+        self.pc_paren_ambig_branch()
+
+        """    695 <pc_paren_ambig_tail_inner>	=>	-	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_1"]:
+        self.parse_token("-")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    696 <pc_paren_ambig_tail_inner>	=>	*	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_2"]:
+        self.parse_token("*")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    697 <pc_paren_ambig_tail_inner>	=>	/	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_3"]:
+        self.parse_token("/")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    698 <pc_paren_ambig_tail_inner>	=>	%	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_4"]:
+        self.parse_token("%")
+        self.strict_piece_factor()
+        self.pc_paren_piece_tail_inner()
+
+        """    699 <pc_paren_ambig_tail_inner>	=>	)	<pc_ambig_tail>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_5"]:
+        self.parse_token(")")
+        self.pc_ambig_tail()
+
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
+def pc_paren_ambig_branch(self):
+    self.appendF(FIRST_SET["<pc_paren_ambig_branch>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    700 <pc_paren_ambig_branch>	=>	<id>	<pc_paren_ambig_tail_inner>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>"]:
+        self.id_()
+        self.pc_paren_ambig_tail_inner()
+
+        """    701 <pc_paren_ambig_branch>	=>	<ret_piece>	<pc_paren_piece_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>_1"]:
+        self.ret_piece()
+        self.pc_paren_piece_tail_inner()
+
+        """    702 <pc_paren_ambig_branch>	=>	<ret_chars>	<pc_paren_chars_tail_inner>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>_2"]:
+        self.ret_chars()
+        self.pc_paren_chars_tail_inner()
+
+        """    703 <pc_paren_ambig_branch>	=>	(	<pc_paren_dispatch>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>_3"]:
+        self.parse_token("(")
+        self.pc_paren_dispatch()
 
     else: self.parse_token(self.error_arr)
 
