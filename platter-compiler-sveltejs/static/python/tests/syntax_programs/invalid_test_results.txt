@@ -1,5 +1,5 @@
 ======================================================================
-TEST SUMMARY: 1/1 tests passed
+INVALID PARSER TEST SUMMARY: 2/2 tests passed
 ======================================================================
 
-All tests passed!
+✓ All invalid programs correctly produced errors!

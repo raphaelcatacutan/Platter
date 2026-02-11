@@ -1,0 +1,14 @@
+start(){
+  pass(a = 3; a -= 1; a > 0){  }
+  pass(b = sum(); c -= 1; c > 0){  }
+  pass(c; c += 1; c < 10){  }
+  repeat(up){  }
+  repeat(1 == (cake - 1)){  }
+  repeat(isTrue()){  }
+  order{
+  } repeat(down);
+  order {
+  } repeat(2 < (bread - 5));
+  order{
+  } repeat(isCorrect());
+}

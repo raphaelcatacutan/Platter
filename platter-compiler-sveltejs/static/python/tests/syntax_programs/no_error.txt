@@ -1,3 +1,0 @@
-Number:1
-Code:"start(){}"
-Expected:"No Syntax Error"

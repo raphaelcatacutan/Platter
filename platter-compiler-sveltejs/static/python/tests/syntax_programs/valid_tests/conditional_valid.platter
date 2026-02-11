@@ -1,0 +1,44 @@
+
+prepare piece of num(piece of a){
+      menu(a){
+          usual:
+              serve 0;
+     }
+}
+start(){
+# check
+  check(candy == 1){
+       bill("one candy");
+  } alt(candy == 2){
+       bill("two candies");
+  } instead{
+       bill("many candies");
+  }
+  # check(isTrue() == up){  }
+  check(peanut > 0){  } 
+  instead{  }
+  check(candy == 1){  } 
+  alt(candy == 2){  }
+  check((1 + 4) > 5){
+  } alt((5 + 6)> 10){
+  } instead{  }
+
+	
+menu(a){
+    choice 1:
+          bill("choice 1");
+   choice 2:
+          bill("choice 2");
+          stop;
+   usual:
+          bill("no matching choice");
+}
+menu("hotdog"){
+     choice "hotdog":
+          stop;
+}
+menu(b){  }
+
+
+
+}
