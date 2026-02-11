@@ -23,9 +23,6 @@ class Parser():
         self.tokens.append(Token("EOF", "EOF", last_token.line, last_token.col))
         
         self.pos = 0
-        # Track parenthesis and bracket balancing
-        # self.paren_counter = 0
-        # self.bracket_counter = 0
     
     def parse_token(self, tok):
         """Parse and consume a specific token type"""
@@ -35,36 +32,23 @@ class Parser():
         if self.tokens[self.pos].type == tok: 
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: MATCH!") # J
             
-            # Track opening parenthesis and brackets
-            # if tok == '(':
-            #     self.paren_counter += 1
-            # elif tok == '[':
-            #     self.bracket_counter += 1
-            # # Track closing parenthesis and brackets
-            # elif tok == ')':
-            #     self.paren_counter -= 1
-            # elif tok == ']':
-            #     self.bracket_counter -= 1
-            
             self.pos += 1
             self.error_arr.clear() # err
             
         else:
             log.warning(f"Expected: {tok} | Current: {self.tokens[self.pos].type} | Remark: INVALID!\n") # J
-            if tok != self.error_arr :  self.error_arr.extend(tok)
-            log.info("STACK: " + str(self.error_arr) + "\n") # J
-            # Filter out closing delimiters from expected tokens if there are no unclosed pairs
-            # filtered_tok = tok
-            # if isinstance(tok, list):
-                # If tok is a list of expected tokens, filter it
-                # filtered_tok = [t for t in tok if not ((t == ')' and self.paren_counter <= 0) or (t == ']' and self.bracket_counter <= 0))]
-            # elif tok == ')' and self.paren_counter <= 0:
-                # If expecting only ')', but no unclosed '(', don't show it
-                # filtered_tok = []
-            # elif tok == ']' and self.bracket_counter <= 0:
-                # If expecting only ']', but no unclosed '[', don't show it
-                # filtered_tok = []
             
+            if tok != self.error_arr:
+                if isinstance(tok, list):
+                    self.error_arr.extend([t for t in tok if t not in self.error_arr])
+                else:
+                    if tok not in self.error_arr: # check membership
+                        self.error_arr.append(tok)
+            
+            log.info("STACK: " + str(self.error_arr) + "\n") # J
+            
+            # Remove duplicates while preserving order 
+            self.error_arr = list(dict.fromkeys(self.error_arr))
             raise ErrorHandler("Unexpected_err", self.tokens[self.pos], self.error_arr) # filtered_tok if filtered_tok else tok
 
     def appendF(self, first_set):
@@ -72,31 +56,25 @@ class Parser():
         self.error_arr.extend(first_set)
 
     def parse_program(self):
-        self.appendF(FIRST_SET["<program>"]) # err
-        log.info("Enter: " + self.tokens[self.pos].type) # J
-        log.info("STACK: " + str(self.error_arr)) # J
+        self.appendF(FIRST_SET["<program>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
 
-        """ 1 <program> -> <global_decl> <recipe_decl> start() <platter>"""
-        # Parse global declarations
-        while self.pos < len(self.tokens) and self.tokens[self.pos].type in ['piece', 'chars', 'sip', 'flag', 'table', 'id']:
+        """    1 <program>	=>	<global_decl>	<recipe_decl>	start	(	)	<platter>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<program>"]:
             self.global_decl()
-        
-        # Parse recipe declarations (prepare functions)
-        while self.pos < len(self.tokens) and self.tokens[self.pos].type in ['prepare']:
             self.recipe_decl()
-
-        # Parse start() platter
-        if self.pos >= len(self.tokens):
-            raise ErrorHandler("EOF", None, "start")
-        
-        self.parse_token("start")
-        self.parse_token("(")
-        self.parse_token(")")
-        self.platter()
+            self.parse_token("start")
+            self.parse_token("(")
+            self.parse_token(")")
+            self.platter()
+        else: self.parse_token(self.error_arr)
         
         # Ensure we've consumed all tokens (should be at EOF token now)
         if self.pos < len(self.tokens) and self.tokens[self.pos].type != "EOF":
             raise ErrorHandler("ExpectedEOF_err", self.tokens[self.pos], None)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def global_decl(self):
         self.appendF(FIRST_SET["<global_decl>"])
@@ -1698,10 +1676,10 @@ class Parser():
             self.parse_token(";")
             self.local_decl()
 
-            """    179 <local_id_tail>	=>	[	<]_tail>    """
+            """    179 <local_id_tail>	=>	[	<endsb_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail>_1"]:
             self.parse_token("[")
-            self.__tail()
+            self.endsb_tail()
 
             """    180 <local_id_tail>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail>_2"]:
@@ -1728,22 +1706,23 @@ class Parser():
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
-    def __tail(self):
-        self.appendF(FIRST_SET["<]_tail>"])
+    def endsb_tail(self):
+        self.appendF(FIRST_SET["<endsb_tail>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    183 <]_tail>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl>    """
-        if self.tokens[self.pos].type in PREDICT_SET["<]_tail>"]:
+        """    183 <endsb_tail>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<endsb_tail>"]:
             self.parse_token("]")
             self.dimensions_tail()
             self.parse_token("of")
-            self.table_declare()
+            self.parse_token("id")
+            self.table_array_init()
             self.parse_token(";")
             self.local_decl()
 
-            """    184 <]_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>    """
-        elif self.tokens[self.pos].type in PREDICT_SET["<]_tail>_1"]:
+            """    184 <endsb_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail>_1"]:
             self.array_accessor_val()
             self.assignment_op()
             self.value()
@@ -2137,11 +2116,11 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    229 <cond_menu>	=>	menu	(	<any_expr>	)	<menu_platter>    """
+        """    229 <cond_menu>	=>	menu	(	<strict_piece_chars_expr>	)	<menu_platter>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cond_menu>"]:
             self.parse_token("menu")
             self.parse_token("(")
-            self.any_expr()
+            self.strict_piece_chars_expr()
             self.parse_token(")")
             self.menu_platter()
         else: self.parse_token(self.error_arr)
@@ -2360,10 +2339,10 @@ class Parser():
             self.parse_token(";")
             self.local_decl_menu()
 
-            """    254 <local_id_tail_menu>	=>	[	<]_tail_menu>    """
+            """    254 <local_id_tail_menu>	=>	[	<endsb_tail_menu>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_menu>_1"]:
             self.parse_token("[")
-            self.__tail_menu()
+            self.endsb_tail_menu()
 
             """    255 <local_id_tail_menu>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_menu>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_menu>_2"]:
@@ -2390,22 +2369,23 @@ class Parser():
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
-    def __tail_menu(self):
-        self.appendF(FIRST_SET["<]_tail_menu>"])
+    def endsb_tail_menu(self):
+        self.appendF(FIRST_SET["<endsb_tail_menu>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    258 <]_tail_menu>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_menu>    """
-        if self.tokens[self.pos].type in PREDICT_SET["<]_tail_menu>"]:
+        """    258 <endsb_tail_menu>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl_menu>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_menu>"]:
             self.parse_token("]")
             self.dimensions_tail()
             self.parse_token("of")
-            self.table_declare()
+            self.parse_token("id")
+            self.table_array_init()
             self.parse_token(";")
             self.local_decl_menu()
 
-            """    259 <]_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>    """
-        elif self.tokens[self.pos].type in PREDICT_SET["<]_tail_menu>_1"]:
+            """    259 <endsb_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_menu>_1"]:
             self.array_accessor_val()
             self.assignment_op()
             self.value()
@@ -2570,10 +2550,10 @@ class Parser():
             self.parse_token(";")
             self.local_decl_loop()
 
-            """    276 <local_id_tail_loop>	=>	[	<]_tail_loop>    """
+            """    276 <local_id_tail_loop>	=>	[	<endsb_tail_loop>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_loop>_1"]:
             self.parse_token("[")
-            self.__tail_loop()
+            self.endsb_tail_loop()
 
             """    277 <local_id_tail_loop>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_loop>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_loop>_2"]:
@@ -2600,22 +2580,23 @@ class Parser():
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
-    def __tail_loop(self):
-        self.appendF(FIRST_SET["<]_tail_loop>"])
+    def endsb_tail_loop(self):
+        self.appendF(FIRST_SET["<endsb_tail_loop>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    280 <]_tail_loop>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_loop>    """
-        if self.tokens[self.pos].type in PREDICT_SET["<]_tail_loop>"]:
+        """    280 <endsb_tail_loop>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl_loop>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_loop>"]:
             self.parse_token("]")
             self.dimensions_tail()
             self.parse_token("of")
-            self.table_declare()
+            self.parse_token("id")
+            self.table_array_init()
             self.parse_token(";")
             self.local_decl_loop()
 
-            """    281 <]_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>    """
-        elif self.tokens[self.pos].type in PREDICT_SET["<]_tail_loop>_1"]:
+            """    281 <endsb_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_loop>_1"]:
             self.array_accessor_val()
             self.assignment_op()
             self.value()
@@ -2756,11 +2737,11 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    296 <cond_menu_loop>	=>	menu	(	<any_expr>	)	<menu_loop_platter>    """
+        """    296 <cond_menu_loop>	=>	menu	(	<strict_piece_chars_expr>	)	<menu_loop_platter>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cond_menu_loop>"]:
             self.parse_token("menu")
             self.parse_token("(")
-            self.any_expr()
+            self.strict_piece_chars_expr()
             self.parse_token(")")
             self.menu_loop_platter()
         else: self.parse_token(self.error_arr)
@@ -5417,6 +5398,298 @@ class Parser():
         elif self.tokens[self.pos].type in PREDICT_SET["<univ_paren_str_tail>_1"]:
             self.parse_token(")")
             self.univ_str_tail()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def strict_piece_chars_expr(self):
+        self.appendF(FIRST_SET["<strict_piece_chars_expr>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    666 <strict_piece_chars_expr>	=>	<id>	<pc_ambig_tail>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>"]:
+            self.id_()
+            self.pc_ambig_tail()
+
+            """    667 <strict_piece_chars_expr>	=>	<ret_piece>	<pc_piece_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_1"]:
+            self.ret_piece()
+            self.pc_piece_tail()
+
+            """    668 <strict_piece_chars_expr>	=>	<ret_chars>	<pc_chars_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_2"]:
+            self.ret_chars()
+            self.pc_chars_tail()
+
+            """    669 <strict_piece_chars_expr>	=>	(	<pc_paren_dispatch>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_3"]:
+            self.parse_token("(")
+            self.pc_paren_dispatch()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_piece_tail(self):
+        self.appendF(FIRST_SET["<pc_piece_tail>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    670 <pc_piece_tail>	=>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_piece_tail>"]:
+            self.strict_piece_mult_tail()
+            self.strict_piece_add_tail()
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_chars_tail(self):
+        self.appendF(FIRST_SET["<pc_chars_tail>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    671 <pc_chars_tail>	=>	<strict_chars_add_tail>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_chars_tail>"]:
+            self.strict_chars_add_tail()
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_ambig_tail(self):
+        self.appendF(FIRST_SET["<pc_ambig_tail>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    672 <pc_ambig_tail>	=>	+	<pc_ambig_branch>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>"]:
+            self.parse_token("+")
+            self.pc_ambig_branch()
+
+            """    673 <pc_ambig_tail>	=>	-	<strict_piece_term>	<strict_piece_add_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_1"]:
+            self.parse_token("-")
+            self.strict_piece_term()
+            self.strict_piece_add_tail()
+
+            """    674 <pc_ambig_tail>	=>	*	<strict_piece_factor>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_2"]:
+            self.parse_token("*")
+            self.strict_piece_factor()
+            self.strict_piece_mult_tail()
+            self.strict_piece_add_tail()
+
+            """    675 <pc_ambig_tail>	=>	/	<strict_piece_factor>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_3"]:
+            self.parse_token("/")
+            self.strict_piece_factor()
+            self.strict_piece_mult_tail()
+            self.strict_piece_add_tail()
+
+            """    676 <pc_ambig_tail>	=>	%	<strict_piece_factor>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_4"]:
+            self.parse_token("%")
+            self.strict_piece_factor()
+            self.strict_piece_mult_tail()
+            self.strict_piece_add_tail()
+
+            """    677 <pc_ambig_tail>	=>	    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_5"]:
+            pass
+
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_ambig_branch(self):
+        self.appendF(FIRST_SET["<pc_ambig_branch>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    678 <pc_ambig_branch>	=>	<id>	<pc_ambig_tail>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>"]:
+            self.id_()
+            self.pc_ambig_tail()
+
+            """    679 <pc_ambig_branch>	=>	<ret_piece>	<pc_piece_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>_1"]:
+            self.ret_piece()
+            self.pc_piece_tail()
+
+            """    680 <pc_ambig_branch>	=>	<ret_chars>	<pc_chars_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>_2"]:
+            self.ret_chars()
+            self.pc_chars_tail()
+
+            """    681 <pc_ambig_branch>	=>	(	<pc_paren_dispatch>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_branch>_3"]:
+            self.parse_token("(")
+            self.pc_paren_dispatch()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_paren_dispatch(self):
+        self.appendF(FIRST_SET["<pc_paren_dispatch>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    682 <pc_paren_dispatch>	=>	<id>	<pc_paren_ambig_tail_inner>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>"]:
+            self.id_()
+            self.pc_paren_ambig_tail_inner()
+
+            """    683 <pc_paren_dispatch>	=>	<ret_piece>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>_1"]:
+            self.ret_piece()
+            self.pc_paren_piece_tail_inner()
+
+            """    684 <pc_paren_dispatch>	=>	<ret_chars>	<pc_paren_chars_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>_2"]:
+            self.ret_chars()
+            self.pc_paren_chars_tail_inner()
+
+            """    685 <pc_paren_dispatch>	=>	(	<pc_paren_dispatch>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_dispatch>_3"]:
+            self.parse_token("(")
+            self.pc_paren_dispatch()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_paren_piece_tail_inner(self):
+        self.appendF(FIRST_SET["<pc_paren_piece_tail_inner>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    686 <pc_paren_piece_tail_inner>	=>	+	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>"]:
+            self.parse_token("+")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    687 <pc_paren_piece_tail_inner>	=>	-	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_1"]:
+            self.parse_token("-")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    688 <pc_paren_piece_tail_inner>	=>	*	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_2"]:
+            self.parse_token("*")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    689 <pc_paren_piece_tail_inner>	=>	/	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_3"]:
+            self.parse_token("/")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    690 <pc_paren_piece_tail_inner>	=>	%	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_4"]:
+            self.parse_token("%")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    691 <pc_paren_piece_tail_inner>	=>	)	<pc_piece_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_piece_tail_inner>_5"]:
+            self.parse_token(")")
+            self.pc_piece_tail()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_paren_chars_tail_inner(self):
+        self.appendF(FIRST_SET["<pc_paren_chars_tail_inner>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    692 <pc_paren_chars_tail_inner>	=>	+	<strict_chars_factor>	<pc_paren_chars_tail_inner>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_chars_tail_inner>"]:
+            self.parse_token("+")
+            self.strict_chars_factor()
+            self.pc_paren_chars_tail_inner()
+
+            """    693 <pc_paren_chars_tail_inner>	=>	)	<pc_chars_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_chars_tail_inner>_1"]:
+            self.parse_token(")")
+            self.pc_chars_tail()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_paren_ambig_tail_inner(self):
+        self.appendF(FIRST_SET["<pc_paren_ambig_tail_inner>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    694 <pc_paren_ambig_tail_inner>	=>	+	<pc_paren_ambig_branch>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>"]:
+            self.parse_token("+")
+            self.pc_paren_ambig_branch()
+
+            """    695 <pc_paren_ambig_tail_inner>	=>	-	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_1"]:
+            self.parse_token("-")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    696 <pc_paren_ambig_tail_inner>	=>	*	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_2"]:
+            self.parse_token("*")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    697 <pc_paren_ambig_tail_inner>	=>	/	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_3"]:
+            self.parse_token("/")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    698 <pc_paren_ambig_tail_inner>	=>	%	<strict_piece_factor>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_4"]:
+            self.parse_token("%")
+            self.strict_piece_factor()
+            self.pc_paren_piece_tail_inner()
+
+            """    699 <pc_paren_ambig_tail_inner>	=>	)	<pc_ambig_tail>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_tail_inner>_5"]:
+            self.parse_token(")")
+            self.pc_ambig_tail()
+
+        else: self.parse_token(self.error_arr)
+
+        log.info("Exit: " + self.tokens[self.pos].type) # J
+
+    def pc_paren_ambig_branch(self):
+        self.appendF(FIRST_SET["<pc_paren_ambig_branch>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    700 <pc_paren_ambig_branch>	=>	<id>	<pc_paren_ambig_tail_inner>    """
+        if self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>"]:
+            self.id_()
+            self.pc_paren_ambig_tail_inner()
+
+            """    701 <pc_paren_ambig_branch>	=>	<ret_piece>	<pc_paren_piece_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>_1"]:
+            self.ret_piece()
+            self.pc_paren_piece_tail_inner()
+
+            """    702 <pc_paren_ambig_branch>	=>	<ret_chars>	<pc_paren_chars_tail_inner>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>_2"]:
+            self.ret_chars()
+            self.pc_paren_chars_tail_inner()
+
+            """    703 <pc_paren_ambig_branch>	=>	(	<pc_paren_dispatch>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<pc_paren_ambig_branch>_3"]:
+            self.parse_token("(")
+            self.pc_paren_dispatch()
 
         else: self.parse_token(self.error_arr)
 
