@@ -204,7 +204,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: Syntax Error: Unexpected '[' at line 4, col 23. Expected 'id', ']'.
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #18 ================
@@ -249,7 +249,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: Syntax Error: Unexpected '[' at line 4, col 24. Expected 'id', ']'.
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #21 ================
@@ -383,7 +383,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: Syntax Error: Unexpected '[' at line 5, col 9. Expected 'id', ']'.
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #29 ================
@@ -527,7 +527,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: Syntax Error: Unexpected '[' at line 4, col 23. Expected 'id', ']'.
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #38 ================
@@ -572,7 +572,7 @@ start(){
     
 EXPECTED OUTPUT: No Syntax Error
 ACTUAL OUTPUT: No Syntax Error
-SYNTAX OUTPUT: Syntax Error: Unexpected '[' at line 4, col 24. Expected 'id', ']'.
+SYNTAX OUTPUT: No Syntax Error
 =====================================
 
 ============ CODE #41 ================
@@ -670,7 +670,7 @@ serve x;
     
 EXPECTED OUTPUT: Syntax Error: Unexpected 'serve' at line 2, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
 ACTUAL OUTPUT: Syntax Error: Unexpected 'serve' at line 2, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.
-SYNTAX OUTPUT: Syntax Error: Unexpected 'serve' at line 2, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'start'.
+SYNTAX OUTPUT: Syntax Error: Unexpected 'serve' at line 3, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'start'.
 =====================================
 
 ============ CODE #48 ================

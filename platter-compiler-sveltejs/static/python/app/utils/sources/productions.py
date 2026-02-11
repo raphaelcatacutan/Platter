@@ -1,3 +1,20 @@
+def program(self):
+    self.appendF(FIRST_SET["<program>"])
+    log.info("Enter: " + self.tokens[self.pos].type)
+    log.info("STACK: " + str(self.error_arr))
+
+    """    1 <program>	=>	<global_decl>	<recipe_decl>	start	(	)	<platter>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<program>"]:
+        self.global_decl()
+        self.recipe_decl()
+        self.parse_token("start")
+        self.parse_token("(")
+        self.parse_token(")")
+        self.platter()
+    else: self.parse_token(self.error_arr)
+
+    log.info("Exit: " + self.tokens[self.pos].type) # J
+
 def global_decl(self):
     self.appendF(FIRST_SET["<global_decl>"])
     log.info("Enter: " + self.tokens[self.pos].type)
@@ -1598,10 +1615,10 @@ def local_id_tail(self):
         self.parse_token(";")
         self.local_decl()
 
-        """    179 <local_id_tail>	=>	[	<]_tail>    """
+        """    179 <local_id_tail>	=>	[	<endsb_tail>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail>_1"]:
         self.parse_token("[")
-        self.__tail()
+        self.endsb_tail()
 
         """    180 <local_id_tail>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail>_2"]:
@@ -1628,22 +1645,23 @@ def local_id_tail(self):
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
 
-def __tail(self):
-    self.appendF(FIRST_SET["<__tail>"])
+def endsb_tail(self):
+    self.appendF(FIRST_SET["<endsb_tail>"])
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    183 <]_tail>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl>    """
-    if self.tokens[self.pos].type in PREDICT_SET["<]_tail>"]:
+    """    183 <endsb_tail>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<endsb_tail>"]:
         self.parse_token("]")
         self.dimensions_tail()
         self.parse_token("of")
-        self.table_declare()
+        self.parse_token("id")
+        self.table_array_init()
         self.parse_token(";")
         self.local_decl()
 
-        """    184 <]_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<]_tail>_1"]:
+        """    184 <endsb_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail>_1"]:
         self.array_accessor_val()
         self.assignment_op()
         self.value()
@@ -2260,10 +2278,10 @@ def local_id_tail_menu(self):
         self.parse_token(";")
         self.local_decl_menu()
 
-        """    254 <local_id_tail_menu>	=>	[	<]_tail_menu>    """
+        """    254 <local_id_tail_menu>	=>	[	<endsb_tail_menu>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_menu>_1"]:
         self.parse_token("[")
-        self.__tail_menu()
+        self.endsb_tail_menu()
 
         """    255 <local_id_tail_menu>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_menu>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_menu>_2"]:
@@ -2290,22 +2308,23 @@ def local_id_tail_menu(self):
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
 
-def __tail_menu(self):
-    self.appendF(FIRST_SET["<__tail_menu>"])
+def endsb_tail_menu(self):
+    self.appendF(FIRST_SET["<endsb_tail_menu>"])
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    258 <]_tail_menu>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_menu>    """
-    if self.tokens[self.pos].type in PREDICT_SET["<]_tail_menu>"]:
+    """    258 <endsb_tail_menu>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl_menu>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_menu>"]:
         self.parse_token("]")
         self.dimensions_tail()
         self.parse_token("of")
-        self.table_declare()
+        self.parse_token("id")
+        self.table_array_init()
         self.parse_token(";")
         self.local_decl_menu()
 
-        """    259 <]_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<]_tail_menu>_1"]:
+        """    259 <endsb_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_menu>_1"]:
         self.array_accessor_val()
         self.assignment_op()
         self.value()
@@ -2470,10 +2489,10 @@ def local_id_tail_loop(self):
         self.parse_token(";")
         self.local_decl_loop()
 
-        """    276 <local_id_tail_loop>	=>	[	<]_tail_loop>    """
+        """    276 <local_id_tail_loop>	=>	[	<endsb_tail_loop>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_loop>_1"]:
         self.parse_token("[")
-        self.__tail_loop()
+        self.endsb_tail_loop()
 
         """    277 <local_id_tail_loop>	=>	<table_accessor>	<assignment_op>	<value>	;	<statements_loop>    """
     elif self.tokens[self.pos].type in PREDICT_SET["<local_id_tail_loop>_2"]:
@@ -2500,22 +2519,23 @@ def local_id_tail_loop(self):
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
 
-def __tail_loop(self):
-    self.appendF(FIRST_SET["<__tail_loop>"])
+def endsb_tail_loop(self):
+    self.appendF(FIRST_SET["<endsb_tail_loop>"])
     log.info("Enter: " + self.tokens[self.pos].type)
     log.info("STACK: " + str(self.error_arr))
 
-    """    280 <]_tail_loop>	=>	]	<dimensions_tail>	of	<table_declare>	;	<local_decl_loop>    """
-    if self.tokens[self.pos].type in PREDICT_SET["<]_tail_loop>"]:
+    """    280 <endsb_tail_loop>	=>	]	<dimensions_tail>	of	id	<table_array_init>	;	<local_decl_loop>    """
+    if self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_loop>"]:
         self.parse_token("]")
         self.dimensions_tail()
         self.parse_token("of")
-        self.table_declare()
+        self.parse_token("id")
+        self.table_array_init()
         self.parse_token(";")
         self.local_decl_loop()
 
-        """    281 <]_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<]_tail_loop>_1"]:
+        """    281 <endsb_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>    """
+    elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_loop>_1"]:
         self.array_accessor_val()
         self.assignment_op()
         self.value()
