@@ -134,7 +134,7 @@ chars[] of names = ["Hello Platter", "Raph", "Jieco"];
 prepare sip of sips() { check(topiece(y) > x) { serve x;} instead {serve y;} }
 
 prepare piece of pieces() {
-	 x =  x + 32 / 323 or up;
+	 x =  x + 32 / 323;
 }
 
 start() {
