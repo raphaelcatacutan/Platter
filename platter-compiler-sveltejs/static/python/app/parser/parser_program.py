@@ -47,7 +47,6 @@ class Parser():
             #     self.bracket_counter -= 1
             
             self.pos += 1
-            log.info(f"")
             self.error_arr.clear() # err
             
         else:
