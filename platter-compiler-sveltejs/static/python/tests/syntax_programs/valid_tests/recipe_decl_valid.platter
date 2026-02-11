@@ -1,0 +1,58 @@
+
+table of Student = [
+    chars of name;
+    piece of age;
+];
+prepare flag of cooked(){
+     serve up;
+}prepare piece of addOne(sip of val){
+    piece of result = val + 1;
+    serve result;
+}
+prepare piece of divide(piece of a, piece of b){
+    serve a / b;
+}
+prepare sip of average(piece of x, piece of y) { 
+serve (x + y) / 2; 
+}
+prepare piece of addTwo(piece of x){
+serve x + 2;
+}
+prepare piece of increment(piece of x){
+serve x + 1;
+} 
+prepare piece of fib(piece of n){
+    check (n <= 1) {
+      serve n; 
+    } 
+    serve fib(n - 1) + fib(n - 2); 
+}
+prepare flag of isPositive(piece of n){
+    serve n > 0; 
+}
+prepare piece of printing(){
+    bill("print");
+    serve 0;
+}
+prepare chars of greet(piece of a) {
+     check (a == 1) {
+     serve "hello, world";
+   } instead { 
+     serve "hi, world";
+   }
+   serve "";
+}
+prepare Student of getStudent() {
+    serve [
+         name = "Michael";
+         age = 21;
+    ];
+}
+
+
+start(){
+
+
+pass (cake; cake-=1; cake >= 0){  }
+     serve 0;
+}
