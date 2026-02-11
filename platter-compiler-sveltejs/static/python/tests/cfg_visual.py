@@ -6,10 +6,12 @@ used in cfg_visual.html. It provides better error messages by computing
 context-aware expected tokens based on the full parsing stack.
 """
 
+import logging as log
 from pprint import pprint
 import subprocess
 from app.lexer.token import Token
 from app.lexer.lexer import Lexer
+from app.parser.parser_program import Parser
 from app.utils.FileHandler import run_file
 
 # Global flag to enable/disable clipboard copy on syntax errors
@@ -430,8 +432,19 @@ if __name__ == "__main__":
         set_clipboard((" ".join(t.type for t in tokens if not "comment" in t.type )))   
         parser = TableDrivenParser(grammar_file, tokens)
         a, e = parser.parse()
-        print("\n\nSYNTAX:")
+        print("\n\nHTML SYNTAX:")
         print(e)
+        filepath = "parser.platter"
+        
+        
+        print("\n\nPYTHON SYNTAX:")
+        log.disable(log.WARNING) 
+        parser = Parser(tokens)
+        try:
+            parser.parse_program()
+            print("No Syntax Error")
+        except SyntaxError as e:
+            print(str(e))
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback

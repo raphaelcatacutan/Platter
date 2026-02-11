@@ -490,6 +490,7 @@
               
               if (!rule) {
                 const expectedArray = [...getFirstSeq(stack.reverse())].filter(t => t !== 'λ');
+                // const expectedArray = Object.keys(parseTable[top])
                 console.log(stack.join(" "))
                 const expectedMsg = expectedArray.length > 0 
                   ? `expected [${expectedArray.map(e => `'${e}'`).join(', ')}]`
