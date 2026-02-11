@@ -147,7 +147,9 @@ def _emit_function(lhs: str, alts: List[ProductionAlt]) -> str:
 
     out: List[str] = []
     out.append(f"def {func_name}(self):")
-    out.append('    log.info("Enter: " + self.tokens[self.pos].type) # J')
+    out.append(f'    self.appendF(FIRST_SET["<{func_name}>"])')
+    out.append('    log.info("Enter: " + self.tokens[self.pos].type)')
+    out.append('    log.info("STACK: " + str(self.error_arr))')
     out.append("")
 
     if len(alts) == 1:
@@ -155,7 +157,7 @@ def _emit_function(lhs: str, alts: List[ProductionAlt]) -> str:
         out.append(f"    {_format_prod_doc(alt.prod_no, alt.lhs, alt.rhs)}")
         out.append(f'    if self.tokens[self.pos].type in PREDICT_SET["{lhs}"]:')
         out.append(_emit_rhs_actions(alt.rhs, indent=" " * 8))
-        out.append(f'    else: self.parse_token(PREDICT_SET_M["{lhs}"])')
+        out.append(f'    else: self.parse_token(self.error_arr)')
     else:
         # first alternative uses base key: PREDICT_SET["<lhs>"]
         first = alts[0]
@@ -171,8 +173,10 @@ def _emit_function(lhs: str, alts: List[ProductionAlt]) -> str:
             out.append(_emit_rhs_actions(alt.rhs, indent=" " * 8))
             out.append("")
 
-        out.append(f'    else: self.parse_token(PREDICT_SET_M["{lhs}"])')
-
+        # Only append else clause if the last alternative doesn't have an empty RHS (pass)
+        if alts[-1].rhs:
+           out.append(f'    else: self.parse_token(self.error_arr)')
+    
     out.append("")
     out.append('    log.info("Exit: " + self.tokens[self.pos].type) # J')
     out.append("")  # trailing newline

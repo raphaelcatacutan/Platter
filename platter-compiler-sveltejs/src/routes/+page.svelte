@@ -235,7 +235,8 @@ start() {
 			'/python/app/parser/predict_set_m.py',
 			'/python/app/parser/predict_set.py',
 			'/python/app/parser/parser_program.py',
-			'/python/app/utils/FileHandler.py'
+			'/python/app/utils/FileHandler.py',
+			'/python/app/parser/first_set.py',
 		];
 
 		// Fetch and write Python files to Pyodide's virtual filesystem
