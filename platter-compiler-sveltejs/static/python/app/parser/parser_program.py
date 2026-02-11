@@ -47,8 +47,8 @@ class Parser():
             
             log.info("STACK: " + str(self.error_arr) + "\n") # J
             
-            # Remove duplicates while preserving order # altrnative to membership checking
-            # self.error_arr = list(dict.fromkeys(self.error_arr))
+            # Remove duplicates while preserving order 
+            self.error_arr = list(dict.fromkeys(self.error_arr))
             raise ErrorHandler("Unexpected_err", self.tokens[self.pos], self.error_arr) # filtered_tok if filtered_tok else tok
 
     def appendF(self, first_set):
