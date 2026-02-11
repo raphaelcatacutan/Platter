@@ -318,7 +318,7 @@ class Parser():
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def id_(self):
-        self.appendF(FIRST_SET["<id_>"])
+        self.appendF(FIRST_SET["<id>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 

@@ -36,3 +36,14 @@ jobs:
           export PYTHONPATH="${GITHUB_WORKSPACE}/platter-compiler-sveltejs/static/python"
           cd platter-compiler-sveltejs/static/python
           python -m unittest discover -s tests -p "ga_*.py" -v
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parser-test-results
+          path: |
+            platter-compiler-sveltejs/static/python/tests/syntax_programs/valid_test_results.txt
+            platter-compiler-sveltejs/static/python/tests/syntax_programs/invalid_test_results.txt
+            platter-compiler-sveltejs/static/python/tests/syntax_programs/test_results.txt
+          if-no-files-found: ignore
