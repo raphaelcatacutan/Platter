@@ -1,0 +1,6 @@
+piece[] of array = [0,1,2];
+piece[] of integers = [1,2,3];
+flag of enabled = up;
+start(){
+bill("flag is: " + tochars(2 - size(array) > integers[0] and enabled == up)); ## fixed false error
+}

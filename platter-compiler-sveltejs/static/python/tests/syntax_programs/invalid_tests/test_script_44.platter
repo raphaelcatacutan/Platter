@@ -1,0 +1,7 @@
+piece of x = 5;
+
+start(){
+    piece of x = topiece(rand() * 3) + 1;
+    chars of s = copy("CompilerDesign", 0, 8);
+    serve x * size(s);
+}

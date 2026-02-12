@@ -1,0 +1,36 @@
+piece of a;
+piece of number = 10;
+start() {
+piece of xx = 24 + 26;
+        piece of z = 5 + 10;
+        piece of x = 10, b = 5;
+        sip of a, b, c;
+        piece of a;
+        chars of name = "Tricia";
+    bill("Hello" + name);
+        bill(tochars(sum));
+       check (input > 0){
+            bill("Number is positive");
+        } alt (input < 0){
+            bill("Number is negative");
+        } instead{
+            bill("Number is zero");
+        }check (input > 0){
+            bill("Number is positive");
+        } alt (input < 0){
+            bill("Number is negative");
+        } instead{
+            bill("Number is zero");
+        }  
+       check (input > 0){
+            bill("Number is positive");
+        } alt (input < 0){
+            bill("Number is negative");
+        } instead{
+            bill("Number is zero");
+        }
+order {
+        bill("Enter a positive number: ");
+ 
+} repeat (number > 0);
+}

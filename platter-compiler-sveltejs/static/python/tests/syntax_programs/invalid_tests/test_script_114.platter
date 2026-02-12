@@ -1,0 +1,8 @@
+start() {
+  person of floy;
+  floy:age = 19;
+  floy:age = floy:age + 1;
+  isAdult = floy:age >= 18;
+  chars of x = tochars(isAdult); 
+  bill(x);
+}

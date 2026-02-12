@@ -1,0 +1,8 @@
+start(){
+    piece of x = 7;
+    check(x > 0){
+        bill(tochars(x * x));
+    } instead {
+        bill(tochars(-x));
+    }
+}

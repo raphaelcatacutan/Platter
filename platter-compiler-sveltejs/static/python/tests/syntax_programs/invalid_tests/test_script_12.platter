@@ -1,0 +1,3 @@
+start() {
+    repeat((x+5) * "abc" == 5){ }
+}
