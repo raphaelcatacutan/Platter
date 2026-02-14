@@ -58,7 +58,7 @@ class TestParser(unittest.TestCase):
         # Get the syntax_programs directory
         tests_dir = os.path.dirname(os.path.abspath(__file__))
         syntax_programs_dir = os.path.join(tests_dir, 'syntax_programs')
-        results_file = os.path.join(syntax_programs_dir, 'test_results.txt')
+        results_file = os.path.join(syntax_programs_dir, 'tests_results.txt')
         
         # Write results to file
         with open(results_file, 'w', encoding='utf-8') as f:
