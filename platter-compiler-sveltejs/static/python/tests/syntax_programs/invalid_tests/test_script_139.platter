@@ -1,0 +1,8 @@
+piece of candy = 1;
+peanut = 0;
+
+start(){
+check(candy == 1){
+} alt(candy == 2){
+ }
+}

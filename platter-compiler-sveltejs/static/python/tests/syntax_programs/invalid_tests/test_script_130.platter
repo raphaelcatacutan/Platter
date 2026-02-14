@@ -1,0 +1,5 @@
+piece[] of nums = [1, 2, 3];
+piece of num = 1;
+
+
+remove([1, 2, 3], 1);

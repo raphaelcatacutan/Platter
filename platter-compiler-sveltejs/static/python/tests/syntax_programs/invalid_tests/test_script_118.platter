@@ -1,0 +1,6 @@
+start() {
+  order {
+          piece of x = 1;
+    x = x + 1;
+  } repeat x < 3;
+}

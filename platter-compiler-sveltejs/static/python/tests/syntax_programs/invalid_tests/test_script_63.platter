@@ -1,0 +1,3 @@
+start(){
+bill("flag is: "  tochars(2));
+}

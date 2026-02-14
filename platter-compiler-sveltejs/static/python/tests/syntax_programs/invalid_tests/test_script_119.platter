@@ -1,0 +1,4 @@
+start() {
+  sip of r = sqrt(9),  p = pow(2, 8);
+  sip of n = rand();
+}

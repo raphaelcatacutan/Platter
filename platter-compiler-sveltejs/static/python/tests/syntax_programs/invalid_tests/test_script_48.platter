@@ -1,0 +1,11 @@
+start(){
+    order{
+        serve 1;
+    } serve 2;
+    repeat(x < 3);
+}start(){
+    order{
+        serve 1;
+    } serve 2;
+    repeat(x < 3);
+}

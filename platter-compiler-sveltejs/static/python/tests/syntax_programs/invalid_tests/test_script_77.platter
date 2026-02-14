@@ -1,0 +1,9 @@
+start() {
+    piece of n = 10;
+    piece[] of fib = [0,1];
+
+    pass(i=2; i+=1; i<n) {
+        fib[i] = fib[i-(1)] + fib[i-(2)];
+    }
+    serve [fib];
+}

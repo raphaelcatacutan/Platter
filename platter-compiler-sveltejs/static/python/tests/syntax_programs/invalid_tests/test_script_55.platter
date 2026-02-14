@@ -1,0 +1,7 @@
+piece of x = 3;
+
+start(){
+    repeat[x < 5]{
+        serve x;
+    }
+}
