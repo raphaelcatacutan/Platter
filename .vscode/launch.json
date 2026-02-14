@@ -5,7 +5,10 @@
 			"name": "Python Debugger: Module",
 			"type": "debugpy",
 			"request": "launch",
-			"module": "tests.cfg_visual",
+			"module": "app.main",
+			"args": [
+				"${file}"
+			],
 			"env": {
 				"PYTHONPATH": "."
 			},
