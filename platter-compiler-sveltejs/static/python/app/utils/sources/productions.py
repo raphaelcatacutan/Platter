@@ -1,3 +1,4 @@
+
 def global_decl(self):
     self.appendF(FIRST_SET["<global_decl>"])
     log.info("Enter: " + self.tokens[self.pos].type)
@@ -246,7 +247,7 @@ def id_(self):
     log.info("STACK: " + str(self.error_arr))
 
     """    32 <id>	=>	id	<id_tail>    """
-    if self.tokens[self.pos].type in PREDICT_SET["<id>"]:
+    if self.tokens[self.pos].type in PREDICT_SET["id_"]:
         self.parse_token("id")
         self.id_tail()
     else: self.parse_token(self.error_arr)
@@ -282,8 +283,7 @@ def call_tailopt(self):
         self.parse_token(")")
 
         """    36 <call_tailopt>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<call_tailopt>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -425,8 +425,7 @@ def element_value_tail(self):
         self.array_element_id()
 
         """    53 <element_value_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<element_value_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -544,8 +543,7 @@ def flavor_tail(self):
         self.flavor_tail()
 
         """    68 <flavor_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<flavor_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -564,8 +562,7 @@ def accessor_tail(self):
         self.table_accessor()
 
         """    71 <accessor_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<accessor_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -667,8 +664,7 @@ def univ_ambig_tail(self):
         self.strict_flag_or_tail()
 
         """    84 <univ_ambig_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<univ_ambig_tail>_8"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -749,8 +745,7 @@ def univ_piece_tail(self):
         self.univ_bool_tail()
 
         """    96 <univ_piece_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<univ_piece_tail>_6"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -806,8 +801,7 @@ def univ_bool_tail(self):
         self.strict_flag_or_tail()
 
         """    105 <univ_bool_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<univ_bool_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -934,8 +928,7 @@ def lhs_ambig_tail(self):
         self.strict_flag_or_tail()
 
         """    123 <lhs_ambig_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<lhs_ambig_tail>_8"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1134,8 +1127,7 @@ def val_ambig_tail(self):
         self.val_piece_tail()
 
         """    152 <val_ambig_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<val_ambig_tail>_5"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1301,8 +1293,7 @@ def val_piece_tail(self):
         self.val_piece_tail()
 
         """    176 <val_piece_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<val_piece_tail>_5"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1318,8 +1309,7 @@ def lhs_flag_comp_tail(self):
         self.strict_flag_factor()
 
         """    178 <lhs_flag_comp_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<lhs_flag_comp_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1462,8 +1452,7 @@ def strict_sip_mult_tail(self):
         self.strict_sip_mult_tail()
 
         """    195 <strict_sip_mult_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_sip_mult_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1486,8 +1475,7 @@ def strict_sip_add_tail(self):
         self.strict_sip_add_tail()
 
         """    198 <strict_sip_add_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_sip_add_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1528,8 +1516,7 @@ def val_sip_tail(self):
         self.val_sip_tail()
 
         """    204 <val_sip_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<val_sip_tail>_5"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1635,8 +1622,7 @@ def strict_chars_add_tail(self):
         self.strict_chars_add_tail()
 
         """    216 <strict_chars_add_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_chars_add_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -1719,8 +1705,7 @@ def val_str_tail(self):
         self.val_str_tail()
 
         """    226 <val_str_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<val_str_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2073,8 +2058,7 @@ def lhs_bool_tail(self):
         self.strict_flag_or_tail()
 
         """    273 <lhs_bool_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<lhs_bool_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2091,8 +2075,7 @@ def strict_flag_and_tail(self):
         self.strict_flag_and_tail()
 
         """    275 <strict_flag_and_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_flag_and_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2109,8 +2092,7 @@ def strict_flag_or_tail(self):
         self.strict_flag_or_tail()
 
         """    277 <strict_flag_or_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_flag_or_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2276,8 +2258,7 @@ def univ_sip_tail(self):
         self.univ_bool_tail()
 
         """    300 <univ_sip_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<univ_sip_tail>_6"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2300,8 +2281,7 @@ def univ_str_tail(self):
         self.univ_bool_tail()
 
         """    303 <univ_str_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<univ_str_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2662,8 +2642,7 @@ def univ_ambig_numeric_tail(self):
         self.univ_bool_tail()
 
         """    355 <univ_ambig_numeric_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<univ_ambig_numeric_tail>_6"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2751,8 +2730,7 @@ def strict_piece_mult_tail(self):
         self.strict_piece_mult_tail()
 
         """    367 <strict_piece_mult_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_mult_tail>_3"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2775,8 +2753,7 @@ def strict_piece_add_tail(self):
         self.strict_piece_add_tail()
 
         """    370 <strict_piece_add_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_add_tail>_2"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2794,8 +2771,7 @@ def piece_id_tail(self):
         self.piece_id_tail()
 
         """    372 <piece_id_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<piece_id_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2841,8 +2817,7 @@ def dimensions_tail(self):
         self.dimensions()
 
         """    376 <dimensions_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<dimensions_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2941,8 +2916,7 @@ def element_piece_tail(self):
         self.array_element_piece()
 
         """    388 <element_piece_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<element_piece_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -2959,8 +2933,7 @@ def array_declare_tail_piece(self):
         self.piece_array_init()
 
         """    390 <array_declare_tail_piece>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_piece>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3028,8 +3001,7 @@ def chars_id_tail(self):
         self.chars_id_tail()
 
         """    397 <chars_id_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<chars_id_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3145,8 +3117,7 @@ def element_chars_tail(self):
         self.array_element_chars()
 
         """    410 <element_chars_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<element_chars_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3163,8 +3134,7 @@ def array_declare_tail_chars(self):
         self.chars_array_init()
 
         """    412 <array_declare_tail_chars>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_chars>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3232,8 +3202,7 @@ def sip_id_tail(self):
         self.sip_id_tail()
 
         """    419 <sip_id_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<sip_id_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3349,8 +3318,7 @@ def element_sip_tail(self):
         self.array_element_sip()
 
         """    432 <element_sip_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<element_sip_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3367,8 +3335,7 @@ def array_declare_tail_sip(self):
         self.sip_array_init()
 
         """    434 <array_declare_tail_sip>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_sip>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3436,8 +3403,7 @@ def flag_id_tail(self):
         self.flag_id_tail()
 
         """    441 <flag_id_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<flag_id_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3553,8 +3519,7 @@ def element_flag_tail(self):
         self.array_element_id()
 
         """    454 <element_flag_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<element_flag_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3571,8 +3536,7 @@ def array_declare_tail_flag(self):
         self.flag_array_init()
 
         """    456 <array_declare_tail_flag>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_flag>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3668,8 +3632,7 @@ def required_decl_tail(self):
         self.required_decl()
 
         """    466 <required_decl_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<required_decl_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3754,8 +3717,7 @@ def table_declare_tail(self):
         self.table_declare()
 
         """    475 <table_declare_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<table_declare_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3858,8 +3820,7 @@ def element_table_tail(self):
         self.array_element_table()
 
         """    486 <element_table_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<element_table_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3876,8 +3837,7 @@ def array_declare_tail_table(self):
         self.table_array_init()
 
         """    488 <array_declare_tail_table>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_table>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -3945,8 +3905,7 @@ def spice_tail(self):
         self.spice_tail()
 
         """    495 <spice_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<spice_tail>_1"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
@@ -4537,8 +4496,7 @@ def pc_ambig_tail(self):
         self.strict_piece_add_tail()
 
         """    677 <pc_ambig_tail>	=>	    """
-    elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_5"]:
-        pass
+
 
 
     log.info("Exit: " + self.tokens[self.pos].type) # J
