@@ -28,7 +28,6 @@ class TestParser(unittest.TestCase):
     failed_tests = []
     
     def test_syntax_scripts(self):
-        """Test all syntax scripts from TSV and TXT files."""
         passed_count = 0
         
         for script in SYNTAX_TSCRIPTS:
