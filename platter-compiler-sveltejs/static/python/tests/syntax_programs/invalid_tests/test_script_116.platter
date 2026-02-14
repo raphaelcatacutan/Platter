@@ -1,0 +1,6 @@
+start() {
+  repeat(true) {
+    x = x + 1;
+    pass(up) { stop; }
+  }
+}

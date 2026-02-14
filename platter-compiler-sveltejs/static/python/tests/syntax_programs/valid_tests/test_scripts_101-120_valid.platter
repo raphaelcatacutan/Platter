@@ -1,0 +1,38 @@
+prepare piece of add2(piece of y) {
+    serve y+2;
+}
+prepare piece of add1() {
+  x = x + 1;
+}
+
+prepare piece of add2() {
+  add1();
+  add1();
+}
+
+
+start() {
+        piece of xd = add2(12) + add2(13);
+  flag of ok = (a + b * 2) >= (c - 1) and not (d == 0) or e < 5;
+  x = 0;
+  order {
+    x = x + 2;
+    y = x * 3;
+    x+=1;
+  } repeat(x < 6);
+  person:age = 19;
+  person:name = "Floyd";
+  pass( x = 0; x+=1 ; x>1) {
+    sum = x + y + z;
+  }
+  x = 0;
+  add2();
+    bill(tochars(xd));
+  repeat(x < 10) {
+    x = x + 1;
+    next;
+    x = x + 999;  
+    # comment ko
+  }
+}
+

@@ -1,0 +1,8 @@
+table of person = [
+        piece of age;
+    chars of name;
+
+]
+
+
+start() {}

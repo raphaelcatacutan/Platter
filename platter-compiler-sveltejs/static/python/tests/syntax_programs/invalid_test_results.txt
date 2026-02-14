@@ -1,5 +1,5 @@
 ======================================================================
-INVALID PARSER TEST SUMMARY: 2/2 tests passed
+INVALID PARSER TEST SUMMARY: 76/76 tests passed
 ======================================================================
 
 ✓ All invalid programs correctly produced errors!

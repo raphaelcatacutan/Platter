@@ -1,0 +1,2 @@
+flag of x = (x + 1) * ("HELLO") > 1; 
+start() {}

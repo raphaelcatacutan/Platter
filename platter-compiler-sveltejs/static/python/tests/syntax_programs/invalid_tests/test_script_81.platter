@@ -1,0 +1,9 @@
+piece of x = 2;
+
+table of Food = [piece of qty;];
+
+start(){
+  Food of hotdog = [a;];
+    
+  bill();
+}

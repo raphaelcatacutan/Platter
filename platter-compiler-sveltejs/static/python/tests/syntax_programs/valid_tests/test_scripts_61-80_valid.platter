@@ -1,0 +1,143 @@
+prepare piece[] of mergeSort(piece[] of arr) {
+    piece of n;
+    piece of mid;
+    piece of i;
+    piece[] of left;
+    piece[] of right;
+    piece[] of sortedLeft;
+    piece[] of sortedRight;
+    piece[] of result;piece[] of array = [0,1,2];
+piece[] of integers = [1,2,3];
+flag of enabled = up;
+
+    n = size(arr);
+
+    check(n <= (1)) {
+        serve [arr];
+    }
+
+    mid = n / (2);
+    left = [];
+    right = [];
+
+    # copy left half
+    pass(i=0; i+=1; i<mid) {
+        append(left, arr[i]);
+    }
+
+    # copy right half
+    pass(i=mid; i+=1; i<n) {
+        append(right, arr[i]);
+    }
+
+    sortedLeft = mergeSort(left);
+    sortedRight = mergeSort(right);
+
+    result = merge(sortedLeft, sortedRight);
+    serve [result];
+}
+
+prepare piece[] of merge(piece[] of left, piece[] of right) {
+    piece of i;
+    piece of j;
+    piece[] of merged;
+
+    i = (0);
+    j = (0);
+    merged = [];
+
+    pass(k=0; k+=1; k<size(left)+size(right)) {
+        check(i < size(left) and (j >= size(right) or left[i] <= right[j])) {
+            append(merged, left[i]);
+            i += (1);
+        }
+        alt(j < size(right)) {
+            append(merged, right[j]);
+            j += (1);
+        }
+    }
+    serve [merged];
+}
+
+start() {
+
+	piece[] of arr = [64,25,12,22,11];
+    piece of n = size(arr);piece[] of arr = [2,4,6,8,10];
+    piece of target = 6;
+    piece of n = size(arr); piece[] of arr = [1,2,3,4,5,6,7,8,9];
+    piece of target = 7;
+    piece of low = 0;
+    piece of high = size(arr)-(1);piece of n = 5;
+    piece of result = 1;piece of a = 48;
+    piece of b = 18; piece of n = 29;
+    flag of isPrime = up;
+    piece[] of arr;
+    piece[] of sorted;
+
+    arr = [38,27,43,3,9,82,10];
+    sorted = mergeSort(arr);
+    serve [sorted];
+bill("flag is: " + tochars(2 - size(array) > integers[0] and enabled == up)); 
+
+    pass(i=2; i+=1; i*i <= n) {
+        check(n % i == 0) {
+            isPrime = down;
+            stop;
+        }
+    }
+    serve [isPrime];
+
+    repeat(b != 0) {
+        piece of temp = b;
+        b = a % b;
+        a = temp;
+    }
+    serve [a];
+
+    pass(i=1; i+=1; i<=n) {
+        result *= i;
+    }
+    serve [result];
+
+    repeat(low <= high) {
+        piece of mid = (low + high) / 2;
+        check(arr[mid] == target) {
+            serve [mid];
+            stop;
+        }
+        alt(arr[mid] < target) {
+            low = mid + 1;
+        }
+        instead {
+            high = mid - 1;
+        }
+    }
+    serve [-1];
+
+    pass(i=0; i+=1; i<n) {
+        check(arr[i] == target) {
+            serve [i];
+            stop;
+        }
+    }
+    serve [-1]; # not found
+
+    pass(i=0; i+=1; i<n-(1)) {
+        piece of minIndex = i;
+        piece of temp;
+        pass(j=i+1; j+=1; j<n) {
+            check(arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        temp = arr[minIndex];
+        arr[minIndex] = arr[i];
+        arr[i] = temp;
+    }
+    serve [arr];
+  menu(1) { 
+    choice 1: rand(); stop; 
+    choice 2: size(a); stop;
+  }
+  
+}

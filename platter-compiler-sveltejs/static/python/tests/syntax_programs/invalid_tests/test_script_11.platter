@@ -1,0 +1,3 @@
+start() {
+    x = x + "hello" + 1;
+}

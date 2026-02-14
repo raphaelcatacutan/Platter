@@ -1,0 +1,40 @@
+piece[][] of grid = [1, 2];
+piece of x = 2;
+table of Item = [
+    piece of price;
+];
+
+Item of i = [
+    price = 50;
+];
+
+piece of x = 5;
+sip of y = 2.5;
+
+prepare chars of makeText(piece of a, sip of b){
+    serve tochars(a + topiece(b));
+}
+
+prepare piece of inc(piece of x){
+    serve x + 1;
+}
+
+start(){
+    serve grid[0][0];
+    repeat(not x < 5){
+        serve x;
+    }
+    menu(x){
+        choice 1: serve 10;
+        choice 2: serve 20;
+        usual: serve 0;
+    }
+    serve (x + 1) * (y - 2);
+    pass(i = 0; i += 1; i < 3){
+        serve i;
+    }
+    serve i:price + 10;
+    serve inc(3);
+    serve makeText(x, y);
+}
+

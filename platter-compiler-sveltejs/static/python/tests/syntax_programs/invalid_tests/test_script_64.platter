@@ -1,0 +1,3 @@
+start(){
+another = bill() += 23;
+}

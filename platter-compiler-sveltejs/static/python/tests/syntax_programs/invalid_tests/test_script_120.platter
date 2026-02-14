@@ -1,0 +1,7 @@
+table of animal = [ chars of sound; ];
+
+start() {
+        animal of pig;
+    chars of cat = "meow";
+    pig:sound = "cat" cat;
+}

@@ -1,0 +1,4 @@
+start(){
+        piece of num = 2, c=3, x=10, y=5;
+        x + c * y
+}
