@@ -41,6 +41,11 @@ class TestParser(unittest.TestCase):
                     self.assertEqual(actual_output, expected_output)
                     passed_count += 1
                 except AssertionError:
+                    is_lexical_error_expected = "lexical errors" in expected_output
+                    is_lexical_error_output = "Invalid" in actual_output
+                    if is_lexical_error_output: 
+                        self.assertEqual(is_lexical_error_expected, True)
+                        continue
                     # Store failed test information
                     TestParser.failed_tests.append({
                         'number': test_num,

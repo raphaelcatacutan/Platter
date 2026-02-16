@@ -222,5 +222,6 @@ FIRST_SET = {
     '<jump_serve>': ['serve'],
     '<usual_clause_loop>': ['usual', 'λ'],
     '<loop_repeat>': ['repeat'],
-    '<loop_order>': ['order']
+    '<loop_order>': ['order'],
+    '<usual_clause>': ['usual', 'λ'],
 }
