@@ -75,26 +75,6 @@ class Parser():
 
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def global_decl(self):
         self.appendF(FIRST_SET["<global_decl>"])
         log.info("Enter: " + self.tokens[self.pos].type)

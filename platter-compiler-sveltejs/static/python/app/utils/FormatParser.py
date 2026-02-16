@@ -173,6 +173,9 @@ def merge_into_parser_program(productions_content):
     if match:
         header = match.group(1)
         
+        # Strip any trailing whitespace/newlines from header to prevent accumulation
+        header = header.rstrip()
+        
         # Indent all lines in productions_content by 4 spaces to make them class methods
         indented_lines = []
         for line in productions_content.split('\n'):
@@ -182,8 +185,11 @@ def merge_into_parser_program(productions_content):
                 indented_lines.append(line)
         indented_productions = '\n'.join(indented_lines)
         
-        # Combine header with indented productions
-        new_content = header + "\n" + indented_productions
+        # Strip leading empty lines from productions to prevent accumulation
+        indented_productions = indented_productions.lstrip('\n')
+        
+        # Combine header with indented productions (add exactly one blank line)
+        new_content = header + "\n\n" + indented_productions
         
         PARSER_PROGRAM_FILE.write_text(new_content, encoding='utf-8')
         print("\n✓ Successfully merged productions into parser_program.py!")
@@ -212,11 +218,18 @@ def remove_duplicates_from_first_set():
     
     dict_content = match.group(1)
     
-    # Parse entries
+    # Parse entries line by line to handle ']' inside quoted strings
     entries = OrderedDict()
-    pattern = r"'([^']+)':\s*\[(.*?)\](?=,\s*'|\s*$)"
+    # Greedy match to capture everything up to the last ] on the line
+    pattern = r"'([^']+)':\s*\[(.*)\],?\s*$"
     
-    for m in re.finditer(pattern, dict_content, re.DOTALL):
+    for line in dict_content.split('\n'):
+        line = line.strip()
+        if not line:
+            continue
+        m = re.match(pattern, line)
+        if not m:
+            continue
         key = m.group(1)
         values_str = m.group(2)
         

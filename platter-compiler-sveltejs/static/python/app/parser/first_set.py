@@ -223,5 +223,5 @@ FIRST_SET = {
     '<usual_clause_loop>': ['usual', 'λ'],
     '<loop_repeat>': ['repeat'],
     '<loop_order>': ['order'],
-    '<usual_clause>': ['usual', 'λ'],
+    '<usual_clause>': ['usual', 'λ']
 }
