@@ -33,10 +33,11 @@ class TestParser(unittest.TestCase):
         for script in SYNTAX_TSCRIPTS:
             test_num = script["number"]
             expected_output = script["expected_output"]
-            actual_output = check_parse(script)
             
             with self.subTest(test_number=test_num):
+                actual_output = check_parse(script)
                 try:
+                    self.maxDiff = None
                     self.assertEqual(actual_output, expected_output)
                     passed_count += 1
                 except AssertionError:

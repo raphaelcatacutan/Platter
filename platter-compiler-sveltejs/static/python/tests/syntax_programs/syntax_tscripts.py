@@ -396,7 +396,7 @@ start(){
   },
   {
     "number": 43,
-    "expected_output": """Syntax Error: Unexpected 'id' at line 5, col 14. Expected '('""",
+    "expected_output": """Syntax Error: Unexpected 'id' at line 5, col 14. Expected '('.""",
     "code": """start(){
     piece of x = 0;
     order{
@@ -506,9 +506,7 @@ start(){
   },
   {
     "number": 55,
-    "expected_output": """Syntax analysis not performed due to lexical errors:
-
-Error at line 4 col 5 - Invalid Lexeme: Invalid delimiter for reserved word 'repeat'""",
+    "expected_output": """Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 4, col 5. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.""",
     "code": """piece of x = 3;
 
 start(){
@@ -534,12 +532,10 @@ start(){
   },
   {
     "number": 57,
-    "expected_output": """Syntax analysis not performed due to lexical errors:
-
-Error at line 1 col 1 - Invalid Lexeme: Invalid delimiter for reserved word 'start'""",
     "code": """start[]{
     serve 0;
-}"""
+}""",
+    "expected_output": """Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 1, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'."""
   },
   {
     "number": 58,
@@ -884,18 +880,14 @@ start(){
   },
   {
     "number": 82,
-    "expected_output": """Syntax analysis not performed due to lexical errors:
-
-Error at line 2 col 3 - Invalid Lexeme: Invalid delimiter for reserved word 'prepare'""",
+    "expected_output": """Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 2, col 3. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.""",
     "code": """start(){
   prepare;){}
 }"""
   },
   {
     "number": 83,
-    "expected_output": """Syntax analysis not performed due to lexical errors:
-
-Error at line 1 col 1 - Invalid Lexeme: Invalid delimiter for reserved word 'prepare'""",
+    "expected_output": """Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 1, col 1. Expected 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start'.""",
     "code": """prepare(){}
 start(){}"""
   },
@@ -1031,7 +1023,7 @@ start(){
   },
   {
     "number": 97,
-    "expected_output": """Syntax Error: Unexpected 'prepare' at line 2, col 2. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.""",
+    "expected_output": """Syntax Error: Unexpected 'prepare' at line 2, col 9. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.""",
     "code": """start(){
         prepare piece of a(){}
 }"""
@@ -1366,9 +1358,7 @@ remove([1, 2, 3], 1);
   },
   {
     "number": 131,
-    "expected_output": """Syntax analysis not performed due to lexical errors:
-
-Error at line 2 col 2 - Invalid Lexeme: Invalid delimiter for reserved word 'serve'""",
+    "expected_output": """Syntax Error: Unexpected 'Invalid Reserved Word Delimeter' at line 2, col 9. Expected 'piece', 'chars', 'sip', 'flag', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve', '}'.""",
     "code": """start(){
         serve;
 }"""
@@ -1392,8 +1382,7 @@ Error at line 2 col 2 - Invalid Lexeme: Invalid delimiter for reserved word 'ser
   },
   {
     "number": 134,
-    "expected_output": """No Syntax Error
-""",
+    "expected_output": """No Syntax Error""",
     "code": """piece of a;
 
 start(){
