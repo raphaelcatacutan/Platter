@@ -87,6 +87,14 @@ class Parser():
 
 
 
+
+
+
+
+
+
+
+
     def global_decl(self):
         self.appendF(FIRST_SET["<global_decl>"])
         log.info("Enter: " + self.tokens[self.pos].type)
@@ -330,12 +338,12 @@ class Parser():
         log.info("Exit: " + self.tokens[self.pos].type) # J
 
     def id_(self):
-        self.appendF(FIRST_SET["<id_>"])
+        self.appendF(FIRST_SET["<id>"])
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
         """    32 <id>	=>	id	<id_tail>    """
-        if self.tokens[self.pos].type in PREDICT_SET["id_"]:
+        if self.tokens[self.pos].type in PREDICT_SET["<id>"]:
             self.parse_token("id")
             self.id_tail()
         else: self.parse_token(self.error_arr)

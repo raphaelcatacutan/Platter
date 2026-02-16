@@ -95,16 +95,16 @@ def remove_program_function(content):
 def apply_id_transformations(content):
     """Transform <id> references to id_ """
     # Replace function definition
-    content = re.sub(r'\bdef id\(self\):', 'def id_(self):', content)
+    # content = re.sub(r'\bdef id\(self\):', 'def id_(self):', content)
     
     # Replace FIRST_SET["<id>"] to FIRST_SET["id_"]
-    content = re.sub(r'FIRST_SET\["<id>"\]', 'FIRST_SET["id_"]', content)
+    content = re.sub(r'FIRST_SET\["<id_>"\]', 'FIRST_SET["<id>"]', content)
     
     # Replace self.id() calls to self.id_()
-    content = re.sub(r'self\.id\(\)', 'self.id_()', content)
+    # content = re.sub(r'self\.id\(\)', 'self.id_()', content)
     
-    # Replace PREDICT_SET["<id>"] to PREDICT_SET["id_"]
-    content = re.sub(r'PREDICT_SET\["<id>"\]', 'PREDICT_SET["id_"]', content)
+    # # Replace PREDICT_SET["<id>"] to PREDICT_SET["id_"]
+    # content = re.sub(r'PREDICT_SET\["<id>"\]', 'PREDICT_SET["id_"]', content)
     
     return content
 
@@ -244,7 +244,7 @@ def remove_duplicates_from_first_set():
     new_content = "".join(lines)
     FIRST_SET_FILE.write_text(new_content, encoding='utf-8')
     
-    print(f"\n✓ Removed duplicates from first_set.py (found {len(entries)} unique entries)")
+    print(f"\nRemoved duplicates from first_set.py (found {len(entries)} unique entries)")
 
 
 # ============= MAIN =============
@@ -266,6 +266,11 @@ def main():
         
         # Step 4: Remove duplicates from first_set.py
         remove_duplicates_from_first_set()
+        
+        # Step 5: Clean up temporary productions.py file
+        if PRODUCTIONS_FILE.exists():
+            PRODUCTIONS_FILE.unlink()
+            print("\n✓ Cleaned up temporary productions.py")
         
         print("✓ CFG UPDATE COMPLETED SUCCESSFULLY!")
         
