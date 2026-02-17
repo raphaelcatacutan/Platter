@@ -1,0 +1,682 @@
+prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
+1	<program>	=>	create	Program	global_decl=collect($0) recipe_decl=collect($1) start_platter=$7	Root node
+2	<global_decl>	=>	collect	-	$1 + $2	Piece global var
+3	<global_decl>	=>	collect	-	$1 + $2	Chars global var
+4	<global_decl>	=>	collect	-	$1 + $2	Sip global var
+5	<global_decl>	=>	collect	-	$1 + $2	Flag global var
+6	<global_decl>	=>	collect	-	$0 + $1	Table prototype
+7	<global_decl>	=>	collect	-	$1 + $2	Table instance
+8	<global_decl>	=>	collect	-	[]	Empty global decl
+9	<piece_decl>	=>	propagate	-	$1	Piece declaration
+10	<piece_decl>	=>	propagate	-	$0	Piece array declaration
+11	<piece_id>	=>	collect	-	[VarDecl("piece", $0.value, $1)] + $2	Piece var with init
+12	<piece_ingredient_init>	=>	propagate	-	$1	Has initializer
+13	<piece_ingredient_init>	=>	skip	-	-	No initializer
+14	<strict_piece_expr>	=>	build_binop	-	left=$0 right=$1	Piece expression with tail
+15	<strict_piece_term>	=>	build_binop	-	left=$0 right=$1	Piece term with tail
+16	<strict_piece_factor>	=>	propagate	-	$0	Factor is ret_piece
+17	<strict_piece_factor>	=>	propagate	-	$0	Factor is identifier
+18	<strict_piece_factor>	=>	propagate	-	$1	Parenthesized expression
+19	<ret_piece>	=>	create	CastExpr	target_type=piece expr=$2	topiece cast
+20	<ret_piece>	=>	create	FunctionCall	name=size args=[$2]	size() function
+21	<ret_piece>	=>	create	FunctionCall	name=search args=[$2,$4]	search() function
+22	<ret_piece>	=>	create	FunctionCall	name=fact args=[$2]	fact() function
+23	<ret_piece>	=>	create	FunctionCall	name=pow args=[$2,$4]	pow() function
+24	<ret_piece>	=>	create	Literal	value_type=piece value=$0.value	Piece literal
+25	<any_expr>	=>	build_binop	-	left=$0 right=$1	ID with tail
+26	<any_expr>	=>	build_binop	-	left=$0 right=$1	ret_piece with tail
+27	<any_expr>	=>	build_binop	-	left=$0 right=$1	ret_sip with tail
+28	<any_expr>	=>	build_binop	-	left=$0 right=$1	ret_chars with tail
+29	<any_expr>	=>	build_binop	-	left=$0 right=$1	ret_flag with tail
+30	<any_expr>	=>	propagate	-	$1	Parenthesized expression
+31	<any_expr>	=>	create	UnaryOp	operator=not operand=$1	Not expression
+32	<id>	=>	build_access	-	base=$0 tail=$1	Identifier with accessor/call
+33	<id_tail>	=>	propagate	-	$0	Call tail
+34	<id_tail>	=>	propagate	-	$0	Accessor tail
+35	<call_tailopt>	=>	create	FunctionCall	name=CONTEXT args=$1	Function call
+36	<call_tailopt>	=>	skip	-	-	No call
+37	<flavor>	=>	collect	-	[$0] + $1	Arguments list
+38	<flavor>	=>	collect	-	[]	No arguments
+39	<value>	=>	propagate	-	$0	Value is any_expr
+40	<value>	=>	propagate	-	$0	Value is array
+41	<value>	=>	propagate	-	$1	Array/table literal
+42	<ret_array>	=>	create	FunctionCall	name=append args=[$2,$4]	append()
+43	<ret_array>	=>	create	FunctionCall	name=sort args=[$2]	sort()
+44	<ret_array>	=>	create	FunctionCall	name=reverse args=[$2]	reverse()
+45	<ret_array>	=>	create	FunctionCall	name=remove args=[$2,$4]	remove()
+46	<strict_array_expr>	=>	create	ArrayLiteral	elements=$1	Array literal with elements
+47	<strict_array_expr>	=>	propagate	-	$0	Array ID with tail
+48	<strict_array_expr>	=>	propagate	-	$0	Result of ret_array
+49	<array_element_id>	=>	collect	-	[Identifier($0.value)] + $1	ID element
+50	<array_element_id>	=>	propagate	-	$0	Array element
+51	<array_element_id>	=>	collect	-	[]	Empty element list
+52	<element_value_tail>	=>	collect	-	$1	More elements
+53	<element_value_tail>	=>	collect	-	[]	No more elements
+54	<array_element>	=>	collect	-	[Literal("piece", $0.value)] + $1	Piece literal element
+55	<array_element>	=>	collect	-	[Literal("sip", $0.value)] + $1	Sip literal element
+56	<array_element>	=>	collect	-	[Literal("flag", $0.value)] + $1	Flag literal element
+57	<array_element>	=>	collect	-	[Literal("chars", $0.value)] + $1	Chars literal element
+58	<array_element>	=>	collect	-	[ArrayLiteral($1)] + $3	Nested array literal
+59	<notation_val>	=>	propagate	-	$0	Notation is element
+60	<notation_val>	=>	build_notation	-	base=$0 tail=$1	Notation is ID with tail
+61	<notation_val>	=>	skip	-	-	Empty notation
+62	<array_or_table>	=>	collect	-	[$1]	Array continuation
+63	<array_or_table>	=>	create	TableLiteral	field_inits=$1	Table literal
+64	<array_or_table>	=>	skip	-	-	End of notation
+65	<field_assignments>	=>	collect	-	[($0.value, $2)] + $4	Field assignment
+66	<field_assignments>	=>	collect	-	[]	No more fields
+67	<flavor_tail>	=>	collect	-	[$1] + $2	More arguments
+68	<flavor_tail>	=>	collect	-	[]	No more arguments
+69	<accessor_tail>	=>	propagate	-	$0	Array accessor
+70	<accessor_tail>	=>	propagate	-	$0	Table accessor
+71	<accessor_tail>	=>	skip	-	-	No accessor
+72	<array_accessor>	=>	build_access	-	type=array value=$1	Array access start
+73	<array_accessor_val>	=>	build_access	-	index=Literal("piece",$0.value) tail=$2	Piece lit index
+74	<array_accessor_val>	=>	build_access	-	index=Identifier($0.value) tail=$2	ID index
+75	<table_accessor>	=>	build_access	-	type=table field=$1.value tail=$2	Table field access
+76	<univ_ambig_tail>	=>	build_binop	-	op=+ right=$1	Addition tail
+77	<univ_ambig_tail>	=>	build_binop	-	op=- right=$1	Subtraction tail
+78	<univ_ambig_tail>	=>	build_binop	-	op=* right=$1	Multiplication tail
+79	<univ_ambig_tail>	=>	build_binop	-	op=/ right=$1	Division tail
+80	<univ_ambig_tail>	=>	build_binop	-	op=% right=$1	Modulo tail
+81	<univ_ambig_tail>	=>	build_binop	-	op=$0 right=$1 tail=$2	Relational comparison
+82	<univ_ambig_tail>	=>	build_binop	-	op=and right=$1 tail=$2	Logical AND
+83	<univ_ambig_tail>	=>	build_binop	-	op=or right=$1 tail=$2	Logical OR
+84	<univ_ambig_tail>	=>	skip	-	-	Empty tail
+85	<univ_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Branch with ID
+86	<univ_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Branch with ret_piece
+87	<univ_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Branch with ret_sip
+88	<univ_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Branch with ret_chars
+89	<univ_ambig_branch>	=>	propagate	-	$1	Parenthesized branch
+90	<univ_piece_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Piece add tail
+91	<univ_piece_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Piece sub tail
+92	<univ_piece_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Piece mult tail
+93	<univ_piece_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Piece div tail
+94	<univ_piece_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Piece mod tail
+95	<univ_piece_tail>	=>	build_binop	-	op=$0 right=$1 tail=$2	Piece comparison tail
+96	<univ_piece_tail>	=>	skip	-	-	Empty piece tail
+97	<rel_op>	=>	token	-	value==	==
+98	<rel_op>	=>	token	-	value!=	!=
+99	<rel_op>	=>	token	-	value>	>
+100	<rel_op>	=>	token	-	value<	<
+101	<rel_op>	=>	token	-	value>=	>=
+102	<rel_op>	=>	token	-	value<=	<=
+103	<univ_bool_tail>	=>	build_binop	-	op=and right=$1 tail=$2	Bool AND tail
+104	<univ_bool_tail>	=>	build_binop	-	op=or right=$1 tail=$2	Bool OR tail
+105	<univ_bool_tail>	=>	skip	-	-	Empty bool tail
+106	<strict_flag_expr>	=>	build_binop	-	left=$0 right=$1	Flag expr with OR tail
+107	<strict_flag_term>	=>	build_binop	-	left=$0 right=$1	Flag term with AND tail
+108	<strict_flag_factor>	=>	build_binop	-	left=$0 right=$1	Flag factor with ambig tail
+109	<strict_flag_factor>	=>	build_binop	-	left=$0 right=$1	ret_piece with piece tail
+110	<strict_flag_factor>	=>	build_binop	-	left=$0 right=$1	ret_sip with sip tail
+111	<strict_flag_factor>	=>	build_binop	-	left=$0 right=$1	ret_chars with chars tail
+112	<strict_flag_factor>	=>	build_binop	-	left=$0 right=$1	ret_flag with bool tail
+113	<strict_flag_factor>	=>	create	UnaryOp	operator=not operand=$1	NOT factor
+114	<strict_flag_factor>	=>	propagate	-	$1	Parenthesized flag factor
+115	<lhs_ambig_tail>	=>	build_binop	-	op=+ right=$1	LHS add tail
+116	<lhs_ambig_tail>	=>	build_binop	-	op=- right=$1 tail=$2	LHS sub tail
+117	<lhs_ambig_tail>	=>	build_binop	-	op=* right=$1 tail=$2	LHS mult tail
+118	<lhs_ambig_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	LHS div tail
+119	<lhs_ambig_tail>	=>	build_binop	-	op=% right=$1 tail=$2	LHS mod tail
+120	<lhs_ambig_tail>	=>	build_binop	-	op=$0 right=$1	LHS comparison tail
+121	<lhs_ambig_tail>	=>	build_binop	-	op=and right=$1 tail=$2	LHS AND tail
+122	<lhs_ambig_tail>	=>	build_binop	-	op=or right=$1 tail=$2	LHS OR tail
+123	<lhs_ambig_tail>	=>	skip	-	-	Empty LHS tail
+124	<ambig_calc_branch>	=>	build_binop	-	left=$0 right=$1	Ambig ID calc
+125	<ambig_calc_branch>	=>	build_binop	-	left=$0 right=$1	Ambig ret_piece calc
+126	<ambig_calc_branch>	=>	build_binop	-	left=$0 right=$1	Ambig ret_sip calc
+127	<ambig_calc_branch>	=>	build_binop	-	left=$0 right=$1	Ambig ret_chars calc
+128	<ambig_calc_branch>	=>	propagate	-	$1	Parenthesized calc
+129	<lhs_ambig_tail_no_lambda>	=>	build_binop	-	op=+ right=$1	LHS NL add
+130	<lhs_ambig_tail_no_lambda>	=>	build_binop	-	op=- right=$1 tail=$2	LHS NL sub
+131	<lhs_ambig_tail_no_lambda>	=>	build_binop	-	op=* right=$1 tail=$2	LHS NL mult
+132	<lhs_ambig_tail_no_lambda>	=>	build_binop	-	op=/ right=$1 tail=$2	LHS NL div
+133	<lhs_ambig_tail_no_lambda>	=>	build_binop	-	op=% right=$1 tail=$2	LHS NL mod
+134	<lhs_ambig_tail_no_lambda>	=>	build_binop	-	op=$0 right=$1	LHS NL cmp
+135	<lhs_piece_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	LHS piece add
+136	<lhs_piece_tail>	=>	build_binop	-	op=- right=$1 tail=$2	LHS piece sub
+137	<lhs_piece_tail>	=>	build_binop	-	op=* right=$1 tail=$2	LHS piece mult
+138	<lhs_piece_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	LHS piece div
+139	<lhs_piece_tail>	=>	build_binop	-	op=% right=$1 tail=$2	LHS piece mod
+140	<lhs_piece_tail>	=>	build_binop	-	op=$0 right=$1	LHS piece cmp
+141	<strict_ambig_rhs>	=>	build_binop	-	left=$0 right=$1	Ambig RHS ID
+142	<strict_ambig_rhs>	=>	build_binop	-	left=$0 right=$1	Ambig RHS ret_piece
+143	<strict_ambig_rhs>	=>	build_binop	-	left=$0 right=$1	Ambig RHS ret_sip
+144	<strict_ambig_rhs>	=>	build_binop	-	left=$0 right=$1	Ambig RHS ret_chars
+145	<strict_ambig_rhs>	=>	propagate	-	$1	Ambig RHS paren
+146	<strict_ambig_rhs>	=>	propagate	-	$0	Ambig RHS ret_flag
+147	<val_ambig_tail>	=>	build_binop	-	op=+ right=$1	Val ambig add
+148	<val_ambig_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Val ambig sub
+149	<val_ambig_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Val ambig mult
+150	<val_ambig_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Val ambig div
+151	<val_ambig_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Val ambig mod
+152	<val_ambig_tail>	=>	skip	-	-	Empty val ambig tail
+153	<paren_ambig_branch_val>	=>	build_binop	-	left=$0 right=$1	Paren ID val
+154	<paren_ambig_branch_val>	=>	build_binop	-	left=$0 right=$1	Paren ret_piece val
+155	<paren_ambig_branch_val>	=>	build_binop	-	left=$0 right=$1	Paren ret_sip val
+156	<paren_ambig_branch_val>	=>	build_binop	-	left=$0 right=$1	Paren ret_chars val
+157	<paren_ambig_branch_val>	=>	propagate	-	$1	Paren dispatch val
+158	<paren_ambig_tail_val>	=>	build_binop	-	op=+ right=$1	Paren val add
+159	<paren_ambig_tail_val>	=>	build_binop	-	op=- right=$1 tail=$2	Paren val sub
+160	<paren_ambig_tail_val>	=>	build_binop	-	op=* right=$1 tail=$2	Paren val mult
+161	<paren_ambig_tail_val>	=>	build_binop	-	op=/ right=$1 tail=$2	Paren val div
+162	<paren_ambig_tail_val>	=>	build_binop	-	op=% right=$1 tail=$2	Paren val mod
+163	<paren_ambig_tail_val>	=>	propagate	-	$1	Close paren
+164	<paren_ambig_tail_val>	=>	propagate	-	$0	Comparisons
+165	<paren_piece_tail_val>	=>	build_binop	-	op=+ right=$1 tail=$2	Paren piece val add
+166	<paren_piece_tail_val>	=>	build_binop	-	op=- right=$1 tail=$2	Paren piece val sub
+167	<paren_piece_tail_val>	=>	build_binop	-	op=* right=$1 tail=$2	Paren piece val mult
+168	<paren_piece_tail_val>	=>	build_binop	-	op=/ right=$1 tail=$2	Paren piece val div
+169	<paren_piece_tail_val>	=>	build_binop	-	op=% right=$1 tail=$2	Paren piece val mod
+170	<paren_piece_tail_val>	=>	propagate	-	$1	Close paren piece
+171	<val_piece_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Val piece add
+172	<val_piece_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Val piece sub
+173	<val_piece_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Val piece mult
+174	<val_piece_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Val piece div
+175	<val_piece_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Val piece mod
+176	<val_piece_tail>	=>	skip	-	-	Empty val piece
+177	<lhs_flag_comp_tail>	=>	build_binop	-	op=$0 right=$1	Flag comp tail
+178	<lhs_flag_comp_tail>	=>	skip	-	-	Empty flag comp
+179	<ret_sip>	=>	create	FunctionCall	name=sqrt args=[$2]	sqrt function
+180	<ret_sip>	=>	create	FunctionCall	name=rand args=[]	rand function
+181	<ret_sip>	=>	create	CastExpr	target_type=sip expr=$2	tosip cast
+182	<ret_sip>	=>	create	Literal	value_type=sip value=$0.value	Sip literal
+183	<paren_sip_tail_val>	=>	build_binop	-	op=+ right=$1 tail=$2	Paren sip val add
+184	<paren_sip_tail_val>	=>	build_binop	-	op=- right=$1 tail=$2	Paren sip val sub
+185	<paren_sip_tail_val>	=>	build_binop	-	op=* right=$1 tail=$2	Paren sip val mult
+186	<paren_sip_tail_val>	=>	build_binop	-	op=/ right=$1 tail=$2	Paren sip val div
+187	<paren_sip_tail_val>	=>	propagate	-	$1	Close paren sip
+188	<strict_sip_factor>	=>	propagate	-	$0	Sip factor ID
+189	<strict_sip_factor>	=>	propagate	-	$0	Sip factor ret
+190	<strict_sip_factor>	=>	propagate	-	$1	Sip factor paren
+191	<strict_sip_expr>	=>	build_binop	-	left=$0 right=$1	Sip expression
+192	<strict_sip_term>	=>	build_binop	-	left=$0 right=$1	Sip term
+193	<strict_sip_mult_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Sip mult tail
+194	<strict_sip_mult_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Sip div tail
+195	<strict_sip_mult_tail>	=>	skip	-	-	Empty sip mult
+196	<strict_sip_add_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Sip add tail
+197	<strict_sip_add_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Sip sub tail
+198	<strict_sip_add_tail>	=>	skip	-	-	Empty sip add
+199	<val_sip_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Val sip add
+200	<val_sip_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Val sip sub
+201	<val_sip_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Val sip mult
+202	<val_sip_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Val sip div
+203	<val_sip_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Val sip mod
+204	<val_sip_tail>	=>	skip	-	-	Empty val sip
+205	<ret_chars>	=>	create	FunctionCall	name=bill args=[$2]	bill function
+206	<ret_chars>	=>	create	FunctionCall	name=take args=[]	take function
+207	<ret_chars>	=>	create	FunctionCall	name=copy args=[$2,$4,$6]	copy function
+208	<ret_chars>	=>	create	FunctionCall	name=cut args=[$2,$4]	cut function
+209	<ret_chars>	=>	create	CastExpr	target_type=chars expr=$2	tochars cast
+210	<ret_chars>	=>	create	Literal	value_type=chars value=$0.value	Chars literal
+211	<strict_chars_expr>	=>	build_binop	-	left=$0 right=$1	Chars expression
+212	<strict_chars_factor>	=>	propagate	-	$0	Chars factor ret
+213	<strict_chars_factor>	=>	propagate	-	$0	Chars factor ID
+214	<strict_chars_factor>	=>	propagate	-	$1	Chars factor paren
+215	<strict_chars_add_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Chars add tail
+216	<strict_chars_add_tail>	=>	skip	-	-	Empty chars tail
+217	<paren_str_tail_val>	=>	build_binop	-	op=+ right=$1 tail=$2	Paren str val add
+218	<paren_str_tail_val>	=>	propagate	-	$1	Close paren str
+219	<strict_string_factor>	=>	propagate	-	$0	String factor ID
+220	<strict_string_factor>	=>	propagate	-	$0	String factor ret
+221	<strict_string_factor>	=>	propagate	-	$1	String factor paren
+222	<paren_dispatch_val_str>	=>	build_binop	-	left=$0 right=$1	Dispatch val str ID
+223	<paren_dispatch_val_str>	=>	build_binop	-	left=$0 right=$1	Dispatch val str ret
+224	<paren_dispatch_val_str>	=>	propagate	-	$1	Dispatch val str paren
+225	<val_str_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Val str add
+226	<val_str_tail>	=>	skip	-	-	Empty val str
+227	<paren_dispatch_val>	=>	build_binop	-	left=$0 right=$1	Paren dispatch ID
+228	<paren_dispatch_val>	=>	build_binop	-	left=$0 right=$1	Paren dispatch ret_piece
+229	<paren_dispatch_val>	=>	build_binop	-	left=$0 right=$1	Paren dispatch ret_sip
+230	<paren_dispatch_val>	=>	build_binop	-	left=$0 right=$1	Paren dispatch ret_chars
+231	<paren_dispatch_val>	=>	propagate	-	$1	Paren dispatch nested
+232	<ret_flag>	=>	create	FunctionCall	name=matches args=[$2,$4]	matches function
+233	<ret_flag>	=>	create	CastExpr	target_type=flag expr=$2	toflag cast
+234	<ret_flag>	=>	create	Literal	value_type=flag value=$0.value	Flag literal
+235	<strict_datas_expr>	=>	create	ArrayLiteral	elements=$1	Strict datas array
+236	<strict_datas_expr>	=>	propagate	-	$0	Strict datas ID
+237	<strict_datas_expr>	=>	propagate	-	$0	Strict datas ret
+238	<lhs_sip_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	LHS sip add
+239	<lhs_sip_tail>	=>	build_binop	-	op=- right=$1 tail=$2	LHS sip sub
+240	<lhs_sip_tail>	=>	build_binop	-	op=* right=$1 tail=$2	LHS sip mult
+241	<lhs_sip_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	LHS sip div
+242	<lhs_sip_tail>	=>	build_binop	-	op=$0 right=$1	LHS sip cmp
+243	<lhs_str_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	LHS str add
+244	<lhs_str_tail>	=>	build_binop	-	op=$0 right=$1	LHS str cmp
+245	<paren_dispatch_lhs_no_lambda>	=>	build_binop	-	left=$0 right=$1	Paren LHS NL ID
+246	<paren_dispatch_lhs_no_lambda>	=>	build_binop	-	left=$0 right=$1	Paren LHS NL piece
+247	<paren_dispatch_lhs_no_lambda>	=>	build_binop	-	left=$0 right=$1	Paren LHS NL sip
+248	<paren_dispatch_lhs_no_lambda>	=>	build_binop	-	left=$0 right=$1	Paren LHS NL chars
+249	<paren_dispatch_lhs_no_lambda>	=>	propagate	-	$1	Paren LHS NL nested
+250	<paren_ambig_tail_lhs>	=>	build_binop	-	op=+ right=$1	Paren ambig LHS add
+251	<paren_ambig_tail_lhs>	=>	build_binop	-	op=- right=$1 tail=$2	Paren ambig LHS sub
+252	<paren_ambig_tail_lhs>	=>	build_binop	-	op=* right=$1 tail=$2	Paren ambig LHS mult
+253	<paren_ambig_tail_lhs>	=>	build_binop	-	op=/ right=$1 tail=$2	Paren ambig LHS div
+254	<paren_ambig_tail_lhs>	=>	build_binop	-	op=% right=$1 tail=$2	Paren ambig LHS mod
+255	<paren_ambig_tail_lhs>	=>	propagate	-	$1	Close paren LHS
+256	<paren_ambig_tail_lhs>	=>	build_binop	-	op=$0 right=$1 tail=$3	Paren ambig LHS cmp
+257	<paren_ambig_tail_lhs>	=>	build_binop	-	op=and right=$1 tail=$3	Paren ambig LHS and
+258	<paren_ambig_tail_lhs>	=>	build_binop	-	op=or right=$1 tail=$3	Paren ambig LHS or
+259	<paren_ambig_branch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren branch LHS ID
+260	<paren_ambig_branch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren branch LHS piece
+261	<paren_ambig_branch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren branch LHS sip
+262	<paren_ambig_branch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren branch LHS chars
+263	<paren_ambig_branch_lhs>	=>	propagate	-	$1	Paren branch LHS nested
+264	<paren_piece_tail_lhs>	=>	build_binop	-	op=+ right=$1 tail=$2	Paren piece LHS add
+265	<paren_piece_tail_lhs>	=>	build_binop	-	op=- right=$1 tail=$2	Paren piece LHS sub
+266	<paren_piece_tail_lhs>	=>	build_binop	-	op=* right=$1 tail=$2	Paren piece LHS mult
+267	<paren_piece_tail_lhs>	=>	build_binop	-	op=/ right=$1 tail=$2	Paren piece LHS div
+268	<paren_piece_tail_lhs>	=>	build_binop	-	op=% right=$1 tail=$2	Paren piece LHS mod
+269	<paren_piece_tail_lhs>	=>	propagate	-	$1	Close paren piece LHS
+270	<paren_piece_tail_lhs>	=>	build_binop	-	op=$0 right=$1 tail=$3	Paren piece LHS cmp
+271	<lhs_bool_tail>	=>	build_binop	-	op=and right=$1 tail=$2	LHS bool and
+272	<lhs_bool_tail>	=>	build_binop	-	op=or right=$1 tail=$2	LHS bool or
+273	<lhs_bool_tail>	=>	skip	-	-	Empty LHS bool
+274	<strict_flag_and_tail>	=>	build_binop	-	op=and right=$1 tail=$2	Flag and tail
+275	<strict_flag_and_tail>	=>	skip	-	-	Empty and tail
+276	<strict_flag_or_tail>	=>	build_binop	-	op=or right=$1 tail=$2	Flag or tail
+277	<strict_flag_or_tail>	=>	skip	-	-	Empty or tail
+278	<paren_sip_tail_lhs>	=>	build_binop	-	op=+ right=$1 tail=$2	Paren sip LHS add
+279	<paren_sip_tail_lhs>	=>	build_binop	-	op=- right=$1 tail=$2	Paren sip LHS sub
+280	<paren_sip_tail_lhs>	=>	build_binop	-	op=* right=$1 tail=$2	Paren sip LHS mult
+281	<paren_sip_tail_lhs>	=>	build_binop	-	op=/ right=$1 tail=$2	Paren sip LHS div
+282	<paren_sip_tail_lhs>	=>	propagate	-	$1	Close paren sip LHS
+283	<paren_sip_tail_lhs>	=>	build_binop	-	op=$0 right=$1 tail=$3	Paren sip LHS cmp
+284	<paren_str_tail_lhs>	=>	build_binop	-	op=+ right=$1 tail=$2	Paren str LHS add
+285	<paren_str_tail_lhs>	=>	propagate	-	$1	Close paren str LHS
+286	<paren_str_tail_lhs>	=>	build_binop	-	op=$0 right=$1 tail=$3	Paren str LHS cmp
+287	<paren_dispatch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren dispatch LHS ID
+288	<paren_dispatch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren dispatch LHS piece
+289	<paren_dispatch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren dispatch LHS sip
+290	<paren_dispatch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren dispatch LHS chars
+291	<paren_dispatch_lhs>	=>	build_binop	-	left=$0 right=$1	Paren dispatch LHS flag
+292	<paren_dispatch_lhs>	=>	create	UnaryOp	operator=not operand=$1	Paren dispatch LHS not
+293	<paren_dispatch_lhs>	=>	propagate	-	$1	Paren dispatch LHS nested
+294	<univ_sip_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Univ sip add
+295	<univ_sip_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Univ sip sub
+296	<univ_sip_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Univ sip mult
+297	<univ_sip_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Univ sip div
+298	<univ_sip_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Univ sip mod
+299	<univ_sip_tail>	=>	build_binop	-	op=$0 right=$1 tail=$2	Univ sip cmp
+300	<univ_sip_tail>	=>	skip	-	-	Empty univ sip
+301	<univ_str_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Univ str add
+302	<univ_str_tail>	=>	build_binop	-	op=$0 right=$1 tail=$2	Univ str cmp
+303	<univ_str_tail>	=>	skip	-	-	Empty univ str
+304	<univ_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	Univ paren ID
+305	<univ_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	Univ paren piece
+306	<univ_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	Univ paren sip
+307	<univ_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	Univ paren chars
+308	<univ_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	Univ paren flag
+309	<univ_paren_dispatch>	=>	create	UnaryOp	operator=not operand=$1	Univ paren not
+310	<univ_paren_dispatch>	=>	propagate	-	$1	Univ paren nested
+311	<univ_paren_ambig_tail>	=>	build_binop	-	op=+ right=$1	Univ paren ambig add
+312	<univ_paren_ambig_tail>	=>	build_binop	-	op=- right=$1	Univ paren ambig sub
+313	<univ_paren_ambig_tail>	=>	build_binop	-	op=* right=$1	Univ paren ambig mult
+314	<univ_paren_ambig_tail>	=>	build_binop	-	op=/ right=$1	Univ paren ambig div
+315	<univ_paren_ambig_tail>	=>	build_binop	-	op=% right=$1	Univ paren ambig mod
+316	<univ_paren_ambig_tail>	=>	build_binop	-	op=$0 right=$1 tail=$3	Univ paren ambig cmp
+317	<univ_paren_ambig_tail>	=>	propagate	-	$1	Close univ paren ambig
+318	<univ_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Univ paren branch ID
+319	<univ_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Univ paren branch piece
+320	<univ_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Univ paren branch sip
+321	<univ_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	Univ paren branch chars
+322	<univ_paren_ambig_branch>	=>	propagate	-	$1	Univ paren branch nested
+323	<univ_paren_piece_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Univ paren piece add
+324	<univ_paren_piece_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Univ paren piece sub
+325	<univ_paren_piece_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Univ paren piece mult
+326	<univ_paren_piece_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Univ paren piece div
+327	<univ_paren_piece_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Univ paren piece mod
+328	<univ_paren_piece_tail>	=>	propagate	-	$1	Close univ paren piece
+329	<univ_paren_piece_tail>	=>	build_binop	-	op=$0 right=$1 tail=$3	Univ paren piece cmp
+330	<univ_paren_sip_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Univ paren sip add
+331	<univ_paren_sip_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Univ paren sip sub
+332	<univ_paren_sip_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Univ paren sip mult
+333	<univ_paren_sip_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Univ paren sip div
+334	<univ_paren_sip_tail>	=>	propagate	-	$1	Close univ paren sip
+335	<univ_paren_sip_tail>	=>	build_binop	-	op=$0 right=$1 tail=$3	Univ paren sip cmp
+336	<univ_paren_str_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Univ paren str add
+337	<univ_paren_str_tail>	=>	propagate	-	$1	Close univ paren str
+338	<univ_paren_str_tail>	=>	build_binop	-	op=$0 right=$1 tail=$3	Univ paren str cmp
+339	<univ_paren_ambig_numeric_branch>	=>	build_binop	-	left=$0 right=$1	Univ numeric branch ID
+340	<univ_paren_ambig_numeric_branch>	=>	build_binop	-	left=$0 right=$1	Univ numeric branch piece
+341	<univ_paren_ambig_numeric_branch>	=>	build_binop	-	left=$0 right=$1	Univ numeric branch sip
+342	<univ_paren_ambig_numeric_branch>	=>	propagate	-	$1	Univ numeric branch paren
+343	<univ_paren_ambig_numeric_tail>	=>	build_binop	-	op=+ right=$1	Univ numeric tail add
+344	<univ_paren_ambig_numeric_tail>	=>	build_binop	-	op=- right=$1	Univ numeric tail sub
+345	<univ_paren_ambig_numeric_tail>	=>	build_binop	-	op=* right=$1	Univ numeric tail mult
+346	<univ_paren_ambig_numeric_tail>	=>	build_binop	-	op=/ right=$1	Univ numeric tail div
+347	<univ_paren_ambig_numeric_tail>	=>	build_binop	-	op=% right=$1	Univ numeric tail mod
+348	<univ_paren_ambig_numeric_tail>	=>	propagate	-	$1	Close univ numeric
+349	<univ_ambig_numeric_tail>	=>	build_binop	-	op=+ right=$1	Univ ambig numeric add
+350	<univ_ambig_numeric_tail>	=>	build_binop	-	op=- right=$1	Univ ambig numeric sub
+351	<univ_ambig_numeric_tail>	=>	build_binop	-	op=* right=$1	Univ ambig numeric mult
+352	<univ_ambig_numeric_tail>	=>	build_binop	-	op=/ right=$1	Univ ambig numeric div
+353	<univ_ambig_numeric_tail>	=>	build_binop	-	op=% right=$1	Univ ambig numeric mod
+354	<univ_ambig_numeric_tail>	=>	build_binop	-	op=$0 right=$1 tail=$2	Univ ambig numeric cmp
+355	<univ_ambig_numeric_tail>	=>	skip	-	-	Empty univ ambig numeric
+356	<univ_ambig_numeric_branch>	=>	build_binop	-	left=$0 right=$1	Univ ambig num branch ID
+357	<univ_ambig_numeric_branch>	=>	build_binop	-	left=$0 right=$1	Univ ambig num branch piece
+358	<univ_ambig_numeric_branch>	=>	build_binop	-	left=$0 right=$1	Univ ambig num branch sip
+359	<univ_ambig_numeric_branch>	=>	propagate	-	$1	Univ ambig num branch paren
+360	<univ_paren_dispatch_numeric>	=>	build_binop	-	left=$0 right=$1	Univ paren numeric ID
+361	<univ_paren_dispatch_numeric>	=>	build_binop	-	left=$0 right=$1	Univ paren numeric piece
+362	<univ_paren_dispatch_numeric>	=>	build_binop	-	left=$0 right=$1	Univ paren numeric sip
+363	<univ_paren_dispatch_numeric>	=>	propagate	-	$1	Univ paren numeric nested
+364	<strict_piece_mult_tail>	=>	build_binop	-	op=* right=$1 tail=$2	Piece mult tail
+365	<strict_piece_mult_tail>	=>	build_binop	-	op=/ right=$1 tail=$2	Piece div tail
+366	<strict_piece_mult_tail>	=>	build_binop	-	op=% right=$1 tail=$2	Piece mod tail
+367	<strict_piece_mult_tail>	=>	skip	-	-	Empty mult tail
+368	<strict_piece_add_tail>	=>	build_binop	-	op=+ right=$1 tail=$2	Piece add tail
+369	<strict_piece_add_tail>	=>	build_binop	-	op=- right=$1 tail=$2	Piece sub tail
+370	<strict_piece_add_tail>	=>	skip	-	-	Empty add tail
+371	<piece_id_tail>	=>	collect	-	[VarDecl("piece",$1.value,$2)] + $3	More piece vars
+372	<piece_id_tail>	=>	collect	-	[]	No more piece vars
+373	<piece_array_decl>	=>	create	ArrayDecl	data_type=piece dimensions=$0 identifier=$2.value init_value=$3	Piece array decl
+374	<dimensions>	=>	count_dims	-	base=1 tail=$2	Count dimensions
+375	<dimensions_tail>	=>	propagate	-	$0	More dimensions
+376	<dimensions_tail>	=>	skip	-	-	No more dimensions
+377	<piece_array_init>	=>	propagate	-	$1	Has array init
+378	<piece_array_init>	=>	skip	-	-	No array init
+379	<piece_array_val>	=>	propagate	-	$0	Array val is ID
+380	<piece_array_val>	=>	propagate	-	$0	Array val is ret_array
+381	<piece_array_val>	=>	create	ArrayLiteral	elements=$1	Array literal
+382	<array_element_piece_opt>	=>	propagate	-	$0	Piece array elements
+383	<array_element_piece_opt>	=>	collect	-	[]	Empty piece array
+384	<array_element_piece>	=>	collect	-	[Identifier($0.value)] + $1	Piece array ID
+385	<array_element_piece>	=>	collect	-	[Literal("piece",$0.value)] + $1	Piece array lit
+386	<array_element_piece>	=>	collect	-	[ArrayLiteral($1)] + $3	Piece nested array
+387	<element_piece_tail>	=>	collect	-	$1	More piece elements
+388	<element_piece_tail>	=>	collect	-	[]	No more piece elements
+389	<array_declare_tail_piece>	=>	collect	-	[ArrayDecl("piece",CONTEXT,$1.value,$2)]	More piece array decls
+390	<array_declare_tail_piece>	=>	collect	-	[]	No more piece array decls
+391	<chars_decl>	=>	propagate	-	$1	Chars declaration
+392	<chars_decl>	=>	propagate	-	$0	Chars array declaration
+393	<chars_id>	=>	collect	-	[VarDecl("chars",$0.value,$1)] + $2	Chars var
+394	<chars_ingredient_init>	=>	propagate	-	$1	Chars init
+395	<chars_ingredient_init>	=>	skip	-	-	No chars init
+396	<chars_id_tail>	=>	collect	-	[VarDecl("chars",$1.value,$2)] + $3	More chars vars
+397	<chars_id_tail>	=>	collect	-	[]	No more chars vars
+398	<chars_array_decl>	=>	create	ArrayDecl	data_type=chars dimensions=$0 identifier=$2.value init_value=$3	Chars array decl
+399	<chars_array_init>	=>	propagate	-	$1	Chars array init
+400	<chars_array_init>	=>	skip	-	-	No chars array init
+401	<chars_array_val>	=>	propagate	-	$0	Chars array ID
+402	<chars_array_val>	=>	propagate	-	$0	Chars array ret
+403	<chars_array_val>	=>	create	ArrayLiteral	elements=$1	Chars array lit
+404	<array_element_chars_opt>	=>	propagate	-	$0	Chars array elements
+405	<array_element_chars_opt>	=>	collect	-	[]	Empty chars array
+406	<array_element_chars>	=>	collect	-	[Identifier($0.value)] + $1	Chars array ID
+407	<array_element_chars>	=>	collect	-	[Literal("chars",$0.value)] + $1	Chars array lit
+408	<array_element_chars>	=>	collect	-	[ArrayLiteral($1)] + $3	Chars nested array
+409	<element_chars_tail>	=>	collect	-	$1	More chars elements
+410	<element_chars_tail>	=>	collect	-	[]	No more chars elements
+411	<array_declare_tail_chars>	=>	collect	-	[ArrayDecl("chars",CONTEXT,$1.value,$2)]	More chars array decls
+412	<array_declare_tail_chars>	=>	collect	-	[]	No more chars array decls
+413	<sip_decl>	=>	propagate	-	$1	Sip declaration
+414	<sip_decl>	=>	propagate	-	$0	Sip array declaration
+415	<sip_id>	=>	collect	-	[VarDecl("sip",$0.value,$1)] + $2	Sip var
+416	<sip_ingredient_init>	=>	propagate	-	$1	Sip init
+417	<sip_ingredient_init>	=>	skip	-	-	No sip init
+418	<sip_id_tail>	=>	collect	-	[VarDecl("sip",$1.value,$2)] + $3	More sip vars
+419	<sip_id_tail>	=>	collect	-	[]	No more sip vars
+420	<sip_array_decl>	=>	create	ArrayDecl	data_type=sip dimensions=$0 identifier=$2.value init_value=$3	Sip array decl
+421	<sip_array_init>	=>	propagate	-	$1	Sip array init
+422	<sip_array_init>	=>	skip	-	-	No sip array init
+423	<sip_array_val>	=>	propagate	-	$0	Sip array ID
+424	<sip_array_val>	=>	propagate	-	$0	Sip array ret
+425	<sip_array_val>	=>	create	ArrayLiteral	elements=$1	Sip array lit
+426	<array_element_sip_opt>	=>	propagate	-	$0	Sip array elements
+427	<array_element_sip_opt>	=>	collect	-	[]	Empty sip array
+428	<array_element_sip>	=>	collect	-	[Identifier($0.value)] + $1	Sip array ID
+429	<array_element_sip>	=>	collect	-	[Literal("sip",$0.value)] + $1	Sip array lit
+430	<array_element_sip>	=>	collect	-	[ArrayLiteral($1)] + $3	Sip nested array
+431	<element_sip_tail>	=>	collect	-	$1	More sip elements
+432	<element_sip_tail>	=>	collect	-	[]	No more sip elements
+433	<array_declare_tail_sip>	=>	collect	-	[ArrayDecl("sip",CONTEXT,$1.value,$2)]	More sip array decls
+434	<array_declare_tail_sip>	=>	collect	-	[]	No more sip array decls
+435	<flag_decl>	=>	propagate	-	$1	Flag declaration
+436	<flag_decl>	=>	propagate	-	$0	Flag array declaration
+437	<flag_id>	=>	collect	-	[VarDecl("flag",$0.value,$1)] + $2	Flag var
+438	<flag_ingredient_init>	=>	propagate	-	$1	Flag init
+439	<flag_ingredient_init>	=>	skip	-	-	No flag init
+440	<flag_id_tail>	=>	collect	-	[VarDecl("flag",$1.value,$2)] + $3	More flag vars
+441	<flag_id_tail>	=>	collect	-	[]	No more flag vars
+442	<flag_array_decl>	=>	create	ArrayDecl	data_type=flag dimensions=$0 identifier=$2.value init_value=$3	Flag array decl
+443	<flag_array_init>	=>	propagate	-	$1	Flag array init
+444	<flag_array_init>	=>	skip	-	-	No flag array init
+445	<flag_array_val>	=>	propagate	-	$0	Flag array ID
+446	<flag_array_val>	=>	propagate	-	$0	Flag array ret
+447	<flag_array_val>	=>	create	ArrayLiteral	elements=$1	Flag array lit
+448	<array_element_flag_opt>	=>	propagate	-	$0	Flag array elements
+449	<array_element_flag_opt>	=>	collect	-	[]	Empty flag array
+450	<array_element_flag>	=>	collect	-	[Identifier($0.value)] + $1	Flag array ID
+451	<array_element_flag>	=>	collect	-	[Literal("flag",$0.value)] + $1	Flag array lit
+452	<array_element_flag>	=>	collect	-	[ArrayLiteral($1)] + $3	Flag nested array
+453	<element_flag_tail>	=>	collect	-	$1	More flag elements
+454	<element_flag_tail>	=>	collect	-	[]	No more flag elements
+455	<array_declare_tail_flag>	=>	collect	-	[ArrayDecl("flag",CONTEXT,$1.value,$2)]	More flag array decls
+456	<array_declare_tail_flag>	=>	collect	-	[]	No more flag array decls
+457	<table_prototype>	=>	create	TablePrototype	name=$2.value fields=$5	Table type definition
+458	<required_decl>	=>	collect	-	[$0] + $2	Field declarations
+459	<decl_head>	=>	create	FieldDecl	data_type=$0_type dimensions=$0_dims identifier=$2.value	Field/param declaration
+460	<primitive_types_dims>	=>	propagate	-	type="piece" dims=$1	Piece type
+461	<primitive_types_dims>	=>	propagate	-	type="sip" dims=$1	Sip type
+462	<primitive_types_dims>	=>	propagate	-	type="flag" dims=$1	Flag type
+463	<primitive_types_dims>	=>	propagate	-	type="chars" dims=$1	Chars type
+464	<primitive_types_dims>	=>	propagate	-	type=$0.value dims=$1	Table/ID type
+465	<required_decl_tail>	=>	propagate	-	$0	More fields
+466	<required_decl_tail>	=>	collect	-	[]	No more fields
+467	<table_decl>	=>	propagate	-	$1	Table declaration
+468	<table_decl>	=>	propagate	-	$0	Table array declaration
+469	<table_declare>	=>	collect	-	[TableDecl(CONTEXT_TYPE,$0.value,$1)] + $2	Table instances
+470	<table_init>	=>	propagate	-	$1	Table init
+471	<table_init>	=>	skip	-	-	No table init
+472	<strict_table_expr>	=>	create	TableLiteral	field_inits=$1	Table literal
+473	<strict_table_expr>	=>	propagate	-	$0	Table expr is ID
+474	<table_declare_tail>	=>	collect	-	$1	More table decls
+475	<table_declare_tail>	=>	collect	-	[]	No more table decls
+476	<table_array_decl>	=>	create	ArrayDecl	data_type=CONTEXT_TYPE dimensions=$0 identifier=$2.value init_value=$3	Table array decl
+477	<table_array_init>	=>	propagate	-	$1	Table array init
+478	<table_array_init>	=>	skip	-	-	No table array init
+479	<table_array_val>	=>	propagate	-	$0	Table array ID
+480	<table_array_val>	=>	propagate	-	$0	Table array ret
+481	<table_array_val>	=>	create	ArrayLiteral	elements=$1	Table array lit
+482	<array_element_table_opt>	=>	propagate	-	$0	Table array elements
+483	<array_element_table_opt>	=>	collect	-	[]	Empty table array
+484	<array_element_table>	=>	collect	-	[$0] + $1	Table array element
+485	<element_table_tail>	=>	collect	-	$1	More table elements
+486	<element_table_tail>	=>	collect	-	[]	No more table elements
+487	<array_declare_tail_table>	=>	collect	-	[ArrayDecl(CONTEXT_TYPE,CONTEXT,$1.value,$2)]	More table array decls
+488	<array_declare_tail_table>	=>	collect	-	[]	No more table array decls
+489	<recipe_decl>	=>	collect	-	[RecipeDecl($1_type,$1_dims,$1_name,$3,$5)] + $6	Recipe declaration
+490	<recipe_decl>	=>	collect	-	[]	No more recipes
+491	<serve_type>	=>	propagate	-	$0	Return type
+492	<spice>	=>	collect	-	[$0] + $1	Parameters
+493	<spice>	=>	collect	-	[]	No parameters
+494	<spice_tail>	=>	collect	-	[$1] + $2	More parameters
+495	<spice_tail>	=>	collect	-	[]	No more parameters
+496	<platter>	=>	create	Platter	local_decls=$1 statements=$2	Block/compound statement
+497	<local_decl>	=>	collect	-	$1 + $2	Piece local decl
+498	<local_decl>	=>	collect	-	$1 + $2	Chars local decl
+499	<local_decl>	=>	collect	-	$1 + $2	Sip local decl
+500	<local_decl>	=>	collect	-	$1 + $2	Flag local decl
+501	<local_decl>	=>	collect	-	$1	Table local decl
+502	<local_decl>	=>	collect	-	[]	No more local decl
+503	<local_id_tail>	=>	collect	-	[TableDecl(CONTEXT,$0)] + $2	Table local var
+504	<local_id_tail>	=>	collect	-	[$1]	Array local/stmt hybrid
+505	<local_id_tail>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Local assignment with accessor
+506	<local_id_tail>	=>	create	Assignment	target=CONTEXT operator=$0 value=$1	Local assignment
+507	<local_id_tail>	=>	propagate	-	$0	Local call/tail
+508	<endsb_tail>	=>	collect	-	[ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6	Array decl end bracket
+509	<endsb_tail>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Array assignment end bracket
+510	<assignment_op>	=>	token	-	value==	=
+511	<assignment_op>	=>	token	-	value=+=	+=
+512	<assignment_op>	=>	token	-	value=-=	-=
+513	<assignment_op>	=>	token	-	value=*=	*=
+514	<assignment_op>	=>	token	-	value=/=	/=
+515	<assignment_op>	=>	token	-	value=%=	%=
+516	<statements>	=>	collect	-	[$0] + $1	ID statement
+517	<statements>	=>	collect	-	[ExpressionStatement($0)] + $2	Built-in call statement
+518	<statements>	=>	collect	-	[$0] + $1	Conditional statement
+519	<statements>	=>	collect	-	[$0] + $1	Loop statement
+520	<statements>	=>	collect	-	[$0] + $1	Jump/return statement
+521	<statements>	=>	collect	-	[]	No more statements
+522	<id_statements>	=>	propagate	-	$1	ID statement extension
+523	<id_statements_ext>	=>	create	ExpressionStatement	expr=FunctionCall($0)	Function call statement
+524	<id_statements_ext>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Assignment statement
+525	<tail1>	=>	propagate	-	$0	Statement tail call
+526	<call_tail>	=>	create	FunctionCall	name=CONTEXT args=$1	Statement call
+527	<assignment_st>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Assignment with accessor
+528	<built_in_rec_call>	=>	propagate	-	$0	Built-in call wrapper
+529	<built_in_rec>	=>	create	FunctionCall	name=append args=[$2,$4]	append()
+530	<built_in_rec>	=>	create	FunctionCall	name=bill args=[$2]	bill()
+531	<built_in_rec>	=>	create	FunctionCall	name=copy args=[$2,$4,$6]	copy()
+532	<built_in_rec>	=>	create	FunctionCall	name=cut args=[$2,$4]	cut()
+533	<built_in_rec>	=>	create	FunctionCall	name=fact args=[$2]	fact()
+534	<built_in_rec>	=>	create	FunctionCall	name=matches args=[$2,$4]	matches()
+535	<built_in_rec>	=>	create	FunctionCall	name=pow args=[$2,$4]	pow()
+536	<built_in_rec>	=>	create	FunctionCall	name=rand args=[]	rand()
+537	<built_in_rec>	=>	create	FunctionCall	name=remove args=[$2,$4]	remove()
+538	<built_in_rec>	=>	create	FunctionCall	name=reverse args=[$2]	reverse()
+539	<built_in_rec>	=>	create	FunctionCall	name=search args=[$2,$4]	search()
+540	<built_in_rec>	=>	create	FunctionCall	name=size args=[$2]	size()
+541	<built_in_rec>	=>	create	FunctionCall	name=sort args=[$2]	sort()
+542	<built_in_rec>	=>	create	FunctionCall	name=sqrt args=[$2]	sqrt()
+543	<built_in_rec>	=>	create	FunctionCall	name=take args=[]	take()
+544	<built_in_rec>	=>	create	FunctionCall	name=tochars args=[$2]	tochars()
+545	<built_in_rec>	=>	create	FunctionCall	name=topiece args=[$2]	topiece()
+546	<built_in_rec>	=>	create	FunctionCall	name=tosip args=[$2]	tosip()
+547	<conditional_st>	=>	propagate	-	$0	Cond check
+548	<conditional_st>	=>	propagate	-	$0	Cond menu
+549	<cond_check>	=>	create	IfStatement	condition=$2 then_block=$4 elif_clauses=$5 else_block=$6	If statement
+550	<alt_clause>	=>	collect	-	[($2,$4)] + $5	Elif clause
+551	<alt_clause>	=>	collect	-	[]	No elif
+552	<instead_clause>	=>	propagate	-	$1	Else block
+553	<instead_clause>	=>	skip	-	-	No else
+554	<cond_menu>	=>	create	SwitchStatement	expr=$2 cases=$5	Switch statement
+555	<strict_piece_chars_expr>	=>	build_binop	-	left=$0 right=$1	Piece/chars expression (was 666)
+556	<strict_piece_chars_expr>	=>	build_binop	-	left=$0 right=$1	Piece/chars ret_piece (was 667)
+557	<strict_piece_chars_expr>	=>	build_binop	-	left=$0 right=$1	Piece/chars ret_chars (was 668)
+558	<strict_piece_chars_expr>	=>	propagate	-	$1	Piece/chars paren (was 669)
+559	<pc_ambig_tail>	=>	build_binop	-	op=+ right=$1	PC ambig add (was 672)
+560	<pc_ambig_tail>	=>	build_binop	-	op=- right=$1 tail=$2	PC ambig sub (was 673)
+561	<pc_ambig_tail>	=>	build_binop	-	op=* right=$1 tail=$3	PC ambig mult (was 674)
+562	<pc_ambig_tail>	=>	build_binop	-	op=/ right=$1 tail=$3	PC ambig div (was 675)
+563	<pc_ambig_tail>	=>	build_binop	-	op=% right=$1 tail=$3	PC ambig mod (was 676)
+564	<pc_ambig_tail>	=>	skip	-	-	Empty PC ambig (was 677)
+565	<pc_ambig_branch>	=>	build_binop	-	left=$0 right=$1	PC ambig branch ID (was 678)
+566	<pc_ambig_branch>	=>	build_binop	-	left=$0 right=$1	PC ambig branch piece (was 679)
+567	<pc_ambig_branch>	=>	build_binop	-	left=$0 right=$1	PC ambig branch chars (was 680)
+568	<pc_ambig_branch>	=>	propagate	-	$1	PC ambig branch paren (was 681)
+569	<pc_piece_tail>	=>	build_binop	-	op=* right=$1 tail=$2	PC piece tail (was 670)
+570	<pc_chars_tail>	=>	propagate	-	$0	PC chars tail (was 671)
+571	<pc_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	PC paren dispatch ID (was 682)
+572	<pc_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	PC paren dispatch piece (was 683)
+573	<pc_paren_dispatch>	=>	build_binop	-	left=$0 right=$1	PC paren dispatch chars (was 684)
+574	<pc_paren_dispatch>	=>	propagate	-	$1	PC paren dispatch nested (was 685)
+575	<pc_paren_ambig_tail_inner>	=>	build_binop	-	op=+ right=$1	PC paren ambig inner add (was 694)
+576	<pc_paren_ambig_tail_inner>	=>	build_binop	-	op=- right=$1 tail=$2	PC paren ambig inner sub (was 695)
+577	<pc_paren_ambig_tail_inner>	=>	build_binop	-	op=* right=$1 tail=$2	PC paren ambig inner mult (was 696)
+578	<pc_paren_ambig_tail_inner>	=>	build_binop	-	op=/ right=$1 tail=$2	PC paren ambig inner div (was 697)
+579	<pc_paren_ambig_tail_inner>	=>	build_binop	-	op=% right=$1 tail=$2	PC paren ambig inner mod (was 698)
+580	<pc_paren_ambig_tail_inner>	=>	propagate	-	$1	Close PC paren ambig (was 699)
+581	<pc_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	PC paren ambig branch ID (was 700)
+582	<pc_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	PC paren ambig branch piece (was 701)
+583	<pc_paren_ambig_branch>	=>	build_binop	-	left=$0 right=$1	PC paren ambig branch chars (was 702)
+584	<pc_paren_ambig_branch>	=>	propagate	-	$1	PC paren ambig branch paren (was 703)
+585	<pc_paren_piece_tail_inner>	=>	build_binop	-	op=+ right=$1 tail=$2	PC paren piece inner add (was 686)
+586	<pc_paren_piece_tail_inner>	=>	build_binop	-	op=- right=$1 tail=$2	PC paren piece inner sub (was 687)
+587	<pc_paren_piece_tail_inner>	=>	build_binop	-	op=* right=$1 tail=$2	PC paren piece inner mult (was 688)
+588	<pc_paren_piece_tail_inner>	=>	build_binop	-	op=/ right=$1 tail=$2	PC paren piece inner div (was 689)
+589	<pc_paren_piece_tail_inner>	=>	build_binop	-	op=% right=$1 tail=$2	PC paren piece inner mod (was 690)
+590	<pc_paren_piece_tail_inner>	=>	propagate	-	$1	Close PC paren piece (was 691)
+591	<pc_paren_chars_tail_inner>	=>	build_binop	-	op=+ right=$1 tail=$2	PC paren chars inner add (was 692)
+592	<pc_paren_chars_tail_inner>	=>	propagate	-	$1	Close PC paren chars (was 693)
+593	<menu_platter>	=>	collect	-	$1 + $2	Menu body
+594	<choice_clause>	=>	collect	-	[CaseClause($1,$3)] + $4	Case clause
+595	<choice_clause>	=>	collect	-	[]	No more cases
+596	<choice_val>	=>	create	Literal	value_type=piece value=$0.value	Piece case value
+597	<choice_val>	=>	create	Literal	value_type=chars value=$0.value	Chars case value
+598	<statements_menu>	=>	collect	-	[$0] + $1	Menu statement ID
+599	<statements_menu>	=>	collect	-	[ExpressionStatement($0)] + $2	Menu built-in
+600	<statements_menu>	=>	collect	-	[$0] + $1	Menu conditional
+601	<statements_menu>	=>	collect	-	[$0] + $1	Menu looping
+602	<statements_menu>	=>	collect	-	[$0] + $1	Menu jump stop
+603	<statements_menu>	=>	collect	-	[$0] + $1	Menu jump serve
+604	<statements_menu>	=>	collect	-	[]	No more menu stmts
+605	<id_statements_menu>	=>	propagate	-	$1	Menu ID stmt ext
+606	<conditional_st_menu>	=>	propagate	-	$0	Menu cond check
+607	<conditional_st_menu>	=>	propagate	-	$0	Menu cond menu
+608	<cond_check_menu>	=>	create	IfStatement	condition=$2 then_block=$4 elif_clauses=$5 else_block=$6	Menu if stmt
+609	<menu_check_platter>	=>	create	Platter	local_decls=$1 statements=$2	Menu check body
+610	<local_decl_menu>	=>	collect	-	$1 + $2	Menu piece decl
+611	<local_decl_menu>	=>	collect	-	$1 + $2	Menu chars decl
+612	<local_decl_menu>	=>	collect	-	$1 + $2	Menu sip decl
+613	<local_decl_menu>	=>	collect	-	$1 + $2	Menu flag decl
+614	<local_decl_menu>	=>	collect	-	$1	Menu table decl
+615	<local_decl_menu>	=>	collect	-	[]	No more menu decl
+616	<local_id_tail_menu>	=>	collect	-	[TableDecl(CONTEXT,$0)] + $2	Menu table var
+617	<local_id_tail_menu>	=>	collect	-	[$1]	Menu array decl
+618	<local_id_tail_menu>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Menu assignment acc
+619	<local_id_tail_menu>	=>	create	Assignment	target=CONTEXT operator=$0 value=$1	Menu assignment
+620	<local_id_tail_menu>	=>	propagate	-	$0	Menu call/tail
+621	<endsb_tail_menu>	=>	collect	-	[ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6	Menu array decl end
+622	<endsb_tail_menu>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Menu array assign end
+623	<looping_st>	=>	propagate	-	$0	Pass loop
+624	<looping_st>	=>	propagate	-	$0	Repeat loop
+625	<looping_st>	=>	propagate	-	$0	Order loop
+626	<loop_pass>	=>	create	ForLoop	init=$2 update=$3 condition=$4 body=$6	For loop
+627	<initialization>	=>	create	Assignment	target=Identifier($0.value) operator== value=$1	Loop init
+628	<loop_init>	=>	propagate	-	$1	Has init value
+629	<loop_init>	=>	skip	-	-	No init value
+630	<update>	=>	create	Assignment	target=Identifier($0.value) accessor=$1 operator=$2 value=$3	Loop update
+631	<loop_platter>	=>	create	Platter	local_decls=$1 statements=$2	Loop body
+632	<local_decl_loop>	=>	collect	-	$1 + $2	Loop piece decl
+633	<local_decl_loop>	=>	collect	-	$1 + $2	Loop chars decl
+634	<local_decl_loop>	=>	collect	-	$1 + $2	Loop sip decl
+635	<local_decl_loop>	=>	collect	-	$1 + $2	Loop flag decl
+636	<local_decl_loop>	=>	collect	-	$1	Loop table decl
+637	<local_decl_loop>	=>	collect	-	[]	No more loop decl
+638	<local_id_tail_loop>	=>	collect	-	[TableDecl(CONTEXT,$0)] + $2	Loop table var
+639	<local_id_tail_loop>	=>	collect	-	[$1]	Loop array decl
+640	<local_id_tail_loop>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Loop assignment acc
+641	<local_id_tail_loop>	=>	create	Assignment	target=CONTEXT operator=$0 value=$1	Loop assignment
+642	<local_id_tail_loop>	=>	propagate	-	$0	Loop call/tail
+643	<endsb_tail_loop>	=>	collect	-	[ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6	Loop array decl end
+644	<endsb_tail_loop>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Loop array assign end
+645	<statements_loop>	=>	collect	-	[$0] + $1	Loop stmt ID
+646	<statements_loop>	=>	collect	-	[ExpressionStatement($0)] + $2	Loop built-in
+647	<statements_loop>	=>	collect	-	[$0] + $1	Loop conditional
+648	<statements_loop>	=>	collect	-	[$0] + $1	Loop looping
+649	<statements_loop>	=>	collect	-	[$0] + $1	Loop jump
+650	<statements_loop>	=>	collect	-	[]	No more loop stmts
+651	<id_statements_loop>	=>	propagate	-	$1	Loop ID stmt ext
+652	<conditional_st_loop>	=>	propagate	-	$0	Loop cond check
+653	<conditional_st_loop>	=>	propagate	-	$0	Loop cond menu
+654	<cond_check_loop>	=>	create	IfStatement	condition=$2 then_block=$4 elif_clauses=$5 else_block=$6	Loop if stmt
+655	<alt_clause_loop>	=>	collect	-	[($2,$4)] + $5	Loop elif
+656	<alt_clause_loop>	=>	collect	-	[]	No loop elif
+657	<instead_clause_loop>	=>	propagate	-	$1	Loop else
+658	<instead_clause_loop>	=>	skip	-	-	No loop else
+659	<cond_menu_loop>	=>	create	SwitchStatement	expr=$2 cases=$5	Loop switch
+660	<menu_loop_platter>	=>	collect	-	$1 + $2	Loop menu body
+661	<choice_clause_loop>	=>	collect	-	[CaseClause($1,$3)] + $4	Loop case clause
+662	<choice_clause_loop>	=>	collect	-	[]	No more loop cases
+663	<choice_usual_loop_st>	=>	collect	-	[$0] + $1	Loop usual stmt ID
+664	<choice_usual_loop_st>	=>	collect	-	[ExpressionStatement($0)] + $2	Loop usual built-in
+665	<choice_usual_loop_st>	=>	collect	-	[$0] + $1	Loop usual cond
+666	<choice_usual_loop_st>	=>	collect	-	[$0] + $1	Loop usual looping
+667	<choice_usual_loop_st>	=>	collect	-	[$0] + $1	Loop usual jump
+668	<choice_usual_loop_st>	=>	collect	-	[]	No more loop usual
+669	<id_statements_choice_usual_loop>	=>	propagate	-	$1	Loop usual ID ext
+670	<jump_st>	=>	propagate	-	$0	Jump next
+671	<jump_st>	=>	propagate	-	$0	Jump stop
+672	<jump_st>	=>	propagate	-	$0	Jump serve
+673	<jump_next>	=>	create	ContinueStatement	-	-	Continue
+674	<jump_stop>	=>	create	BreakStatement	-	-	Break
+675	<jump_serve>	=>	create	ReturnStatement	value=$1	Return
+676	<usual_clause_loop>	=>	propagate	-	$2	Usual clause loop
+677	<usual_clause_loop>	=>	skip	-	-	No usual loop
+678	<loop_repeat>	=>	create	WhileLoop	condition=$2 body=$4	While loop
+679	<loop_order>	=>	create	DoWhileLoop	body=$1 condition=$4	Do-while loop
+680	<usual_clause>	=>	propagate	-	$2	Usual clause (default)
+681	<usual_clause>	=>	skip	-	-	No usual clause
