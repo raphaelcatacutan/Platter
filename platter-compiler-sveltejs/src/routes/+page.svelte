@@ -237,6 +237,9 @@ start() {
 			'/python/app/parser/parser_program.py',
 			'/python/app/utils/FileHandler.py',
 			'/python/app/parser/first_set.py',
+			'/python/app/semantic_analyzer/ast/ast_nodes.py',
+			'/python/app/semantic_analyzer/ast/ast_parser_program.py',
+			'/python/app/semantic_analyzer/ast/ast_reader.py',
 		];
 
 		// Fetch and write Python files to Pyodide's virtual filesystem
@@ -500,8 +503,150 @@ start() {
 
 	async function analyzeSemantic() {
 		normalizeCurlyQuotes();
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
+		// Run lexical analysis first, skip logging to combine outputs
+		const lexicalResult = await analyzeLexical(true);
+
+		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
+			clearTerminal();
+
+			if (!pyodideReady) {
+				const errorMsg = 'Python runtime not ready';
+				setTerminalError(errorMsg);
+				analysisStatus = 'error';
+				terminalOutput = `${lexicalResult.output}\n${errorMsg}`;
+			} else {
+				try {
+					// Set the code input in Python
+					pyodide.globals.set('code_input', codeInput);
+
+					// Run AST parser and semantic analysis
+					const result = await pyodide.runPythonAsync(`
+import sys
+import re
+from app.lexer.lexer import Lexer
+from app.semantic_analyzer.ast.ast_parser_program import ASTParser
+from app.semantic_analyzer.ast.ast_reader import ASTReader, print_ast
+
+result = None
+try:
+    lexer = Lexer(code_input)
+    tokens = lexer.tokenize()
+    parser = ASTParser(tokens)
+    ast = parser.parse_program()
+    
+    # Pretty print AST to console logs
+    print("\\n" + "="*80)
+    print("AST Analysis Complete")
+    print("="*80)
+    print_ast(ast, format="pretty")
+    
+    # Also create JSON representation
+    reader = ASTReader(ast)
+    ast_json = reader.to_json(indent=2)
+    
+    result = {
+        "success": True, 
+        "message": "Semantic analysis completed successfully",
+        "ast": ast_json
+    }
+except SyntaxError as e:
+    error_msg = str(e)
+    # Try to extract line and col from error message
+    match = re.search(r'line (\\d+), col (\\d+)', error_msg)
+    if match:
+        line = int(match.group(1))
+        col = int(match.group(2))
+        result = {"success": False, "message": error_msg, "error": {"line": line, "col": col, "message": error_msg}}
+    else:
+        result = {"success": False, "message": error_msg}
+except Exception as e:
+    result = {"success": False, "message": f"Semantic analysis failed: {str(e)}"}
+
+result
+				`);
+
+				const data = result.toJs({ dict_converter: Object.fromEntries });
+
+				if (data.success) {
+					clearErrorMarkers();
+					const semanticMessage = data.message || 'Semantic analysis completed successfully';
+					const okMessage = `${lexicalResult.output}\n${semanticMessage}\n\nAST generated successfully! Check browser console for AST structure.`;
+					setTerminalOk(okMessage);
+					analysisStatus = 'success';
+					terminalOutput = okMessage;
+					
+					// Log AST to browser console
+					if (data.ast) {
+						try {
+							const astObj = JSON.parse(data.ast);
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+							console.log('%c🌳 Abstract Syntax Tree (AST)', 'color: #00ff00; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+							console.log(astObj);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+						} catch (e) {
+							console.warn('Failed to parse AST JSON:', e);
+						}
+					}
+				} else {
+					// Handle syntax errors with line/col information
+					if (data.error && data.error.line && data.error.col) {
+						// Create a token-like object for the error marker
+						const errorToken = {
+							type: 'Syntax Error',
+							value: 'error',
+							line: data.error.line,
+							col: data.error.col
+						};
+						addErrorMarkers([errorToken]);
+					}
+					const semanticError = data.message || 'Semantic analysis failed';
+					const errorMessage = `${lexicalResult.output}\n${semanticError}`;
+					setTerminalError(semanticError);
+					analysisStatus = 'error';
+					terminalOutput = errorMessage;
+				}
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : 'Unknown error';
+				const semanticError = `Semantic analysis failed: ${msg}`;
+				const errorMessage = `${lexicalResult.output}\n${semanticError}`;
+				setTerminalError(semanticError);
+				analysisStatus = 'error';
+				terminalOutput = errorMessage;
+			}
+			}
+		} else if (termMessages.length > 0) {
+			// Lexical errors found
+			const lexicalErrors = termMessages.map(m => m.text).join('; ');
+			termMessages = [
+				{ icon: errorIcon, text: 'Semantic analysis not performed due to lexical errors:' },
+				...termMessages
+			];
+			analysisStatus = 'error';
+			terminalOutput = `Lexical errors: ${lexicalErrors}`;
+		} else {
+			const notImplMessage = 'Semantic analysis initialization failed';
+			setTerminalError(notImplMessage);
+			analysisStatus = 'error';
+			terminalOutput = notImplMessage;
+		}
+
 		activeTab = 'semantic';
-		setTerminalError('Semantics not yet implemented');
+
+		// Log the semantic analysis
+		const duration = performance.now() - startTime;
+		addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `semantic-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
 	}
 
 	async function analyzeSyntax() {
