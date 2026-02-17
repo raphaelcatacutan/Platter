@@ -6,19 +6,10 @@
 	"scripts": {
 		"start": "cd platter-compiler-sveltejs && npm run dev",
 		"dev": "cd platter-compiler-sveltejs && npm run dev",
-		"build": "npm run sync-python && cd platter-compiler-sveltejs && npm run build",
 		"preview": "cd platter-compiler-sveltejs && npm run preview",
-		"sync-python": "node sync-python.js",
-		"install-all": "cd platter-compiler-sveltejs && npm install",
+		"install": "cd platter-compiler-sveltejs && npm install",
 		"test": "cd platter-compiler-sveltejs/static/python && python -m unittest discover -s tests -p \"ga_*.py\" -v",
-		"test:parser:valid": "cd platter-compiler-sveltejs/static/python && python -m unittest tests.ga_parser_valid -v",
-		"test:parser:invalid": "cd platter-compiler-sveltejs/static/python && python -m unittest tests.ga_parser_invalid -v",
-		"test:parser": "npm run test:parser:valid && npm run test:parser:invalid",
-		"test:frontend": "cd platter-compiler-sveltejs && npm run test",
-		"parser": "cls && cd ./platter-compiler-sveltejs/static/python && python -m app.parser.parser_program", 
-		"p_test": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.ScriptTransformer && python -m app.utils.TestScriptTester",
-		"t_sets": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.PredictSetTransformer && python -m app.utils.FirstSetTransformer",
-		"g_prod": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.ProductionGenerator"
+		"build": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.BuildBackend"
 	},
 	"repository": {
 		"type": "git",

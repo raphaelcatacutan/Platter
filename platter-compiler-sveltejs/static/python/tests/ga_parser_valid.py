@@ -84,7 +84,7 @@ class TestParserValidPrograms(unittest.TestCase):
         passed_count = total_tests - len(cls.failed_tests)
         
         # Get the syntax_programs directory
-        results_file = cls.valid_tests_dir.parent / 'valid_test_results.txt'
+        results_file = cls.valid_tests_dir.parent / 'tests_valid_results.txt'
         
         # Write results to file
         with open(results_file, 'w', encoding='utf-8') as f:

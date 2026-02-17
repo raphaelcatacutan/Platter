@@ -24,7 +24,7 @@ from typing import List, Dict, Tuple
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 
 TSV_REL_PATH = PROJECT_ROOT / "static/python/app/utils/sources"
-TSV_NAME = "new_prods.tsv"
+TSV_NAME = "cfg.tsv"
 
 OUTPUT_DIR_REL = PROJECT_ROOT / "static/python/app/utils/sources"
 OUTPUT_FILENAME = "productions.py"

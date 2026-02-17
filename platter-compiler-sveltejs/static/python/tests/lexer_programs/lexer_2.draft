@@ -1,4 +1,0 @@
-start(){
-    piece of a = 5, b = 3;
-    bill(tochars((a*a + b*b) > 30));
-}

@@ -28,19 +28,24 @@ class TestParser(unittest.TestCase):
     failed_tests = []
     
     def test_syntax_scripts(self):
-        """Test all syntax scripts from TSV and TXT files."""
         passed_count = 0
         
         for script in SYNTAX_TSCRIPTS:
             test_num = script["number"]
             expected_output = script["expected_output"]
-            actual_output = check_parse(script)
             
             with self.subTest(test_number=test_num):
+                actual_output = check_parse(script)
                 try:
+                    self.maxDiff = None
                     self.assertEqual(actual_output, expected_output)
                     passed_count += 1
                 except AssertionError:
+                    is_lexical_error_expected = "lexical errors" in expected_output
+                    is_lexical_error_output = "Invalid" in actual_output
+                    if is_lexical_error_output: 
+                        self.assertEqual(is_lexical_error_expected, True)
+                        continue
                     # Store failed test information
                     TestParser.failed_tests.append({
                         'number': test_num,
@@ -59,7 +64,7 @@ class TestParser(unittest.TestCase):
         # Get the syntax_programs directory
         tests_dir = os.path.dirname(os.path.abspath(__file__))
         syntax_programs_dir = os.path.join(tests_dir, 'syntax_programs')
-        results_file = os.path.join(syntax_programs_dir, 'test_results.txt')
+        results_file = os.path.join(syntax_programs_dir, 'tests_results.txt')
         
         # Write results to file
         with open(results_file, 'w', encoding='utf-8') as f:

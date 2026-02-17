@@ -878,7 +878,7 @@ tokens
 	<header class="titlebar">
 		<div class="brand">
 			<img class="logo" src={logo} alt="Platter logo" />
-			<a href="/python/tests/cfg_visual.html" target="_blank" class="name" title="View CFG Visualization">Platter IDE</a>
+			<a href="/cfg" target="_blank" class="name" title="View CFG Visualization">Platter IDE</a>
 		</div>
 		<div class="win-controls">
 			<span class="dot" title="minimize"></span>

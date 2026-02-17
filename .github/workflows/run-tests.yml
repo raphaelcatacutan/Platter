@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run lexer and parser tests
+      - name: Run unittests
         run: |
           export PYTHONPATH="${GITHUB_WORKSPACE}/platter-compiler-sveltejs/static/python"
           cd platter-compiler-sveltejs/static/python
