@@ -34,11 +34,11 @@
 34	<flag_ingredient_init>	=>	λ							
 35	<flag_id_tail>	=>	,	id	<flag_ingredient_init>	<flag_id_tail>				
 36	<flag_id_tail>	=>	λ							
-37	<piece_array_decl>	=>	<dimensions>	of	id	<piece_array_init>	<array_declare_tail_piece>		;	
-38	<sip_array_decl>	=>	<dimensions>	of	id	<sip_array_init>	<array_declare_tail_sip>		;	
-39	<chars_array_decl>	=>	<dimensions>	of	id	<chars_array_init>	<array_declare_tail_chars>		;	
-40	<flag_array_decl>	=>	<dimensions>	of	id	<flag_array_init>	<array_declare_tail_flag>		;	
-41	<table_array_decl>	=>	<dimensions>	of	id	<table_array_init>	<array_declare_tail_table>		;	
+37	<piece_array_decl>	=>	<dimensions>	of	id	<piece_array_init>	<array_declare_tail_piece>	;		
+38	<sip_array_decl>	=>	<dimensions>	of	id	<sip_array_init>	<array_declare_tail_sip>	;		
+39	<chars_array_decl>	=>	<dimensions>	of	id	<chars_array_init>	<array_declare_tail_chars>	;		
+40	<flag_array_decl>	=>	<dimensions>	of	id	<flag_array_init>	<array_declare_tail_flag>	;		
+41	<table_array_decl>	=>	<dimensions>	of	id	<table_array_init>	<array_declare_tail_table>	;		
 42	<piece_array_val>	=>	id	<id_tail>						
 43	<piece_array_val>	=>	<ret_array>							
 44	<piece_array_val>	=>	[	<array_element_piece_opt>	]					
@@ -64,15 +64,15 @@
 64	<table_array_val>	=>	[	<array_element_table_opt>	]					
 65	<table_array_init>	=>	=	<table_array_val>						
 66	<table_array_init>	=>	λ							
-67	<array_declare_tail_piece>	=>	,	id	<piece_array_init>					
+67	<array_declare_tail_piece>	=>	,	id	<piece_array_init>	<array_declare_tail_piece>				
 68	<array_declare_tail_piece>	=>	λ							
-69	<array_declare_tail_sip>	=>	,	id	<sip_array_init>					
+69	<array_declare_tail_sip>	=>	,	id	<sip_array_init>	<array_declare_tail_sip>				
 70	<array_declare_tail_sip>	=>	λ							
-71	<array_declare_tail_flag>	=>	,	id	<flag_array_init>					
+71	<array_declare_tail_flag>	=>	,	id	<flag_array_init>	<array_declare_tail_flag>				
 72	<array_declare_tail_flag>	=>	λ							
-73	<array_declare_tail_chars>	=>	,	id	<chars_array_init>					
+73	<array_declare_tail_chars>	=>	,	id	<chars_array_init>	<array_declare_tail_chars>				
 74	<array_declare_tail_chars>	=>	λ							
-75	<array_declare_tail_table>	=>	,	id	<table_array_init>					
+75	<array_declare_tail_table>	=>	,	id	<table_array_init>	<array_declare_tail_table>				
 76	<array_declare_tail_table>	=>	λ							
 77	<dimensions>	=>	[	]	<dimensions_tail>					
 78	<dimensions_tail>	=>	<dimensions>							

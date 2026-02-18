@@ -689,11 +689,12 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    67 <array_declare_tail_piece>	=>	,	id	<piece_array_init>    """
+        """    67 <array_declare_tail_piece>	=>	,	id	<piece_array_init>	<array_declare_tail_piece>    """
         if self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_piece>"]:
             self.parse_token(",")
             self.parse_token("id")
             self.piece_array_init()
+            self.array_declare_tail_piece()
 
             """    68 <array_declare_tail_piece>	=>	    """
 
@@ -706,11 +707,12 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    69 <array_declare_tail_sip>	=>	,	id	<sip_array_init>    """
+        """    69 <array_declare_tail_sip>	=>	,	id	<sip_array_init>	<array_declare_tail_sip>    """
         if self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_sip>"]:
             self.parse_token(",")
             self.parse_token("id")
             self.sip_array_init()
+            self.array_declare_tail_sip()
 
             """    70 <array_declare_tail_sip>	=>	    """
 
@@ -723,11 +725,12 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    71 <array_declare_tail_flag>	=>	,	id	<flag_array_init>    """
+        """    71 <array_declare_tail_flag>	=>	,	id	<flag_array_init>	<array_declare_tail_flag>    """
         if self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_flag>"]:
             self.parse_token(",")
             self.parse_token("id")
             self.flag_array_init()
+            self.array_declare_tail_flag()
 
             """    72 <array_declare_tail_flag>	=>	    """
 
@@ -740,11 +743,12 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    73 <array_declare_tail_chars>	=>	,	id	<chars_array_init>    """
+        """    73 <array_declare_tail_chars>	=>	,	id	<chars_array_init>	<array_declare_tail_chars>    """
         if self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_chars>"]:
             self.parse_token(",")
             self.parse_token("id")
             self.chars_array_init()
+            self.array_declare_tail_chars()
 
             """    74 <array_declare_tail_chars>	=>	    """
 
@@ -757,11 +761,12 @@ class Parser():
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    75 <array_declare_tail_table>	=>	,	id	<table_array_init>    """
+        """    75 <array_declare_tail_table>	=>	,	id	<table_array_init>	<array_declare_tail_table>    """
         if self.tokens[self.pos].type in PREDICT_SET["<array_declare_tail_table>"]:
             self.parse_token(",")
             self.parse_token("id")
             self.table_array_init()
+            self.array_declare_tail_table()
 
             """    76 <array_declare_tail_table>	=>	    """
 

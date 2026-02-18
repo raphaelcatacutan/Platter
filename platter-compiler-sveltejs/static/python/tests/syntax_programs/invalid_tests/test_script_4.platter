@@ -1,2 +1,2 @@
-flag of a = (x + 1) > "Hello";
-start() {}
+# flag of a = (x + 1) > "Hello"; not invalid syntactically in after 1st defense cfg
+# start() {}
