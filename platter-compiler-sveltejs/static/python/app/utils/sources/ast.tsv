@@ -84,7 +84,7 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 83	<value>	=>	propagate	-	$0	Value is ret_array
 84	<value>	=>	propagate	-	$1	Value is array literal
 85	<notation_val>	=>	propagate	-	$0	Notation is element
-86	<notation_val>	=>	build_notation	-	base=$0 tail=$1	Notation is ID with tail
+86	<notation_val>	=>	propagate	-	$1 context_id=$0.value	Notation is ID with tail
 87	<notation_val>	=>	skip	-	-	Empty notation
 88	<array_element>	=>	collect	-	[Literal("piece", $0.value)] + $1	Piece literal element
 89	<array_element>	=>	collect	-	[Literal("sip", $0.value)] + $1	Sip literal element
@@ -129,9 +129,9 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 128	<array_element_table_opt>	=>	collect	-	[]	Empty table array
 129	<element_table_tail>	=>	collect	-	$1	More table elements
 130	<element_table_tail>	=>	collect	-	[]	No more table elements
-131	<array_or_table>	=>	collect	-	[$1]	Array continuation
-132	<array_or_table>	=>	create	TableLiteral	field_inits=$3	Table literal
-133	<array_or_table>	=>	skip	-	-	End of notation
+131	<array_or_table>	=>	collect	-	[Identifier(CONTEXT_ID)] + $1	Array continuation
+132	<array_or_table>	=>	collect	-	TableLiteral([(CONTEXT_ID,$1)] + $3)	Table literal
+133	<array_or_table>	=>	propagate	-	Identifier(CONTEXT_ID)	Identifier only
 134	<field_assignments>	=>	collect	-	[($0.value, $2)] + $4	Field assignment
 135	<field_assignments>	=>	collect	-	[]	No more fields
 136	<flavor_tail>	=>	collect	-	[$1] + $2	More arguments
@@ -169,33 +169,33 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 168	<spice>	=>	collect	-	[]	No parameters
 169	<spice_tail>	=>	collect	-	[$1] + $2	More parameters
 170	<spice_tail>	=>	collect	-	[]	No more parameters
-171	<platter>	=>	create	Platter	local_decls=$1 statements=$2	Block/compound statement
+171	<platter>	=>	manual	-	(lambda decls, stmts: Platter([d for d in decls if isinstance(d, (VarDecl, ArrayDecl, TableDecl))], [s for s in decls if isinstance(s, (Assignment, ExpressionStatement, IfStatement, WhileLoop, ForLoop, DoWhileLoop, SwitchStatement, BreakStatement, ContinueStatement, ReturnStatement))] + stmts))($1, $2)	Block/compound statement
 172	<local_decl>	=>	collect	-	$1 + $2	Piece local decl
 173	<local_decl>	=>	collect	-	$1 + $2	Chars local decl
 174	<local_decl>	=>	collect	-	$1 + $2	Sip local decl
 175	<local_decl>	=>	collect	-	$1 + $2	Flag local decl
-176	<local_decl>	=>	collect	-	$1	Table local decl
+176	<local_decl>	=>	collect	-	$1	Table local decl/statements
 177	<local_decl>	=>	collect	-	[]	No more local decl
-178	<local_id_tail>	=>	collect	-	[TableDecl(CONTEXT,$0)] + $2	Table local var
-179	<local_id_tail>	=>	collect	-	[$1]	Array local/stmt hybrid
-180	<local_id_tail>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Local assignment with accessor
-181	<local_id_tail>	=>	create	Assignment	target=CONTEXT operator=$0 value=$1	Local assignment
-182	<local_id_tail>	=>	propagate	-	$0	Local call/tail
+178	<local_id_tail>	=>	collect	-	[TableDecl(CONTEXT,$1)] + $3	Table local var
+179	<local_id_tail>	=>	collect	-	$1	Array local/stmt hybrid
+180	<local_id_tail>	=>	collect	-	[Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4	Local assignment with accessor
+181	<local_id_tail>	=>	collect	-	[Assignment(CONTEXT, $0, $1)] + $3	Local assignment
+182	<local_id_tail>	=>	collect	-	[ExpressionStatement($0)] + $2	Local call/tail
 183	<endsb_tail>	=>	collect	-	[ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6	Array decl end bracket
-184	<endsb_tail>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Array assignment end bracket
+184	<endsb_tail>	=>	collect	-	[Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4	Array assignment end bracket
 185	<assignment_op>	=>	token	-	value==	=
 186	<assignment_op>	=>	token	-	value=+=	+=
 187	<assignment_op>	=>	token	-	value=-=	-=
 188	<assignment_op>	=>	token	-	value=*=	*=
 189	<assignment_op>	=>	token	-	value=/=	/=
 190	<assignment_op>	=>	token	-	value=%=	%=
-191	<statements>	=>	collect	-	[$0] + $1	ID statement
+191	<statements>	=>	collect	-	$0 + $1	ID statement
 192	<statements>	=>	collect	-	[ExpressionStatement($0)] + $2	Built-in call statement
 193	<statements>	=>	collect	-	[$0] + $1	Conditional statement
 194	<statements>	=>	collect	-	[$0] + $1	Loop statement
 195	<statements>	=>	collect	-	[$0] + $1	Jump/return statement
 196	<statements>	=>	collect	-	[]	No more statements
-197	<id_statements>	=>	propagate	-	$1 context_id=$0.value	ID statement extension
+197	<id_statements>	=>	manual	-	(lambda ctx, stmt, rest: (setattr(self, '_context_identifier', ctx), stmt + rest)[1])($0.value, [$1], $2)	ID statement extension
 198	<id_statements_ext>	=>	create	ExpressionStatement	expr=$0	Function call statement
 199	<id_statements_ext>	=>	propagate	-	$0	Assignment statement
 200	<tail1>	=>	propagate	-	$0	Statement tail call
@@ -251,13 +251,13 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 250	<local_decl_menu>	=>	collect	-	$1 + $2	Menu flag decl
 251	<local_decl_menu>	=>	collect	-	$1	Menu table decl
 252	<local_decl_menu>	=>	collect	-	[]	No more menu decl
-253	<local_id_tail_menu>	=>	collect	-	[TableDecl(CONTEXT,$0)] + $2	Menu table var
-254	<local_id_tail_menu>	=>	collect	-	[$1]	Menu array decl
-255	<local_id_tail_menu>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Menu assignment acc
-256	<local_id_tail_menu>	=>	create	Assignment	target=CONTEXT operator=$0 value=$1	Menu assignment
-257	<local_id_tail_menu>	=>	propagate	-	$0	Menu call/tail
+253	<local_id_tail_menu>	=>	collect	-	[TableDecl(CONTEXT,$1)] + $3	Menu table var
+254	<local_id_tail_menu>	=>	collect	-	$1	Menu array decl
+255	<local_id_tail_menu>	=>	collect	-	[Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4	Menu assignment acc
+256	<local_id_tail_menu>	=>	collect	-	[Assignment(CONTEXT, $0, $1)] + $3	Menu assignment
+257	<local_id_tail_menu>	=>	collect	-	[ExpressionStatement($0)] + $2	Menu call/tail
 258	<endsb_tail_menu>	=>	collect	-	[ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6	Menu array decl end
-259	<endsb_tail_menu>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Menu array assign end
+259	<endsb_tail_menu>	=>	collect	-	[Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4	Menu array assign end
 260	<looping_st>	=>	propagate	-	$0	Pass loop
 261	<looping_st>	=>	propagate	-	$0	Repeat loop
 262	<looping_st>	=>	propagate	-	$0	Order loop
@@ -273,13 +273,13 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 272	<local_decl_loop>	=>	collect	-	$1 + $2	Loop flag decl
 273	<local_decl_loop>	=>	collect	-	$1	Loop table decl
 274	<local_decl_loop>	=>	collect	-	[]	No more loop decl
-275	<local_id_tail_loop>	=>	collect	-	[TableDecl(CONTEXT,$0)] + $2	Loop table var
-276	<local_id_tail_loop>	=>	collect	-	[$1]	Loop array decl
-277	<local_id_tail_loop>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Loop assignment acc
-278	<local_id_tail_loop>	=>	create	Assignment	target=CONTEXT operator=$0 value=$1	Loop assignment
-279	<local_id_tail_loop>	=>	propagate	-	$0	Loop call/tail
+275	<local_id_tail_loop>	=>	collect	-	[TableDecl(CONTEXT,$1)] + $3	Loop table var
+276	<local_id_tail_loop>	=>	collect	-	$1	Loop array decl
+277	<local_id_tail_loop>	=>	collect	-	[Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4	Loop assignment acc
+278	<local_id_tail_loop>	=>	collect	-	[Assignment(CONTEXT, $0, $1)] + $3	Loop assignment
+279	<local_id_tail_loop>	=>	collect	-	[ExpressionStatement($0)] + $2	Loop call/tail
 280	<endsb_tail_loop>	=>	collect	-	[ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6	Loop array decl end
-281	<endsb_tail_loop>	=>	create	Assignment	target=CONTEXT accessor=$0 operator=$1 value=$2	Loop array assign end
+281	<endsb_tail_loop>	=>	collect	-	[Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4	Loop array assign end
 282	<statements_loop>	=>	collect	-	[$0] + $1	Loop stmt ID
 283	<statements_loop>	=>	collect	-	[ExpressionStatement($0)] + $2	Loop built-in
 284	<statements_loop>	=>	collect	-	[$0] + $1	Loop conditional
@@ -299,7 +299,7 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 298	<choice_clause_loop>	=>	collect	-	[CaseClause($1,$3)] + $4	Loop case clause
 299	<choice_clause_loop>	=>	collect	-	[]	No more loop cases
 300	<usual_clause_loop>	=>	propagate	-	$2	Usual clause loop
-301	<usual_clause_loop>	=>	skip	-	-	No usual loop
+301	<usual_clause_loop>	=>	collect	-	[]	No usual loop
 302	<choice_usual_loop_st>	=>	collect	-	[$0] + $1	Loop usual stmt ID
 303	<choice_usual_loop_st>	=>	collect	-	[ExpressionStatement($0)] + $2	Loop usual built-in
 304	<choice_usual_loop_st>	=>	collect	-	[$0] + $1	Loop usual cond
@@ -316,7 +316,7 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 315	<loop_repeat>	=>	create	WhileLoop	condition=$2 body=$4	While loop
 316	<loop_order>	=>	create	DoWhileLoop	body=$1 condition=$4	Do-while loop
 317	<usual_clause>	=>	propagate	-	$2	Usual clause (default)
-318	<usual_clause>	=>	skip	-	-	No usual clause
+318	<usual_clause>	=>	collect	-	[]	No usual clause
 319	<strict_chars_expr>	=>	build_binop	-	left=$0 right=$1	Chars expression
 320	<strict_chars_factor>	=>	propagate	-	$0	Chars factor ret
 321	<strict_chars_factor>	=>	propagate	-	$0	Chars factor ID
@@ -421,7 +421,7 @@ prod_no	<lhs>	=>	action_type	ast_class	field_mapping	note
 420	<flag_cont_any>	=>	build_binop	-	op=- right=$1	Flag cont sub
 421	<flag_cont_any>	=>	build_binop	-	op=* right=$1	Flag cont mult
 422	<flag_cont_any>	=>	build_binop	-	op=/ right=$1	Flag cont div
-423	<flag_cont_any>	=>	build_binop	-	op=% right=$1 tail=$2	Flag cont mod
+423	<flag_cont_any>	=>	manual	-	lambda left: BinaryOp(BinaryOp(left, "%", $1), $2, $3)	Flag cont mod rel
 424	<flag_cont_any>	=>	build_binop	-	op=$0 right=$1 tail=$2	Flag cont rel
 425	<flag_cont_any>	=>	skip	-	-	Empty flag cont any
 426	<flag_cps_expr>	=>	build_binop	-	left=$0 right=$1 tail=$2	Flag cps piece

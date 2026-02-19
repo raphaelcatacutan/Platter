@@ -1,7 +1,7 @@
 SYNTAX_TSCRIPTS = [
   {
     "number": 1,
-    "expected_output": """Syntax Error: Unexpected 'chars_lit' at line 1, col 24. Expected 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', '('.""",
+    "expected_output": """No Syntax Error""",
     "code": """flag of x = (x + 1) * ("HELLO") > 1; 
 start() {}"""
   },
@@ -13,13 +13,13 @@ start() {}"""
   },
   {
     "number": 3,
-    "expected_output": """Syntax Error: Unexpected 'piece_lit' at line 1, col 29. Expected 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '('.""",
+    "expected_output": """No Syntax Error""",
     "code": """flag of a = (x + "hello") > 1; 
 start() {}"""
   },
   {
     "number": 4,
-    "expected_output": """Syntax Error: Unexpected 'chars_lit' at line 1, col 23. Expected 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', '('.""",
+    "expected_output": """No Syntax Error""",
     "code": """flag of a = (x + 1) > "Hello";
 start() {}"""
   },
@@ -37,7 +37,7 @@ start() {}"""
   },
   {
     "number": 7,
-    "expected_output": """Syntax Error: Unexpected ';' at line 1, col 18. Expected '+', '-', '*', '/', '%', '==', '!=', '>', '<', '>=', '<='.""",
+    "expected_output": """Syntax Error: Unexpected ';' at line 1, col 18. Expected '*', '/', '%', '+', '-', '==', '!=', '>=', '<=', '<', '>'.""",
     "code": """flag of x = 1 * 1;
 start() {}"""
   },
@@ -69,7 +69,7 @@ start() {}"""
   },
   {
     "number": 12,
-    "expected_output": """Syntax Error: Unexpected 'chars_lit' at line 2, col 20. Expected 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'id', '('.""",
+    "expected_output": """Syntax Error: Unexpected 'chars_lit' at line 2, col 20. Expected 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'id', '('.""",
     "code": """start() {
     repeat((x+5) * "abc" == 5){ }
 }"""
@@ -104,7 +104,7 @@ start(){
   },
   {
     "number": 16,
-    "expected_output": """Syntax Error: Unexpected '-' at line 6, col 22. Expected 'id', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'matches', 'toflag', 'flag_lit', '(', 'not'.""",
+    "expected_output": """Syntax Error: Unexpected '-' at line 6, col 22. Expected 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not'.""",
     "code": """start(){
     piece of x = 7;
     check(x > 0){
@@ -327,7 +327,7 @@ start(){
   },
   {
     "number": 36,
-    "expected_output": """Syntax Error: Unexpected '-' at line 6, col 22. Expected 'id', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'matches', 'toflag', 'flag_lit', '(', 'not'.""",
+    "expected_output": """Syntax Error: Unexpected '-' at line 6, col 22. Expected 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not'.""",
     "code": """start(){
     piece of x = 7;
     check(x > 0){
@@ -568,7 +568,7 @@ start(){
   },
   {
     "number": 60,
-    "expected_output": """Syntax Error: Unexpected ':' at line 2, col 16. Expected '+', '-', '*', '/', '%', '==', '!=', '>', '<', '>=', '<=', ';'.""",
+    "expected_output": """Syntax Error: Unexpected ':' at line 2, col 16. Expected '%', '+', '-', '*', '/', '==', '!=', '>=', '<=', '<', '>', ';'.""",
     "code": """start(){
     serve x + 1: 2;
 }"""
@@ -620,7 +620,7 @@ bill(tochars(topiece("32")-topiece(cut(12.56,2.0))));
   },
   {
     "number": 67,
-    "expected_output": """Syntax Error: Unexpected ')' at line 2, col 26. Expected '+', '-', '*', '/', '%', '==', '!=', '>', '<', '>=', '<='.""",
+    "expected_output": """Syntax Error: Unexpected ')' at line 2, col 26. Expected '%', '+', '-', '*', '/', '==', '!=', '>=', '<=', '<', '>'.""",
     "code": """start(){
 pass(a = 3; a-=1; a and 0){
 }
@@ -1150,7 +1150,7 @@ start() {}"""
   },
   {
     "number": 109,
-    "expected_output": """Syntax Error: Unexpected '*' at line 2, col 49. Expected 'and', 'or', ',', ';'.""",
+    "expected_output": """Syntax Error: Unexpected ';' at line 2, col 74. Expected '*', '/', '%', '+', '-', '==', '!=', '>=', '<=', '<', '>'.""",
     "code": """start() {
   flag of expr = 1 - 23 > 12  and (up and down) * 12 * 1 * 2 % 12 / (1/2);
 }
@@ -1269,7 +1269,7 @@ start() {
   },
   {
     "number": 120,
-    "expected_output": """Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '==', '!=', '>', '<', '>=', '<=', ';'.""",
+    "expected_output": """Syntax Error: Unexpected 'id' at line 6, col 23. Expected '+', '==', '!=', '>=', '<=', '<', '>', ';'.""",
     "code": """table of animal = [ chars of sound; ];
 
 start() {

@@ -317,9 +317,13 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
                     if _is_nonterminal(rhs[idx]):
                         lines.append(f"{indent}return node_{idx}")
                     else:
-                        # Terminal: wrap id tokens in Identifier, return others as-is
+                        # Terminal: wrap appropriately based on type
                         if rhs[idx] == "id":
                             lines.append(f"{indent}return Identifier(token_{idx}.value)")
+                        elif rhs[idx] in ["piece_lit", "sip_lit", "flag_lit", "chars_lit"]:
+                            # Wrap literal tokens in Literal nodes
+                            lit_type = rhs[idx].replace("_lit", "")  # "piece_lit" -> "piece"
+                            lines.append(f"{indent}return Literal('{lit_type}', token_{idx}.value)")
                         else:
                             lines.append(f"{indent}return token_{idx}.value")
                 else:
@@ -327,7 +331,7 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             else:
                 lines.append(f"{indent}return None")
         # Check if this is an attribute mapping like type="piece" dims=$1
-        elif "=" in ref:
+        elif "=" in ref and not any(ref.startswith(prefix) for prefix in ["Identifier(", "TableLiteral(", "ArrayLiteral("]):
             lines.append(f"{indent}# Create simple attribute object")
             fields = _parse_field_mapping(ref, rhs)
             # Use a class with dynamic attributes for cleaner access
@@ -336,6 +340,15 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             for field_name, field_value in fields.items():
                 lines.append(f"{indent}result.{field_name} = {field_value}")
             lines.append(f"{indent}return result")
+        # Check if this is an expression (like Identifier(CONTEXT_ID) for empty productions)
+        elif any(ref.startswith(prefix) for prefix in ["Identifier(", "TableLiteral(", "ArrayLiteral(", "["]):
+            lines.append(f"{indent}# Propagate expression")
+            expr = ref
+            # Substitute CONTEXT keywords (longest first to avoid partial matches)
+            expr = expr.replace("CONTEXT_TYPE", "self._context_type")
+            expr = expr.replace("CONTEXT_ID", "self._context_identifier")
+            expr = expr.replace("CONTEXT", "self._context_dimensions")
+            lines.append(f"{indent}return {expr}")
         else:
             lines.append(f"{indent}return None")
     
@@ -406,8 +419,9 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
                     expr = expr.replace(f"${i}.value", f"token_{i}.value")
                     expr = expr.replace(f"${i}", f"token_{i}")
         
-        # Replace CONTEXT keywords with instance variables
+        # Replace CONTEXT keywords with instance variables (longest first to avoid partial matches)
         expr = expr.replace("CONTEXT_TYPE", "self._context_type")
+        expr = expr.replace("CONTEXT_ID", "self._context_identifier")
         expr = expr.replace("CONTEXT", "self._context_dimensions")
         
         # Generate the return statement
@@ -609,6 +623,13 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
         lines.append(f"{indent}")
         lines.append(f"{indent}return build_call")
     
+    elif action.action_type == "manual":
+        # Manual inline Python code - substitute $N references
+        code = action.field_mapping.strip()
+        code = _substitute_field_value(code, rhs)
+        lines.append(f"{indent}# Manual code")
+        lines.append(f"{indent}return {code}")
+    
     else:
         # Unknown action type - just return None
         lines.append(f"{indent}# Unknown action: {action.action_type}")
@@ -696,45 +717,45 @@ def _emit_function(lhs: str, alts: List[ProductionAlt], actions: Dict[str, ASTAc
     func_name = _safe_func_name(lhs)
 
     out: List[str] = []
-    out.append(f"    def {func_name}(self):")
-    out.append(f'        self.appendF(FIRST_SET["{lhs}"])')
-    out.append('        log.info("Enter: " + self.tokens[self.pos].type)')
-    out.append('        log.info("STACK: " + str(self.error_arr))')
+    out.append(f"def {func_name}(self):")
+    out.append(f'    self.appendF(FIRST_SET["{lhs}"])')
+    out.append('    log.info("Enter: " + self.tokens[self.pos].type)')
+    out.append('    log.info("STACK: " + str(self.error_arr))')
     out.append("")
 
     if len(alts) == 1:
         alt = alts[0]
         action = actions.get(alt.prod_no)
         
-        out.append(f"        {_format_prod_doc(alt.prod_no, alt.lhs, alt.rhs)}")
-        out.append(f'        if self.tokens[self.pos].type in PREDICT_SET["{lhs}"]:')
-        out.append(_emit_rhs_parse_and_action(alt.rhs, action, indent=" " * 12))
-        out.append(f'        else: self.parse_token(self.error_arr)')
+        out.append(f"    {_format_prod_doc(alt.prod_no, alt.lhs, alt.rhs)}")
+        out.append(f'    if self.tokens[self.pos].type in PREDICT_SET["{lhs}"]:')
+        out.append(_emit_rhs_parse_and_action(alt.rhs, action, indent=" " * 8))
+        out.append(f'    else: self.parse_token(self.error_arr)')
     else:
         # Multiple alternatives
         first = alts[0]
         first_action = actions.get(first.prod_no)
         
-        out.append(f"        {_format_prod_doc(first.prod_no, first.lhs, first.rhs)}")
-        out.append(f'        if self.tokens[self.pos].type in PREDICT_SET["{lhs}"]:')
-        out.append(_emit_rhs_parse_and_action(first.rhs, first_action, indent=" " * 12))
+        out.append(f"    {_format_prod_doc(first.prod_no, first.lhs, first.rhs)}")
+        out.append(f'    if self.tokens[self.pos].type in PREDICT_SET["{lhs}"]:')
+        out.append(_emit_rhs_parse_and_action(first.rhs, first_action, indent=" " * 8))
         out.append("")
 
         # Remaining alternatives
         for i, alt in enumerate(alts[1:], start=1):
             alt_action = actions.get(alt.prod_no)
             
-            out.append(f"            {_format_prod_doc(alt.prod_no, alt.lhs, alt.rhs)}")
-            out.append(f'        elif self.tokens[self.pos].type in PREDICT_SET["{lhs}_{i}"]:')
-            out.append(_emit_rhs_parse_and_action(alt.rhs, alt_action, indent=" " * 12))
+            out.append(f"        {_format_prod_doc(alt.prod_no, alt.lhs, alt.rhs)}")
+            out.append(f'    elif self.tokens[self.pos].type in PREDICT_SET["{lhs}_{i}"]:')
+            out.append(_emit_rhs_parse_and_action(alt.rhs, alt_action, indent=" " * 8))
             out.append("")
 
         # Else clause only if last alternative has non-empty RHS
         if alts[-1].rhs:
-           out.append(f'        else: self.parse_token(self.error_arr)')
+           out.append(f'    else: self.parse_token(self.error_arr)')
     
     out.append("")
-    out.append('        log.info("Exit: " + self.tokens[self.pos].type)')
+    out.append('    log.info("Exit: " + self.tokens[self.pos].type)')
     out.append("")
     return "\n".join(out)
 
@@ -830,10 +851,13 @@ class ASTParser:
         if self.tokens[self.pos].type in PREDICT_SET["<program>"]:
             node_0 = self.global_decl()
             node_1 = self.recipe_decl()
+            token_2 = self.tokens[self.pos]
             self.parse_token("start")
+            token_3 = self.tokens[self.pos]
             self.parse_token("(")
+            token_4 = self.tokens[self.pos]
             self.parse_token(")")
-            node_7 = self.platter()
+            node_5 = self.platter()
             
             # Create Program node
             prog = Program()
@@ -843,7 +867,7 @@ class ASTParser:
             if isinstance(node_1, list):
                 for recipe in node_1:
                     prog.add_recipe_decl(recipe)
-            prog.set_start_platter(node_7)
+            prog.set_start_platter(node_5)
             
             # Ensure we've consumed all tokens
             if self.pos < len(self.tokens) and self.tokens[self.pos].type != "EOF":
@@ -864,7 +888,9 @@ class ASTParser:
             continue
         
         group_alts = sorted(grouped[lhs], key=_prod_sort_key)
-        chunks.append(_emit_function(lhs, group_alts, ast_actions))
+        func_code = _emit_function(lhs, group_alts, ast_actions)
+        # Note: FormatASTParser.py will add class method indentation
+        chunks.append(func_code)
     
     # Write output
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
