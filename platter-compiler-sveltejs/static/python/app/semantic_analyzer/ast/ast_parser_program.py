@@ -10,7 +10,7 @@ from app.parser.first_set import FIRST_SET
 from app.semantic_analyzer.ast.ast_nodes import *
 import logging as log
 
-log.basicConfig(level=log.DEBUG, format='%(levelname)s: <%(funcName)s> | %(message)s')
+log.basicConfig(level=log.CRITICAL, format='%(levelname)s: <%(funcName)s> | %(message)s')
 
 
 class ASTParser:

@@ -237,9 +237,13 @@ start() {
 			'/python/app/parser/parser_program.py',
 			'/python/app/utils/FileHandler.py',
 			'/python/app/parser/first_set.py',
+			'/python/app/semantic_analyzer/__init__.py',
 			'/python/app/semantic_analyzer/ast/ast_nodes.py',
 			'/python/app/semantic_analyzer/ast/ast_parser_program.py',
 			'/python/app/semantic_analyzer/ast/ast_reader.py',
+			'/python/app/semantic_analyzer/symbol_table/__init__.py',
+			'/python/app/semantic_analyzer/symbol_table/symbol_table_builder.py',
+			'/python/app/semantic_analyzer/symbol_table/symbol_table_output.py',
 		];
 
 		// Fetch and write Python files to Pyodide's virtual filesystem
@@ -527,9 +531,12 @@ start() {
 					const result = await pyodide.runPythonAsync(`
 import sys
 import re
+import json
 from app.lexer.lexer import Lexer
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
 from app.semantic_analyzer.ast.ast_reader import ASTReader, print_ast
+from app.semantic_analyzer.symbol_table import build_symbol_table, print_symbol_table
+from app.semantic_analyzer.symbol_table.symbol_table_output import format_symbol_table_for_console
 
 result = None
 try:
@@ -544,15 +551,41 @@ try:
     print("="*80)
     print_ast(ast, format="pretty")
     
+    # Build and print Symbol Table
+    print("\\n" + "="*80)
+    print("Building Symbol Table")
+    print("="*80)
+    symbol_table = build_symbol_table(ast)
+    print_symbol_table(symbol_table)
+    
     # Also create JSON representation
     reader = ASTReader(ast)
     ast_json = reader.to_json(indent=2)
     
-    result = {
-        "success": True, 
-        "message": "Semantic analysis completed successfully",
-        "ast": ast_json
-    }
+    # Get symbol table data for console.table output
+    symbol_table_data = format_symbol_table_for_console(symbol_table)
+    symbol_table_json = json.dumps(symbol_table_data)
+    
+    # Check for semantic errors
+    if symbol_table.has_errors():
+        error_list = []
+        for err in symbol_table.errors:
+            error_list.append(f"[{err.severity.upper()}] {err.message}")
+        
+        result = {
+            "success": False, 
+            "message": "Semantic errors found:\\n" + "\\n".join(error_list),
+            "ast": ast_json,
+            "symbol_table": symbol_table_json,
+            "errors": error_list
+        }
+    else:
+        result = {
+            "success": True, 
+            "message": "No semantic errors",
+            "ast": ast_json,
+            "symbol_table": symbol_table_json
+        }
 except SyntaxError as e:
     error_msg = str(e)
     # Try to extract line and col from error message
@@ -573,8 +606,8 @@ result
 
 				if (data.success) {
 					clearErrorMarkers();
-					const semanticMessage = data.message || 'Semantic analysis completed successfully';
-					const okMessage = `${lexicalResult.output}\n${semanticMessage}\n\nAST generated successfully! Check browser console for AST structure.`;
+					const semanticMessage = data.message || 'No semantic errors';
+					const okMessage = `${lexicalResult.output}\n${semanticMessage}\n\nAST and Symbol Table generated successfully! Check browser console for details.`;
 					setTerminalOk(okMessage);
 					analysisStatus = 'success';
 					terminalOutput = okMessage;
@@ -592,9 +625,60 @@ result
 							console.warn('Failed to parse AST JSON:', e);
 						}
 					}
+					
+					// Log Symbol Table as console.table for better display of accessed scopes
+					if (data.symbol_table) {
+						try {
+							const symbolTableData = JSON.parse(data.symbol_table);
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+							console.log('%c📋 Symbol Table (Detailed View)', 'color: #00bcd4; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+							console.table(symbolTableData);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+						} catch (e) {
+							console.warn('Failed to parse Symbol Table JSON:', e);
+						}
+					}
 				} else {
+					// Check if we have semantic errors
+					if (data.errors && data.errors.length > 0) {
+						clearErrorMarkers();
+						// Display semantic errors in terminal
+						const errorMessage = `${lexicalResult.output}\n${data.message}`;
+						setTerminalError(errorMessage);
+						analysisStatus = 'error';
+						terminalOutput = errorMessage;
+						
+						// Still log AST to console if available
+						if (data.ast) {
+							try {
+								const astObj = JSON.parse(data.ast);
+								console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.log('%c🌳 Abstract Syntax Tree (AST) - With Semantic Errors', 'color: #ff9800; font-size: 16px; font-weight: bold');
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.log(astObj);
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							} catch (e) {
+								console.warn('Failed to parse AST JSON:', e);
+							}
+						}
+						
+						// Still log Symbol Table if available
+						if (data.symbol_table) {
+							try {
+								const symbolTableData = JSON.parse(data.symbol_table);
+								console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.log('%c📋 Symbol Table - With Semantic Errors', 'color: #ff9800; font-size: 16px; font-weight: bold');
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.table(symbolTableData);
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							} catch (e) {
+								console.warn('Failed to parse Symbol Table JSON:', e);
+							}
+						}
+					}
 					// Handle syntax errors with line/col information
-					if (data.error && data.error.line && data.error.col) {
+					else if (data.error && data.error.line && data.error.col) {
 						// Create a token-like object for the error marker
 						const errorToken = {
 							type: 'Syntax Error',
