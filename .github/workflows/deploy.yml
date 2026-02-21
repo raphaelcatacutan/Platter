@@ -40,12 +40,18 @@ jobs:
           BASE_PATH: /Platter
         run: npm run build
 
+      - name: Verify build output
+        run: |
+          ls -la platter-compiler-sveltejs/build/
+          echo "Build directory contents verified"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build
           path: platter-compiler-sveltejs/build/
           retention-days: 1
+          if-no-files-found: error
 
   # Deploy to GitHub Pages
   deploy:
@@ -63,6 +69,11 @@ jobs:
         with:
           name: build
           path: build
+
+      - name: Verify downloaded artifacts
+        run: |
+          ls -la build/
+          echo "Downloaded artifacts verified"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

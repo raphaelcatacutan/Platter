@@ -40,25 +40,23 @@ class Program(ASTNode):
 
 class VarDecl(ASTNode):
     """Variable declaration (ingredient/scalar)"""
-    def __init__(self, data_type, identifier, init_value=None, scope="global"):
+    def __init__(self, data_type, identifier, init_value=None):
         super().__init__("VarDecl")
         self.data_type = data_type  # "piece", "sip", "flag", "chars"
         self.identifier = identifier  # String
         self.init_value = init_value  # Expression node or None
-        self.scope = scope
     
     def __repr__(self):
         return f"VarDecl({self.data_type} {self.identifier}, init={'Yes' if self.init_value else 'No'})"
 
 class ArrayDecl(ASTNode):
     """Array declaration"""
-    def __init__(self, data_type, dimensions, identifier, init_value=None, scope="global"):
+    def __init__(self, data_type, dimensions, identifier, init_value=None):
         super().__init__("ArrayDecl")
         self.data_type = data_type
         self.dimensions = dimensions  # int: number of dimensions
         self.identifier = identifier
         self.init_value = init_value  # ArrayLiteral or Expression
-        self.scope = scope
     
     def __repr__(self):
         return f"ArrayDecl({self.data_type}[{self.dimensions}] {self.identifier})"
@@ -87,13 +85,12 @@ class FieldDecl(ASTNode):
 
 class TableDecl(ASTNode):
     """Table instance declaration"""
-    def __init__(self, table_type, identifier, init_value=None, dimensions=0, scope="global"):
+    def __init__(self, table_type, identifier, init_value=None, dimensions=0):
         super().__init__("TableDecl")
         self.table_type = table_type  # String: name of table type
         self.identifier = identifier
         self.init_value = init_value  # TableLiteral or None
         self.dimensions = dimensions
-        self.scope = scope
     
     def __repr__(self):
         dims = f"[{self.dimensions}]" if self.dimensions > 0 else ""
