@@ -10,7 +10,7 @@ from app.parser.first_set import FIRST_SET
 from app.semantic_analyzer.ast.ast_nodes import *
 import logging as log
 
-log.basicConfig(level=log.CRITICAL, format='%(levelname)s: <%(funcName)s> | %(message)s')
+log.basicConfig(level=log.DEBUG, format='%(levelname)s: <%(funcName)s> | %(message)s')
 
 
 class ASTParser:
@@ -5370,11 +5370,11 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    394 <flag_eq_tail>	=>	==	<flag_operand>	<flag_eq_tail>    """
+        """    394 <flag_eq_tail>	=>	==	<simple_flag>	<flag_eq_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_eq_tail>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("==")
-            node_1 = self.flag_operand()
+            node_1 = self.simple_flag()
             node_2 = self.flag_eq_tail()
 
             # Build binary operation chain
@@ -5385,11 +5385,11 @@ class ASTParser:
                 return node
             return build_op
 
-            """    395 <flag_eq_tail>	=>	!=	<flag_operand>	<flag_eq_tail>    """
+            """    395 <flag_eq_tail>	=>	!=	<simple_flag>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_eq_tail>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("!=")
-            node_1 = self.flag_operand()
+            node_1 = self.simple_flag()
             node_2 = self.flag_eq_tail()
 
             # Build binary operation chain
@@ -5412,68 +5412,16 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    397 <flag_op_tail>	=>	and	<flag_operand>	<flag_op_tail>    """
+        """    397 <flag_op_tail>	=>	<flag_eq_tail>	<flag_expr_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_op_tail>"]:
-            token_0 = self.tokens[self.pos]
-            self.parse_token("and")
-            node_1 = self.flag_operand()
-            node_2 = self.flag_op_tail()
+            node_0 = self.flag_eq_tail()
+            node_1 = self.flag_expr_tail()
 
-            # Build binary operation chain
-            def build_op(left):
-                node = BinaryOp(left, "and", node_1)
-                if node_2:
-                    return node_2(node)
-                return node
-            return build_op
+            # Manual code
+            return (lambda eq_tail, expr_tail: (lambda left: expr_tail(eq_tail(left))) if (eq_tail and expr_tail) else (expr_tail if expr_tail else eq_tail))(node_0, node_1)
 
-            """    398 <flag_op_tail>	=>	==	<flag_operand>	<flag_op_tail>    """
+            """    398 <flag_op_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_op_tail>_1"]:
-            token_0 = self.tokens[self.pos]
-            self.parse_token("==")
-            node_1 = self.flag_operand()
-            node_2 = self.flag_op_tail()
-
-            # Build binary operation chain
-            def build_op(left):
-                node = BinaryOp(left, "=", node_1)
-                if node_2:
-                    return node_2(node)
-                return node
-            return build_op
-
-            """    399 <flag_op_tail>	=>	!=	<flag_operand>	<flag_op_tail>    """
-        elif self.tokens[self.pos].type in PREDICT_SET["<flag_op_tail>_2"]:
-            token_0 = self.tokens[self.pos]
-            self.parse_token("!=")
-            node_1 = self.flag_operand()
-            node_2 = self.flag_op_tail()
-
-            # Build binary operation chain
-            def build_op(left):
-                node = BinaryOp(left, "!=", node_1)
-                if node_2:
-                    return node_2(node)
-                return node
-            return build_op
-
-            """    400 <flag_op_tail>	=>	or	<flag_operand>	<flag_op_tail>    """
-        elif self.tokens[self.pos].type in PREDICT_SET["<flag_op_tail>_3"]:
-            token_0 = self.tokens[self.pos]
-            self.parse_token("or")
-            node_1 = self.flag_operand()
-            node_2 = self.flag_op_tail()
-
-            # Build binary operation chain
-            def build_op(left):
-                node = BinaryOp(left, "or", node_1)
-                if node_2:
-                    return node_2(node)
-                return node
-            return build_op
-
-            """    401 <flag_op_tail>	=>	    """
-        elif self.tokens[self.pos].type in PREDICT_SET["<flag_op_tail>_4"]:
             return None
 
 
@@ -5484,7 +5432,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    402 <cont_sip>	=>	<sip_ops>	<strict_sip_expr>    """
+        """    399 <cont_sip>	=>	<sip_ops>	<strict_sip_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cont_sip>"]:
             node_0 = self.sip_ops()
             node_1 = self.strict_sip_expr()
@@ -5495,7 +5443,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    403 <cont_sip>	=>	    """
+            """    400 <cont_sip>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cont_sip>_1"]:
             return None
 
@@ -5507,7 +5455,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    404 <cont_piece>	=>	<all_ops>	<strict_piece_expr>    """
+        """    401 <cont_piece>	=>	<all_ops>	<strict_piece_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cont_piece>"]:
             node_0 = self.all_ops()
             node_1 = self.strict_piece_expr()
@@ -5518,7 +5466,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    405 <cont_piece>	=>	    """
+            """    402 <cont_piece>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cont_piece>_1"]:
             return None
 
@@ -5530,7 +5478,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    406 <cont_chars>	=>	<chars_ops>	<strict_chars_expr>    """
+        """    403 <cont_chars>	=>	<chars_ops>	<strict_chars_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cont_chars>"]:
             node_0 = self.chars_ops()
             node_1 = self.strict_chars_expr()
@@ -5541,7 +5489,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    407 <cont_chars>	=>	    """
+            """    404 <cont_chars>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cont_chars>_1"]:
             return None
 
@@ -5553,7 +5501,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    408 <strict_flag_expr>	=>	<flag_operand>	<flag_expr_tail>    """
+        """    405 <strict_flag_expr>	=>	<flag_operand>	<flag_expr_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<strict_flag_expr>"]:
             node_0 = self.flag_operand()
             node_1 = self.flag_expr_tail()
@@ -5572,7 +5520,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    409 <flag_expr_tail>	=>	and	<strict_flag_expr>    """
+        """    406 <flag_expr_tail>	=>	and	<strict_flag_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_expr_tail>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("and")
@@ -5584,7 +5532,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    410 <flag_expr_tail>	=>	or	<strict_flag_expr>    """
+            """    407 <flag_expr_tail>	=>	or	<strict_flag_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_expr_tail>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("or")
@@ -5596,10 +5544,35 @@ class ASTParser:
                 return node
             return build_op
 
-            """    411 <flag_expr_tail>	=>	    """
+            """    408 <flag_expr_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_expr_tail>_2"]:
             return None
 
+
+        log.info("Exit: " + self.tokens[self.pos].type)
+
+    def simple_flag(self):
+        self.appendF(FIRST_SET["<simple_flag>"])
+        log.info("Enter: " + self.tokens[self.pos].type)
+        log.info("STACK: " + str(self.error_arr))
+
+        """    409 <simple_flag>	=>	(	<flag_operand>	)    """
+        if self.tokens[self.pos].type in PREDICT_SET["<simple_flag>"]:
+            token_0 = self.tokens[self.pos]
+            self.parse_token("(")
+            node_1 = self.flag_operand()
+            token_2 = self.tokens[self.pos]
+            self.parse_token(")")
+
+            return node_1
+
+            """    410 <simple_flag>	=>	<ret_flag>    """
+        elif self.tokens[self.pos].type in PREDICT_SET["<simple_flag>_1"]:
+            node_0 = self.ret_flag()
+
+            return node_0
+
+        else: self.parse_token(self.error_arr)
 
         log.info("Exit: " + self.tokens[self.pos].type)
 
@@ -5608,7 +5581,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    412 <flag_operand>	=>	<ret_piece>	<cont_piece>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
+        """    411 <flag_operand>	=>	<ret_piece>	<cont_piece>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_operand>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
@@ -5622,7 +5595,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    413 <flag_operand>	=>	<ret_sip>	<cont_sip>	<rel_op>	<strict_sip_expr>	<flag_eq_tail>    """
+            """    412 <flag_operand>	=>	<ret_sip>	<cont_sip>	<rel_op>	<strict_sip_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
@@ -5636,7 +5609,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    414 <flag_operand>	=>	<ret_flag>	<flag_eq_tail>    """
+            """    413 <flag_operand>	=>	<ret_flag>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_2"]:
             node_0 = self.ret_flag()
             node_1 = self.flag_eq_tail()
@@ -5647,7 +5620,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    415 <flag_operand>	=>	<ret_chars>	<cont_chars>	<rel_op>	<strict_chars_expr>	<flag_eq_tail>    """
+            """    414 <flag_operand>	=>	<ret_chars>	<cont_chars>	<rel_op>	<strict_chars_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_3"]:
             node_0 = self.ret_chars()
             node_1 = self.cont_chars()
@@ -5661,7 +5634,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    416 <flag_operand>	=>	not	<flag_operand>	<flag_eq_tail>    """
+            """    415 <flag_operand>	=>	not	<flag_operand>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("not")
@@ -5675,7 +5648,7 @@ class ASTParser:
             else:
                 return node
 
-            """    417 <flag_operand>	=>	<id>	<flag_cont_any>    """
+            """    416 <flag_operand>	=>	<id>	<flag_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_5"]:
             node_0 = self.id_()
             node_1 = self.flag_cont_any()
@@ -5686,7 +5659,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    418 <flag_operand>	=>	(	<any_expr>	)	<flag_cont_any>    """
+            """    417 <flag_operand>	=>	(	<any_expr>	)	<flag_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_6"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -5710,7 +5683,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    419 <flag_cont_any>	=>	+	<flag_cps_expr>    """
+        """    418 <flag_cont_any>	=>	+	<flag_cps_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -5722,7 +5695,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    420 <flag_cont_any>	=>	-	<flag_ps_expr>    """
+            """    419 <flag_cont_any>	=>	-	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -5734,7 +5707,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    421 <flag_cont_any>	=>	*	<flag_ps_expr>    """
+            """    420 <flag_cont_any>	=>	*	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -5746,7 +5719,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    422 <flag_cont_any>	=>	/	<flag_ps_expr>    """
+            """    421 <flag_cont_any>	=>	/	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -5758,7 +5731,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    423 <flag_cont_any>	=>	%	<strict_piece_expr>	<rel_op>	<strict_piece_expr>    """
+            """    422 <flag_cont_any>	=>	%	<strict_piece_expr>	<rel_op>	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -5769,7 +5742,7 @@ class ASTParser:
             # Manual code
             return lambda left: BinaryOp(BinaryOp(left, "%", node_1), node_2, node_3)
 
-            """    424 <flag_cont_any>	=>	<rel_op>	<any_expr>	<flag_eq_tail>    """
+            """    423 <flag_cont_any>	=>	<rel_op>	<any_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_5"]:
             node_0 = self.rel_op()
             node_1 = self.any_expr()
@@ -5783,7 +5756,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    425 <flag_cont_any>	=>	    """
+            """    424 <flag_cont_any>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_6"]:
             return None
 
@@ -5795,7 +5768,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    426 <flag_cps_expr>	=>	<ret_piece>	<cont_piece>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
+        """    425 <flag_cps_expr>	=>	<ret_piece>	<cont_piece>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_cps_expr>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
@@ -5809,7 +5782,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    427 <flag_cps_expr>	=>	<ret_sip>	<cont_sip>	<rel_op>	<strict_sip_expr>	<flag_eq_tail>    """
+            """    426 <flag_cps_expr>	=>	<ret_sip>	<cont_sip>	<rel_op>	<strict_sip_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_expr>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
@@ -5823,7 +5796,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    428 <flag_cps_expr>	=>	<ret_chars>	<cont_chars>	<rel_op>	<strict_chars_expr>	<flag_eq_tail>    """
+            """    427 <flag_cps_expr>	=>	<ret_chars>	<cont_chars>	<rel_op>	<strict_chars_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_expr>_2"]:
             node_0 = self.ret_chars()
             node_1 = self.cont_chars()
@@ -5837,7 +5810,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    429 <flag_cps_expr>	=>	<id>	<flag_cps_cont_any>    """
+            """    428 <flag_cps_expr>	=>	<id>	<flag_cps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_expr>_3"]:
             node_0 = self.id_()
             node_1 = self.flag_cps_cont_any()
@@ -5848,7 +5821,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    430 <flag_cps_expr>	=>	(	<any_expr>	)	<flag_cps_cont_any>    """
+            """    429 <flag_cps_expr>	=>	(	<any_expr>	)	<flag_cps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_expr>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -5872,7 +5845,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    431 <flag_cps_cont_any>	=>	+	<flag_cps_expr>    """
+        """    430 <flag_cps_cont_any>	=>	+	<flag_cps_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -5884,7 +5857,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    432 <flag_cps_cont_any>	=>	-	<flag_ps_expr>    """
+            """    431 <flag_cps_cont_any>	=>	-	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -5896,7 +5869,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    433 <flag_cps_cont_any>	=>	*	<flag_ps_expr>    """
+            """    432 <flag_cps_cont_any>	=>	*	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -5908,7 +5881,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    434 <flag_cps_cont_any>	=>	/	<flag_ps_expr>    """
+            """    433 <flag_cps_cont_any>	=>	/	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -5920,7 +5893,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    435 <flag_cps_cont_any>	=>	%	<strict_piece_expr>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
+            """    434 <flag_cps_cont_any>	=>	%	<strict_piece_expr>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -5937,7 +5910,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    436 <flag_cps_cont_any>	=>	<rel_op>	<strict_cps_expr>	<flag_eq_tail>    """
+            """    435 <flag_cps_cont_any>	=>	<rel_op>	<strict_cps_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>_5"]:
             node_0 = self.rel_op()
             node_1 = self.strict_cps_expr()
@@ -5960,7 +5933,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    437 <flag_ps_expr>	=>	<ret_piece>	<cont_piece>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
+        """    436 <flag_ps_expr>	=>	<ret_piece>	<cont_piece>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_ps_expr>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
@@ -5974,7 +5947,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    438 <flag_ps_expr>	=>	<ret_sip>	<cont_sip>	<rel_op>	<strict_sip_expr>	<flag_eq_tail>    """
+            """    437 <flag_ps_expr>	=>	<ret_sip>	<cont_sip>	<rel_op>	<strict_sip_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_expr>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
@@ -5988,7 +5961,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    439 <flag_ps_expr>	=>	<id>	<flag_ps_cont_any>    """
+            """    438 <flag_ps_expr>	=>	<id>	<flag_ps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_expr>_2"]:
             node_0 = self.id_()
             node_1 = self.flag_ps_cont_any()
@@ -5999,7 +5972,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    440 <flag_ps_expr>	=>	(	<any_expr>	)	<flag_ps_cont_any>    """
+            """    439 <flag_ps_expr>	=>	(	<any_expr>	)	<flag_ps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_expr>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -6023,7 +5996,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    441 <flag_ps_cont_any>	=>	+	<flag_ps_expr>    """
+        """    440 <flag_ps_cont_any>	=>	+	<flag_ps_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -6035,7 +6008,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    442 <flag_ps_cont_any>	=>	-	<flag_ps_expr>    """
+            """    441 <flag_ps_cont_any>	=>	-	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -6047,7 +6020,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    443 <flag_ps_cont_any>	=>	*	<flag_ps_expr>    """
+            """    442 <flag_ps_cont_any>	=>	*	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -6059,7 +6032,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    444 <flag_ps_cont_any>	=>	/	<flag_ps_expr>    """
+            """    443 <flag_ps_cont_any>	=>	/	<flag_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -6071,7 +6044,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    445 <flag_ps_cont_any>	=>	%	<strict_piece_expr>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
+            """    444 <flag_ps_cont_any>	=>	%	<strict_piece_expr>	<rel_op>	<strict_piece_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -6088,7 +6061,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    446 <flag_ps_cont_any>	=>	<rel_op>	<strict_ps_expr>	<flag_eq_tail>    """
+            """    445 <flag_ps_cont_any>	=>	<rel_op>	<strict_ps_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>_5"]:
             node_0 = self.rel_op()
             node_1 = self.strict_ps_expr()
@@ -6111,7 +6084,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    447 <any_expr>	=>	<ret_piece>	<cont_piece>	<any_cont_p_flag_tail>    """
+        """    446 <any_expr>	=>	<ret_piece>	<cont_piece>	<any_cont_p_flag_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_expr>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
@@ -6123,7 +6096,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    448 <any_expr>	=>	<ret_sip>	<cont_sip>	<any_cont_s_flag_tail>    """
+            """    447 <any_expr>	=>	<ret_sip>	<cont_sip>	<any_cont_s_flag_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
@@ -6135,7 +6108,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    449 <any_expr>	=>	<ret_flag>	<flag_op_tail>    """
+            """    448 <any_expr>	=>	<ret_flag>	<flag_op_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_2"]:
             node_0 = self.ret_flag()
             node_1 = self.flag_op_tail()
@@ -6146,7 +6119,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    450 <any_expr>	=>	<ret_chars>	<cont_chars>	<any_cont_c_flag_tail>    """
+            """    449 <any_expr>	=>	<ret_chars>	<cont_chars>	<any_cont_c_flag_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_3"]:
             node_0 = self.ret_chars()
             node_1 = self.cont_chars()
@@ -6158,7 +6131,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    451 <any_expr>	=>	<id>	<any_cont_any>    """
+            """    450 <any_expr>	=>	<id>	<any_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_4"]:
             node_0 = self.id_()
             node_1 = self.any_cont_any()
@@ -6169,7 +6142,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    452 <any_expr>	=>	(	<any_expr>	)	<any_cont_any>    """
+            """    451 <any_expr>	=>	(	<any_expr>	)	<any_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_5"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -6184,7 +6157,7 @@ class ASTParser:
             else:
                 return node_1
 
-            """    453 <any_expr>	=>	not	<strict_flag_expr>    """
+            """    452 <any_expr>	=>	not	<strict_flag_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_expr>_6"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("not")
@@ -6203,7 +6176,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    454 <any_cont_any>	=>	+	<strict_cps_expr>	<any_cont_cps_flag_tail>    """
+        """    453 <any_cont_any>	=>	+	<strict_cps_expr>	<any_cont_cps_flag_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -6218,7 +6191,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    455 <any_cont_any>	=>	-	<strict_ps_expr>	<any_cont_ps_flag_tail>    """
+            """    454 <any_cont_any>	=>	-	<strict_ps_expr>	<any_cont_ps_flag_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -6233,7 +6206,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    456 <any_cont_any>	=>	*	<strict_ps_expr>	<any_cont_ps_flag_tail>    """
+            """    455 <any_cont_any>	=>	*	<strict_ps_expr>	<any_cont_ps_flag_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -6248,7 +6221,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    457 <any_cont_any>	=>	/	<strict_ps_expr>	<any_cont_ps_flag_tail>    """
+            """    456 <any_cont_any>	=>	/	<strict_ps_expr>	<any_cont_ps_flag_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -6263,7 +6236,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    458 <any_cont_any>	=>	%	<strict_piece_expr>	<any_cont_p_flag_tail>    """
+            """    457 <any_cont_any>	=>	%	<strict_piece_expr>	<any_cont_p_flag_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -6278,10 +6251,10 @@ class ASTParser:
                 return node
             return build_op
 
-            """    459 <any_cont_any>	=>	<rel_op>	<strict_cps_expr>	<flag_op_tail>    """
+            """    458 <any_cont_any>	=>	<rel_op>	<any_expr>	<flag_op_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_5"]:
             node_0 = self.rel_op()
-            node_1 = self.strict_cps_expr()
+            node_1 = self.any_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
@@ -6292,13 +6265,13 @@ class ASTParser:
                 return node
             return build_op
 
-            """    460 <any_cont_any>	=>	<flag_expr_tail>    """
+            """    459 <any_cont_any>	=>	<flag_expr_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_6"]:
             node_0 = self.flag_expr_tail()
 
             return node_0
 
-            """    461 <any_cont_any>	=>	    """
+            """    460 <any_cont_any>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_7"]:
             return None
 
@@ -6310,7 +6283,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    462 <any_cont_cps_flag_tail>	=>	<rel_op>	<strict_cps_expr>	<flag_op_tail>    """
+        """    461 <any_cont_cps_flag_tail>	=>	<rel_op>	<strict_cps_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_cps_flag_tail>"]:
             node_0 = self.rel_op()
             node_1 = self.strict_cps_expr()
@@ -6324,7 +6297,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    463 <any_cont_cps_flag_tail>	=>	    """
+            """    462 <any_cont_cps_flag_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_cps_flag_tail>_1"]:
             return None
 
@@ -6336,7 +6309,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    464 <any_cont_ps_flag_tail>	=>	<rel_op>	<strict_ps_expr>	<flag_op_tail>    """
+        """    463 <any_cont_ps_flag_tail>	=>	<rel_op>	<strict_ps_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_ps_flag_tail>"]:
             node_0 = self.rel_op()
             node_1 = self.strict_ps_expr()
@@ -6350,7 +6323,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    465 <any_cont_ps_flag_tail>	=>	    """
+            """    464 <any_cont_ps_flag_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_ps_flag_tail>_1"]:
             return None
 
@@ -6362,7 +6335,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    466 <any_cont_p_flag_tail>	=>	<rel_op>	<strict_piece_expr>	<flag_op_tail>    """
+        """    465 <any_cont_p_flag_tail>	=>	<rel_op>	<strict_piece_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_p_flag_tail>"]:
             node_0 = self.rel_op()
             node_1 = self.strict_piece_expr()
@@ -6376,7 +6349,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    467 <any_cont_p_flag_tail>	=>	    """
+            """    466 <any_cont_p_flag_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_p_flag_tail>_1"]:
             return None
 
@@ -6388,7 +6361,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    468 <any_cont_s_flag_tail>	=>	<rel_op>	<strict_sip_expr>	<flag_op_tail>    """
+        """    467 <any_cont_s_flag_tail>	=>	<rel_op>	<strict_sip_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_s_flag_tail>"]:
             node_0 = self.rel_op()
             node_1 = self.strict_sip_expr()
@@ -6402,7 +6375,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    469 <any_cont_s_flag_tail>	=>	    """
+            """    468 <any_cont_s_flag_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_s_flag_tail>_1"]:
             return None
 
@@ -6414,7 +6387,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    470 <any_cont_c_flag_tail>	=>	<rel_op>	<strict_chars_expr>	<flag_op_tail>    """
+        """    469 <any_cont_c_flag_tail>	=>	<rel_op>	<strict_chars_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_c_flag_tail>"]:
             node_0 = self.rel_op()
             node_1 = self.strict_chars_expr()
@@ -6428,7 +6401,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    471 <any_cont_c_flag_tail>	=>	    """
+            """    470 <any_cont_c_flag_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_c_flag_tail>_1"]:
             return None
 
@@ -6440,7 +6413,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    472 <strict_cps_expr>	=>	<ret_piece>	<cont_piece>    """
+        """    471 <strict_cps_expr>	=>	<ret_piece>	<cont_piece>    """
         if self.tokens[self.pos].type in PREDICT_SET["<strict_cps_expr>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
@@ -6451,7 +6424,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    473 <strict_cps_expr>	=>	<ret_sip>	<cont_sip>    """
+            """    472 <strict_cps_expr>	=>	<ret_sip>	<cont_sip>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_cps_expr>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
@@ -6462,7 +6435,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    474 <strict_cps_expr>	=>	<ret_chars>	<cont_chars>    """
+            """    473 <strict_cps_expr>	=>	<ret_chars>	<cont_chars>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_cps_expr>_2"]:
             node_0 = self.ret_chars()
             node_1 = self.cont_chars()
@@ -6473,7 +6446,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    475 <strict_cps_expr>	=>	<id>	<cps_cont_any>    """
+            """    474 <strict_cps_expr>	=>	<id>	<cps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_cps_expr>_3"]:
             node_0 = self.id_()
             node_1 = self.cps_cont_any()
@@ -6484,7 +6457,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    476 <strict_cps_expr>	=>	(	<strict_cps_expr>	)	<cps_cont_any>    """
+            """    475 <strict_cps_expr>	=>	(	<strict_cps_expr>	)	<cps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_cps_expr>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -6508,7 +6481,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    477 <cps_cont_any>	=>	+	<strict_cps_expr>    """
+        """    476 <cps_cont_any>	=>	+	<strict_cps_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cps_cont_any>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -6520,7 +6493,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    478 <cps_cont_any>	=>	-	<strict_ps_expr>    """
+            """    477 <cps_cont_any>	=>	-	<strict_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cps_cont_any>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -6532,7 +6505,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    479 <cps_cont_any>	=>	*	<strict_ps_expr>    """
+            """    478 <cps_cont_any>	=>	*	<strict_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cps_cont_any>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -6544,7 +6517,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    480 <cps_cont_any>	=>	/	<strict_ps_expr>    """
+            """    479 <cps_cont_any>	=>	/	<strict_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cps_cont_any>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -6556,7 +6529,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    481 <cps_cont_any>	=>	%	<strict_piece_expr>    """
+            """    480 <cps_cont_any>	=>	%	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cps_cont_any>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -6568,7 +6541,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    482 <cps_cont_any>	=>	    """
+            """    481 <cps_cont_any>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<cps_cont_any>_5"]:
             return None
 
@@ -6580,7 +6553,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    483 <strict_ps_expr>	=>	<ret_piece>	<cont_piece>    """
+        """    482 <strict_ps_expr>	=>	<ret_piece>	<cont_piece>    """
         if self.tokens[self.pos].type in PREDICT_SET["<strict_ps_expr>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
@@ -6591,7 +6564,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    484 <strict_ps_expr>	=>	<ret_sip>	<cont_sip>    """
+            """    483 <strict_ps_expr>	=>	<ret_sip>	<cont_sip>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_ps_expr>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
@@ -6602,7 +6575,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    485 <strict_ps_expr>	=>	<id>	<ps_cont_any>    """
+            """    484 <strict_ps_expr>	=>	<id>	<ps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_ps_expr>_2"]:
             node_0 = self.id_()
             node_1 = self.ps_cont_any()
@@ -6613,7 +6586,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    486 <strict_ps_expr>	=>	(	<strict_ps_expr>	)	<ps_cont_any>    """
+            """    485 <strict_ps_expr>	=>	(	<strict_ps_expr>	)	<ps_cont_any>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_ps_expr>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -6637,7 +6610,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    487 <ps_cont_any>	=>	+	<strict_ps_expr>    """
+        """    486 <ps_cont_any>	=>	+	<strict_ps_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<ps_cont_any>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -6649,7 +6622,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    488 <ps_cont_any>	=>	-	<strict_ps_expr>    """
+            """    487 <ps_cont_any>	=>	-	<strict_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<ps_cont_any>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -6661,7 +6634,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    489 <ps_cont_any>	=>	*	<strict_ps_expr>    """
+            """    488 <ps_cont_any>	=>	*	<strict_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<ps_cont_any>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -6673,7 +6646,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    490 <ps_cont_any>	=>	/	<strict_ps_expr>    """
+            """    489 <ps_cont_any>	=>	/	<strict_ps_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<ps_cont_any>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -6685,7 +6658,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    491 <ps_cont_any>	=>	%	<strict_piece_expr>    """
+            """    490 <ps_cont_any>	=>	%	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<ps_cont_any>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -6697,7 +6670,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    492 <ps_cont_any>	=>	    """
+            """    491 <ps_cont_any>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<ps_cont_any>_5"]:
             return None
 
@@ -6709,7 +6682,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    493 <strict_piece_chars_expr>	=>	<id>	<pc_ambig_tail>    """
+        """    492 <strict_piece_chars_expr>	=>	<id>	<pc_ambig_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>"]:
             node_0 = self.id_()
             node_1 = self.pc_ambig_tail()
@@ -6720,7 +6693,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    494 <strict_piece_chars_expr>	=>	<ret_piece>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
+            """    493 <strict_piece_chars_expr>	=>	<ret_piece>	<strict_piece_mult_tail>	<strict_piece_add_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_1"]:
             node_0 = self.ret_piece()
             node_1 = self.strict_piece_mult_tail()
@@ -6732,7 +6705,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    495 <strict_piece_chars_expr>	=>	<ret_chars>	<strict_chars_add_tail>    """
+            """    494 <strict_piece_chars_expr>	=>	<ret_chars>	<strict_chars_add_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_2"]:
             node_0 = self.ret_chars()
             node_1 = self.strict_chars_add_tail()
@@ -6743,7 +6716,7 @@ class ASTParser:
             else:
                 return node_0
 
-            """    496 <strict_piece_chars_expr>	=>	(	<strict_piece_chars_expr>	)	<pc_ambig_tail>    """
+            """    495 <strict_piece_chars_expr>	=>	(	<strict_piece_chars_expr>	)	<pc_ambig_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<strict_piece_chars_expr>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("(")
@@ -6767,7 +6740,7 @@ class ASTParser:
         log.info("Enter: " + self.tokens[self.pos].type)
         log.info("STACK: " + str(self.error_arr))
 
-        """    497 <pc_ambig_tail>	=>	+	<strict_piece_chars_expr>    """
+        """    496 <pc_ambig_tail>	=>	+	<strict_piece_chars_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("+")
@@ -6779,7 +6752,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    498 <pc_ambig_tail>	=>	-	<strict_piece_expr>    """
+            """    497 <pc_ambig_tail>	=>	-	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_1"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("-")
@@ -6791,7 +6764,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    499 <pc_ambig_tail>	=>	*	<strict_piece_expr>    """
+            """    498 <pc_ambig_tail>	=>	*	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_2"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("*")
@@ -6803,7 +6776,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    500 <pc_ambig_tail>	=>	/	<strict_piece_expr>    """
+            """    499 <pc_ambig_tail>	=>	/	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_3"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("/")
@@ -6815,7 +6788,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    501 <pc_ambig_tail>	=>	%	<strict_piece_expr>    """
+            """    500 <pc_ambig_tail>	=>	%	<strict_piece_expr>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("%")
@@ -6827,7 +6800,7 @@ class ASTParser:
                 return node
             return build_op
 
-            """    502 <pc_ambig_tail>	=>	    """
+            """    501 <pc_ambig_tail>	=>	    """
         elif self.tokens[self.pos].type in PREDICT_SET["<pc_ambig_tail>_5"]:
             return None
 
