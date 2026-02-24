@@ -215,7 +215,7 @@ class SymbolTable:
     
     def is_type_defined(self, type_name: str) -> bool:
         """Check if a type is defined"""
-        builtin_types = {"piece", "sip", "flag", "chars", "void"}
+        builtin_types = {"piece", "sip", "flag", "chars"}
         return type_name in builtin_types or type_name in self.table_types
     
     def add_error(self, message: str, node: ASTNode = None, severity: str = "error"):
