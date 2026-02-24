@@ -1,9 +1,0 @@
-- Scope and Declaration (by symbol table)
-    - Create accessing pass (will lookup on symbol table)
-    
-- Type Matching (by symbol table)
-- Parameter and Argument Arity ()
-- Serve Statement Arity (separate semantic check)
-
-
-Token and Lexeme

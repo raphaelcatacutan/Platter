@@ -238,12 +238,22 @@ start() {
 			'/python/app/utils/FileHandler.py',
 			'/python/app/parser/first_set.py',
 			'/python/app/semantic_analyzer/__init__.py',
+			'/python/app/semantic_analyzer/semantic_analyzer.py',
+			'/python/app/semantic_analyzer/ast/__init__.py',
 			'/python/app/semantic_analyzer/ast/ast_nodes.py',
 			'/python/app/semantic_analyzer/ast/ast_parser_program.py',
 			'/python/app/semantic_analyzer/ast/ast_reader.py',
 			'/python/app/semantic_analyzer/symbol_table/__init__.py',
+			'/python/app/semantic_analyzer/symbol_table/types.py',
+			'/python/app/semantic_analyzer/symbol_table/symbol_table.py',
 			'/python/app/semantic_analyzer/symbol_table/symbol_table_builder.py',
 			'/python/app/semantic_analyzer/symbol_table/symbol_table_output.py',
+			'/python/app/semantic_analyzer/semantic_passes/__init__.py',
+			'/python/app/semantic_analyzer/semantic_passes/error_handler.py',
+			'/python/app/semantic_analyzer/semantic_passes/type_checker.py',
+			'/python/app/semantic_analyzer/semantic_passes/scope_checker.py',
+			'/python/app/semantic_analyzer/semantic_passes/control_flow_checker.py',
+			'/python/app/semantic_analyzer/semantic_passes/function_checker.py',
 		];
 
 		// Fetch and write Python files to Pyodide's virtual filesystem
@@ -532,10 +542,33 @@ start() {
 import sys
 import re
 import json
+import importlib
+
+# Force reload of modified modules to clear cache
+if 'app.semantic_analyzer.symbol_table.types' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.symbol_table.types'])
+if 'app.semantic_analyzer.symbol_table.symbol_table' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.symbol_table.symbol_table'])
+if 'app.semantic_analyzer.symbol_table.symbol_table_builder' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.symbol_table.symbol_table_builder'])
+if 'app.semantic_analyzer.semantic_passes.error_handler' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.semantic_passes.error_handler'])
+if 'app.semantic_analyzer.semantic_passes.scope_checker' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.semantic_passes.scope_checker'])
+if 'app.semantic_analyzer.semantic_passes.type_checker' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.semantic_passes.type_checker'])
+if 'app.semantic_analyzer.semantic_passes.control_flow_checker' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.semantic_passes.control_flow_checker'])
+if 'app.semantic_analyzer.semantic_passes.function_checker' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.semantic_passes.function_checker'])
+if 'app.semantic_analyzer.semantic_analyzer' in sys.modules:
+    importlib.reload(sys.modules['app.semantic_analyzer.semantic_analyzer'])
+
 from app.lexer.lexer import Lexer
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
 from app.semantic_analyzer.ast.ast_reader import ASTReader, print_ast
-from app.semantic_analyzer.symbol_table import build_symbol_table, print_symbol_table
+from app.semantic_analyzer import analyze_program
+from app.semantic_analyzer.symbol_table import print_symbol_table
 from app.semantic_analyzer.symbol_table.symbol_table_output import format_symbol_table_for_console
 
 result = None
@@ -551,12 +584,14 @@ try:
     print("="*80)
     print_ast(ast, format="pretty")
     
-    # Build and print Symbol Table
+    # Run complete semantic analysis with all passes
     print("\\n" + "="*80)
-    print("Building Symbol Table")
+    print("Running Semantic Analysis (All Passes)")
     print("="*80)
-    symbol_table = build_symbol_table(ast)
-    print_symbol_table(symbol_table)
+    symbol_table, error_handler = analyze_program(ast)
+    
+    # Print symbol table with error handler
+    print_symbol_table(symbol_table, error_handler)
     
     # Also create JSON representation
     reader = ASTReader(ast)
@@ -566,25 +601,53 @@ try:
     symbol_table_data = format_symbol_table_for_console(symbol_table)
     symbol_table_json = json.dumps(symbol_table_data)
     
-    # Check for semantic errors
-    if symbol_table.has_errors():
+    # Check for semantic errors from error handler
+    if error_handler.has_errors():
         error_list = []
-        for err in symbol_table.errors:
-            error_list.append(f"[{err.severity.upper()}] {err.message}")
+        error_details = []
+        error_markers = []  # For frontend error marking
+        for err in error_handler.get_errors():
+            error_list.append(str(err))
+            # Format each error without emojis
+            severity_label = "ERROR" if err.severity.name == "ERROR" else "WARNING"
+            error_details.append(f"[{severity_label}] {err.message}")
+            
+            # Add position info for error markers if available
+            if err.line and err.col and err.value:
+                error_markers.append({
+                    "line": err.line,
+                    "col": err.col,
+                    "value": err.value,
+                    "message": err.message
+                })
+        
+        # Build detailed message with all errors (formal formatting)
+        detailed_message = f"Semantic analysis failed with {error_handler.get_error_count()} error(s) and {error_handler.get_warning_count()} warning(s)\\n"
+        for detail in error_details:
+            detailed_message += f"{detail}\\n"
         
         result = {
             "success": False, 
-            "message": "Semantic errors found:\\n" + "\\n".join(error_list),
+            "message": detailed_message,
             "ast": ast_json,
             "symbol_table": symbol_table_json,
-            "errors": error_list
+            "errors": error_list,
+            "error_markers": error_markers
         }
     else:
+        # Check for warnings even if no errors
+        warning_list = []
+        if error_handler.has_warnings():
+            for warn in error_handler.get_errors():
+                warning_list.append(str(warn))
+        
+        warning_msg = f" with {error_handler.get_warning_count()} warning(s)" if error_handler.has_warnings() else ""
         result = {
             "success": True, 
-            "message": "No semantic errors",
+            "message": f"No semantic errors{warning_msg}",
             "ast": ast_json,
-            "symbol_table": symbol_table_json
+            "symbol_table": symbol_table_json,
+            "warnings": warning_list if warning_list else []
         }
 except SyntaxError as e:
     error_msg = str(e)
@@ -643,6 +706,19 @@ result
 					// Check if we have semantic errors
 					if (data.errors && data.errors.length > 0) {
 						clearErrorMarkers();
+						
+						// Add error markers if position info is available
+						if (data.error_markers && data.error_markers.length > 0) {
+							const semanticTokens = data.error_markers.map((marker: any) => ({
+								type: 'semantic_error',
+								value: marker.value,
+								line: marker.line,
+								col: marker.col,
+								message: marker.message
+							}));
+							addErrorMarkers(semanticTokens);
+						}
+						
 						// Display semantic errors in terminal
 						const errorMessage = `${lexicalResult.output}\n${data.message}`;
 						setTerminalError(errorMessage);
@@ -1536,6 +1612,9 @@ tokens
 		width: 16px;
 		height: 16px;
 		object-fit: contain;
+	}
+	.tmsg {
+		white-space: pre-wrap;
 	}
 
 	.right {

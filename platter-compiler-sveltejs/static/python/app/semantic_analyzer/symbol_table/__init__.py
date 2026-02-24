@@ -2,14 +2,17 @@
 Symbol Table Package for Platter Language Semantic Analysis
 """
 
-from .symbol_table_builder import (
-    SymbolTable,
-    SymbolTableBuilder,
-    Symbol,
+from .types import (
     SymbolKind,
     TypeInfo,
-    Scope,
-    SemanticError,
+    Symbol,
+    Scope
+)
+
+from .symbol_table import SymbolTable
+
+from .symbol_table_builder import (
+    SymbolTableBuilder,
     build_symbol_table,
     print_symbol_table
 )
@@ -21,7 +24,6 @@ __all__ = [
     'SymbolKind',
     'TypeInfo',
     'Scope',
-    'SemanticError',
     'build_symbol_table',
     'print_symbol_table'
 ]
