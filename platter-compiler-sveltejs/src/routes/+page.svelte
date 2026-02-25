@@ -472,9 +472,14 @@ start() {
 	}
 
 	function addErrorMarkers(errors: Token[]) {
-		if (!cmInstance) return;
+		if (!cmInstance) {
+			console.warn('Cannot add error markers: CodeMirror instance not available');
+			return;
+		}
+		console.log('addErrorMarkers called with', errors.length, 'errors');
 		clearErrorMarkers();
-		errors.forEach((error) => {
+		errors.forEach((error, index) => {
+			console.log(`Adding marker ${index + 1}:`, error);
 			const line = error.line - 1; // CodeMirror uses 0-based line numbers
 			const col = error.col - 1; // CodeMirror uses 0-based columns
 			const valueLength = error.value?.length || 1;
@@ -484,7 +489,9 @@ start() {
 				{ className: 'error-underline' }
 			);
 			errorMarkers.push(marker);
+			console.log(`  [OK] Marker ${index + 1} added successfully`);
 		});
+		console.log(`Total ${errorMarkers.length} error markers active in editor`);
 	}
 
 	// Convert curly quotes to straight quotes in CodeMirror
@@ -579,13 +586,15 @@ try:
     ast = parser.parse_program()
     
     # Pretty print AST to console logs
-    print("\\n" + "="*80)
+    print("")
+    print("="*80)
     print("AST Analysis Complete")
     print("="*80)
     print_ast(ast, format="pretty")
     
     # Run complete semantic analysis with all passes
-    print("\\n" + "="*80)
+    print("")
+    print("="*80)
     print("Running Semantic Analysis (All Passes)")
     print("="*80)
     symbol_table, error_handler = analyze_program(ast)
@@ -606,20 +615,42 @@ try:
         error_list = []
         error_details = []
         error_markers = []  # For frontend error marking
+        
+        print("")
+        print("="*80)
+        print("SEMANTIC ERROR DETAILS WITH POSITIONS")
+        print("="*80)
+        
         for err in error_handler.get_errors():
             error_list.append(str(err))
             # Format each error without emojis
             severity_label = "ERROR" if err.severity.name == "ERROR" else "WARNING"
             error_details.append(f"[{severity_label}] {err.message}")
             
+            # Log position info to console
+            position_info = f"Line: {err.line}, Column: {err.column}" if err.line and err.column else "Position: Unknown"
+            print(f"{severity_label}: {err.message}")
+            print(f"  > {position_info}")
+            print(f"  > Error Code: {err.error_code or 'N/A'}")
+            if err.node:
+                print(f"  > Node Type: {err.node.node_type}")
+            print()
+            
             # Add position info for error markers if available
-            if err.line and err.col and err.value:
+            if err.line and err.column:
                 error_markers.append({
                     "line": err.line,
-                    "col": err.col,
-                    "value": err.value,
+                    "col": err.column,
+                    "value": err.error_code or "semantic_error",
                     "message": err.message
                 })
+                print(f"  [OK] Error marker added for line {err.line}, col {err.column}")
+            else:
+                print(f"  [SKIP] No position info available - marker not added")
+        
+        print("")
+        print(f"Total error markers to send to frontend: {len(error_markers)}")
+        print("="*80)
         
         # Build detailed message with all errors (formal formatting)
         detailed_message = f"Semantic analysis failed with {error_handler.get_error_count()} error(s) and {error_handler.get_warning_count()} warning(s)\\n"
@@ -703,23 +734,36 @@ result
 						}
 					}
 				} else {
+					// Log error markers received from backend
+					console.log('\n=== SEMANTIC ERROR MARKERS DEBUG ===');
+					console.log('Error markers received:', data.error_markers);
+					console.log('Number of markers:', data.error_markers?.length || 0);
+					
 					// Check if we have semantic errors
 					if (data.errors && data.errors.length > 0) {
 						clearErrorMarkers();
 						
 						// Add error markers if position info is available
 						if (data.error_markers && data.error_markers.length > 0) {
-							const semanticTokens = data.error_markers.map((marker: any) => ({
+						console.log('Processing error markers...');
+						const semanticTokens = data.error_markers.map((marker: any) => {
+							console.log(`  Marker: Line ${marker.line}, Col ${marker.col}, Message: ${marker.message}`);
+							return {
 								type: 'semantic_error',
 								value: marker.value,
 								line: marker.line,
 								col: marker.col,
 								message: marker.message
-							}));
-							addErrorMarkers(semanticTokens);
-						}
-						
-						// Display semantic errors in terminal
+							};
+						});
+						console.log('Semantic tokens created:', semanticTokens);
+						console.log('Calling addErrorMarkers with', semanticTokens.length, 'tokens');
+						addErrorMarkers(semanticTokens);
+						console.log('Error markers added to editor');
+					} else {
+						console.log('No error markers to add (array empty or undefined)');
+					}
+					console.log('=== END ERROR MARKERS DEBUG ===\n');
 						const errorMessage = `${lexicalResult.output}\n${data.message}`;
 						setTerminalError(errorMessage);
 						analysisStatus = 'error';
