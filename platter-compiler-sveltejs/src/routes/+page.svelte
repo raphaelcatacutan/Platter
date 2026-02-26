@@ -254,6 +254,17 @@ start() {
 			'/python/app/semantic_analyzer/semantic_passes/scope_checker.py',
 			'/python/app/semantic_analyzer/semantic_passes/control_flow_checker.py',
 			'/python/app/semantic_analyzer/semantic_passes/function_checker.py',
+			'/python/app/intermediate_code/__init__.py',
+			'/python/app/intermediate_code/tac.py',
+			'/python/app/intermediate_code/quadruple.py',
+			'/python/app/intermediate_code/ir_generator.py',
+			'/python/app/intermediate_code/output_formatter.py',
+			'/python/app/intermediate_code/optimizer.py',
+			'/python/app/intermediate_code/constant_folding.py',
+			'/python/app/intermediate_code/propagation.py',
+			'/python/app/intermediate_code/dead_code_elimination.py',
+			'/python/app/intermediate_code/algebraic_simplification.py',
+			'/python/app/intermediate_code/optimizer_manager.py',
 		];
 
 		// Fetch and write Python files to Pyodide's virtual filesystem
@@ -450,7 +461,7 @@ start() {
 		(m) =>
 			!(
 				typeof m.text === 'string' &&
-				(m.text.startsWith('Lexical OK') || m.text.startsWith('No Syntax Error'))
+				(m.text.startsWith('Lexical OK') || m.text.startsWith('No Syntax Error') || m.text.startsWith('Warning:'))
 			)
 	).length;
 
@@ -483,10 +494,11 @@ start() {
 			const line = error.line - 1; // CodeMirror uses 0-based line numbers
 			const col = error.col - 1; // CodeMirror uses 0-based columns
 			const valueLength = error.value?.length || 1;
+			const isWarning = (error as any).severity === 'warning';
 			const marker = cmInstance.markText(
 				{ line, ch: col },
 				{ line, ch: col + valueLength },
-				{ className: 'error-underline' }
+				{ className: isWarning ? 'warning-underline' : 'error-underline' }
 			);
 			errorMarkers.push(marker);
 			console.log(`  [OK] Marker ${index + 1} added successfully`);
@@ -570,6 +582,18 @@ if 'app.semantic_analyzer.semantic_passes.function_checker' in sys.modules:
     importlib.reload(sys.modules['app.semantic_analyzer.semantic_passes.function_checker'])
 if 'app.semantic_analyzer.semantic_analyzer' in sys.modules:
     importlib.reload(sys.modules['app.semantic_analyzer.semantic_analyzer'])
+if 'app.intermediate_code.tac' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.tac'])
+if 'app.intermediate_code.quadruple' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.quadruple'])
+if 'app.intermediate_code.ir_generator' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.ir_generator'])
+if 'app.intermediate_code.output_formatter' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.output_formatter'])
+if 'app.intermediate_code.optimizer' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.optimizer'])
+if 'app.intermediate_code.optimizer_manager' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.optimizer_manager'])
 
 from app.lexer.lexer import Lexer
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
@@ -577,6 +601,9 @@ from app.semantic_analyzer.ast.ast_reader import ASTReader, print_ast
 from app.semantic_analyzer import analyze_program
 from app.semantic_analyzer.symbol_table import print_symbol_table
 from app.semantic_analyzer.symbol_table.symbol_table_output import format_symbol_table_for_console
+from app.intermediate_code.ir_generator import IRGenerator
+from app.intermediate_code.output_formatter import IRFormatter
+from app.intermediate_code.optimizer_manager import OptimizerManager, OptimizationLevel
 
 result = None
 try:
@@ -610,24 +637,66 @@ try:
     symbol_table_data = format_symbol_table_for_console(symbol_table)
     symbol_table_json = json.dumps(symbol_table_data)
     
+    # Generate Intermediate Representation (IR)
+    ir_tac_text = ""
+    ir_quads_text = ""
+    ir_tac_optimized_text = ""
+    try:
+        ir_gen = IRGenerator()
+        tac_instructions, quad_table = ir_gen.generate(ast)
+        formatter = IRFormatter()
+        ir_tac_text = formatter.format_tac_text(tac_instructions)
+        ir_quads_text = formatter.format_quadruples_text(quad_table)
+        
+        print("")
+        print("="*80)
+        print("Intermediate Code (Three Address Code)")
+        print("="*80)
+        print(ir_tac_text)
+        
+        print("")
+        print("="*80)
+        print("Intermediate Code (Quadruples)")
+        print("="*80)
+        print(ir_quads_text)
+        
+        # Optimized IR
+        optimizer = OptimizerManager(OptimizationLevel.STANDARD)
+        optimized_tac = optimizer.optimize_tac(tac_instructions)
+        ir_tac_optimized_text = formatter.format_tac_text(optimized_tac)
+        
+        print("")
+        print("="*80)
+        print("Optimized IR (Three Address Code - Standard Level)")
+        print("="*80)
+        print(ir_tac_optimized_text)
+    except Exception as ir_err:
+        print(f"IR generation error: {str(ir_err)}")
+    
     # Check for semantic errors from error handler
     if error_handler.has_errors():
         error_list = []
-        error_details = []
         error_markers = []  # For frontend error marking
-        
+
         print("")
         print("="*80)
         print("SEMANTIC ERROR DETAILS WITH POSITIONS")
         print("="*80)
         
+        error_messages = []
+        warning_messages = []
+        
         for err in error_handler.get_errors():
             error_list.append(str(err))
-            # Format each error without emojis
-            severity_label = "ERROR" if err.severity.name == "ERROR" else "WARNING"
-            error_details.append(f"[{severity_label}] {err.message}")
+            is_error = err.severity.name == "ERROR"
+            
+            if is_error:
+                error_messages.append(err.message)
+            else:
+                warning_messages.append(err.message)
             
             # Log position info to console
+            severity_label = "ERROR" if is_error else "WARNING"
             position_info = f"Line: {err.line}, Column: {err.column}" if err.line and err.column else "Position: Unknown"
             print(f"{severity_label}: {err.message}")
             print(f"  > {position_info}")
@@ -642,7 +711,8 @@ try:
                     "line": err.line,
                     "col": err.column,
                     "value": err.error_code or "semantic_error",
-                    "message": err.message
+                    "message": err.message,
+                    "severity": "warning" if not is_error else "error"
                 })
                 print(f"  [OK] Error marker added for line {err.line}, col {err.column}")
             else:
@@ -652,17 +722,27 @@ try:
         print(f"Total error markers to send to frontend: {len(error_markers)}")
         print("="*80)
         
-        # Build detailed message with all errors (formal formatting)
-        detailed_message = f"Semantic analysis failed with {error_handler.get_error_count()} error(s) and {error_handler.get_warning_count()} warning(s)\\n"
-        for detail in error_details:
-            detailed_message += f"{detail}\\n"
+        # Build terminal message: errors first, then warnings
+        error_count = len(error_messages)
+        detailed_message = f"Semantic analysis failed with {error_count} error(s)\\n\\n"
+        for msg in error_messages:
+            detailed_message += f"Semantic Error: {msg}\\n"
+        if warning_messages:
+            detailed_message += "\\n"
+            for msg in warning_messages:
+                detailed_message += f"Warning: {msg}\\n"
         
         result = {
             "success": False, 
             "message": detailed_message,
             "ast": ast_json,
             "symbol_table": symbol_table_json,
+            "ir_tac": ir_tac_text,
+            "ir_quads": ir_quads_text,
+            "ir_tac_optimized": ir_tac_optimized_text,
             "errors": error_list,
+            "semantic_errors": json.dumps(error_messages),
+            "semantic_warnings": json.dumps(warning_messages),
             "error_markers": error_markers
         }
     else:
@@ -678,6 +758,9 @@ try:
             "message": f"No semantic errors{warning_msg}",
             "ast": ast_json,
             "symbol_table": symbol_table_json,
+            "ir_tac": ir_tac_text,
+            "ir_quads": ir_quads_text,
+            "ir_tac_optimized": ir_tac_optimized_text,
             "warnings": warning_list if warning_list else []
         }
 except SyntaxError as e:
@@ -701,7 +784,7 @@ result
 				if (data.success) {
 					clearErrorMarkers();
 					const semanticMessage = data.message || 'No semantic errors';
-					const okMessage = `${lexicalResult.output}\n${semanticMessage}\n\nAST and Symbol Table generated successfully! Check browser console for details.`;
+					const okMessage = `${semanticMessage}\n\nAST, Symbol Table, and IR generated successfully! Check browser console for details.`;
 					setTerminalOk(okMessage);
 					analysisStatus = 'success';
 					terminalOutput = okMessage;
@@ -733,6 +816,33 @@ result
 							console.warn('Failed to parse Symbol Table JSON:', e);
 						}
 					}
+
+					// Log Intermediate Code (TAC)
+					if (data.ir_tac) {
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						console.log('%c⚙️  Intermediate Code — Three Address Code (TAC)', 'color: #ff9800; font-size: 16px; font-weight: bold');
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						console.log(data.ir_tac);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+					}
+
+					// Log Intermediate Code (Quadruples)
+					if (data.ir_quads) {
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						console.log('%c🔢 Intermediate Code — Quadruples', 'color: #ce93d8; font-size: 16px; font-weight: bold');
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						console.log(data.ir_quads);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+					}
+
+					// Log Optimized IR (TAC)
+					if (data.ir_tac_optimized) {
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+						console.log('%c✨ Optimized IR — Three Address Code (Standard Level)', 'color: #80cbc4; font-size: 16px; font-weight: bold');
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+						console.log(data.ir_tac_optimized);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+					}
 				} else {
 					// Log error markers received from backend
 					console.log('\n=== SEMANTIC ERROR MARKERS DEBUG ===');
@@ -753,7 +863,8 @@ result
 								value: marker.value,
 								line: marker.line,
 								col: marker.col,
-								message: marker.message
+								message: marker.message,
+								severity: marker.severity
 							};
 						});
 						console.log('Semantic tokens created:', semanticTokens);
@@ -764,11 +875,15 @@ result
 						console.log('No error markers to add (array empty or undefined)');
 					}
 					console.log('=== END ERROR MARKERS DEBUG ===\n');
-						const errorMessage = `${lexicalResult.output}\n${data.message}`;
-						setTerminalError(errorMessage);
-						analysisStatus = 'error';
-						terminalOutput = errorMessage;
-						
+					// Build one termMessages entry per error/warning so errorCount is accurate
+					const semErrors: string[] = data.semantic_errors ? JSON.parse(data.semantic_errors) : [];
+					const semWarnings: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
+					const msgs: { icon: any; text: string }[] = [];
+					for (const msg of semErrors) msgs.push({ icon: errorIcon, text: `Semantic Error: ${msg}` });
+					for (const msg of semWarnings) msgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+					termMessages = msgs;
+					analysisStatus = 'error';
+					terminalOutput = data.message;
 						// Still log AST to console if available
 						if (data.ast) {
 							try {
@@ -807,12 +922,17 @@ result
 							col: data.error.col
 						};
 						addErrorMarkers([errorToken]);
+						const semanticError = data.message || 'Semantic analysis failed';
+						setTerminalError(semanticError);
+						analysisStatus = 'error';
+						terminalOutput = `${lexicalResult.output}\n${semanticError}`;
+					} else {
+						// Generic fallback
+						const semanticError = data.message || 'Semantic analysis failed';
+						setTerminalError(semanticError);
+						analysisStatus = 'error';
+						terminalOutput = `${lexicalResult.output}\n${semanticError}`;
 					}
-					const semanticError = data.message || 'Semantic analysis failed';
-					const errorMessage = `${lexicalResult.output}\n${semanticError}`;
-					setTerminalError(semanticError);
-					analysisStatus = 'error';
-					terminalOutput = errorMessage;
 				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -1855,6 +1975,12 @@ tokens
 	:global(.error-underline) {
 		border-bottom: 2px solid #ff0000 !important;
 		background-color: rgba(255, 0, 0, 0.1) !important;
+	}
+
+	/* Warning underline styling */
+	:global(.warning-underline) {
+		border-bottom: 2px solid #ff9800 !important;
+		background-color: rgba(255, 152, 0, 0.1) !important;
 	}
 
 	/* Platter Language Syntax Highlighting - TypeScript-inspired colors */
