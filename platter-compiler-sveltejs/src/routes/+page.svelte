@@ -130,17 +130,25 @@
 	let codeInput = `piece of x = 42;
 sip of y = 3.67;
 chars[] of names = ["Hello Platter", "Raph", "Jieco"];
+piece[][] of nums = [
+	[12, 21, 2],
+    [32, 2, 12]
+];
+table of yz = [
+	piece  of x;
+    sip of xyz;
+];
 
 prepare sip of sips() { check(topiece(y) > x) { serve x;} instead {serve y;} }
 
 prepare piece of pieces() {
-	 x =  x + 32 / 323;
+	 serve x + 32 / 323;
+     
 }
 
 start() {
 	piece of z = topiece(topiece(sips()) + pieces());
 	serve z;
-    pass (i =0 ; i+=1; (i>4)) {  }
 }`;
 
 	type Token = { type: string; value: string; line: number; col: number };
