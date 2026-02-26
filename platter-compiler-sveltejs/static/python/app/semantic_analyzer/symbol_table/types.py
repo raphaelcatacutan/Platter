@@ -10,9 +10,9 @@ from enum import Enum
 
 class SymbolKind(Enum):
     """Types of symbols in the symbol table"""
-    VARIABLE = "variable"
-    PARAMETER = "parameter"
-    FUNCTION = "function"
+    VARIABLE = "ingredient"
+    PARAMETER = "spice"
+    FUNCTION = "recipe"
     TABLE_TYPE = "table_type"
     FIELD = "field"
 

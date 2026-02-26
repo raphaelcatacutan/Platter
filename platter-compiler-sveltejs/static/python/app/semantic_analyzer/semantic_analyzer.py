@@ -30,10 +30,9 @@ class SemanticAnalyzer:
         """
         # Phase 1: Build symbol table (collect symbols only)
         builder = SymbolTableBuilder()
+        # Attach error handler before building
+        builder.symbol_table.error_handler = self.error_handler
         self.symbol_table = builder.build(ast_root)
-        
-        # Connect error handler to symbol table
-        self.symbol_table.error_handler = self.error_handler
         
         # Phase 2: Run semantic checking passes
         self._run_semantic_passes(ast_root)
