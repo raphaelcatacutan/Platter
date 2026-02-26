@@ -50,3 +50,4 @@ platter-compiler-sveltejs/static/python/app/utils/sources/productions.py
 platter-compiler-sveltejs/static/python/tests/test.platter
 **/tests_*.txt
 
+/documentation
