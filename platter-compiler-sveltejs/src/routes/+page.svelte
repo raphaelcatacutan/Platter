@@ -600,6 +600,14 @@ if 'app.intermediate_code.output_formatter' in sys.modules:
     importlib.reload(sys.modules['app.intermediate_code.output_formatter'])
 if 'app.intermediate_code.optimizer' in sys.modules:
     importlib.reload(sys.modules['app.intermediate_code.optimizer'])
+if 'app.intermediate_code.constant_folding' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.constant_folding'])
+if 'app.intermediate_code.propagation' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.propagation'])
+if 'app.intermediate_code.dead_code_elimination' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.dead_code_elimination'])
+if 'app.intermediate_code.algebraic_simplification' in sys.modules:
+    importlib.reload(sys.modules['app.intermediate_code.algebraic_simplification'])
 if 'app.intermediate_code.optimizer_manager' in sys.modules:
     importlib.reload(sys.modules['app.intermediate_code.optimizer_manager'])
 
@@ -935,6 +943,33 @@ result
 							} catch (e) {
 								console.warn('Failed to parse Symbol Table JSON:', e);
 							}
+						}
+
+						// Still log Intermediate Code (TAC) if available
+						if (data.ir_tac) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							console.log('%c⚙️  Intermediate Code — Three Address Code (TAC) - With Semantic Errors', 'color: #ff9800; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							console.log(data.ir_tac);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						}
+
+						// Still log Intermediate Code (Quadruples) if available
+						if (data.ir_quads) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+							console.log('%c🔢 Intermediate Code — Quadruples - With Semantic Errors', 'color: #ce93d8; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+							console.log(data.ir_quads);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						}
+
+						// Still log Optimized IR if available
+						if (data.ir_tac_optimized) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+							console.log('%c✨ Optimized IR — Three Address Code - With Semantic Errors', 'color: #80cbc4; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+							console.log(data.ir_tac_optimized);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
 						}
 					}
 					// Handle syntax errors with line/col information
