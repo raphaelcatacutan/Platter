@@ -393,11 +393,8 @@
 <rel_op>	{ > }
 <flag_eq_tail>	{ == }
 <flag_eq_tail>	{ != }
-<flag_eq_tail>	{ ==, !=, and, or, ,, ;, ) }
-<flag_op_tail>	{ and }
-<flag_op_tail>	{ == }
-<flag_op_tail>	{ != }
-<flag_op_tail>	{ or }
+<flag_eq_tail>	{ and, or, ,, ;, ), ==, != }
+<flag_op_tail>	{ ==, !=, and, or, ,, ), ; }
 <flag_op_tail>	{ ,, ), ==, !=, and, or, ; }
 <cont_sip>	{ +, -, *, / }
 <cont_sip>	{ ==, !=, >=, <=, <, >, ,, ), and, or, ; }
@@ -409,6 +406,8 @@
 <flag_expr_tail>	{ and }
 <flag_expr_tail>	{ or }
 <flag_expr_tail>	{ ,, ;, ), ==, !=, and, or }
+<simple_flag>	{ ( }
+<simple_flag>	{ matches, flag_lit }
 <flag_operand>	{ topiece, size, search, fact, pow, piece_lit }
 <flag_operand>	{ sqrt, rand, tosip, sip_lit }
 <flag_operand>	{ matches, flag_lit }
@@ -422,7 +421,7 @@
 <flag_cont_any>	{ / }
 <flag_cont_any>	{ % }
 <flag_cont_any>	{ ==, !=, >=, <=, <, > }
-<flag_cont_any>	{ ==, !=, and, or, ,, ;, ) }
+<flag_cont_any>	{ and, or, ,, ;, ), ==, != }
 <flag_cps_expr>	{ topiece, size, search, fact, pow, piece_lit }
 <flag_cps_expr>	{ sqrt, rand, tosip, sip_lit }
 <flag_cps_expr>	{ bill, take, copy, cut, tochars, chars_lit }

@@ -1,0 +1,498 @@
+"""
+Type Checking Pass for Platter Language
+Validates type compatibility in expressions, assignments, and operations
+"""
+
+from app.semantic_analyzer.ast.ast_nodes import *
+from app.semantic_analyzer.symbol_table.types import TypeInfo, Symbol, SymbolKind
+from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
+from app.semantic_analyzer.semantic_passes.error_handler import SemanticErrorHandler, ErrorCodes
+from typing import Optional
+
+
+class TypeChecker:
+    """Performs type checking on AST"""
+    
+    def __init__(self, symbol_table: SymbolTable, error_handler: SemanticErrorHandler):
+        self.symbol_table = symbol_table
+        self.error_handler = error_handler
+    
+    def check(self, ast_root: Program):
+        """Run type checking pass"""
+        # Check global declarations
+        for decl in ast_root.global_decl:
+            if isinstance(decl, VarDecl):
+                self._check_var_decl(decl)
+            elif isinstance(decl, ArrayDecl):
+                self._check_array_decl(decl)
+            elif isinstance(decl, TableDecl):
+                self._check_table_decl(decl)
+        
+        # Check function bodies
+        for recipe in ast_root.recipe_decl:
+            self._check_recipe_decl(recipe)
+        
+        # Check start_platter if present (navigate to its existing scope)
+        if ast_root.start_platter:
+            if self.symbol_table.navigate_to_scope("start_platter_1"):
+                self._check_platter(ast_root.start_platter)
+                self.symbol_table.exit_scope()
+    
+    def _check_var_decl(self, node: VarDecl):
+        """Check variable declaration type consistency"""
+        if node.init_value:
+            init_type = self._get_expression_type(node.init_value)
+            if init_type:
+                var_type = TypeInfo(node.data_type, 0)
+                if not var_type.is_compatible_with(init_type):
+                    self.error_handler.add_error(
+                        f"Type mismatch in variable '{node.identifier}' initialization: "
+                        f"expected {var_type}, got {init_type}",
+                        node,
+                        ErrorCodes.TYPE_MISMATCH
+                    )
+    
+    def _check_array_decl(self, node: ArrayDecl):
+        """Check array declaration type consistency"""
+        if node.init_value:
+            init_type = self._get_expression_type(node.init_value)
+            if init_type:
+                dims = node.dimensions if node.dimensions is not None else 0
+                array_type = TypeInfo(node.data_type, dims)
+                if not array_type.is_compatible_with(init_type):
+                    self.error_handler.add_error(
+                        f"Type mismatch in array '{node.identifier}' initialization: "
+                        f"expected {array_type}, got {init_type}",
+                        node,
+                        ErrorCodes.TYPE_MISMATCH
+                    )
+    
+    def _check_table_decl(self, node: TableDecl):
+        """Check table declaration type consistency"""
+        # Verify table type exists
+        table_type = self.symbol_table.lookup_table_type(node.table_type)
+        if not table_type:
+            self.error_handler.add_error(
+                f"Undefined table type '{node.table_type}'",
+                node,
+                ErrorCodes.UNDEFINED_TYPE
+            )
+            return
+        
+        if node.init_value:
+            init_type = self._get_expression_type(node.init_value)
+            if init_type:
+                dims = node.dimensions if node.dimensions is not None else 0
+                expected_type = TypeInfo(node.table_type, dims, table_type.table_fields if dims == 0 else None)
+                if dims > 0:
+                    expected_type.is_table = True
+                    expected_type.table_fields = table_type.table_fields
+                
+                if not expected_type.is_compatible_with(init_type):
+                    self.error_handler.add_error(
+                        f"Type mismatch in table '{node.identifier}' initialization: "
+                        f"expected {expected_type}, got {init_type}",
+                        node,
+                        ErrorCodes.TYPE_MISMATCH
+                    )
+    
+    def _check_recipe_decl(self, node: RecipeDecl):
+        """Check function declaration"""
+        # Save current function context
+        old_function = self.symbol_table.current_function
+        func_symbol = self.symbol_table.lookup_symbol(node.name)
+        self.symbol_table.current_function = func_symbol
+        
+        # Check function body (navigate to existing function scope)
+        if node.body:
+            scope_name = node.name  # The builder removed 'recipe_' prefix
+            if self.symbol_table.navigate_to_scope(scope_name):
+                self._check_platter(node.body)
+                self.symbol_table.exit_scope()
+        
+        # Restore function context
+        self.symbol_table.current_function = old_function
+    
+    def _check_platter(self, node: Platter):
+        """Check block/compound statement"""
+        # Check local declarations
+        for decl in node.local_decls:
+            if isinstance(decl, VarDecl):
+                self._check_var_decl(decl)
+            elif isinstance(decl, ArrayDecl):
+                self._check_array_decl(decl)
+            elif isinstance(decl, TableDecl):
+                self._check_table_decl(decl)
+        
+        # Check statements
+        for stmt in node.statements:
+            self._check_statement(stmt)
+    
+    def _check_statement(self, node: ASTNode):
+        """Check a statement"""
+        if isinstance(node, Assignment):
+            self._check_assignment(node)
+        elif isinstance(node, ReturnStatement):
+            self._check_return_statement(node)
+        elif isinstance(node, IfStatement):
+            self._check_if_statement(node)
+        elif isinstance(node, SwitchStatement):
+            self._check_switch_statement(node)
+        elif isinstance(node, WhileLoop):
+            self._check_while_loop(node)
+        elif isinstance(node, DoWhileLoop):
+            self._check_do_while_loop(node)
+        elif isinstance(node, ForLoop):
+            self._check_for_loop(node)
+        elif isinstance(node, Platter):
+            self._check_platter(node)
+        elif isinstance(node, ExpressionStatement):
+            self._get_expression_type(node.expr)
+    
+    def _check_assignment(self, node: Assignment):
+        """Check assignment type compatibility"""
+        target_type = self._get_expression_type(node.target)
+        value_type = self._get_expression_type(node.value)
+        
+        if target_type and value_type:
+            if not target_type.is_compatible_with(value_type):
+                self.error_handler.add_error(
+                    f"Type mismatch in assignment: cannot assign {value_type} to {target_type}",
+                    node,
+                    ErrorCodes.TYPE_MISMATCH
+                )
+    
+    def _check_return_statement(self, node: ReturnStatement):
+        """Check return statement type compatibility"""
+        if not self.symbol_table.current_function:
+            return  # Error will be caught by control_flow_checker
+        
+        expected_type = self.symbol_table.current_function.type_info
+        
+        if node.value:
+            actual_type = self._get_expression_type(node.value)
+            if actual_type and not expected_type.is_compatible_with(actual_type):
+                self.error_handler.add_error(
+                    f"Return type mismatch: expected {expected_type}, got {actual_type}",
+                    node,
+                    ErrorCodes.INVALID_RETURN_TYPE
+                )
+        else:
+            # Returning nothing - check if function expects void
+            if expected_type.base_type != "void":
+                self.error_handler.add_error(
+                    f"Missing return value: function expects {expected_type}",
+                    node,
+                    ErrorCodes.INVALID_RETURN_TYPE
+                )
+    
+    def _check_if_statement(self, node: IfStatement):
+        """Check if statement"""
+        # Check condition is boolean-compatible
+        cond_type = self._get_expression_type(node.condition)
+        if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
+            self.error_handler.add_warning(
+                f"Condition should be flag type, got {cond_type}",
+                node.condition
+            )
+        
+        # Check branches
+        self._check_platter(node.then_block)
+        for elif_cond, elif_block in node.elif_clauses:
+            self._get_expression_type(elif_cond)
+            self._check_platter(elif_block)
+        if node.else_block:
+            self._check_platter(node.else_block)
+    
+    def _check_switch_statement(self, node: SwitchStatement):
+        """Check switch statement"""
+        # Get switch expression type
+        switch_type = self._get_expression_type(node.expr)
+        
+        # Check cases
+        for case in node.cases:
+            # Check case value type matches switch expression type
+            for value in case.values:
+                case_type = self._get_expression_type(value)
+                if switch_type and case_type and not switch_type.is_compatible_with(case_type):
+                    self.error_handler.add_error(
+                        f"Case value type {case_type} does not match switch expression type {switch_type}",
+                        value,
+                        ErrorCodes.TYPE_MISMATCH
+                    )
+            
+            # Check case statements
+            for stmt in case.statements:
+                self._check_statement(stmt)
+        
+        # Check default case
+        if node.default:
+            for stmt in node.default:
+                self._check_statement(stmt)
+    
+    def _check_while_loop(self, node: WhileLoop):
+        """Check while loop"""
+        cond_type = self._get_expression_type(node.condition)
+        if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
+            self.error_handler.add_warning(
+                f"Loop condition should be flag type, got {cond_type}",
+                node.condition
+            )
+        self._check_platter(node.body)
+    
+    def _check_do_while_loop(self, node: DoWhileLoop):
+        """Check do-while loop"""
+        self._check_platter(node.body)
+        cond_type = self._get_expression_type(node.condition)
+        if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
+            self.error_handler.add_warning(
+                f"Loop condition should be flag type, got {cond_type}",
+                node.condition
+            )
+    
+    def _check_for_loop(self, node: ForLoop):
+        """Check for loop"""
+        if node.init:
+            if isinstance(node.init, Assignment):
+                self._check_assignment(node.init)
+        if node.condition:
+            cond_type = self._get_expression_type(node.condition)
+            if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
+                self.error_handler.add_warning(
+                    f"Loop condition should be flag type, got {cond_type}",
+                    node.condition
+                )
+        if node.update:
+            if isinstance(node.update, Assignment):
+                self._check_assignment(node.update)
+        self._check_platter(node.body)
+    
+    def _get_expression_type(self, expr: ASTNode) -> Optional[TypeInfo]:
+        """Get the type of an expression"""
+        if expr is None:
+            return None
+        
+        if isinstance(expr, Literal):
+            return self._get_literal_type(expr)
+        elif isinstance(expr, Identifier):
+            return self._get_identifier_type(expr)
+        elif isinstance(expr, BinaryOp):
+            return self._get_binary_op_type(expr)
+        elif isinstance(expr, UnaryOp):
+            return self._get_unary_op_type(expr)
+        elif isinstance(expr, ArrayAccess):
+            return self._get_array_access_type(expr)
+        elif isinstance(expr, TableAccess):
+            return self._get_table_access_type(expr)
+        elif isinstance(expr, FunctionCall):
+            return self._get_function_call_type(expr)
+        elif isinstance(expr, CastExpr):
+            return self._get_cast_type(expr)
+        elif isinstance(expr, ArrayLiteral):
+            return self._get_array_literal_type(expr)
+        elif isinstance(expr, TableLiteral):
+            return self._get_table_literal_type(expr)
+        
+        return None
+    
+    def _get_literal_type(self, node: Literal) -> TypeInfo:
+        """Get type of a literal"""
+        return TypeInfo(node.value_type, 0)
+    
+    def _get_identifier_type(self, node: Identifier) -> Optional[TypeInfo]:
+        """Get type of an identifier"""
+        symbol = self.symbol_table.lookup_symbol(node.name)
+        if not symbol:
+            return None
+        return symbol.type_info
+    
+    def _get_binary_op_type(self, node: BinaryOp) -> Optional[TypeInfo]:
+        """Get type of a binary operation"""
+        left_type = self._get_expression_type(node.left)
+        right_type = self._get_expression_type(node.right)
+        
+        if not left_type or not right_type:
+            return None
+        
+        # Check type compatibility
+        if not left_type.is_compatible_with(right_type):
+            self.error_handler.add_error(
+                f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
+                node,
+                ErrorCodes.INVALID_OPERATION
+            )
+            return None
+        
+        # Determine result type based on operator
+        if node.operator in ['+', '-', '*', '/', '%']:
+            # Arithmetic operations
+            if left_type.base_type in ["piece", "sip"]:
+                return left_type
+            else:
+                self.error_handler.add_error(
+                    f"Invalid type for arithmetic operation: {left_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
+        elif node.operator in ['==', '!=', '<', '>', '<=', '>=']:
+            # Comparison operations return flag (boolean)
+            return TypeInfo("flag", 0)
+        elif node.operator in ['&&', '||']:
+            # Logical operations
+            return TypeInfo("flag", 0)
+        else:
+            return left_type
+    
+    def _get_unary_op_type(self, node: UnaryOp) -> Optional[TypeInfo]:
+        """Get type of a unary operation"""
+        operand_type = self._get_expression_type(node.operand)
+        
+        if not operand_type:
+            return None
+        
+        if node.operator == '!':
+            # Logical NOT
+            return TypeInfo("flag", 0)
+        elif node.operator in ['-', '+']:
+            # Unary plus/minus
+            if operand_type.base_type in ["piece", "sip"]:
+                return operand_type
+            else:
+                self.error_handler.add_error(
+                    f"Invalid type for unary {node.operator}: {operand_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
+        
+        return operand_type
+    
+    def _get_array_access_type(self, node: ArrayAccess) -> Optional[TypeInfo]:
+        """Get type of array access"""
+        array_type = self._get_expression_type(node.array)
+        index_type = self._get_expression_type(node.index)
+        
+        if not array_type:
+            return None
+        
+        # Check index is integer type
+        if index_type and index_type.base_type not in ["piece"]:
+            self.error_handler.add_error(
+                f"Array index must be piece type, got {index_type}",
+                node.index,
+                ErrorCodes.INVALID_ARRAY_ACCESS
+            )
+        
+        # Check array is actually an array
+        if array_type.dimensions == 0:
+            self.error_handler.add_error(
+                f"Cannot index non-array type {array_type}",
+                node,
+                ErrorCodes.INVALID_ARRAY_ACCESS
+            )
+            return None
+        
+        # Return element type
+        return array_type.get_element_type()
+    
+    def _get_table_access_type(self, node: TableAccess) -> Optional[TypeInfo]:
+        """Get type of table field access"""
+        table_type = self._get_expression_type(node.table)
+        
+        if not table_type:
+            return None
+        
+        # Check table is actually a table type
+        if not table_type.is_table:
+            self.error_handler.add_error(
+                f"Cannot access field of non-table type {table_type}",
+                node,
+                ErrorCodes.INVALID_TABLE_ACCESS
+            )
+            return None
+        
+        # Get field type
+        field_type = table_type.get_field_type(node.field)
+        if not field_type:
+            self.error_handler.add_error(
+                f"Table type {table_type.base_type} has no field '{node.field}'",
+                node,
+                ErrorCodes.UNDEFINED_FIELD
+            )
+            return None
+        
+        return field_type
+    
+    def _get_function_call_type(self, node: FunctionCall) -> Optional[TypeInfo]:
+        """Get type of function call (return type)"""
+        func_symbol = self.symbol_table.lookup_symbol(node.name)
+        if not func_symbol:
+            return None
+        
+        return func_symbol.type_info
+    
+    def _get_cast_type(self, node: CastExpr) -> TypeInfo:
+        """Get type of cast expression"""
+        dims = node.dimensions if node.dimensions is not None else 0
+        
+        # Check if cast is valid
+        expr_type = self._get_expression_type(node.expr)
+        target_type = TypeInfo(node.target_type, dims)
+        
+        if expr_type:
+            # Allow numeric conversions
+            if expr_type.base_type in ["piece", "sip"] and target_type.base_type in ["piece", "sip"]:
+                return target_type
+            # Allow same-dimension array casts if base types compatible
+            elif expr_type.dimensions == target_type.dimensions:
+                if expr_type.base_type != target_type.base_type:
+                    self.error_handler.add_warning(
+                        f"Explicit cast from {expr_type} to {target_type}",
+                        node
+                    )
+                return target_type
+            else:
+                self.error_handler.add_error(
+                    f"Invalid cast from {expr_type} to {target_type}",
+                    node,
+                    ErrorCodes.INVALID_CAST
+                )
+        
+        return target_type
+    
+    def _get_array_literal_type(self, node: ArrayLiteral) -> Optional[TypeInfo]:
+        """Get type of array literal"""
+        if not node.elements:
+            return None
+        
+        # Get type of first element
+        first_type = self._get_expression_type(node.elements[0])
+        if not first_type:
+            return None
+        
+        # Check all elements have same type
+        for elem in node.elements[1:]:
+            elem_type = self._get_expression_type(elem)
+            if elem_type and not first_type.is_compatible_with(elem_type):
+                self.error_handler.add_error(
+                    f"Array literal has inconsistent element types: {first_type} and {elem_type}",
+                    node,
+                    ErrorCodes.TYPE_MISMATCH
+                )
+        
+        # Return array type with one more dimension
+        return TypeInfo(first_type.base_type, first_type.dimensions + 1, first_type.table_fields if first_type.is_table else None)
+    
+    def _get_table_literal_type(self, node: TableLiteral) -> Optional[TypeInfo]:
+        """Get type of table literal"""
+        # Build field types from literal
+        field_types = {}
+        for field_name, value in node.field_inits:
+            field_type = self._get_expression_type(value)
+            if field_type:
+                field_types[field_name] = field_type
+        
+        # Create synthetic table type
+        # Note: Should match against expected type from context
+        return TypeInfo("anonymous_table", 0, field_types)

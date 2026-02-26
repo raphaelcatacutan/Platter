@@ -290,6 +290,81 @@ def _parse_field_mapping(field_mapping: str, rhs: List[str]) -> Dict[str, str]:
     return result
 
 
+def _find_first_token(rhs: List[str]) -> Optional[int]:
+    """Find the index of the first terminal token in RHS"""
+    for i, sym in enumerate(rhs):
+        if not _is_nonterminal(sym):
+            return i
+    return None
+
+
+def _inject_position_args(expr: str, rhs: List[str]) -> str:
+    """
+    Inject position arguments into node constructors in an expression.
+    Looks for patterns like VarDecl(...), ArrayDecl(...), Literal(...), etc.
+    and adds the appropriate token_X.line, token_X.col arguments.
+    """
+    # Node classes that typically need position info
+    node_classes = [
+        "VarDecl", "ArrayDecl", "RecipeDecl", "Assignment", "IfStatement",
+        "WhileLoop", "ForLoop", "ReturnStatement", "BreakStatement", "ContinueStatement",
+        "BinaryOp", "UnaryOp", "FunctionCall", "ArrayAccess", "TableAccess",
+        "Literal", "Identifier", "ArrayLiteral", "TableLiteral"
+    ]
+    
+    # Find the first token in the RHS for fallback position
+    first_token_idx = _find_first_token(rhs)
+    
+    result = expr
+    
+    for node_class in node_classes:
+        # Find all occurrences of NodeClass(...)
+        pattern = rf'({node_class}\([^)]+\))'
+        matches = list(re.finditer(pattern, result))
+        
+        # Process matches in reverse to maintain string indices
+        for match in reversed(matches):
+            constructor_call = match.group(1)
+            
+            # Check if it already has position arguments (look for token_X.line or .line)
+            if '.line' in constructor_call:
+                continue
+            
+            # Special case: Identifier with context identifier
+            if 'self._context_identifier' in constructor_call and node_class == 'Identifier':
+                # Use context position instead of token position
+                close_paren_pos = constructor_call.rfind(')')
+                new_call = (constructor_call[:close_paren_pos] +
+                           ", self._context_identifier_line, self._context_identifier_col" +
+                           constructor_call[close_paren_pos:])
+                result = result[:match.start()] + new_call + result[match.end():]
+                continue
+            
+            # Find which token to use for position (extract token_N references)
+            token_refs = re.findall(r'token_(\d+)', constructor_call)
+            if token_refs:
+                # Use the first token reference found
+                token_idx = token_refs[0]
+            elif first_token_idx is not None:
+                # No token references in constructor, use first token from RHS
+                token_idx = str(first_token_idx)
+            else:
+                # No tokens available, skip this node
+                continue
+            
+            # Insert position args before the closing paren
+            # Find the last closing paren
+            close_paren_pos = constructor_call.rfind(')')
+            new_call = (constructor_call[:close_paren_pos] +
+                       f", token_{token_idx}.line, token_{token_idx}.col" +
+                       constructor_call[close_paren_pos:])
+            
+            # Replace in result
+            result = result[:match.start()] + new_call + result[match.end():]
+    
+    return result
+
+
 def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -> str:
     """Generate code for an AST action"""
     lines: List[str] = []
@@ -319,11 +394,11 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
                     else:
                         # Terminal: wrap appropriately based on type
                         if rhs[idx] == "id":
-                            lines.append(f"{indent}return Identifier(token_{idx}.value)")
+                            lines.append(f"{indent}return Identifier(token_{idx}.value, token_{idx}.line, token_{idx}.col)")
                         elif rhs[idx] in ["piece_lit", "sip_lit", "flag_lit", "chars_lit"]:
                             # Wrap literal tokens in Literal nodes
                             lit_type = rhs[idx].replace("_lit", "")  # "piece_lit" -> "piece"
-                            lines.append(f"{indent}return Literal('{lit_type}', token_{idx}.value)")
+                            lines.append(f"{indent}return Literal('{lit_type}', token_{idx}.value, token_{idx}.line, token_{idx}.col)")
                         else:
                             lines.append(f"{indent}return token_{idx}.value")
                 else:
@@ -346,7 +421,11 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             expr = ref
             # Substitute CONTEXT keywords (longest first to avoid partial matches)
             expr = expr.replace("CONTEXT_TYPE", "self._context_type")
-            expr = expr.replace("CONTEXT_ID", "self._context_identifier")
+            # Special handling for Identifier(CONTEXT_ID) - add position info
+            if "Identifier(CONTEXT_ID)" in expr:
+                expr = expr.replace("Identifier(CONTEXT_ID)", "Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)")
+            else:
+                expr = expr.replace("CONTEXT_ID", "self._context_identifier")
             expr = expr.replace("CONTEXT", "self._context_dimensions")
             lines.append(f"{indent}return {expr}")
         else:
@@ -359,6 +438,10 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
         # Parse field_mapping to extract constructor args
         fields = _parse_field_mapping(action.field_mapping, rhs)
         
+        # Find first token for position info
+        first_token_idx = _find_first_token(rhs)
+        pos_args = f"token_{first_token_idx}.line, token_{first_token_idx}.col" if first_token_idx is not None else "None, None"
+        
         # Special handling for Assignment with accessor field
         if action.ast_class == "Assignment" and "accessor" in fields:
             # Assignment(target, operator, value)
@@ -368,23 +451,28 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             operator = fields.get("operator", "None")
             value = fields.get("value", "None")
             
+            # Inject position args into target if it's an Identifier
+            target = _inject_position_args(target, rhs)
+            
             lines.append(f"{indent}target = {target}")
             lines.append(f"{indent}accessor = {accessor}")
             lines.append(f"{indent}if accessor:")
             lines.append(f"{indent}    target = accessor(target)")
-            lines.append(f"{indent}node = Assignment(target, {operator}, {value})")
+            lines.append(f"{indent}node = Assignment(target, {operator}, {value}, {pos_args})")
             lines.append(f"{indent}return node")
         else:
             # Normal node creation
             args = []
             for field_name, field_value in fields.items():
+                # Inject position args into any node constructors in field values
+                field_value = _inject_position_args(field_value, rhs)
                 args.append(field_value)
             
             if args:
                 args_str = ", ".join(args)
-                lines.append(f"{indent}node = {action.ast_class}({args_str})")
+                lines.append(f"{indent}node = {action.ast_class}({args_str}, {pos_args})")
             else:
-                lines.append(f"{indent}node = {action.ast_class}()")
+                lines.append(f"{indent}node = {action.ast_class}({pos_args})")
             
             lines.append(f"{indent}return node")
     
@@ -424,6 +512,9 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
         expr = expr.replace("CONTEXT_ID", "self._context_identifier")
         expr = expr.replace("CONTEXT", "self._context_dimensions")
         
+        # Inject position arguments into node constructors in the expression
+        expr = _inject_position_args(expr, rhs)
+        
         # Generate the return statement
         lines.append(f"{indent}result = {expr}")
         lines.append(f"{indent}return result")
@@ -448,9 +539,11 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             op = fields["op"]
             right = fields["right"]
             tail = fields.get("tail", None)
+            first_token_idx = _find_first_token(rhs)
+            pos_args = f"token_{first_token_idx}.line, token_{first_token_idx}.col" if first_token_idx is not None else "None, None"
             lines.append(f"{indent}# Build binary operation chain")
             lines.append(f"{indent}def build_op(left):")
-            lines.append(f"{indent}    node = BinaryOp(left, {op}, {right})")
+            lines.append(f"{indent}    node = BinaryOp(left, {op}, {right}, {pos_args})")
             if tail:
                 lines.append(f"{indent}    if {tail}:")
                 lines.append(f"{indent}        return {tail}(node)")
@@ -481,7 +574,7 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
                 idx = int(base_match.group(2))
                 if idx < len(rhs) and rhs[idx] == "id":
                     lines.append(f"{indent}# Build accessor: id token with tail")
-                    lines.append(f"{indent}base = Identifier({base_ref}.value)")
+                    lines.append(f"{indent}base = Identifier({base_ref}.value, {base_ref}.line, {base_ref}.col)")
                     lines.append(f"{indent}if {tail}:")
                     lines.append(f"{indent}    return {tail}(base)")
                     lines.append(f"{indent}else:")
@@ -509,9 +602,11 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             # Array index access with tail
             index = fields["index"]
             tail = fields.get("tail", "None")
+            first_token_idx = _find_first_token(rhs)
+            pos_args = f"token_{first_token_idx}.line, token_{first_token_idx}.col" if first_token_idx is not None else "None, None"
             lines.append(f"{indent}# Build array accessor chain")
             lines.append(f"{indent}def build_access(base):")
-            lines.append(f"{indent}    node = ArrayAccess(base, {index})")
+            lines.append(f"{indent}    node = ArrayAccess(base, {index}, {pos_args})")
             lines.append(f"{indent}    if {tail}:")
             lines.append(f"{indent}        return {tail}(node)")
             lines.append(f"{indent}    return node")
@@ -520,9 +615,11 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             # Table field access with tail
             field = fields.get("field", '""')
             tail = fields.get("tail", "None")
+            first_token_idx = _find_first_token(rhs)
+            pos_args = f"token_{first_token_idx}.line, token_{first_token_idx}.col" if first_token_idx is not None else "None, None"
             lines.append(f"{indent}# Build table accessor chain")
             lines.append(f"{indent}def build_access(base):")
-            lines.append(f"{indent}    node = TableAccess(base, {field})")
+            lines.append(f"{indent}    node = TableAccess(base, {field}, {pos_args})")
             lines.append(f"{indent}    if {tail}:")
             lines.append(f"{indent}        return {tail}(node)")
             lines.append(f"{indent}    return node")
@@ -556,7 +653,7 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
             if idx < len(rhs) and rhs[idx] == "id":
                 # It's an id token - wrap in Identifier
                 lines.append(f"{indent}# Build notation with id token")
-                lines.append(f"{indent}base = Identifier({base_ref}.value)")
+                lines.append(f"{indent}base = Identifier({base_ref}.value, {base_ref}.line, {base_ref}.col)")
                 lines.append(f"{indent}if {tail}:")
                 lines.append(f"{indent}    return {tail}(base)")
                 lines.append(f"{indent}else:")
@@ -583,9 +680,11 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
         operator = fields.get("operator", '"not"')
         operand = fields.get("operand", "None")
         tail = fields.get("tail", "None")
+        first_token_idx = _find_first_token(rhs)
+        pos_args = f"token_{first_token_idx}.line, token_{first_token_idx}.col" if first_token_idx is not None else "None, None"
         
         lines.append(f"{indent}# Build unary operation")
-        lines.append(f"{indent}node = UnaryOp({operator}, {operand})")
+        lines.append(f"{indent}node = UnaryOp({operator}, {operand}, {pos_args})")
         lines.append(f"{indent}if {tail}:")
         lines.append(f"{indent}    return {tail}(node)")
         lines.append(f"{indent}else:")
@@ -601,6 +700,9 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
         args_ref = fields.get("args", "[]")
         
         # Generate closure that extracts name from base Identifier
+        first_token_idx = _find_first_token(rhs)
+        pos_args = f"token_{first_token_idx}.line, token_{first_token_idx}.col" if first_token_idx is not None else "None, None"
+        
         lines.append(f"{indent}def build_call(base):")
         lines.append(f"{indent}    # Extract function name from Identifier node")
         lines.append(f"{indent}    if hasattr(base, 'name'):")
@@ -609,7 +711,7 @@ def _emit_ast_action(action: ASTAction, rhs: List[str], indent: str = " " * 8) -
         lines.append(f"{indent}        func_name = str(base)")
         lines.append(f"{indent}    ")
         lines.append(f"{indent}    # Create FunctionCall node")
-        lines.append(f"{indent}    node = FunctionCall(func_name, {args_ref})")
+        lines.append(f"{indent}    node = FunctionCall(func_name, {args_ref}, {pos_args})")
         
         # Only add tail handling if tail is specified
         if "tail" in fields:
@@ -700,6 +802,14 @@ def _emit_rhs_parse_and_action(rhs: List[str], action: Optional[ASTAction], inde
             context_subst = _substitute_field_value(context_val, rhs)
             lines.append(f"{indent}# Set identifier context for subsequent parsing")
             lines.append(f"{indent}self._context_identifier = {context_subst}")
+            # Also store position info if it's from a token
+            if '.value' in context_val and '$' in context_val:
+                idx_match = re.match(r'\$(\d+)', context_val)
+                if idx_match:
+                    idx = int(idx_match.group(1))
+                    if idx < len(rhs) and not _is_nonterminal(rhs[idx]):
+                        lines.append(f"{indent}self._context_identifier_line = token_{idx}.line")
+                        lines.append(f"{indent}self._context_identifier_col = token_{idx}.col")
     
     # Apply AST action
     lines.append("")
@@ -805,6 +915,8 @@ class ASTParser:
         self._context_dimensions = None
         self._context_type = None
         self._context_identifier = None  # For passing identifier names to function calls
+        self._context_identifier_line = None
+        self._context_identifier_col = None
         
         if not self.tokens:
             raise ErrorHandler("EOF", None, PREDICT_SET["<program>"])

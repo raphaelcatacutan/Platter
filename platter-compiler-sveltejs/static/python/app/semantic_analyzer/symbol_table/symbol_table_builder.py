@@ -5,248 +5,9 @@ NOTE: This version does NOT perform semantic checking - it only collects symbols
 """
 
 from app.semantic_analyzer.ast.ast_nodes import *
-from typing import Optional, Dict, List
-from enum import Enum
-
-
-class SymbolKind(Enum):
-    """Types of symbols in the symbol table"""
-    VARIABLE = "variable"
-    PARAMETER = "parameter"
-    FUNCTION = "function"
-    TABLE_TYPE = "table_type"
-    FIELD = "field"
-
-
-class TypeInfo:
-    """Represents type information including arrays and nested structures"""
-    
-    def __init__(self, base_type: str, dimensions: int = 0, table_fields: Optional[Dict[str, 'TypeInfo']] = None):
-        self.base_type = base_type
-        self.dimensions = dimensions if dimensions is not None else 0
-        self.table_fields = table_fields or {}
-        self.is_table = table_fields is not None
-    
-    def __repr__(self):
-        dims = f"{'[]' * self.dimensions}" if self.dimensions > 0 else ""
-        if self.is_table:
-            return f"Table({self.base_type}){dims}"
-        return f"{self.base_type}{dims}"
-    
-    def __eq__(self, other):
-        if not isinstance(other, TypeInfo):
-            return False
-        return (self.base_type == other.base_type and 
-                self.dimensions == other.dimensions and
-                self.is_table == other.is_table)
-    
-    def is_compatible_with(self, other: 'TypeInfo') -> bool:
-        """Check if this type is compatible with another"""
-        if self == other:
-            return True
-        if self.dimensions != other.dimensions:
-            return False
-        if self.base_type != other.base_type:
-            if {self.base_type, other.base_type} == {"piece", "sip"}:
-                return True
-            return False
-        if self.is_table and other.is_table:
-            if set(self.table_fields.keys()) != set(other.table_fields.keys()):
-                return False
-            for field_name in self.table_fields:
-                if not self.table_fields[field_name].is_compatible_with(other.table_fields[field_name]):
-                    return False
-        return True
-    
-    def get_element_type(self) -> Optional['TypeInfo']:
-        """Get the type of array elements"""
-        if self.dimensions == 0:
-            return None
-        return TypeInfo(self.base_type, self.dimensions - 1, self.table_fields if self.is_table else None)
-    
-    def get_field_type(self, field_name: str) -> Optional['TypeInfo']:
-        """Get the type of a table field"""
-        if not self.is_table:
-            return None
-        return self.table_fields.get(field_name)
-
-
-class Symbol:
-    """Represents a symbol in the symbol table"""
-    
-    def __init__(self, name: str, kind: SymbolKind, type_info: TypeInfo, 
-                 scope_level: int, declaration_node: ASTNode = None, declared_scope: 'Scope' = None):
-        self.name = name
-        self.kind = kind
-        self.type_info = type_info
-        self.scope_level = scope_level
-        self.declaration_node = declaration_node
-        self.declared_scope = declared_scope  # Store the scope where declared
-        self.is_initialized = False
-        self.usages = []  # List of scope names where this symbol is accessed
-        self.accessed_in_scopes = []  # Track unique scope names where accessed
-    
-    def add_usage(self, scope_name: str, declared_scope_name: str):
-        """Record that this symbol was accessed in a given scope (only if different from declaration scope)"""
-        # Only record if accessed in a different scope than where it was declared
-        if scope_name != declared_scope_name and scope_name not in self.accessed_in_scopes:
-            self.accessed_in_scopes.append(scope_name)
-    
-    def __repr__(self):
-        return f"Symbol({self.name}: {self.type_info}, kind={self.kind.value}, level={self.scope_level})"
-
-
-class Scope:
-    """Represents a lexical scope"""
-    
-    def __init__(self, name: str, level: int, parent: Optional['Scope'] = None):
-        self.name = name
-        self.level = level
-        self.parent = parent
-        self.symbols: Dict[str, Symbol] = {}
-        self.children: List['Scope'] = []
-        self.declaring_scope = None  # The scope where this scope's symbols are declared
-    
-    def define(self, symbol: Symbol) -> bool:
-        """Define a symbol in this scope"""
-        if symbol.name in self.symbols:
-            return False
-        self.symbols[symbol.name] = symbol
-        return True
-    
-    def lookup_local(self, name: str) -> Optional[Symbol]:
-        """Look up symbol in this scope only"""
-        return self.symbols.get(name)
-    
-    def lookup(self, name: str) -> Optional[Symbol]:
-        """Look up symbol in this scope and parent scopes"""
-        if name in self.symbols:
-            return self.symbols[name]
-        if self.parent:
-            return self.parent.lookup(name)
-        return None
-    
-    def get_all_symbols(self) -> Dict[str, Symbol]:
-        """Get all symbols visible in this scope"""
-        all_symbols = {}
-        if self.parent:
-            all_symbols = self.parent.get_all_symbols()
-        all_symbols.update(self.symbols)
-        return all_symbols
-    
-    def __repr__(self):
-        return f"Scope({self.name}, level={self.level}, symbols={len(self.symbols)})"
-
-
-class SemanticError:
-    """Represents a semantic error"""
-    
-    def __init__(self, message: str, node: ASTNode = None, severity: str = "error"):
-        self.message = message
-        self.node = node
-        self.severity = severity
-    
-    def __repr__(self):
-        return f"[{self.severity.upper()}] {self.message}"
-
-
-class SymbolTable:
-    """Manages symbol table with scope stack"""
-    
-    def __init__(self):
-        self.global_scope = Scope("global", 0)
-        self.current_scope = self.global_scope
-        self.scope_counter = 0
-        # Track counters per scope type for incremental naming
-        self.scope_type_counters: Dict[str, int] = {
-            'check': 0, 'alt': 0, 'instead': 0,
-            'pass': 0, 'repeat': 0, 'order_repeat': 0,
-            'menu': 0, 'choice': 0, 'default': 0,
-            'block': 0, 'start_platter': 0
-        }
-        self.errors: List[SemanticError] = []
-        self.table_types: Dict[str, TypeInfo] = {}
-        self.current_function: Optional[Symbol] = None
-        self.in_loop = 0
-    
-    def enter_scope(self, name: str) -> Scope:
-        """Enter a new scope with incremental counter per scope type"""
-        # For recipes, don't add suffix
-        if name.startswith('recipe_'):
-            scope_name = name.replace('recipe_', '')  # Remove recipe_ prefix
-        # For scope types with counters, use incremental numbering
-        elif name in self.scope_type_counters:
-            self.scope_type_counters[name] += 1
-            scope_name = f"{name}_{self.scope_type_counters[name]}"
-        else:
-            scope_name = name
-        
-        new_scope = Scope(scope_name, self.current_scope.level + 1, self.current_scope)
-        self.current_scope.children.append(new_scope)
-        self.current_scope = new_scope
-        return new_scope
-    
-    def exit_scope(self):
-        """Exit current scope"""
-        if self.current_scope.parent:
-            self.current_scope = self.current_scope.parent
-    
-    def define_symbol(self, name: str, kind: SymbolKind, type_info: TypeInfo, 
-                     declaration_node: ASTNode = None) -> bool:
-        """Define a symbol in current scope"""
-        symbol = Symbol(name, kind, type_info, self.current_scope.level, declaration_node, self.current_scope)
-        
-        if not self.current_scope.define(symbol):
-            self.add_error(f"Symbol '{name}' already defined in scope '{self.current_scope.name}'", declaration_node)
-            return False
-        
-        if kind == SymbolKind.TABLE_TYPE:
-            self.table_types[name] = type_info
-        
-        return True
-    
-    def lookup_symbol(self, name: str) -> Optional[Symbol]:
-        """Look up symbol"""
-        return self.current_scope.lookup(name)
-    
-    def lookup_table_type(self, name: str) -> Optional[TypeInfo]:
-        """Look up a table type definition"""
-        return self.table_types.get(name)
-    
-    def is_type_defined(self, type_name: str) -> bool:
-        """Check if a type is defined"""
-        builtin_types = {"piece", "sip", "flag", "chars", "void"}
-        return type_name in builtin_types or type_name in self.table_types
-    
-    def add_error(self, message: str, node: ASTNode = None, severity: str = "error"):
-        """Add a semantic error"""
-        self.errors.append(SemanticError(message, node, severity))
-    
-    def add_warning(self, message: str, node: ASTNode = None):
-        """Add a semantic warning"""
-        self.add_error(message, node, "warning")
-    
-    def has_errors(self) -> bool:
-        """Check if there are any errors"""
-        return any(e.severity == "error" for e in self.errors)
-    
-    def get_errors_str(self) -> str:
-        """Get formatted error string"""
-        if not self.errors:
-            return "No errors"
-        return "\n".join(str(e) for e in self.errors)
-    
-    def print_scope_tree(self, scope: Scope = None, indent: int = 0):
-        """Print the scope tree"""
-        if scope is None:
-            scope = self.global_scope
-        
-        print("  " * indent + str(scope))
-        for name, symbol in scope.symbols.items():
-            print("  " * (indent + 1) + f"├─ {symbol}")
-        
-        for child in scope.children:
-            self.print_scope_tree(child, indent + 1)
+from app.semantic_analyzer.symbol_table.types import Symbol, Scope, SymbolKind, TypeInfo
+from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
+from typing import Optional
 
 
 class SymbolTableBuilder:
@@ -255,11 +16,28 @@ class SymbolTableBuilder:
     def __init__(self):
         self.symbol_table = SymbolTable()
         self.built = False
+        self._register_builtin_functions()
+    
+    def _register_builtin_functions(self):
+        """Register built-in type conversion functions"""
+        # Built-in type conversion functions: topiece, tosip, toflag, tochars
+        builtin_functions = [
+            ("topiece", "piece"),  # Converts to piece (integer)
+            ("tosip", "sip"),      # Converts to sip (float)
+            ("tochars", "chars"),  # Converts to chars (string)
+        ]
+        
+        for func_name, return_type in builtin_functions:
+            type_info = TypeInfo(return_type, 0)
+            type_info.is_function = True
+            # Built-in functions can accept any type as parameter
+            self.symbol_table.define_symbol(func_name, SymbolKind.FUNCTION, type_info, None)
     
     def build(self, ast_root: Program) -> SymbolTable:
         """Build symbol table from AST"""
         if not isinstance(ast_root, Program):
-            self.symbol_table.add_error("Root must be a Program node")
+            if self.symbol_table.error_handler:
+                self.symbol_table.error_handler.add_error("Root must be a Program node")
             return self.symbol_table
         
         self._gather_type_definitions(ast_root)
@@ -327,7 +105,8 @@ class SymbolTableBuilder:
         )
         
         if not self.symbol_table.current_scope.define(func_symbol):
-            self.symbol_table.add_error(f"Recipe '{node.name}' already defined", node)
+            if self.symbol_table.error_handler:
+                self.symbol_table.error_handler.add_error(f"Recipe '{node.name}' already defined", node)
             return
         
         self.symbol_table.enter_scope(f"recipe_{node.name}")
@@ -515,20 +294,25 @@ class SymbolTableBuilder:
         """Process for loop - use Platter syntax: pass"""
         self.symbol_table.in_loop += 1
         
-        # Track init, condition, and update expressions
-        if node.init:
-            if isinstance(node.init, Assignment):
-                self._track_expression_usage(node.init.target)
-                self._track_expression_usage(node.init.value)
+        # Enter scope for the entire for loop
+        self.symbol_table.enter_scope("pass")
+        
+        # Track init, condition, and update expressions (treat as usage, not declaration)
+        if node.init and isinstance(node.init, Assignment):
+            self._track_expression_usage(node.init.target)
+            self._track_expression_usage(node.init.value)
+        
         if node.condition:
             self._track_expression_usage(node.condition)
+            
         if node.update:
             if isinstance(node.update, Assignment):
                 self._track_expression_usage(node.update.target)
                 self._track_expression_usage(node.update.value)
         
-        self.symbol_table.enter_scope("pass")
+        # Process loop body
         self._process_platter(node.body)
+        
         self.symbol_table.exit_scope()
         self.symbol_table.in_loop -= 1
     
@@ -555,6 +339,26 @@ class SymbolTableBuilder:
                 if declared_scope:
                     # Record usage with both current scope and declaring scope
                     symbol.add_usage(self.symbol_table.current_scope.name, declared_scope.name)
+            else:
+                # Symbol not declared - track as undeclared but accessed
+                if expr.name not in self.symbol_table.undeclared_symbols:
+                    # Create a phantom symbol with no declaration
+                    undeclared_symbol = Symbol(
+                        name=expr.name,
+                        kind=SymbolKind.VARIABLE,  # Assume variable
+                        type_info=TypeInfo("unknown", 0),
+                        scope_level=-1,  # Special marker for undeclared
+                        declaration_node=None,
+                        declared_scope=None  # No declaration scope
+                    )
+                    self.symbol_table.undeclared_symbols[expr.name] = undeclared_symbol
+                else:
+                    undeclared_symbol = self.symbol_table.undeclared_symbols[expr.name]
+                
+                # Track where it was accessed (avoid duplicates)
+                current_scope_name = self.symbol_table.current_scope.name
+                if current_scope_name not in undeclared_symbol.accessed_in_scopes:
+                    undeclared_symbol.accessed_in_scopes.append(current_scope_name)
         
         elif isinstance(expr, BinaryOp):
             self._track_expression_usage(expr.left)
@@ -577,6 +381,25 @@ class SymbolTableBuilder:
                 declared_scope = self._find_declaring_scope(symbol.name)
                 if declared_scope:
                     symbol.add_usage(self.symbol_table.current_scope.name, declared_scope.name)
+            else:
+                # Function not declared - track as undeclared but accessed
+                if expr.name not in self.symbol_table.undeclared_symbols:
+                    undeclared_symbol = Symbol(
+                        name=expr.name,
+                        kind=SymbolKind.FUNCTION,
+                        type_info=TypeInfo("unknown", 0),
+                        scope_level=-1,
+                        declaration_node=None,
+                        declared_scope=None
+                    )
+                    self.symbol_table.undeclared_symbols[expr.name] = undeclared_symbol
+                else:
+                    undeclared_symbol = self.symbol_table.undeclared_symbols[expr.name]
+                
+                # Track where it was accessed (avoid duplicates)
+                current_scope_name = self.symbol_table.current_scope.name
+                if current_scope_name not in undeclared_symbol.accessed_in_scopes:
+                    undeclared_symbol.accessed_in_scopes.append(current_scope_name)
             # Track arguments
             for arg in expr.args:
                 self._track_expression_usage(arg)
@@ -609,7 +432,7 @@ def build_symbol_table(ast_root: Program) -> SymbolTable:
     return builder.build(ast_root)
 
 
-def print_symbol_table(symbol_table: SymbolTable):
+def print_symbol_table(symbol_table: SymbolTable, error_handler=None):
     """Print symbol table in formatted table layout"""
     from app.semantic_analyzer.symbol_table.symbol_table_output import format_symbol_table_compact
     
@@ -619,5 +442,5 @@ def print_symbol_table(symbol_table: SymbolTable):
     print("╚" + "═" * 78 + "╝")
     print()
     
-    formatted_output = format_symbol_table_compact(symbol_table)
+    formatted_output = format_symbol_table_compact(symbol_table, error_handler)
     print(formatted_output)

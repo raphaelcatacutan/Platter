@@ -2,8 +2,10 @@
 
 # Base node
 class ASTNode:
-    def __init__(self, node_type="ASTNode"): 
+    def __init__(self, node_type="ASTNode", line=None, column=None): 
         self.node_type = node_type
+        self.line = line
+        self.column = column
     
     def __repr__(self):
         return f"{self.__class__.__name__}()"
@@ -14,8 +16,8 @@ class ASTNode:
 
 class Program(ASTNode):
     """Root node of the AST"""
-    def __init__(self): 
-        super().__init__("Program")
+    def __init__(self, line=None, column=None): 
+        super().__init__("Program", line, column)
         self.global_decl = []  # List of declaration nodes
         self.recipe_decl = []  # List of RecipeDecl nodes
         self.start_platter = None  # Platter node
@@ -40,8 +42,8 @@ class Program(ASTNode):
 
 class VarDecl(ASTNode):
     """Variable declaration (ingredient/scalar)"""
-    def __init__(self, data_type, identifier, init_value=None):
-        super().__init__("VarDecl")
+    def __init__(self, data_type, identifier, init_value=None, line=None, column=None):
+        super().__init__("VarDecl", line, column)
         self.data_type = data_type  # "piece", "sip", "flag", "chars"
         self.identifier = identifier  # String
         self.init_value = init_value  # Expression node or None
@@ -51,8 +53,8 @@ class VarDecl(ASTNode):
 
 class ArrayDecl(ASTNode):
     """Array declaration"""
-    def __init__(self, data_type, dimensions, identifier, init_value=None):
-        super().__init__("ArrayDecl")
+    def __init__(self, data_type, dimensions, identifier, init_value=None, line=None, column=None):
+        super().__init__("ArrayDecl", line, column)
         self.data_type = data_type
         self.dimensions = dimensions  # int: number of dimensions
         self.identifier = identifier
@@ -63,8 +65,8 @@ class ArrayDecl(ASTNode):
 
 class TablePrototype(ASTNode):
     """Table type definition"""
-    def __init__(self, name, fields):
-        super().__init__("TablePrototype")
+    def __init__(self, name, fields, line=None, column=None):
+        super().__init__("TablePrototype", line, column)
         self.name = name
         self.fields = fields  # List of FieldDecl nodes
     
@@ -73,8 +75,8 @@ class TablePrototype(ASTNode):
 
 class FieldDecl(ASTNode):
     """Field in a table prototype"""
-    def __init__(self, data_type, dimensions, identifier):
-        super().__init__("FieldDecl")
+    def __init__(self, data_type, dimensions, identifier, line=None, column=None):
+        super().__init__("FieldDecl", line, column)
         self.data_type = data_type  # "piece", "sip", "flag", "chars", or table name
         self.dimensions = dimensions  # int
         self.identifier = identifier
@@ -85,8 +87,8 @@ class FieldDecl(ASTNode):
 
 class TableDecl(ASTNode):
     """Table instance declaration"""
-    def __init__(self, table_type, identifier, init_value=None, dimensions=0):
-        super().__init__("TableDecl")
+    def __init__(self, table_type, identifier, init_value=None, dimensions=0, line=None, column=None):
+        super().__init__("TableDecl", line, column)
         self.table_type = table_type  # String: name of table type
         self.identifier = identifier
         self.init_value = init_value  # TableLiteral or None
@@ -98,8 +100,8 @@ class TableDecl(ASTNode):
 
 class RecipeDecl(ASTNode):
     """Function/recipe declaration"""
-    def __init__(self, return_type, return_dims, name, params, body):
-        super().__init__("RecipeDecl")
+    def __init__(self, return_type, return_dims, name, params, body, line=None, column=None):
+        super().__init__("RecipeDecl", line, column)
         self.return_type = return_type
         self.return_dims = return_dims  # int
         self.name = name
@@ -112,8 +114,8 @@ class RecipeDecl(ASTNode):
 
 class ParamDecl(ASTNode):
     """Function parameter"""
-    def __init__(self, data_type, dimensions, identifier):
-        super().__init__("ParamDecl")
+    def __init__(self, data_type, dimensions, identifier, line=None, column=None):
+        super().__init__("ParamDecl", line, column)
         self.data_type = data_type
         self.dimensions = dimensions
         self.identifier = identifier
@@ -128,8 +130,8 @@ class ParamDecl(ASTNode):
 
 class Platter(ASTNode):
     """Block/compound statement"""
-    def __init__(self, local_decls=None, statements=None):
-        super().__init__("Platter")
+    def __init__(self, local_decls=None, statements=None, line=None, column=None):
+        super().__init__("Platter", line, column)
         self.local_decls = local_decls or []
         self.statements = statements or []
     
@@ -146,8 +148,8 @@ class Platter(ASTNode):
 
 class Assignment(ASTNode):
     """Assignment statement"""
-    def __init__(self, target, operator, value):
-        super().__init__("Assignment")
+    def __init__(self, target, operator, value, line=None, column=None):
+        super().__init__("Assignment", line, column)
         self.target = target  # Identifier or accessor node
         self.operator = operator  # "=", "+=", "-=", "*=", "/=", "%="
         self.value = value  # Expression node
@@ -157,8 +159,8 @@ class Assignment(ASTNode):
 
 class IfStatement(ASTNode):
     """Conditional statement (check/alt/instead)"""
-    def __init__(self, condition, then_block, elif_clauses=None, else_block=None):
-        super().__init__("IfStatement")
+    def __init__(self, condition, then_block, elif_clauses=None, else_block=None, line=None, column=None):
+        super().__init__("IfStatement", line, column)
         self.condition = condition  # Expression
         self.then_block = then_block  # Platter
         self.elif_clauses = elif_clauses or []  # List of (condition, block) tuples
@@ -172,8 +174,8 @@ class IfStatement(ASTNode):
 
 class SwitchStatement(ASTNode):
     """Switch statement (menu)"""
-    def __init__(self, expr, cases, default=None):
-        super().__init__("SwitchStatement")
+    def __init__(self, expr, cases, default=None, line=None, column=None):
+        super().__init__("SwitchStatement", line, column)
         self.expr = expr  # Expression to switch on
         self.cases = cases or []  # List of CaseClause nodes
         self.default = default  # Statements list or None
@@ -186,8 +188,8 @@ class SwitchStatement(ASTNode):
 
 class CaseClause(ASTNode):
     """Case in a switch statement"""
-    def __init__(self, value, statements):
-        super().__init__("CaseClause")
+    def __init__(self, value, statements, line=None, column=None):
+        super().__init__("CaseClause", line, column)
         self.value = value  # Literal value
         self.statements = statements  # List of statement nodes
     
@@ -196,8 +198,8 @@ class CaseClause(ASTNode):
 
 class WhileLoop(ASTNode):
     """While loop (repeat)"""
-    def __init__(self, condition, body):
-        super().__init__("WhileLoop")
+    def __init__(self, condition, body, line=None, column=None):
+        super().__init__("WhileLoop", line, column)
         self.condition = condition
         self.body = body  # Platter
     
@@ -206,8 +208,8 @@ class WhileLoop(ASTNode):
 
 class DoWhileLoop(ASTNode):
     """Do-while loop (order...repeat)"""
-    def __init__(self, body, condition):
-        super().__init__("DoWhileLoop")
+    def __init__(self, body, condition, line=None, column=None):
+        super().__init__("DoWhileLoop", line, column)
         self.body = body
         self.condition = condition
     
@@ -216,8 +218,8 @@ class DoWhileLoop(ASTNode):
 
 class ForLoop(ASTNode):
     """For loop (pass)"""
-    def __init__(self, init, update, condition, body):
-        super().__init__("ForLoop")
+    def __init__(self, init, update, condition, body, line=None, column=None):
+        super().__init__("ForLoop", line, column)
         self.init = init  # Assignment or None
         self.update = update  # Assignment
         self.condition = condition  # Expression
@@ -228,8 +230,8 @@ class ForLoop(ASTNode):
 
 class ReturnStatement(ASTNode):
     """Return statement (serve)"""
-    def __init__(self, value=None):
-        super().__init__("ReturnStatement")
+    def __init__(self, value=None, line=None, column=None):
+        super().__init__("ReturnStatement", line, column)
         self.value = value  # Expression or None
     
     def __repr__(self):
@@ -237,24 +239,24 @@ class ReturnStatement(ASTNode):
 
 class BreakStatement(ASTNode):
     """Break statement (stop)"""
-    def __init__(self):
-        super().__init__("BreakStatement")
+    def __init__(self, line=None, column=None):
+        super().__init__("BreakStatement", line, column)
     
     def __repr__(self):
         return "BreakStatement()"
 
 class ContinueStatement(ASTNode):
     """Continue statement (next)"""
-    def __init__(self):
-        super().__init__("ContinueStatement")
+    def __init__(self, line=None, column=None):
+        super().__init__("ContinueStatement", line, column)
     
     def __repr__(self):
         return "ContinueStatement()"
 
 class ExpressionStatement(ASTNode):
     """Expression used as statement"""
-    def __init__(self, expr):
-        super().__init__("ExpressionStatement")
+    def __init__(self, expr, line=None, column=None):
+        super().__init__("ExpressionStatement", line, column)
         self.expr = expr
     
     def __repr__(self):
@@ -266,8 +268,8 @@ class ExpressionStatement(ASTNode):
 
 class BinaryOp(ASTNode):
     """Binary operation"""
-    def __init__(self, left, operator, right):
-        super().__init__("BinaryOp")
+    def __init__(self, left, operator, right, line=None, column=None):
+        super().__init__("BinaryOp", line, column)
         self.left = left
         self.operator = operator  # "+", "-", "*", "/", "%", "==", "!=", ">", "<", ">=", "<=", "and", "or"
         self.right = right
@@ -277,8 +279,8 @@ class BinaryOp(ASTNode):
 
 class UnaryOp(ASTNode):
     """Unary operation"""
-    def __init__(self, operator, operand):
-        super().__init__("UnaryOp")
+    def __init__(self, operator, operand, line=None, column=None):
+        super().__init__("UnaryOp", line, column)
         self.operator = operator  # "not", "-"
         self.operand = operand
     
@@ -287,8 +289,8 @@ class UnaryOp(ASTNode):
 
 class Identifier(ASTNode):
     """Variable reference"""
-    def __init__(self, name):
-        super().__init__("Identifier")
+    def __init__(self, name, line=None, column=None):
+        super().__init__("Identifier", line, column)
         self.name = name
     
     def __repr__(self):
@@ -296,8 +298,8 @@ class Identifier(ASTNode):
 
 class ArrayAccess(ASTNode):
     """Array element access"""
-    def __init__(self, array, index):
-        super().__init__("ArrayAccess")
+    def __init__(self, array, index, line=None, column=None):
+        super().__init__("ArrayAccess", line, column)
         self.array = array  # Expression
         self.index = index  # Expression
     
@@ -306,8 +308,8 @@ class ArrayAccess(ASTNode):
 
 class TableAccess(ASTNode):
     """Table field access"""
-    def __init__(self, table, field):
-        super().__init__("TableAccess")
+    def __init__(self, table, field, line=None, column=None):
+        super().__init__("TableAccess", line, column)
         self.table = table  # Expression
         self.field = field  # String
     
@@ -316,8 +318,8 @@ class TableAccess(ASTNode):
 
 class FunctionCall(ASTNode):
     """Function call"""
-    def __init__(self, name, args=None):
-        super().__init__("FunctionCall")
+    def __init__(self, name, args=None, line=None, column=None):
+        super().__init__("FunctionCall", line, column)
         self.name = name
         self.args = args or []
     
@@ -329,8 +331,8 @@ class FunctionCall(ASTNode):
 
 class CastExpr(ASTNode):
     """Type cast expression"""
-    def __init__(self, target_type, expr):
-        super().__init__("CastExpr")
+    def __init__(self, target_type, expr, line=None, column=None):
+        super().__init__("CastExpr", line, column)
         self.target_type = target_type  # "piece", "sip", "flag", "chars"
         self.expr = expr
     
@@ -343,8 +345,8 @@ class CastExpr(ASTNode):
 
 class Literal(ASTNode):
     """Literal value"""
-    def __init__(self, value_type, value):
-        super().__init__("Literal")
+    def __init__(self, value_type, value, line=None, column=None):
+        super().__init__("Literal", line, column)
         self.value_type = value_type  # "piece", "sip", "flag", "chars"
         self.value = value
     
@@ -353,8 +355,8 @@ class Literal(ASTNode):
 
 class ArrayLiteral(ASTNode):
     """Array literal"""
-    def __init__(self, elements=None):
-        super().__init__("ArrayLiteral")
+    def __init__(self, elements=None, line=None, column=None):
+        super().__init__("ArrayLiteral", line, column)
         self.elements = elements or []
     
     def add_element(self, elem):
@@ -366,8 +368,8 @@ class ArrayLiteral(ASTNode):
 
 class TableLiteral(ASTNode):
     """Table literal"""
-    def __init__(self, field_inits=None):
-        super().__init__("TableLiteral")
+    def __init__(self, field_inits=None, line=None, column=None):
+        super().__init__("TableLiteral", line, column)
         self.field_inits = field_inits or []  # List of (field_name, value) tuples
     
     def add_field(self, field_name, value):

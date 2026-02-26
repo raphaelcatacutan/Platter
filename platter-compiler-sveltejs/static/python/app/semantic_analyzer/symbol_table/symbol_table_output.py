@@ -8,12 +8,13 @@ from app.semantic_analyzer.ast.ast_nodes import Literal, ArrayLiteral, TableLite
 from typing import List, Optional, Tuple
 
 
-def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
+def format_symbol_table_compact(symbol_table: SymbolTable, error_handler=None) -> str:
     """
     Format symbol table in a nicely formatted table with columns
     
     Args:
         symbol_table: The symbol table to format
+        error_handler: Optional error handler for displaying errors
     
     Returns:
         Formatted string representation
@@ -72,7 +73,7 @@ def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
     def collect_symbols(scope: Scope) -> None:
         for name, symbol in scope.symbols.items():
             # Get the actual scope name where declared
-            declared_scope_name = symbol.declared_scope.name if symbol.declared_scope else "unknown"
+            declared_scope_name = symbol.declared_scope.name if symbol.declared_scope else ""
             
             # Format accessed scopes as a list
             accessed_list = symbol.accessed_in_scopes if symbol.accessed_in_scopes else []
@@ -82,14 +83,14 @@ def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
                 'id': symbol.name,
                 'type': symbol.type_info.base_type,
                 'dims': str(symbol.type_info.dimensions) if symbol.type_info.dimensions > 0 else "-",
-                'declared_scope': declared_scope_name,
+                'declared_scope': declared_scope_name if declared_scope_name else "-",
                 'accessed_scopes': accessed_str,
                 'accessed_list': accessed_list,  # Store as list for console output
                 'parameters': get_parameters_str(symbol),
                 'args': "-",  # Args tracked at call sites, not in symbol definition
                 'value': get_value_str(symbol),
                 'kind': symbol.kind.value,
-                'scope_name': scope.name,
+                'scope_name': scope.name if declared_scope_name else "undeclared",
                 'level': scope.level
             })
         
@@ -97,6 +98,27 @@ def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
             collect_symbols(child)
     
     collect_symbols(symbol_table.global_scope)
+    
+    # Add undeclared symbols
+    if hasattr(symbol_table, 'undeclared_symbols'):
+        for name, symbol in symbol_table.undeclared_symbols.items():
+            accessed_list = symbol.accessed_in_scopes if symbol.accessed_in_scopes else []
+            accessed_str = ", ".join(accessed_list) if accessed_list else "-"
+            
+            symbols_data.append({
+                'id': symbol.name,
+                'type': symbol.type_info.base_type if symbol.type_info.base_type != "unknown" else "?",
+                'dims': str(symbol.type_info.dimensions) if symbol.type_info.dimensions > 0 else "-",
+                'declared_scope': "-",  # Empty for undeclared
+                'accessed_scopes': accessed_str,
+                'accessed_list': accessed_list,
+                'parameters': "-",
+                'args': "-",
+                'value': "-",
+                'kind': symbol.kind.value,
+                'scope_name': "undeclared",
+                'level': -1
+            })
     
     # Calculate column widths
     if symbols_data:
@@ -134,7 +156,8 @@ def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
                      "─" * args_width + "┼" + "─" * value_width + "┤")
         
         # Group by scope level and scope for better readability
-        symbols_data.sort(key=lambda x: (x['level'], x['scope_name'], x['kind'], x['id']))
+        # Put undeclared symbols at the end
+        symbols_data.sort(key=lambda x: (999 if x['level'] == -1 else x['level'], x['scope_name'], x['kind'], x['id']))
         
         # Add data rows
         current_scope = None
@@ -173,7 +196,7 @@ def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
     output.append("║      SYMBOL TABLE STATISTICS               ║")
     output.append("╠════════════════════════════════════════════╣")
     
-    summary = format_symbol_table_summary(symbol_table)
+    summary = format_symbol_table_summary(symbol_table, error_handler)
     output.append(f"║  Total Symbols:    {summary['total_symbols']:>4}                      ║")
     output.append(f"║  Variables:        {summary['variables']:>4}                      ║")
     output.append(f"║  Functions:        {summary['functions']:>4}                      ║")
@@ -185,15 +208,16 @@ def format_symbol_table_compact(symbol_table: SymbolTable) -> str:
     output.append("╚════════════════════════════════════════════╝")
     
     # Add error details if any
-    if symbol_table.errors:
+    if error_handler and error_handler.has_errors():
+        errors = error_handler.get_errors()
         output.append("")
         output.append("╔════════════════════════════════════════════════════════════════════════╗")
         output.append("║                         SEMANTIC ISSUES                                ║")
         output.append("╠════════════════════════════════════════════════════════════════════════╣")
         
-        for i, error in enumerate(symbol_table.errors, 1):
+        for i, error in enumerate(errors, 1):
             severity_icon = "❌" if error.severity == "error" else "⚠️"
-            output.append(f"║ {severity_icon} [{error.severity.upper():<7}] {error.message:<55} ║")
+            output.append(f"║ {severity_icon} [{error.severity.name.upper():<7}] {error.message:<55} ║")
         
         output.append("╚════════════════════════════════════════════════════════════════════════╝")
     else:
@@ -252,14 +276,14 @@ def format_symbol_table_for_console(symbol_table: SymbolTable) -> List[dict]:
     def collect_symbols(scope: Scope) -> None:
         for name, symbol in scope.symbols.items():
             # Get the actual scope name where declared
-            declared_scope_name = symbol.declared_scope.name if symbol.declared_scope else "unknown"
+            declared_scope_name = symbol.declared_scope.name if symbol.declared_scope else ""
             
             # Create dictionary with all symbol info
             symbol_dict = {
                 'ID': symbol.name,
                 'Type': symbol.type_info.base_type,
                 'Dims': str(symbol.type_info.dimensions) if symbol.type_info.dimensions > 0 else "-",
-                'Declared': declared_scope_name,
+                'Declared': declared_scope_name if declared_scope_name else "-",
                 'Accessed': symbol.accessed_in_scopes if symbol.accessed_in_scopes else [],
                 'Parameters': get_parameters_str(symbol),
                 'Value': get_value_str(symbol),
@@ -274,13 +298,29 @@ def format_symbol_table_for_console(symbol_table: SymbolTable) -> List[dict]:
     
     collect_symbols(symbol_table.global_scope)
     
+    # Add undeclared symbols that were accessed
+    if hasattr(symbol_table, 'undeclared_symbols'):
+        for name, symbol in symbol_table.undeclared_symbols.items():
+            symbol_dict = {
+                'ID': symbol.name,
+                'Type': symbol.type_info.base_type if symbol.type_info.base_type != "unknown" else "?",
+                'Dims': str(symbol.type_info.dimensions) if symbol.type_info.dimensions > 0 else "-",
+                'Declared': "",  # Empty for undeclared
+                'Accessed': symbol.accessed_in_scopes if symbol.accessed_in_scopes else [],
+                'Parameters': "-",
+                'Value': "-",
+                'Kind': symbol.kind.value,
+                'Level': -1
+            }
+            symbols_output.append(symbol_dict)
+    
     # Sort by level and name for better readability
     symbols_output.sort(key=lambda x: (x['Level'], x['ID']))
     
     return symbols_output
 
 
-def format_symbol_table_summary(symbol_table: SymbolTable) -> dict:
+def format_symbol_table_summary(symbol_table: SymbolTable, error_handler=None) -> dict:
     """
     Create a summary dictionary of symbol table statistics
     
@@ -320,29 +360,41 @@ def format_symbol_table_summary(symbol_table: SymbolTable) -> dict:
     
     counts = count_symbols_in_scope(symbol_table.global_scope)
     
+    error_count = 0
+    warning_count = 0
+    has_errors = False
+    
+    if error_handler:
+        from app.semantic_analyzer.semantic_passes.error_handler import ErrorSeverity
+        errors = error_handler.get_errors()
+        error_count = len([e for e in errors if e.severity == ErrorSeverity.ERROR])
+        warning_count = len([e for e in errors if e.severity == ErrorSeverity.WARNING])
+        has_errors = error_handler.has_errors()
+    
     return {
         'total_symbols': counts['total'],
         'variables': counts['variables'],
         'functions': counts['functions'],
         'table_types': counts['tables'],
         'parameters': counts['parameters'],
-        'errors': len([e for e in symbol_table.errors if e.severity == 'error']),
-        'warnings': len([e for e in symbol_table.errors if e.severity == 'warning']),
-        'has_errors': symbol_table.has_errors()
+        'errors': error_count,
+        'warnings': warning_count,
+        'has_errors': has_errors
     }
 
 
-def get_symbol_table_status_message(symbol_table: SymbolTable) -> str:
+def get_symbol_table_status_message(symbol_table: SymbolTable, error_handler=None) -> str:
     """
     Get a short status message about the symbol table analysis
     
     Args:
         symbol_table: The symbol table to check
+        error_handler: Optional error handler
     
     Returns:
         Status message string
     """
-    summary = format_symbol_table_summary(symbol_table)
+    summary = format_symbol_table_summary(symbol_table, error_handler)
     
     if summary['has_errors']:
         return f"Symbol Table: {summary['errors']} error(s), {summary['warnings']} warning(s)"
@@ -352,22 +404,22 @@ def get_symbol_table_status_message(symbol_table: SymbolTable) -> str:
         return f"Symbol Table: OK - {summary['total_symbols']} symbols defined"
 
 
-def format_errors_only(symbol_table: SymbolTable) -> str:
+def format_errors_only(error_handler) -> str:
     """
-    Format only the errors from the symbol table
+    Format only the errors from the error handler
     
     Args:
-        symbol_table: The symbol table to get errors from
+        error_handler: The error handler to get errors from
     
     Returns:
         Formatted error string
     """
-    if not symbol_table.errors:
+    if not error_handler or not error_handler.has_errors():
         return "No errors or warnings"
     
     output = []
-    for error in symbol_table.errors:
-        output.append(f"[{error.severity.upper()}] {error.message}")
+    for error in error_handler.get_errors():
+        output.append(f"[{error.severity.name.upper()}] {error.message}")
     
     return "\n".join(output)
 
@@ -380,7 +432,7 @@ def get_all_symbols_flat(symbol_table: SymbolTable) -> List[Symbol]:
         symbol_table: The symbol table to extract from
     
     Returns:
-        List of all Symbol objects
+        List of all Symbol objects (including undeclared but accessed symbols)
     """
     symbols = []
     
@@ -390,6 +442,11 @@ def get_all_symbols_flat(symbol_table: SymbolTable) -> List[Symbol]:
             collect_from_scope(child)
     
     collect_from_scope(symbol_table.global_scope)
+    
+    # Add undeclared but accessed symbols
+    if hasattr(symbol_table, 'undeclared_symbols'):
+        symbols.extend(symbol_table.undeclared_symbols.values())
+    
     return symbols
 
 
