@@ -239,6 +239,7 @@ start() {
 			'/python/app/parser/first_set.py',
 			'/python/app/semantic_analyzer/__init__.py',
 			'/python/app/semantic_analyzer/semantic_analyzer.py',
+			'/python/app/semantic_analyzer/builtin_recipes.py',
 			'/python/app/semantic_analyzer/ast/__init__.py',
 			'/python/app/semantic_analyzer/ast/ast_nodes.py',
 			'/python/app/semantic_analyzer/ast/ast_parser_program.py',
@@ -701,7 +702,11 @@ result
 				if (data.success) {
 					clearErrorMarkers();
 					const semanticMessage = data.message || 'No semantic errors';
-					const okMessage = `${lexicalResult.output}\n${semanticMessage}\n\nAST and Symbol Table generated successfully! Check browser console for details.`;
+					let warningDetails = '';
+					if (data.warnings && data.warnings.length > 0) {
+						warningDetails = data.warnings.map((w: string) => `${w}`).join('\n');
+					}
+					const okMessage = `${semanticMessage}\n${warningDetails}`;
 					setTerminalOk(okMessage);
 					analysisStatus = 'success';
 					terminalOutput = okMessage;

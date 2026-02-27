@@ -19,7 +19,7 @@ class SymbolTable:
         self.scope_type_counters: Dict[str, int] = {
             'check': 0, 'alt': 0, 'instead': 0,
             'pass': 0, 'repeat': 0, 'order_repeat': 0,
-            'menu': 0, 'choice': 0, 'default': 0,
+            'menu': 0, 'choice': 0, 'usual': 0,
             'block': 0, 'start_platter': 0
         }
         self.table_types: Dict[str, TypeInfo] = {}

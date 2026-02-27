@@ -7,6 +7,7 @@ from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import TypeInfo, Symbol, SymbolKind
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
 from app.semantic_analyzer.semantic_passes.error_handler import SemanticErrorHandler, ErrorCodes
+from app.semantic_analyzer.builtin_recipes import get_builtin_recipe, is_builtin_recipe
 from typing import Optional
 
 
@@ -28,7 +29,7 @@ class TypeChecker:
             elif isinstance(decl, TableDecl):
                 self._check_table_decl(decl)
         
-        # Check function bodies
+        # Check recipe bodies
         for recipe in ast_root.recipe_decl:
             self._check_recipe_decl(recipe)
         
@@ -39,15 +40,15 @@ class TypeChecker:
                 self.symbol_table.exit_scope()
     
     def _check_var_decl(self, node: VarDecl):
-        """Check variable declaration type consistency"""
+        """Check ingredient declaration type consistency"""
         if node.init_value:
             init_type = self._get_expression_type(node.init_value)
             if init_type:
-                var_type = TypeInfo(node.data_type, 0)
-                if not var_type.is_compatible_with(init_type):
+                ingredient_type = TypeInfo(node.data_type, 0)
+                if not ingredient_type.is_compatible_with(init_type):
                     self.error_handler.add_error(
-                        f"Type mismatch in variable '{node.identifier}' initialization: "
-                        f"expected {var_type}, got {init_type}",
+                        f"Type mismatch in ingredient '{node.identifier}' initialization: "
+                        f"expected {ingredient_type}, got {init_type}",
                         node,
                         ErrorCodes.TYPE_MISMATCH
                     )
@@ -97,21 +98,21 @@ class TypeChecker:
                     )
     
     def _check_recipe_decl(self, node: RecipeDecl):
-        """Check function declaration"""
-        # Save current function context
-        old_function = self.symbol_table.current_function
-        func_symbol = self.symbol_table.lookup_symbol(node.name)
-        self.symbol_table.current_function = func_symbol
+        """Check recipe declaration"""
+        # Save current recipe context
+        old_recipe = self.symbol_table.current_function
+        recipe_symbol = self.symbol_table.lookup_symbol(node.name)
+        self.symbol_table.current_function = recipe_symbol
         
-        # Check function body (navigate to existing function scope)
+        # Check recipe body (navigate to existing recipe scope)
         if node.body:
             scope_name = node.name  # The builder removed 'recipe_' prefix
             if self.symbol_table.navigate_to_scope(scope_name):
                 self._check_platter(node.body)
                 self.symbol_table.exit_scope()
         
-        # Restore function context
-        self.symbol_table.current_function = old_function
+        # Restore recipe context
+        self.symbol_table.current_function = old_recipe
     
     def _check_platter(self, node: Platter):
         """Check block/compound statement"""
@@ -163,7 +164,7 @@ class TypeChecker:
                 )
     
     def _check_return_statement(self, node: ReturnStatement):
-        """Check return statement type compatibility"""
+        """Check serve statement type compatibility"""
         if not self.symbol_table.current_function:
             return  # Error will be caught by control_flow_checker
         
@@ -173,22 +174,22 @@ class TypeChecker:
             actual_type = self._get_expression_type(node.value)
             if actual_type and not expected_type.is_compatible_with(actual_type):
                 self.error_handler.add_error(
-                    f"Return type mismatch: expected {expected_type}, got {actual_type}",
+                    f"Serve type mismatch: expected {expected_type}, got {actual_type}",
                     node,
-                    ErrorCodes.INVALID_RETURN_TYPE
+                    ErrorCodes.INVALID_SERVE_TYPE
                 )
         else:
-            # Returning nothing - check if function expects void
+            # Serving nothing - check if recipe expects void
             if expected_type.base_type != "void":
                 self.error_handler.add_error(
-                    f"Missing return value: function expects {expected_type}",
+                    f"Missing serve value: recipe expects {expected_type}",
                     node,
-                    ErrorCodes.INVALID_RETURN_TYPE
+                    ErrorCodes.INVALID_SERVE_TYPE
                 )
     
     def _check_if_statement(self, node: IfStatement):
-        """Check if statement"""
-        # Check condition is boolean-compatible
+        """Check check statement (if/alt/instead)"""
+        # Check condition is flag-compatible
         cond_type = self._get_expression_type(node.condition)
         if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
             self.error_handler.add_warning(
@@ -198,40 +199,40 @@ class TypeChecker:
         
         # Check branches
         self._check_platter(node.then_block)
-        for elif_cond, elif_block in node.elif_clauses:
-            self._get_expression_type(elif_cond)
-            self._check_platter(elif_block)
+        for alt_cond, alt_block in node.elif_clauses:
+            self._get_expression_type(alt_cond)
+            self._check_platter(alt_block)
         if node.else_block:
             self._check_platter(node.else_block)
     
     def _check_switch_statement(self, node: SwitchStatement):
-        """Check switch statement"""
-        # Get switch expression type
-        switch_type = self._get_expression_type(node.expr)
+        """Check menu statement (menu/choice/usual)"""
+        # Get menu expression type
+        menu_type = self._get_expression_type(node.expr)
         
-        # Check cases
+        # Check choices
         for case in node.cases:
-            # Check case value type matches switch expression type
+            # Check choice value type matches menu expression type
             for value in case.values:
                 case_type = self._get_expression_type(value)
-                if switch_type and case_type and not switch_type.is_compatible_with(case_type):
+                if menu_type and case_type and not menu_type.is_compatible_with(case_type):
                     self.error_handler.add_error(
-                        f"Case value type {case_type} does not match switch expression type {switch_type}",
+                        f"Choice value type {case_type} does not match menu expression type {menu_type}",
                         value,
                         ErrorCodes.TYPE_MISMATCH
                     )
             
-            # Check case statements
+            # Check choice statements
             for stmt in case.statements:
                 self._check_statement(stmt)
         
-        # Check default case
+        # Check usual case
         if node.default:
             for stmt in node.default:
                 self._check_statement(stmt)
     
     def _check_while_loop(self, node: WhileLoop):
-        """Check while loop"""
+        """Check repeat loop"""
         cond_type = self._get_expression_type(node.condition)
         if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
             self.error_handler.add_warning(
@@ -241,7 +242,7 @@ class TypeChecker:
         self._check_platter(node.body)
     
     def _check_do_while_loop(self, node: DoWhileLoop):
-        """Check do-while loop"""
+        """Check order-repeat loop"""
         self._check_platter(node.body)
         cond_type = self._get_expression_type(node.condition)
         if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
@@ -251,7 +252,7 @@ class TypeChecker:
             )
     
     def _check_for_loop(self, node: ForLoop):
-        """Check for loop"""
+        """Check pass loop"""
         if node.init:
             if isinstance(node.init, Assignment):
                 self._check_assignment(node.init)
@@ -425,12 +426,18 @@ class TypeChecker:
         return field_type
     
     def _get_function_call_type(self, node: FunctionCall) -> Optional[TypeInfo]:
-        """Get type of function call (return type)"""
-        func_symbol = self.symbol_table.lookup_symbol(node.name)
-        if not func_symbol:
+        """Get type of recipe call (serve type)"""
+        # Check if it's a built-in recipe
+        builtin = get_builtin_recipe(node.name)
+        if builtin:
+            return builtin.get_return_type_info()
+        
+        # Look up user-defined recipe
+        recipe_symbol = self.symbol_table.lookup_symbol(node.name)
+        if not recipe_symbol:
             return None
         
-        return func_symbol.type_info
+        return recipe_symbol.type_info
     
     def _get_cast_type(self, node: CastExpr) -> TypeInfo:
         """Get type of cast expression"""

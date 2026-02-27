@@ -15,44 +15,44 @@ class ControlFlowChecker:
         self.symbol_table = symbol_table
         self.error_handler = error_handler
         self.in_loop = 0
-        self.in_function = False
-        self.current_function_has_return = False
+        self.in_recipe = False
+        self.current_recipe_has_serve = False
     
     def check(self, ast_root: Program):
         """Run control flow checking pass"""
-        # Check function bodies
+        # Check recipe bodies
         for recipe in ast_root.recipe_decl:
             self._check_recipe_decl(recipe)
         
-        # Check start_platter if present (treat as a function)
+        # Check start_platter if present (treat as a recipe)
         if ast_root.start_platter:
-            old_in_function = self.in_function
-            self.in_function = True
+            old_in_recipe = self.in_recipe
+            self.in_recipe = True
             self._check_platter(ast_root.start_platter)
-            self.in_function = old_in_function
+            self.in_recipe = old_in_recipe
     
     def _check_recipe_decl(self, node: RecipeDecl):
-        """Check function declaration"""
-        old_in_function = self.in_function
-        old_has_return = self.current_function_has_return
+        """Check recipe declaration"""
+        old_in_recipe = self.in_recipe
+        old_has_serve = self.current_recipe_has_serve
         
-        self.in_function = True
-        self.current_function_has_return = False
+        self.in_recipe = True
+        self.current_recipe_has_serve = False
         
-        # Check function body
+        # Check recipe body
         if node.body:
             self._check_platter(node.body)
         
-        # Check if non-void function has return statement
-        if node.return_type != "void" and not self.current_function_has_return:
+        # Check if non-void recipe has serve statement
+        if node.return_type != "void" and not self.current_recipe_has_serve:
             self.error_handler.add_warning(
-                f"Function '{node.name}' may not return a value in all code paths",
+                f"Recipe '{node.name}' may not serve a value in all code paths",
                 node,
-                ErrorCodes.MISSING_RETURN
+                ErrorCodes.MISSING_SERVE
             )
         
-        self.in_function = old_in_function
-        self.current_function_has_return = old_has_return
+        self.in_recipe = old_in_recipe
+        self.current_recipe_has_serve = old_has_serve
     
     def _check_platter(self, node: Platter):
         """Check block/compound statement"""
@@ -81,69 +81,69 @@ class ControlFlowChecker:
             self._check_platter(node)
     
     def _check_break_statement(self, node: BreakStatement):
-        """Check break statement is inside a loop or switch"""
+        """Check stop statement is inside a loop or menu"""
         if self.in_loop == 0:
             self.error_handler.add_error(
-                "break statement outside of loop",
+                "stop statement outside of loop",
                 node,
-                ErrorCodes.BREAK_OUTSIDE_LOOP
+                ErrorCodes.STOP_OUTSIDE_LOOP
             )
     
     def _check_continue_statement(self, node: ContinueStatement):
-        """Check continue statement is inside a loop"""
+        """Check next statement is inside a loop"""
         if self.in_loop == 0:
             self.error_handler.add_error(
-                "continue statement outside of loop",
+                "next statement outside of loop",
                 node,
-                ErrorCodes.CONTINUE_OUTSIDE_LOOP
+                ErrorCodes.NEXT_OUTSIDE_LOOP
             )
     
     def _check_return_statement(self, node: ReturnStatement):
-        """Check return statement is inside a function"""
-        if not self.in_function:
+        """Check serve statement is inside a recipe"""
+        if not self.in_recipe:
             self.error_handler.add_error(
-                "return statement outside of function",
+                "serve statement outside of recipe",
                 node,
-                ErrorCodes.RETURN_OUTSIDE_FUNCTION
+                ErrorCodes.SERVE_OUTSIDE_RECIPE
             )
         else:
-            self.current_function_has_return = True
+            self.current_recipe_has_serve = True
     
     def _check_if_statement(self, node: IfStatement):
-        """Check if statement"""
-        # Track if all branches return
-        then_returns = self._block_has_return(node.then_block)
+        """Check check statement (if/alt/instead)"""
+        # Track if all branches serve
+        then_serves = self._block_has_serve(node.then_block)
         
-        elif_returns = []
-        for _, elif_block in node.elif_clauses:
-            elif_returns.append(self._block_has_return(elif_block))
+        alt_serves = []
+        for _, alt_block in node.elif_clauses:
+            alt_serves.append(self._block_has_serve(alt_block))
         
-        else_returns = False
+        instead_serves = False
         if node.else_block:
-            else_returns = self._block_has_return(node.else_block)
+            instead_serves = self._block_has_serve(node.else_block)
         
-        # If all branches return, mark function as having return
-        if then_returns and (not node.elif_clauses or all(elif_returns)) and else_returns:
-            self.current_function_has_return = True
+        # If all branches serve, mark recipe as having serve
+        if then_serves and (not node.elif_clauses or all(alt_serves)) and instead_serves:
+            self.current_recipe_has_serve = True
         
         # Check branches
         self._check_platter(node.then_block)
-        for _, elif_block in node.elif_clauses:
-            self._check_platter(elif_block)
+        for _, alt_block in node.elif_clauses:
+            self._check_platter(alt_block)
         if node.else_block:
             self._check_platter(node.else_block)
     
     def _check_switch_statement(self, node: SwitchStatement):
-        """Check switch statement"""
-        # Allow break in switch
+        """Check menu statement (menu/choice/usual)"""
+        # Allow stop in menu
         self.in_loop += 1
         
-        # Check cases
+        # Check choices
         for case in node.cases:
             for stmt in case.statements:
                 self._check_statement(stmt)
         
-        # Check default case
+        # Check usual case
         if node.default:
             for stmt in node.default:
                 self._check_statement(stmt)
@@ -151,41 +151,41 @@ class ControlFlowChecker:
         self.in_loop -= 1
     
     def _check_while_loop(self, node: WhileLoop):
-        """Check while loop"""
+        """Check repeat loop"""
         self.in_loop += 1
         self._check_platter(node.body)
         self.in_loop -= 1
     
     def _check_do_while_loop(self, node: DoWhileLoop):
-        """Check do-while loop"""
+        """Check order-repeat loop"""
         self.in_loop += 1
         self._check_platter(node.body)
         self.in_loop -= 1
     
     def _check_for_loop(self, node: ForLoop):
-        """Check for loop"""
+        """Check pass loop"""
         self.in_loop += 1
         self._check_platter(node.body)
         self.in_loop -= 1
     
-    def _block_has_return(self, block: Platter) -> bool:
-        """Check if a block definitely has a return statement"""
+    def _block_has_serve(self, block: Platter) -> bool:
+        """Check if a block definitely has a serve statement"""
         for stmt in block.statements:
             if isinstance(stmt, ReturnStatement):
                 return True
             elif isinstance(stmt, IfStatement):
-                # Check if all branches return
-                then_returns = self._block_has_return(stmt.then_block)
+                # Check if all branches serve
+                then_serves = self._block_has_serve(stmt.then_block)
                 
-                elif_returns = []
-                for _, elif_block in stmt.elif_clauses:
-                    elif_returns.append(self._block_has_return(elif_block))
+                alt_serves = []
+                for _, alt_block in stmt.elif_clauses:
+                    alt_serves.append(self._block_has_serve(alt_block))
                 
-                else_returns = False
+                instead_serves = False
                 if stmt.else_block:
-                    else_returns = self._block_has_return(stmt.else_block)
+                    instead_serves = self._block_has_serve(stmt.else_block)
                 
-                if then_returns and (not stmt.elif_clauses or all(elif_returns)) and else_returns:
+                if then_serves and (not stmt.elif_clauses or all(alt_serves)) and instead_serves:
                     return True
         
         return False

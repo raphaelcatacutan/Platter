@@ -1,24 +1,25 @@
 """
-Function Checking Pass for Platter Language
-Validates function calls, parameter matching, and return types
+Recipe Checking Pass for Platter Language
+Validates recipe calls, spice (parameter) matching, and serve (return) types
 """
 
 from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import TypeInfo, Symbol, SymbolKind
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
 from app.semantic_analyzer.semantic_passes.error_handler import SemanticErrorHandler, ErrorCodes
+from app.semantic_analyzer.builtin_recipes import get_builtin_recipe, is_builtin_recipe
 from typing import Optional, List
 
 
 class FunctionChecker:
-    """Performs function call checking on AST"""
+    """Performs recipe call checking on AST"""
     
     def __init__(self, symbol_table: SymbolTable, error_handler: SemanticErrorHandler):
         self.symbol_table = symbol_table
         self.error_handler = error_handler
     
     def check(self, ast_root: Program):
-        """Run function checking pass"""
+        """Run recipe checking pass"""
         # Check global declarations
         for decl in ast_root.global_decl:
             if isinstance(decl, VarDecl) and decl.init_value:
@@ -28,7 +29,7 @@ class FunctionChecker:
             elif isinstance(decl, TableDecl) and decl.init_value:
                 self._check_expression(decl.init_value)
         
-        # Check function bodies
+        # Check recipe bodies
         for recipe in ast_root.recipe_decl:
             self._check_recipe_decl(recipe)
         
@@ -39,8 +40,8 @@ class FunctionChecker:
                 self.symbol_table.exit_scope()
     
     def _check_recipe_decl(self, node: RecipeDecl):
-        """Check function declaration"""
-        # Check function body (navigate to existing function scope)
+        """Check recipe declaration"""
+        # Check recipe body (navigate to existing recipe scope)
         if node.body:
             scope_name = node.name  # The builder removed 'recipe_' prefix
             if self.symbol_table.navigate_to_scope(scope_name):
@@ -138,73 +139,124 @@ class FunctionChecker:
                 self._check_expression(value)
     
     def _check_function_call(self, node: FunctionCall):
-        """Check function call arguments"""
-        # Look up function symbol
-        func_symbol = self.symbol_table.lookup_symbol(node.name)
-        if not func_symbol:
+        """Check recipe call flavors (arguments)"""
+        # Check if it's a built-in recipe
+        builtin = get_builtin_recipe(node.name)
+        if builtin:
+            self._check_builtin_recipe_call(node, builtin)
+            # Still recursively check flavors
+            for arg in node.args:
+                self._check_expression(arg)
+            return
+        
+        # Look up recipe symbol
+        recipe_symbol = self.symbol_table.lookup_symbol(node.name)
+        if not recipe_symbol:
             # Error already reported by scope_checker
             return
         
-        if func_symbol.kind != SymbolKind.FUNCTION:
+        if recipe_symbol.kind != SymbolKind.FUNCTION:
             # Error already reported by scope_checker
             return
         
-        # Get function parameters
-        params = self._get_function_parameters(node.name)
-        if params is None:
-            # Could not determine parameters
+        # Get recipe spices (parameters)
+        spices = self._get_recipe_spices(node.name)
+        if spices is None:
+            # Could not determine spices
             return
         
-        # Check argument count
-        if len(node.args) != len(params):
+        # Check flavor count
+        if len(node.args) != len(spices):
             self.error_handler.add_error(
-                f"Function '{node.name}' expects {len(params)} argument(s), got {len(node.args)}",
+                f"Recipe '{node.name}' expects {len(spices)} flavor(s), got {len(node.args)}",
                 node,
-                ErrorCodes.ARGUMENT_COUNT_MISMATCH
+                ErrorCodes.FLAVOR_COUNT_MISMATCH
             )
             return
         
-        # Check argument types
-        for i, (arg, param) in enumerate(zip(node.args, params)):
+        # Check flavor types
+        for i, (arg, spice) in enumerate(zip(node.args, spices)):
             arg_type = self._get_expression_type(arg)
-            param_type = param.type_info
+            spice_type = spice.type_info
             
-            if arg_type and not param_type.is_compatible_with(arg_type):
+            if arg_type and not spice_type.is_compatible_with(arg_type):
                 self.error_handler.add_error(
-                    f"Argument {i+1} of function '{node.name}': "
-                    f"expected {param_type}, got {arg_type}",
+                    f"Flavor {i+1} of recipe '{node.name}': "
+                    f"expected {spice_type}, got {arg_type}",
                     arg,
-                    ErrorCodes.ARGUMENT_TYPE_MISMATCH
+                    ErrorCodes.FLAVOR_TYPE_MISMATCH
                 )
         
-        # Recursively check arguments
+        # Recursively check flavors
         for arg in node.args:
             self._check_expression(arg)
     
-    def _get_function_parameters(self, func_name: str) -> Optional[List[Symbol]]:
-        """Get function parameters from the AST or symbol table"""
-        # Look up the function symbol
-        func_symbol = self.symbol_table.lookup_symbol(func_name)
-        if not func_symbol or func_symbol.kind != SymbolKind.FUNCTION:
+    def _check_builtin_recipe_call(self, node: FunctionCall, builtin):
+        """Check built-in recipe call"""
+        expected_count = builtin.get_spice_count()
+        
+        # Check flavor count
+        if len(node.args) != expected_count:
+            self.error_handler.add_error(
+                f"Built-in recipe '{node.name}' expects {expected_count} flavor(s), got {len(node.args)}",
+                node,
+                ErrorCodes.FLAVOR_COUNT_MISMATCH
+            )
+            return
+        
+        # Check flavor types (with flexible type checking for built-ins)
+        for i, arg in enumerate(node.args):
+            arg_type = self._get_expression_type(arg)
+            expected_spice_type = builtin.get_spice_type_info(i)
+            
+            if arg_type and expected_spice_type:
+                # For built-ins, be more flexible with type compatibility
+                if not self._is_compatible_for_builtin(arg_type, expected_spice_type):
+                    self.error_handler.add_error(
+                        f"Flavor {i+1} of built-in recipe '{node.name}': "
+                        f"expected {expected_spice_type}, got {arg_type}",
+                        arg,
+                        ErrorCodes.FLAVOR_TYPE_MISMATCH
+                    )
+    
+    def _is_compatible_for_builtin(self, arg_type: TypeInfo, expected_type: TypeInfo) -> bool:
+        """Check if a type is compatible for built-in recipe calls (more flexible)"""
+        # First check with standard compatibility
+        if expected_type.is_compatible_with(arg_type):
+            return True
+        
+        # For built-ins, allow any scalar type to be converted
+        if expected_type.dimensions == 0 and arg_type.dimensions == 0:
+            # Allow piece/sip/chars/flag to be compatible with each other for built-ins
+            return True
+        
+        # Check if dimensions match (important for array operations)
+        return expected_type.dimensions == arg_type.dimensions
+    
+    def _get_recipe_spices(self, recipe_name: str) -> Optional[List[Symbol]]:
+        """Get recipe spices (parameters) from the AST or symbol table"""
+        # Look up the recipe symbol
+        recipe_symbol = self.symbol_table.lookup_symbol(recipe_name)
+        if not recipe_symbol or recipe_symbol.kind != SymbolKind.FUNCTION:
             return None
         
-        # Find the function's scope (recipe scope)
-        func_scope = None
+        # Find the recipe's scope
+        recipe_scope = None
         for child in self.symbol_table.global_scope.children:
-            if child.name == func_name:
-                func_scope = child
+            if child.name == recipe_name:
+                recipe_scope = child
                 break
         
-        if not func_scope:
+        if not recipe_scope:
             return None
         
-        # Get parameters (symbols with kind PARAMETER)
-        params = []
-        for name, symbol in func_scope.symbols.items():
+        # Get spices (symbols with kind PARAMETER)
+        spices = []
+        for name, symbol in recipe_scope.symbols.items():
             if symbol.kind == SymbolKind.PARAMETER:
-                params.append(symbol)
+                spices.append(symbol)
         
-        return params
+        return spices
     
     def _get_expression_type(self, expr: ASTNode) -> Optional[TypeInfo]:
         """Get the type of an expression (simplified version)"""

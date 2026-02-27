@@ -41,7 +41,7 @@ class Program(ASTNode):
 # ============================================================================
 
 class VarDecl(ASTNode):
-    """Variable declaration (ingredient/scalar)"""
+    """Ingredient declaration (scalar ingredient)"""
     def __init__(self, data_type, identifier, init_value=None, line=None, column=None):
         super().__init__("VarDecl", line, column)
         self.data_type = data_type  # "piece", "sip", "flag", "chars"
@@ -99,21 +99,21 @@ class TableDecl(ASTNode):
         return f"TableDecl({self.table_type}{dims} {self.identifier})"
 
 class RecipeDecl(ASTNode):
-    """Function/recipe declaration"""
+    """Recipe declaration (prepare)"""
     def __init__(self, return_type, return_dims, name, params, body, line=None, column=None):
         super().__init__("RecipeDecl", line, column)
         self.return_type = return_type
         self.return_dims = return_dims  # int
         self.name = name
-        self.params = params  # List of ParamDecl nodes
+        self.params = params  # List of ParamDecl nodes (spices)
         self.body = body  # Platter node
     
     def __repr__(self):
         dims = f"[{self.return_dims}]" if self.return_dims > 0 else ""
-        return f"RecipeDecl({self.return_type}{dims} {self.name}({len(self.params)} params))"
+        return f"RecipeDecl({self.return_type}{dims} {self.name}({len(self.params)} spices))"
 
 class ParamDecl(ASTNode):
-    """Function parameter"""
+    """Recipe spice (parameter)"""
     def __init__(self, data_type, dimensions, identifier, line=None, column=None):
         super().__init__("ParamDecl", line, column)
         self.data_type = data_type
@@ -163,31 +163,31 @@ class IfStatement(ASTNode):
         super().__init__("IfStatement", line, column)
         self.condition = condition  # Expression
         self.then_block = then_block  # Platter
-        self.elif_clauses = elif_clauses or []  # List of (condition, block) tuples
-        self.else_block = else_block  # Platter or None
+        self.elif_clauses = elif_clauses or []  # List of (condition, block) tuples (alt)
+        self.else_block = else_block  # Platter or None (instead)
     
     def add_elif(self, condition, block):
         self.elif_clauses.append((condition, block))
     
     def __repr__(self):
-        return f"IfStatement(elifs={len(self.elif_clauses)}, else={'Yes' if self.else_block else 'No'})"
+        return f"IfStatement(alts={len(self.elif_clauses)}, instead={'Yes' if self.else_block else 'No'})"
 
 class SwitchStatement(ASTNode):
-    """Switch statement (menu)"""
+    """Menu statement (menu/choice/usual)"""
     def __init__(self, expr, cases, default=None, line=None, column=None):
         super().__init__("SwitchStatement", line, column)
-        self.expr = expr  # Expression to switch on
-        self.cases = cases or []  # List of CaseClause nodes
-        self.default = default  # Statements list or None
+        self.expr = expr  # Expression to menu on
+        self.cases = cases or []  # List of CaseClause nodes (choice)
+        self.default = default  # Statements list or None (usual)
     
     def add_case(self, case_node):
         self.cases.append(case_node)
     
     def __repr__(self):
-        return f"SwitchStatement({len(self.cases)} cases, default={'Yes' if self.default else 'No'})"
+        return f"SwitchStatement({len(self.cases)} choices, usual={'Yes' if self.default else 'No'})"
 
 class CaseClause(ASTNode):
-    """Case in a switch statement"""
+    """Choice in a menu statement"""
     def __init__(self, value, statements, line=None, column=None):
         super().__init__("CaseClause", line, column)
         self.value = value  # Literal value
@@ -197,7 +197,7 @@ class CaseClause(ASTNode):
         return f"CaseClause({len(self.statements)} stmts)"
 
 class WhileLoop(ASTNode):
-    """While loop (repeat)"""
+    """Repeat loop (repeat)"""
     def __init__(self, condition, body, line=None, column=None):
         super().__init__("WhileLoop", line, column)
         self.condition = condition
@@ -207,7 +207,7 @@ class WhileLoop(ASTNode):
         return f"WhileLoop()"
 
 class DoWhileLoop(ASTNode):
-    """Do-while loop (order...repeat)"""
+    """Order-repeat loop (order...repeat)"""
     def __init__(self, body, condition, line=None, column=None):
         super().__init__("DoWhileLoop", line, column)
         self.body = body
@@ -217,7 +217,7 @@ class DoWhileLoop(ASTNode):
         return f"DoWhileLoop()"
 
 class ForLoop(ASTNode):
-    """For loop (pass)"""
+    """Pass loop (pass)"""
     def __init__(self, init, update, condition, body, line=None, column=None):
         super().__init__("ForLoop", line, column)
         self.init = init  # Assignment or None
@@ -229,7 +229,7 @@ class ForLoop(ASTNode):
         return f"ForLoop()"
 
 class ReturnStatement(ASTNode):
-    """Return statement (serve)"""
+    """Serve statement (serve)"""
     def __init__(self, value=None, line=None, column=None):
         super().__init__("ReturnStatement", line, column)
         self.value = value  # Expression or None
@@ -238,7 +238,7 @@ class ReturnStatement(ASTNode):
         return f"ReturnStatement(has_value={'Yes' if self.value else 'No'})"
 
 class BreakStatement(ASTNode):
-    """Break statement (stop)"""
+    """Stop statement (stop)"""
     def __init__(self, line=None, column=None):
         super().__init__("BreakStatement", line, column)
     
@@ -246,7 +246,7 @@ class BreakStatement(ASTNode):
         return "BreakStatement()"
 
 class ContinueStatement(ASTNode):
-    """Continue statement (next)"""
+    """Next statement (next)"""
     def __init__(self, line=None, column=None):
         super().__init__("ContinueStatement", line, column)
     
@@ -288,7 +288,7 @@ class UnaryOp(ASTNode):
         return f"UnaryOp({self.operator})"
 
 class Identifier(ASTNode):
-    """Variable reference"""
+    """Ingredient reference"""
     def __init__(self, name, line=None, column=None):
         super().__init__("Identifier", line, column)
         self.name = name
@@ -317,17 +317,17 @@ class TableAccess(ASTNode):
         return f"TableAccess(.{self.field})"
 
 class FunctionCall(ASTNode):
-    """Function call"""
+    """Recipe call"""
     def __init__(self, name, args=None, line=None, column=None):
         super().__init__("FunctionCall", line, column)
         self.name = name
-        self.args = args or []
+        self.args = args or []  # flavors
     
     def add_arg(self, arg):
         self.args.append(arg)
     
     def __repr__(self):
-        return f"FunctionCall({self.name}, {len(self.args)} args)"
+        return f"FunctionCall({self.name}, {len(self.args)} flavors)"
 
 class CastExpr(ASTNode):
     """Type cast expression"""
@@ -344,13 +344,17 @@ class CastExpr(ASTNode):
 # ============================================================================
 
 class Literal(ASTNode):
-    """Literal value"""
+    """Literal value (piece/sip/flag/chars)"""
     def __init__(self, value_type, value, line=None, column=None):
         super().__init__("Literal", line, column)
         self.value_type = value_type  # "piece", "sip", "flag", "chars"
         self.value = value
     
     def __repr__(self):
+        # Display 'up' for True and 'down' for False in repr
+        if self.value_type == "flag":
+            display_val = "up" if self.value else "down"
+            return f"Literal({self.value_type}: {display_val})"
         return f"Literal({self.value_type}: {self.value})"
 
 class ArrayLiteral(ASTNode):
