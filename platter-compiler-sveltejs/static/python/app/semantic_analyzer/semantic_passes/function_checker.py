@@ -7,7 +7,7 @@ from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import TypeInfo, Symbol, SymbolKind
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
 from app.semantic_analyzer.semantic_passes.error_handler import SemanticErrorHandler, ErrorCodes
-from app.semantic_analyzer.builtin_recipes import get_builtin_recipe, is_builtin_recipe
+from app.semantic_analyzer.builtin_recipes import get_builtin_recipe, is_builtin_recipe, find_compatible_builtin_overload
 from typing import Optional, List
 
 
@@ -141,9 +141,31 @@ class FunctionChecker:
     def _check_function_call(self, node: FunctionCall):
         """Check recipe call flavors (arguments)"""
         # Check if it's a built-in recipe
-        builtin = get_builtin_recipe(node.name)
-        if builtin:
-            self._check_builtin_recipe_call(node, builtin)
+        if is_builtin_recipe(node.name):
+            # Get argument types to find the matching overload
+            arg_types = []
+            for arg in node.args:
+                arg_type = self._get_expression_type(arg)
+                if arg_type:
+                    arg_types.append((arg_type.base_type, arg_type.dimensions))
+                else:
+                    # Can't determine arg type, but still check arguments recursively
+                    for arg in node.args:
+                        self._check_expression(arg)
+                    return
+            
+            # Find matching overload
+            builtin_overload = find_compatible_builtin_overload(node.name, arg_types)
+            if builtin_overload:
+                self._check_builtin_recipe_call(node, builtin_overload)
+            else:
+                # No matching overload - report error
+                self.error_handler.add_error(
+                    f"No matching overload for built-in recipe '{node.name}' with argument types: {arg_types}",
+                    node,
+                    ErrorCodes.FLAVOR_TYPE_MISMATCH
+                )
+            
             # Still recursively check flavors
             for arg in node.args:
                 self._check_expression(arg)

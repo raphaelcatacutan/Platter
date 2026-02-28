@@ -48,128 +48,386 @@ class BuiltinRecipeSignature:
 
 
 # Built-in recipe definitions
-# Format: (name, return_type, return_dims, [(spice_type, spice_dims), ...], description)
+# Format: name -> [list of signatures] to support overloading
+# All overloads have the same arity and return type, but different parameter types
 BUILTIN_RECIPES = {
-    # Type conversion recipes
-    "topiece": BuiltinRecipeSignature(
-        "topiece", "piece", 0, 
-        [("chars", 0)],  # Accepts chars, sip, or flag (any scalar)
-        "Convert to piece (integer)"
-    ),
+    # Type conversion recipes (with overloads for different input types)
+    "topiece": [
+        BuiltinRecipeSignature(
+            "topiece", "piece", 0, 
+            [("piece", 0)],
+            "Convert piece to piece (does nothing)"
+        ),
+        BuiltinRecipeSignature(
+            "topiece", "piece", 0, 
+            [("chars", 0)],
+            "Convert chars to piece (integer)"
+        ),
+        BuiltinRecipeSignature(
+            "topiece", "piece", 0, 
+            [("sip", 0)],
+            "Convert sip to piece (integer)"
+        ),
+        BuiltinRecipeSignature(
+            "topiece", "piece", 0, 
+            [("flag", 0)],
+            "Convert flag to piece (integer)"
+        ),
+    ],
     
-    "tosip": BuiltinRecipeSignature(
-        "tosip", "sip", 0,
-        [("chars", 0)],  # Accepts piece, chars, or flag (any scalar)
-        "Convert to sip (float)"
-    ),
+    "tosip": [
+        BuiltinRecipeSignature(
+            "tosip", "sip", 0,
+            [("sip", 0)],
+            "Convert sip to sip (does nothing)"
+        ),
+        BuiltinRecipeSignature(
+            "tosip", "sip", 0,
+            [("piece", 0)],
+            "Convert piece to sip (float)"
+        ),
+        BuiltinRecipeSignature(
+            "tosip", "sip", 0,
+            [("chars", 0)],
+            "Convert chars to sip (float)"
+        ),
+        BuiltinRecipeSignature(
+            "tosip", "sip", 0,
+            [("flag", 0)],
+            "Convert flag to sip (float)"
+        ),
+    ],
     
-    "tochars": BuiltinRecipeSignature(
-        "tochars", "chars", 0,
-        [("chars", 0)],  # Accepts any scalar type
-        "Convert to chars (string)"
-    ),
+    "tochars": [
+        BuiltinRecipeSignature(
+            "tochars", "chars", 0,
+            [("chars", 0)],
+            "Convert chars to chars (does nothing)"
+        ),
+        BuiltinRecipeSignature(
+            "tochars", "chars", 0,
+            [("piece", 0)],
+            "Convert piece to chars (string)"
+        ),
+        BuiltinRecipeSignature(
+            "tochars", "chars", 0,
+            [("sip", 0)],
+            "Convert sip to chars (string)"
+        ),
+        BuiltinRecipeSignature(
+            "tochars", "chars", 0,
+            [("flag", 0)],
+            "Convert flag to chars (string)"
+        ),
+    ],
+
+    # Input and Output recipes
+    "take": [
+        BuiltinRecipeSignature(
+            "take", "chars", 0,
+            [],
+            "Read input no params"
+        ),
+    ],
     
-    # Array manipulation recipes
-    "append": BuiltinRecipeSignature(
-        "append", "void", 0,
-        [("chars", 1), ("chars", 0)],  # (array, element) - accepts any array type
-        "Append element to end of array"
-    ),
+    "bill": [
+        BuiltinRecipeSignature(
+            "bill", "chars", 0,
+            [("chars", 0)],
+            "Print chars to output"
+        ),
+    ],
     
-    "remove": BuiltinRecipeSignature(
-        "remove", "chars", 0,  # Returns the removed element
-        [("chars", 1), ("piece", 0)],  # (array, index)
-        "Remove and return element at index from array"
-    ),
+     # Math and Formatting recipes   
+    "pow": [
+        BuiltinRecipeSignature(
+            "pow", "piece", 0,
+            [("piece", 0), ("piece", 0)],
+            "Calculate power (piece^piece)"
+        ),
+    ],
+
+    "sqrt": [
+        BuiltinRecipeSignature(
+            "sqrt", "sip", 0,
+            [("piece", 0)],
+            "Calculate square root of piece -> sip"
+        ),
+    ],
     
-    "size": BuiltinRecipeSignature(
-        "size", "piece", 0,
-        [("chars", 1)],  # Accepts any array
-        "Get the size (length) of an array"
-    ),
+    "fact": [
+        BuiltinRecipeSignature(
+            "fact", "piece", 0,
+            [("piece", 0)],
+            "Calculate factorial (piece only)"
+        ),
+    ],
     
-    "copy": BuiltinRecipeSignature(
-        "copy", "chars", 1,
-        [("chars", 1)],  # Accepts any array, returns same type
-        "Create a copy of an array"
-    ),
+    "cut": [
+        BuiltinRecipeSignature(
+            "cut", "chars", 0,
+            [("sip", 0), ("sip", 0)],
+            "Format sip to chars cut(x,y) where <x>.<y> result digits"
+        ),
+    ],
     
-    "reverse": BuiltinRecipeSignature(
-        "reverse", "void", 0,
-        [("chars", 1)],  # Modifies array in place
-        "Reverse an array in place"
-    ),
+    "copy": [
+        BuiltinRecipeSignature(
+            "copy", "chars", 0,
+            [("chars", 0), ("piece", 0), ("piece", 0)],
+            "Extracts a substring based on character position copy(chars,start,end)"
+        ),
+    ],
+
+    "rand": [
+        BuiltinRecipeSignature(
+            "rand", "sip", 0,
+            [],
+            "Generate random sip integer between 0 and 1, exclusive"
+        ),
+    ],
     
-    "sort": BuiltinRecipeSignature(
-        "sort", "void", 0,
-        [("chars", 1)],  # Modifies array in place
-        "Sort an array in place"
-    ),
+    # Array and Table recipes
+    "size": [
+        BuiltinRecipeSignature(
+            "size", "piece", 0,
+            [("piece", 1)],
+            "Get the size (length) of piece array"
+        ),
+        BuiltinRecipeSignature(
+            "size", "piece", 0,
+            [("sip", 1)],
+            "Get the size (length) of sip array"
+        ),
+        BuiltinRecipeSignature(
+            "size", "piece", 0,
+            [("chars", 1)],
+            "Get the size (length) of chars array"
+        ),
+        BuiltinRecipeSignature(
+            "size", "piece", 0,
+            [("flag", 1)],
+            "Get the size (length) of flag array"
+        ),
+    ],
     
-    "order": BuiltinRecipeSignature(
-        "order", "void", 0,
-        [("chars", 1)],  # Modifies array in place (alias for sort)
-        "Order (sort) an array in place"
-    ),
+    "sort": [
+        BuiltinRecipeSignature(
+            "sort", "piece", 1,
+            [("piece", 1)],
+            "Sort piece array in place"
+        ),
+        BuiltinRecipeSignature(
+            "sort", "sip", 1,
+            [("sip", 1)],
+            "Sort sip array in place"
+        ),
+        BuiltinRecipeSignature(
+            "sort", "chars", 1,
+            [("chars", 1)],
+            "Sort chars array in place"
+        ),
+    ],
     
-    # String manipulation recipes
-    "cut": BuiltinRecipeSignature(
-        "cut", "chars", 0,
-        [("chars", 0), ("piece", 0), ("piece", 0)],  # (string, start, end)
-        "Extract substring from start to end index"
-    ),
+    "search": [
+        BuiltinRecipeSignature(
+            "search", "piece", 0,
+            [("piece", 1), ("piece", 0)],
+            "Search for piece element, return index or -1"
+        ),
+        BuiltinRecipeSignature(
+            "search", "piece", 0,
+            [("sip", 1), ("sip", 0)],
+            "Search for sip element, return index or -1"
+        ),
+        BuiltinRecipeSignature(
+            "search", "piece", 0,
+            [("chars",1), ("chars", 0)],
+            "Search for chars element, return index or -1"
+        ),
+    ],
     
-    "search": BuiltinRecipeSignature(
-        "search", "piece", 0,
-        [("chars", 0), ("chars", 0)],  # (haystack, needle)
-        "Search for substring, return index or -1"
-    ),
+    "reverse": [
+        BuiltinRecipeSignature(
+            "reverse", "piece", 1,
+            [("piece", 1)],
+            "Reverse piece array in place"
+        ),
+        BuiltinRecipeSignature(
+            "reverse", "sip", 1,
+            [("sip", 1)],
+            "Reverse sip array in place"
+        ),
+        BuiltinRecipeSignature(
+            "reverse", "chars", 1,
+            [("chars", 1)],
+            "Reverse chars array in place"
+        ),
+        BuiltinRecipeSignature(
+            "reverse", "flag", 1,
+            [("flag", 1)],
+            "Reverse flag array in place"
+        ),
+    ],
     
-    "matches": BuiltinRecipeSignature(
-        "matches", "flag", 0,
-        [("chars", 0), ("chars", 0)],  # (string, pattern)
-        "Check if string matches pattern"
-    ),
+    "append": [
+        BuiltinRecipeSignature(
+            "append", "piece", 1,
+            [("piece", 1), ("piece", 0)],
+            "Append piece element to piece array"
+        ),
+        BuiltinRecipeSignature(
+            "append", "sip", 1,
+            [("sip", 1), ("sip", 0)],
+            "Append sip element to sip array"
+        ),
+        BuiltinRecipeSignature(
+            "append", "chars", 1,
+            [("chars", 1), ("chars", 0)],
+            "Append chars element to chars array"
+        ),
+        BuiltinRecipeSignature(
+            "append", "flag", 1,
+            [("flag", 1), ("flag", 0)],
+            "Append flag element to flag array"
+        ),
+    ],
     
-    # Math recipes
-    "sqrt": BuiltinRecipeSignature(
-        "sqrt", "sip", 0,
-        [("sip", 0)],  # Accepts piece or sip
-        "Calculate square root"
-    ),
+    "remove": [
+        BuiltinRecipeSignature(
+            "remove", "piece", 1,
+            [("piece", 1), ("piece", 0)],
+            "Remove piece at index from piece array element and return new array"
+        ),
+        BuiltinRecipeSignature(
+            "remove", "sip", 1,
+            [("sip", 1), ("piece", 0)],
+            "Remove sip at index from piece array element and return new array"
+        ),
+        BuiltinRecipeSignature(
+            "remove", "chars", 1,
+            [("chars", 1), ("piece", 0)],
+            "Remove chars at index from piece array element and return new array"
+        ),
+        BuiltinRecipeSignature(
+            "remove", "flag", 1,
+            [("flag", 1), ("piece", 0)],
+            "Remove flag at index from piece array element and return new array"
+        ),
+    ],
     
-    "pow": BuiltinRecipeSignature(
-        "pow", "sip", 0,
-        [("sip", 0), ("sip", 0)],  # (base, exponent)
-        "Calculate power (base^exponent)"
-    ),
-    
-    "fact": BuiltinRecipeSignature(
-        "fact", "piece", 0,
-        [("piece", 0)],
-        "Calculate factorial (piece only)"
-    ),
-    
-    # Random number generation
-    "rand": BuiltinRecipeSignature(
-        "rand", "piece", 0,
-        [("piece", 0), ("piece", 0)],  # (min, max)
-        "Generate random piece (integer) between min and max (inclusive)"
-    ),
+    "matches": [
+        # Arrays
+        BuiltinRecipeSignature(
+            "matches", "flag", 0,
+            [("piece", 1), ("piece", 1)],
+            "Check if two piece arrays have the same elements"
+        ),
+        BuiltinRecipeSignature(
+            "matches", "flag", 0,
+            [("sip", 1), ("sip", 1)],
+            "Check if two sip arrays have the same elements"
+        ),
+        BuiltinRecipeSignature(
+            "matches", "flag", 0,
+            [("chars", 1), ("chars", 1)],
+            "Check if two chars arrays have the same elements"
+        ),
+        BuiltinRecipeSignature(
+            "matches", "flag", 0,
+            [("flag", 1), ("flag", 1)],
+            "Check if two flag arrays have the same elements"
+        ),
+        # Tables/Structs (assuming type name is 'table' or 'struct')
+        BuiltinRecipeSignature(
+            "matches", "flag", 0,
+            [("table", 0), ("table", 0)],
+            "Check if two tables have the same fields and values"
+        ),
+        # Table/Struct arrays
+        BuiltinRecipeSignature(
+            "matches", "flag", 0,
+            [("table", 1), ("table", 1)],
+            "Check if two table arrays have the same elements"
+        ),
+    ],
 }
 
 
-def get_builtin_recipe(name: str) -> BuiltinRecipeSignature:
+def get_builtin_recipe(name: str) -> List[BuiltinRecipeSignature]:
     """
-    Get a built-in recipe signature by name
+    Get all built-in recipe signature overloads by name
     
     Args:
         name: Recipe name
     
     Returns:
-        BuiltinRecipeSignature if found, None otherwise
+        List of BuiltinRecipeSignature overloads if found, empty list otherwise
     """
-    return BUILTIN_RECIPES.get(name)
+    return BUILTIN_RECIPES.get(name, [])
+
+
+def get_builtin_recipe_overload(name: str, arg_types: List[Tuple[str, int]]) -> BuiltinRecipeSignature:
+    """
+    Get a specific built-in recipe overload by name and argument types
+    
+    Args:
+        name: Recipe name
+        arg_types: List of (type_name, dimensions) tuples for arguments
+    
+    Returns:
+        Matching BuiltinRecipeSignature if found, None otherwise
+    """
+    overloads = BUILTIN_RECIPES.get(name, [])
+    for overload in overloads:
+        if overload.spices == arg_types:
+            return overload
+    return None
+
+
+def find_compatible_builtin_overload(name: str, arg_types: List[Tuple[str, int]]) -> BuiltinRecipeSignature:
+    """
+    Find a compatible built-in recipe overload by name and argument types.
+    Allows some type flexibility (e.g., piece and sip are compatible).
+    
+    Args:
+        name: Recipe name
+        arg_types: List of (type_name, dimensions) tuples for arguments
+    
+    Returns:
+        Compatible BuiltinRecipeSignature if found, None otherwise
+    """
+    overloads = BUILTIN_RECIPES.get(name, [])
+    
+    # First try exact match
+    for overload in overloads:
+        if overload.spices == arg_types:
+            return overload
+    
+    # Then try compatible match (piece <-> sip)
+    for overload in overloads:
+        if len(overload.spices) != len(arg_types):
+            continue
+        
+        compatible = True
+        for i, (expected_type, expected_dims) in enumerate(overload.spices):
+            actual_type, actual_dims = arg_types[i]
+            
+            # Dimensions must match exactly
+            if expected_dims != actual_dims:
+                compatible = False
+                break
+            
+            # Types must match or be compatible (piece <-> sip)
+            if expected_type != actual_type:
+                if not ({expected_type, actual_type} == {"piece", "sip"}):
+                    compatible = False
+                    break
+        
+        if compatible:
+            return overload
+    
+    return None
 
 
 def is_builtin_recipe(name: str) -> bool:

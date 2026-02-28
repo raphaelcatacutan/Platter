@@ -8,7 +8,7 @@ import logging as log
 
 # To disable logs, set level=log.CRITICAL. 
 # To enable logs, set level=log.DEBUG
-log.basicConfig(level=log.DEBUG, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
+log.basicConfig(level=log.CRITICAL, format='%(levelname)s: <%(funcName)s> | %(message)s') # J
 
 class Parser():
     def __init__(self, tokens):

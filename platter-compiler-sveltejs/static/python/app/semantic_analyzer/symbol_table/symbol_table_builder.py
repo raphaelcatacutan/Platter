@@ -11,6 +11,21 @@ from app.semantic_analyzer.builtin_recipes import BUILTIN_RECIPES
 from typing import Optional
 
 
+class _BuiltinParam:
+    """Simple parameter holder for built-in recipes"""
+    def __init__(self, data_type: str, dimensions: int):
+        self.data_type = data_type
+        self.dimensions = dimensions
+
+
+class _BuiltinDeclaration:
+    """Simple declaration node holder for built-in recipes"""
+    def __init__(self, params: list, return_type: str, return_dims: int):
+        self.params = params
+        self.return_type = return_type
+        self.return_dims = return_dims
+
+
 class SymbolTableBuilder:
     """Builds symbol table by traversing the AST - NO semantic checking!"""
     
@@ -20,11 +35,36 @@ class SymbolTableBuilder:
         self._register_builtin_recipes()
     
     def _register_builtin_recipes(self):
-        """Register all built-in recipes"""
-        for recipe_name, recipe_sig in BUILTIN_RECIPES.items():
-            type_info = recipe_sig.get_return_type_info()
-            type_info.is_function = True
-            self.symbol_table.define_symbol(recipe_name, SymbolKind.FUNCTION, type_info, None)
+        """Register all built-in recipes with their overloads"""
+        for recipe_name, signatures in BUILTIN_RECIPES.items():
+            for signature in signatures:
+                # Create mock parameter nodes for signature matching
+                params = [_BuiltinParam(spice_type, spice_dims) 
+                         for spice_type, spice_dims in signature.spices]
+                
+                # Create a mock declaration node
+                declaration = _BuiltinDeclaration(
+                    params, 
+                    signature.return_type, 
+                    signature.return_dims
+                )
+                
+                # Create type info with is_function flag
+                type_info = signature.get_return_type_info()
+                type_info.is_function = True
+                
+                # Create symbol
+                symbol = Symbol(
+                    recipe_name, 
+                    SymbolKind.FUNCTION, 
+                    type_info, 
+                    0,
+                    declaration,
+                    self.symbol_table.global_scope
+                )
+                
+                # Register as built-in (allows overloading)
+                self.symbol_table.register_builtin_recipe(recipe_name, symbol)
     
     def build(self, ast_root: Program) -> SymbolTable:
         """Build symbol table from AST"""
@@ -85,6 +125,15 @@ class SymbolTableBuilder:
     
     def _process_recipe_decl(self, node: RecipeDecl):
         """Process a recipe declaration"""
+        # Prevent user-defined recipes from shadowing built-ins
+        if self.symbol_table.is_builtin_recipe(node.name):
+            if self.symbol_table.error_handler:
+                self.symbol_table.error_handler.add_error(
+                    f"Cannot redefine built-in recipe '{node.name}'", 
+                    node
+                )
+            return
+        
         dims = node.return_dims if node.return_dims is not None else 0
         serve_type = self._create_type_info(node.return_type, dims)
         

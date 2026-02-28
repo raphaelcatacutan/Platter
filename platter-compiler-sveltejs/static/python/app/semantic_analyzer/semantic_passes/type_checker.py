@@ -7,7 +7,7 @@ from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import TypeInfo, Symbol, SymbolKind
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
 from app.semantic_analyzer.semantic_passes.error_handler import SemanticErrorHandler, ErrorCodes
-from app.semantic_analyzer.builtin_recipes import get_builtin_recipe, is_builtin_recipe
+from app.semantic_analyzer.builtin_recipes import get_builtin_recipe, is_builtin_recipe, find_compatible_builtin_overload
 from typing import Optional
 
 
@@ -428,9 +428,24 @@ class TypeChecker:
     def _get_function_call_type(self, node: FunctionCall) -> Optional[TypeInfo]:
         """Get type of recipe call (serve type)"""
         # Check if it's a built-in recipe
-        builtin = get_builtin_recipe(node.name)
-        if builtin:
-            return builtin.get_return_type_info()
+        if is_builtin_recipe(node.name):
+            # Get argument types
+            arg_types = []
+            for arg in node.args:
+                arg_type = self._get_expression_type(arg)
+                if arg_type:
+                    arg_types.append((arg_type.base_type, arg_type.dimensions))
+                else:
+                    # If we can't determine arg type, we can't find overload
+                    return None
+            
+            # Find matching overload
+            builtin_overload = find_compatible_builtin_overload(node.name, arg_types)
+            if builtin_overload:
+                return builtin_overload.get_return_type_info()
+            else:
+                # No matching overload found - error will be caught elsewhere
+                return None
         
         # Look up user-defined recipe
         recipe_symbol = self.symbol_table.lookup_symbol(node.name)

@@ -8,9 +8,28 @@ from app.semantic_analyzer.ast.ast_nodes import Literal, ArrayLiteral, TableLite
 from typing import List, Optional, Tuple
 
 
+def _get_parameters_str(symbol: Symbol) -> str:
+    """Get parameter list for functions"""
+    if symbol.kind.value != 'recipe' or not symbol.declaration_node:
+        return "-"
+    
+    if hasattr(symbol.declaration_node, 'params'):
+        params = symbol.declaration_node.params
+        if not params:
+            return "()"
+        param_strs = []
+        for p in params:
+            dims_str = f"[{p.dimensions}]" if hasattr(p, 'dimensions') and p.dimensions else ""
+            param_id = p.identifier if hasattr(p, 'identifier') else ""
+            param_strs.append(f"{p.data_type}{dims_str} {param_id}".strip())
+        return f"({', '.join(param_strs)})"
+    return "-"
+
+
 def format_symbol_table_compact(symbol_table: SymbolTable, error_handler=None) -> str:
     """
     Format symbol table in a nicely formatted table with columns
+    Separates built-in recipes from user-defined symbols
     
     Args:
         symbol_table: The symbol table to format
@@ -21,6 +40,78 @@ def format_symbol_table_compact(symbol_table: SymbolTable, error_handler=None) -
     """
     output = []
     
+    # === BUILT-IN RECIPES SECTION ===
+    if hasattr(symbol_table, 'builtin_recipes') and symbol_table.builtin_recipes:
+        output.append("╔════════════════════════════════════════════════════════════════════════╗")
+        output.append("║                      BUILT-IN RECIPES (OVERLOADABLE)                   ║")
+        output.append("╚════════════════════════════════════════════════════════════════════════╝")
+        output.append("")
+        
+        builtin_data = []
+        for recipe_name, overloads in sorted(symbol_table.builtin_recipes.items()):
+            for idx, symbol in enumerate(overloads, 1):
+                params_str = _get_parameters_str(symbol)
+                return_type = symbol.type_info.base_type
+                return_dims = "[]" * symbol.type_info.dimensions if symbol.type_info.dimensions > 0 else ""
+                
+                builtin_data.append({
+                    'name': recipe_name if idx == 1 else "",  # Show name only once
+                    'overload': f"#{idx}",
+                    'parameters': params_str,
+                    'returns': f"{return_type}{return_dims}"
+                })
+        
+        if builtin_data:
+            # Calculate column widths
+            max_name = max(len(b['name']) for b in builtin_data)
+            max_overload = max(len(b['overload']) for b in builtin_data)
+            max_params = max(len(b['parameters']) for b in builtin_data)
+            max_returns = max(len(b['returns']) for b in builtin_data)
+            
+            name_width = max(max_name, len("Recipe")) + 2
+            overload_width = max(max_overload, len("Ver")) + 2
+            params_width = min(max(max_params, len("Parameters")) + 2, 50)
+            returns_width = max(max_returns, len("Returns")) + 2
+            
+            # Build table header
+            output.append("┌" + "─" * name_width + "┬" + "─" * overload_width + "┬" + 
+                         "─" * params_width + "┬" + "─" * returns_width + "┐")
+            
+            header = (f"│ {'Recipe':<{name_width-2}} │ {'Ver':<{overload_width-2}} │ "
+                     f"{'Parameters':<{params_width-2}} │ {'Returns':<{returns_width-2}} │")
+            output.append(header)
+            
+            output.append("├" + "─" * name_width + "┼" + "─" * overload_width + "┼" + 
+                         "─" * params_width + "┼" + "─" * returns_width + "┤")
+            
+            # Add data rows
+            current_recipe = None
+            for data in builtin_data:
+                # Add separator between different recipes
+                if current_recipe != data['name'] and data['name'] and current_recipe is not None:
+                    output.append("├" + "─" * name_width + "┼" + "─" * overload_width + "┼" + 
+                                 "─" * params_width + "┼" + "─" * returns_width + "┤")
+                
+                if data['name']:
+                    current_recipe = data['name']
+                
+                params_display = data['parameters'][:params_width-2] if len(data['parameters']) > params_width-2 else data['parameters']
+                
+                row = (f"│ {data['name']:<{name_width-2}} │ {data['overload']:<{overload_width-2}} │ "
+                      f"{params_display:<{params_width-2}} │ {data['returns']:<{returns_width-2}} │")
+                output.append(row)
+            
+            # Close table
+            output.append("└" + "─" * name_width + "┴" + "─" * overload_width + "┴" + 
+                         "─" * params_width + "┴" + "─" * returns_width + "┘")
+        
+        output.append("")
+        output.append("╔════════════════════════════════════════════════════════════════════════╗")
+        output.append("║                      USER-DEFINED SYMBOLS                              ║")
+        output.append("╚════════════════════════════════════════════════════════════════════════╝")
+        output.append("")
+    
+    # === USER-DEFINED SYMBOLS SECTION ===
     # Collect all symbols with their scope information
     symbols_data = []
     
@@ -30,22 +121,6 @@ def format_symbol_table_compact(symbol_table: SymbolTable, error_handler=None) -
             return "global"
         # Return the actual scope name which contains recipe names and statement types
         return scope_name
-    
-    def get_parameters_str(symbol: Symbol) -> str:
-        """Get parameter list for functions"""
-        if symbol.kind.value != 'function' or not symbol.declaration_node:
-            return "-"
-        
-        if hasattr(symbol.declaration_node, 'params'):
-            params = symbol.declaration_node.params
-            if not params:
-                return "()"
-            param_strs = []
-            for p in params:
-                dims_str = f"[{p.dimensions}]" if p.dimensions else ""
-                param_strs.append(f"{p.data_type}{dims_str} {p.identifier}")
-            return f"({', '.join(param_strs)})"
-        return "-"
     
     def get_value_str(symbol: Symbol) -> str:
         """Get initial value if available"""
@@ -86,7 +161,7 @@ def format_symbol_table_compact(symbol_table: SymbolTable, error_handler=None) -
                 'declared_scope': declared_scope_name if declared_scope_name else "-",
                 'accessed_scopes': accessed_str,
                 'accessed_list': accessed_list,  # Store as list for console output
-                'parameters': get_parameters_str(symbol),
+                'parameters': _get_parameters_str(symbol),
                 'args': "-",  # Args tracked at call sites, not in symbol definition
                 'value': get_value_str(symbol),
                 'kind': symbol.kind.value,
@@ -240,22 +315,6 @@ def format_symbol_table_for_console(symbol_table: SymbolTable) -> List[dict]:
     """
     symbols_output = []
     
-    def get_parameters_str(symbol: Symbol) -> str:
-        """Get parameter list for functions"""
-        if symbol.kind.value != 'function' or not symbol.declaration_node:
-            return "-"
-        
-        if hasattr(symbol.declaration_node, 'params'):
-            params = symbol.declaration_node.params
-            if not params:
-                return "()"
-            param_strs = []
-            for p in params:
-                dims_str = f"[{p.dimensions}]" if p.dimensions else ""
-                param_strs.append(f"{p.data_type}{dims_str} {p.identifier}")
-            return f"({', '.join(param_strs)})"
-        return "-"
-    
     def get_value_str(symbol: Symbol) -> str:
         """Get initial value if available"""
         if not symbol.declaration_node:
@@ -285,7 +344,7 @@ def format_symbol_table_for_console(symbol_table: SymbolTable) -> List[dict]:
                 'Dims': str(symbol.type_info.dimensions) if symbol.type_info.dimensions > 0 else "-",
                 'Declared': declared_scope_name if declared_scope_name else "-",
                 'Accessed': symbol.accessed_in_scopes if symbol.accessed_in_scopes else [],
-                'Parameters': get_parameters_str(symbol),
+                'Parameters': _get_parameters_str(symbol),
                 'Value': get_value_str(symbol),
                 'Kind': symbol.kind.value,
                 'Level': scope.level
