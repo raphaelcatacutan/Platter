@@ -2495,7 +2495,8 @@ class ASTParser:
             node_4 = self.statements()
 
             # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            result = [Assignment((node_0(self._context_dimensions) if node_0 else self._context_dimensions), node_1, node_2)] + node_4
+            base = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            result = [Assignment((node_0(base) if node_0 else base), node_1, node_2)] + node_4
             return result
 
         else: self.parse_token(self.error_arr)
@@ -2709,7 +2710,7 @@ class ASTParser:
             self.parse_token(";")
 
             # Create Assignment node
-            target = self._context_dimensions
+            target = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
             accessor = node_0
             if accessor:
                 target = accessor(target)
@@ -3534,7 +3535,8 @@ class ASTParser:
             node_4 = self.statements_menu()
 
             # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            result = [Assignment((node_0(self._context_dimensions) if node_0 else self._context_dimensions), node_1, node_2)] + node_4
+            base = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            result = [Assignment((node_0(base) if node_0 else base), node_1, node_2)] + node_4
             return result
 
         else: self.parse_token(self.error_arr)
@@ -3849,7 +3851,8 @@ class ASTParser:
             node_4 = self.statements_loop()
 
             # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            result = [Assignment((node_0(self._context_dimensions) if node_0 else self._context_dimensions), node_1, node_2)] + node_4
+            base = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            result = [Assignment((node_0(base) if node_0 else base), node_1, node_2)] + node_4
             return result
 
         else: self.parse_token(self.error_arr)

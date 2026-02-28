@@ -205,7 +205,7 @@ class TypeChecker:
             if not target_type.is_exact_match(value_type):
                 self.error_handler.add_error(
                     f"Type mismatch in assignment: cannot assign {value_type} to {target_type}",
-                    node,
+                    node.target,  # Use target node for better error location
                     ErrorCodes.TYPE_MISMATCH
                 )
     
@@ -407,18 +407,17 @@ class TypeChecker:
         if not left_type or not right_type:
             return None
         
-        # Check type compatibility
-        if not left_type.is_compatible_with(right_type):
-            self.error_handler.add_error(
-                f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
-                node,
-                ErrorCodes.INVALID_OPERATION
-            )
-            return None
-        
         # Determine result type based on operator
         if node.operator in ['+', '-', '*', '/', '%']:
-            # Arithmetic operations
+            # Arithmetic operations require exact type match (no implicit conversions)
+            if not left_type.is_exact_match(right_type):
+                self.error_handler.add_error(
+                    f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
+            
             if left_type.base_type in ["piece", "sip"]:
                 return left_type
             elif left_type.base_type == "chars" and node.operator == '+':
@@ -431,13 +430,54 @@ class TypeChecker:
                     ErrorCodes.INVALID_OPERATION
                 )
                 return None
-        elif node.operator in ['==', '!=', '<', '>', '<=', '>=']:
-            # Comparison operations return flag (boolean)
+        elif node.operator in ['<', '>', '<=', '>=']:
+            # Relational operations require exact type match (no implicit conversions)
+            if not left_type.is_exact_match(right_type):
+                self.error_handler.add_error(
+                    f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
+            # Relational operations return flag (boolean)
+            return TypeInfo("flag", 0)
+        elif node.operator in ['==', '!=']:
+            # Equality operations require exact type match
+            if not left_type.is_exact_match(right_type):
+                self.error_handler.add_error(
+                    f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
+            # Equality operations return flag (boolean)
             return TypeInfo("flag", 0)
         elif node.operator in ['and', 'or']:
-            # Logical operations
+            # Logical operations only work with flag types
+            if left_type.base_type != "flag" or right_type.base_type != "flag":
+                self.error_handler.add_error(
+                    f"Logical operators require flag operands: {left_type} {node.operator} {right_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
+            if not left_type.is_exact_match(right_type):
+                self.error_handler.add_error(
+                    f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
             return TypeInfo("flag", 0)
         else:
+            # For other operators, check exact match
+            if not left_type.is_exact_match(right_type):
+                self.error_handler.add_error(
+                    f"Type mismatch in binary operation: {left_type} {node.operator} {right_type}",
+                    node,
+                    ErrorCodes.INVALID_OPERATION
+                )
+                return None
             return left_type
     
     def _get_unary_op_type(self, node: UnaryOp) -> Optional[TypeInfo]:
