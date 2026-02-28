@@ -7,7 +7,23 @@ NOTE: This version does NOT perform semantic checking - it only collects symbols
 from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import Symbol, Scope, SymbolKind, TypeInfo
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
+from app.semantic_analyzer.builtin_recipes import BUILTIN_RECIPES
 from typing import Optional
+
+
+class _BuiltinParam:
+    """Simple parameter holder for built-in recipes"""
+    def __init__(self, data_type: str, dimensions: int):
+        self.data_type = data_type
+        self.dimensions = dimensions
+
+
+class _BuiltinDeclaration:
+    """Simple declaration node holder for built-in recipes"""
+    def __init__(self, params: list, return_type: str, return_dims: int):
+        self.params = params
+        self.return_type = return_type
+        self.return_dims = return_dims
 
 
 class SymbolTableBuilder:
@@ -16,22 +32,39 @@ class SymbolTableBuilder:
     def __init__(self):
         self.symbol_table = SymbolTable()
         self.built = False
-        self._register_builtin_functions()
+        self._register_builtin_recipes()
     
-    def _register_builtin_functions(self):
-        """Register built-in type conversion functions"""
-        # Built-in type conversion functions: topiece, tosip, toflag, tochars
-        builtin_functions = [
-            ("topiece", "piece"),  # Converts to piece (integer)
-            ("tosip", "sip"),      # Converts to sip (float)
-            ("tochars", "chars"),  # Converts to chars (string)
-        ]
-        
-        for func_name, return_type in builtin_functions:
-            type_info = TypeInfo(return_type, 0)
-            type_info.is_function = True
-            # Built-in functions can accept any type as parameter
-            self.symbol_table.define_symbol(func_name, SymbolKind.FUNCTION, type_info, None)
+    def _register_builtin_recipes(self):
+        """Register all built-in recipes with their overloads"""
+        for recipe_name, signatures in BUILTIN_RECIPES.items():
+            for signature in signatures:
+                # Create mock parameter nodes for signature matching
+                params = [_BuiltinParam(spice_type, spice_dims) 
+                         for spice_type, spice_dims in signature.spices]
+                
+                # Create a mock declaration node
+                declaration = _BuiltinDeclaration(
+                    params, 
+                    signature.return_type, 
+                    signature.return_dims
+                )
+                
+                # Create type info with is_function flag
+                type_info = signature.get_return_type_info()
+                type_info.is_function = True
+                
+                # Create symbol
+                symbol = Symbol(
+                    recipe_name, 
+                    SymbolKind.FUNCTION, 
+                    type_info, 
+                    0,
+                    declaration,
+                    self.symbol_table.global_scope
+                )
+                
+                # Register as built-in (allows overloading)
+                self.symbol_table.register_builtin_recipe(recipe_name, symbol)
     
     def build(self, ast_root: Program) -> SymbolTable:
         """Build symbol table from AST"""
@@ -91,29 +124,38 @@ class SymbolTableBuilder:
             self._process_recipe_decl(recipe)
     
     def _process_recipe_decl(self, node: RecipeDecl):
-        """Process a function declaration"""
-        dims = node.return_dims if node.return_dims is not None else 0
-        return_type = self._create_type_info(node.return_type, dims)
+        """Process a recipe declaration"""
+        # Prevent user-defined recipes from shadowing built-ins
+        if self.symbol_table.is_builtin_recipe(node.name):
+            if self.symbol_table.error_handler:
+                self.symbol_table.error_handler.add_error(
+                    f"Cannot redefine built-in recipe '{node.name}'", 
+                    node
+                )
+            return
         
-        func_symbol = Symbol(
+        dims = node.return_dims if node.return_dims is not None else 0
+        serve_type = self._create_type_info(node.return_type, dims)
+        
+        recipe_symbol = Symbol(
             node.name,
             SymbolKind.FUNCTION,
-            return_type,
+            serve_type,
             0,
             node,
             self.symbol_table.current_scope
         )
         
-        if not self.symbol_table.current_scope.define(func_symbol):
+        if not self.symbol_table.current_scope.define(recipe_symbol):
             if self.symbol_table.error_handler:
                 self.symbol_table.error_handler.add_error(f"Recipe '{node.name}' already defined", node)
             return
         
         self.symbol_table.enter_scope(f"recipe_{node.name}")
-        self.symbol_table.current_function = func_symbol
+        self.symbol_table.current_function = recipe_symbol
         
-        for param in node.params:
-            self._process_param_decl(param)
+        for spice in node.params:
+            self._process_param_decl(spice)
         
         if node.body:
             self._process_platter(node.body)
@@ -122,7 +164,7 @@ class SymbolTableBuilder:
         self.symbol_table.exit_scope()
     
     def _process_param_decl(self, node: ParamDecl):
-        """Process a function parameter"""
+        """Process a recipe spice (parameter)"""
         dims = node.dimensions if node.dimensions is not None else 0
         type_info = self._create_type_info(node.data_type, dims)
         
@@ -134,7 +176,7 @@ class SymbolTableBuilder:
         )
     
     def _process_var_decl(self, node: VarDecl):
-        """Process a variable declaration"""
+        """Process an ingredient declaration"""
         type_info = self._create_type_info(node.data_type, 0)
         
         self.symbol_table.define_symbol(
@@ -253,8 +295,8 @@ class SymbolTableBuilder:
             self.symbol_table.exit_scope()
     
     def _process_switch_statement(self, node: SwitchStatement):
-        """Process switch statement - use Platter syntax: menu/choice"""
-        # Track switch expression usage
+        """Process menu statement - use Platter syntax: menu/choice/usual"""
+        # Track menu expression usage
         self._track_expression_usage(node.expr)
         
         for i, case in enumerate(node.cases):
@@ -264,7 +306,7 @@ class SymbolTableBuilder:
             self.symbol_table.exit_scope()
         
         if node.default:
-            self.symbol_table.enter_scope("default")
+            self.symbol_table.enter_scope("usual")
             for stmt in node.default:
                 self._process_statement(stmt)
             self.symbol_table.exit_scope()
@@ -375,14 +417,14 @@ class SymbolTableBuilder:
             self._track_expression_usage(expr.table)
         
         elif isinstance(expr, FunctionCall):
-            # Track function name usage
+            # Track recipe name usage
             symbol = self.symbol_table.lookup_symbol(expr.name)
             if symbol:
                 declared_scope = self._find_declaring_scope(symbol.name)
                 if declared_scope:
                     symbol.add_usage(self.symbol_table.current_scope.name, declared_scope.name)
             else:
-                # Function not declared - track as undeclared but accessed
+                # Recipe not declared - track as undeclared but accessed
                 if expr.name not in self.symbol_table.undeclared_symbols:
                     undeclared_symbol = Symbol(
                         name=expr.name,
@@ -400,7 +442,7 @@ class SymbolTableBuilder:
                 current_scope_name = self.symbol_table.current_scope.name
                 if current_scope_name not in undeclared_symbol.accessed_in_scopes:
                     undeclared_symbol.accessed_in_scopes.append(current_scope_name)
-            # Track arguments
+            # Track flavors (arguments)
             for arg in expr.args:
                 self._track_expression_usage(arg)
         

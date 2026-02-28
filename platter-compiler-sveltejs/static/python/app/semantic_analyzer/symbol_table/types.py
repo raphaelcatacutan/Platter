@@ -10,10 +10,10 @@ from enum import Enum
 
 class SymbolKind(Enum):
     """Types of symbols in the symbol table"""
-    VARIABLE = "ingredient"
-    PARAMETER = "spice"
-    FUNCTION = "recipe"
-    TABLE_TYPE = "table_type"
+    VARIABLE = "ingredient"  # variable -> ingredient
+    PARAMETER = "spice"  # parameter -> spice
+    FUNCTION = "recipe"  # function -> recipe
+    TABLE_TYPE = "table_type"  # struct -> table
     FIELD = "field"
 
 

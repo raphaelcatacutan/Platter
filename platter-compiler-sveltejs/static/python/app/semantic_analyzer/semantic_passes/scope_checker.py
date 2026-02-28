@@ -7,6 +7,7 @@ from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import Symbol, SymbolKind
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
 from app.semantic_analyzer.semantic_passes.error_handler import SemanticErrorHandler, ErrorCodes
+from app.semantic_analyzer.builtin_recipes import is_builtin_recipe
 from typing import Set
 
 
@@ -39,11 +40,11 @@ class ScopeChecker:
                 self._check_platter(ast_root.start_platter)
                 self.symbol_table.exit_scope()
         
-        # Check for unused variables (warnings)
+        # Check for unused ingredients (warnings)
         self._check_unused_symbols()
     
     def _check_var_decl(self, node: VarDecl):
-        """Check variable declaration"""
+        """Check ingredient declaration"""
         # Check if type is defined
         if not self.symbol_table.is_type_defined(node.data_type):
             self.error_handler.add_error(
@@ -101,25 +102,25 @@ class ScopeChecker:
             self._check_expression(node.init_value)
     
     def _check_recipe_decl(self, node: RecipeDecl):
-        """Check function declaration"""
-        # Check return type
+        """Check recipe declaration"""
+        # Check serve type
         if not self.symbol_table.is_type_defined(node.return_type):
             self.error_handler.add_error(
-                f"Undefined return type '{node.return_type}'",
+                f"Undefined serve type '{node.return_type}'",
                 node,
                 ErrorCodes.UNDEFINED_TYPE
             )
         
-        # Check parameter types
-        for param in node.params:
-            if not self.symbol_table.is_type_defined(param.data_type):
+        # Check spice types
+        for spice in node.params:
+            if not self.symbol_table.is_type_defined(spice.data_type):
                 self.error_handler.add_error(
-                    f"Undefined parameter type '{param.data_type}' in parameter '{param.identifier}'",
-                    param,
+                    f"Undefined spice type '{spice.data_type}' in spice '{spice.identifier}'",
+                    spice,
                     ErrorCodes.UNDEFINED_TYPE
                 )
         
-        # Check function body (navigate to existing function scope)
+        # Check recipe body (navigate to existing recipe scope)
         if node.body:
             scope_name = node.name  # The builder removed 'recipe_' prefix
             if self.symbol_table.navigate_to_scope(scope_name):
@@ -201,7 +202,7 @@ class ScopeChecker:
             if not symbol:
                 scope_name = self.symbol_table.current_scope.name
                 self.error_handler.add_error(
-                    f"Undefined variable '{expr.name}' in '{scope_name}'",
+                    f"Undefined ingredient '{expr.name}' in '{scope_name}'",
                     expr,
                     ErrorCodes.UNDEFINED_SYMBOL
                 )
@@ -224,26 +225,30 @@ class ScopeChecker:
             self._check_expression(expr.table)
         
         elif isinstance(expr, FunctionCall):
-            # Check if function is defined
-            func_symbol = self.symbol_table.lookup_symbol(expr.name)
-            if not func_symbol:
-                scope_name = self.symbol_table.current_scope.name
-                self.error_handler.add_error(
-                    f"Undefined function '{expr.name}' in '{scope_name}'",
-                    expr,
-                    ErrorCodes.UNDEFINED_FUNCTION
-                )
-            elif func_symbol.kind != SymbolKind.FUNCTION:
-                self.error_handler.add_error(
-                    f"'{expr.name}' is not a function",
-                    expr,
-                    ErrorCodes.UNDEFINED_FUNCTION
-                )
-            else:
-                # Mark function as used
+            # Check if recipe is defined (including built-in recipes)
+            if is_builtin_recipe(expr.name):
+                # Built-in recipes are always available
                 self.used_symbols.add(expr.name)
+            else:
+                recipe_symbol = self.symbol_table.lookup_symbol(expr.name)
+                if not recipe_symbol:
+                    scope_name = self.symbol_table.current_scope.name
+                    self.error_handler.add_error(
+                        f"Undefined recipe '{expr.name}' in '{scope_name}'",
+                        expr,
+                        ErrorCodes.UNDEFINED_RECIPE
+                    )
+                elif recipe_symbol.kind != SymbolKind.FUNCTION:
+                    self.error_handler.add_error(
+                        f"'{expr.name}' is not a recipe",
+                        expr,
+                        ErrorCodes.UNDEFINED_RECIPE
+                    )
+                else:
+                    # Mark recipe as used
+                    self.used_symbols.add(expr.name)
             
-            # Check arguments
+            # Check flavors (arguments)
             for arg in expr.args:
                 self._check_expression(arg)
         
@@ -266,7 +271,7 @@ class ScopeChecker:
                 self._check_expression(value)
     
     def _check_unused_symbols(self):
-        """Check for unused variables and issue warnings"""
+        """Check for unused ingredients and issue warnings"""
         # Recursively check all scopes
         self._check_scope_for_unused(self.symbol_table.global_scope)
     
@@ -280,9 +285,9 @@ class ScopeChecker:
             # Check if symbol was used
             if name not in self.used_symbols:
                 self.error_handler.add_warning(
-                    f"Unused variable '{name}'",
+                    f"Unused ingredient '{name}'",
                     symbol.declaration_node,
-                    ErrorCodes.UNUSED_VARIABLE
+                    ErrorCodes.UNUSED_INGREDIENT
                 )
         
         # Check child scopes
