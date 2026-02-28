@@ -264,7 +264,7 @@ class TypeChecker:
                     return
             
             actual_type = self._get_expression_type(node.value)
-            if actual_type and not expected_type.is_compatible_with(actual_type):
+            if actual_type and not expected_type.is_exact_match(actual_type):
                 self.error_handler.add_error(
                     f"Serve type mismatch: expected {expected_type}, got {actual_type}",
                     node,
