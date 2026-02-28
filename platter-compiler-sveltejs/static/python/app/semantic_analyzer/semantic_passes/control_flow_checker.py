@@ -17,6 +17,7 @@ class ControlFlowChecker:
         self.in_loop = 0
         self.in_recipe = False
         self.current_recipe_has_serve = False
+        self.code_is_reachable = True  # Track if current code is reachable
     
     def check(self, ast_root: Program):
         """Run control flow checking pass"""
@@ -43,21 +44,34 @@ class ControlFlowChecker:
         if node.body:
             self._check_platter(node.body)
         
-        # Check if non-void recipe has serve statement
-        if node.return_type != "void" and not self.current_recipe_has_serve:
-            self.error_handler.add_warning(
-                f"Recipe '{node.name}' may not serve a value in all code paths",
-                node,
-                ErrorCodes.MISSING_SERVE
-            )
+        # Check if non-void recipe has guaranteed serve statement
+        if node.return_type != "void":
+            if not node.body or not self._block_has_serve(node.body):
+                self.error_handler.add_error(
+                    f"Recipe '{node.name}' must have a guaranteed serve statement in all code paths",
+                    node,
+                    ErrorCodes.MISSING_SERVE
+                )
         
         self.in_recipe = old_in_recipe
         self.current_recipe_has_serve = old_has_serve
     
     def _check_platter(self, node: Platter):
         """Check block/compound statement"""
-        for stmt in node.statements:
+        for i, stmt in enumerate(node.statements):
             self._check_statement(stmt)
+            
+            # If we hit a serve statement, mark subsequent code as unreachable
+            if isinstance(stmt, ServeStatement):
+                # Check if there are statements after serve
+                if i + 1 < len(node.statements):
+                    next_stmt = node.statements[i + 1]
+                    self.error_handler.add_error(
+                        "Unreachable code after serve statement",
+                        next_stmt,
+                        ErrorCodes.UNREACHABLE_CODE
+                    )
+                    break  # Stop checking further statements in this block
     
     def _check_statement(self, node: ASTNode):
         """Check a statement"""
@@ -106,26 +120,9 @@ class ControlFlowChecker:
                 node,
                 ErrorCodes.SERVE_OUTSIDE_RECIPE
             )
-        else:
-            self.current_recipe_has_serve = True
     
     def _check_check_statement(self, node: CheckStatement):
         """Check check statement (if/alt/instead)"""
-        # Track if all branches serve
-        then_serves = self._block_has_serve(node.then_block)
-        
-        alt_serves = []
-        for _, alt_block in node.elif_clauses:
-            alt_serves.append(self._block_has_serve(alt_block))
-        
-        instead_serves = False
-        if node.else_block:
-            instead_serves = self._block_has_serve(node.else_block)
-        
-        # If all branches serve, mark recipe as having serve
-        if then_serves and (not node.elif_clauses or all(alt_serves)) and instead_serves:
-            self.current_recipe_has_serve = True
-        
         # Check branches
         self._check_platter(node.then_block)
         for _, alt_block in node.elif_clauses:
