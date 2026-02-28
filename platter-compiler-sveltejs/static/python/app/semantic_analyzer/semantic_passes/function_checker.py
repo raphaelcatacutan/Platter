@@ -135,7 +135,7 @@ class FunctionChecker:
             for elem in expr.elements:
                 self._check_expression(elem)
         elif isinstance(expr, TableLiteral):
-            for field_name, value in expr.field_inits:
+            for field_name, value, line, col in expr.field_inits:
                 self._check_expression(value)
     
     def _check_function_call(self, node: RecipeCall):
@@ -338,7 +338,7 @@ class FunctionChecker:
         elif isinstance(expr, TableLiteral):
             # Build field types from literal
             field_types = {}
-            for field_name, value in expr.field_inits:
+            for field_name, value, line, col in expr.field_inits:
                 field_type = self._get_expression_type(value)
                 if field_type:
                     field_types[field_name] = field_type

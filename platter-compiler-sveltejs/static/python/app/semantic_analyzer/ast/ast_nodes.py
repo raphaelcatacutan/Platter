@@ -374,7 +374,7 @@ class TableLiteral(ASTNode):
     """Table literal"""
     def __init__(self, field_inits=None, line=None, column=None):
         super().__init__("TableLiteral", line, column)
-        self.field_inits = field_inits or []  # List of (field_name, value) tuples
+        self.field_inits = field_inits or []  # List of (field_name, value, line, col) tuples
     
     def add_field(self, field_name, value):
         self.field_inits.append((field_name, value))

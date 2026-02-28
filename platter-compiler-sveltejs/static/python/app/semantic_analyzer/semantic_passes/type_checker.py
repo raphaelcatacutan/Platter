@@ -95,21 +95,46 @@ class TypeChecker:
             return
         
         if node.init_value:
-            init_type = self._get_expression_type(node.init_value)
-            if init_type:
-                dims = node.dimensions if node.dimensions is not None else 0
-                expected_type = TypeInfo(node.table_type, dims, table_type.table_fields if dims == 0 else None)
-                if dims > 0:
-                    expected_type.is_table = True
-                    expected_type.table_fields = table_type.table_fields
-                
-                if not expected_type.is_compatible_with(init_type):
-                    self.error_handler.add_error(
-                        f"Type mismatch in table '{node.identifier}' initialization: "
-                        f"expected {expected_type}, got {init_type}",
-                        node,
-                        ErrorCodes.TYPE_MISMATCH
-                    )
+            # For table literals, check field-by-field instead of comparing types directly
+            if isinstance(node.init_value, TableLiteral):
+                # Validate each field in the literal
+                for field_name, value, line, col in node.init_value.field_inits:
+                    # Check if field exists in table type
+                    if field_name not in table_type.table_fields:
+                        self.error_handler.add_error(
+                            f"Table type '{node.table_type}' has no field '{field_name}'",
+                            node,
+                            ErrorCodes.UNDEFINED_FIELD
+                        )
+                        continue
+                    
+                    # Check if field value type matches expected type
+                    expected_field_type = table_type.table_fields[field_name]
+                    actual_field_type = self._get_expression_type(value)
+                    
+                    if actual_field_type and not expected_field_type.is_compatible_with(actual_field_type):
+                        self.error_handler.add_error(
+                            f"Field '{field_name}' type mismatch: expected {expected_field_type}, got {actual_field_type}",
+                            node,
+                            ErrorCodes.TYPE_MISMATCH
+                        )
+            else:
+                # For non-literal expressions, compare types
+                init_type = self._get_expression_type(node.init_value)
+                if init_type:
+                    dims = node.dimensions if node.dimensions is not None else 0
+                    expected_type = TypeInfo(node.table_type, dims, table_type.table_fields if dims == 0 else None)
+                    if dims > 0:
+                        expected_type.is_table = True
+                        expected_type.table_fields = table_type.table_fields
+                    
+                    if not expected_type.is_compatible_with(init_type):
+                        self.error_handler.add_error(
+                            f"Type mismatch in table '{node.identifier}' initialization: "
+                            f"expected {expected_type}, got {init_type}",
+                            node,
+                            ErrorCodes.TYPE_MISMATCH
+                        )
     
     def _check_recipe_decl(self, node: RecipeDecl):
         """Check recipe declaration"""
@@ -192,6 +217,39 @@ class TypeChecker:
         expected_type = self.symbol_table.current_function.type_info
         
         if node.value:
+            # Special case: table literals matching table types
+            if isinstance(node.value, TableLiteral) and expected_type.is_table:
+                # Validate each field in the literal
+                table_type_symbol = self.symbol_table.lookup_table_type(expected_type.base_type)
+                if table_type_symbol:
+                    all_fields_valid = True
+                    for field_name, value, line, col in node.value.field_inits:
+                        # Check if field exists in table type
+                        if field_name not in table_type_symbol.table_fields:
+                            self.error_handler.add_error(
+                                f"Table type '{expected_type.base_type}' has no field '{field_name}'",
+                                node,
+                                ErrorCodes.UNDEFINED_FIELD
+                            )
+                            all_fields_valid = False
+                            continue
+                        
+                        # Check if field value type matches expected type
+                        expected_field_type = table_type_symbol.table_fields[field_name]
+                        actual_field_type = self._get_expression_type(value)
+                        
+                        if actual_field_type and not expected_field_type.is_compatible_with(actual_field_type):
+                            self.error_handler.add_error(
+                                f"Field '{field_name}' type mismatch: expected {expected_field_type}, got {actual_field_type}",
+                                node,
+                                ErrorCodes.TYPE_MISMATCH
+                            )
+                            all_fields_valid = False
+                    
+                    # If all fields are valid, accept the table literal
+                    if all_fields_valid:
+                        return
+            
             # Special case: empty array literals are compatible with any array type
             if isinstance(node.value, ArrayLiteral) and not node.value.elements:
                 if expected_type.dimensions > 0:
@@ -547,7 +605,7 @@ class TypeChecker:
         """Get type of table literal"""
         # Build field types from literal
         field_types = {}
-        for field_name, value in node.field_inits:
+        for field_name, value, line, col in node.field_inits:
             field_type = self._get_expression_type(value)
             if field_type:
                 field_types[field_name] = field_type

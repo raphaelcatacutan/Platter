@@ -90,7 +90,7 @@ class ScopeChecker:
             )
         
         # Check dimensions if it's an array of tables
-        if node.dimensions is not None and node.dimensions <= 0:
+        if node.dimensions is not None and node.dimensions < 0:
             self.error_handler.add_error(
                 f"Array dimensions must be positive, got {node.dimensions}",
                 node,
@@ -267,7 +267,7 @@ class ScopeChecker:
                 self._check_expression(elem)
         
         elif isinstance(expr, TableLiteral):
-            for field_name, value in expr.field_inits:
+            for field_name, value, line, col in expr.field_inits:
                 self._check_expression(value)
     
     def _check_unused_symbols(self):

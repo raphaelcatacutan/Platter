@@ -1785,8 +1785,8 @@ class ASTParser:
             self.parse_token(";")
             node_4 = self.field_assignments()
 
-            # Collect: [($0.value, $2)] + $4
-            result = [(token_0.value, node_2)] + node_4
+            # Collect: [($0.value, $2, $1.line, $1.col)] + $4
+            result = [(token_0.value, node_2, token_1.line, token_1.col)] + node_4
             return result
 
             """    135 <field_assignments>	=>	    """
@@ -2373,6 +2373,10 @@ class ASTParser:
         elif self.tokens[self.pos].type in PREDICT_SET["<local_decl>_4"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("id")
+            # Set context identifier BEFORE parsing so it's available for call_tail
+            self._context_identifier = token_0.value
+            self._context_identifier_line = token_0.line
+            self._context_identifier_col = token_0.col
             node_1 = self.local_id_tail()
 
             # Collect: $1
@@ -2425,8 +2429,9 @@ class ASTParser:
             self.parse_token(";")
             node_4 = self.statements()
 
-            # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            result = [Assignment((node_0(self._context_dimensions, token_3.line, token_3.col) if node_0 else self._context_dimensions), node_1, node_2)] + node_4
+            # Collect: [Assignment(($0(Identifier(CONTEXT)) if $0 else Identifier(CONTEXT)), $1, $2)] + $4
+            base_id = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            result = [Assignment((node_0(base_id) if node_0 else base_id), node_1, node_2)] + node_4
             return result
 
             """    181 <local_id_tail>	=>	<assignment_op>	<value>	;	<statements>    """
@@ -2437,8 +2442,9 @@ class ASTParser:
             self.parse_token(";")
             node_3 = self.statements()
 
-            # Collect: [Assignment(CONTEXT, $0, $1)] + $3
-            result = [Assignment(self._context_dimensions, node_0, node_1, token_2.line, token_2.col)] + node_3
+            # Collect: [Assignment(Identifier(CONTEXT), $0, $1)] + $3
+            base_id = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            result = [Assignment(base_id, node_0, node_1, token_2.line, token_2.col)] + node_3
             return result
 
             """    182 <local_id_tail>	=>	<tail1>	;	<statements>    """
@@ -2617,11 +2623,15 @@ class ASTParser:
         if self.tokens[self.pos].type in PREDICT_SET["<id_statements>"]:
             token_0 = self.tokens[self.pos]
             self.parse_token("id")
+            # Set context identifier BEFORE parsing so it's available for call_tail
+            self._context_identifier = token_0.value
+            self._context_identifier_line = token_0.line
+            self._context_identifier_col = token_0.col
             node_1 = self.id_statements_ext()
             node_2 = self.statements()
 
             # Manual code
-            return (lambda ctx, stmt, rest: (setattr(self, '_context_identifier', ctx), stmt + rest)[1])(token_0.value, [node_1], node_2)
+            return [node_1] + node_2
         else: self.parse_token(self.error_arr)
 
         log.info("Exit: " + self.tokens[self.pos].type)

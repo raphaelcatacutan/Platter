@@ -454,7 +454,7 @@ class SymbolTableBuilder:
                 self._track_expression_usage(elem)
         
         elif isinstance(expr, TableLiteral):
-            for field_name, value in expr.field_inits:
+            for field_name, value, line, col in expr.field_inits:
                 self._track_expression_usage(value)
     
     def _find_declaring_scope(self, symbol_name: str) -> Optional[Scope]:
