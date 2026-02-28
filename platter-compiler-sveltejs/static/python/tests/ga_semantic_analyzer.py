@@ -5,6 +5,7 @@ from pathlib import Path
 from app.lexer.lexer import Lexer
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
 from app.semantic_analyzer.semantic_analyzer import SemanticAnalyzer
+from app.parser.parser_program import Parser
 
 # Suppress debug logs from parser during tests
 logging.getLogger().setLevel(logging.CRITICAL)
@@ -42,34 +43,42 @@ class TestSemanticAnalyzer(unittest.TestCase):
             - success: True if analysis completed (even with semantic errors)
             - actual_output: The semantic analysis output
             - error_message: Any exception message if analysis failed
+            
+        Run syntax analysis first. If it passes, run semantic analysis.
+        Returns (success, actual_output, error_message)
         """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 code = f.read()
-            
+
             # Lexical analysis
             lexer = Lexer(code)
             tokens = lexer.tokenize()
-            
-            # Parse to AST
+
+            # --- Syntax analysis ---
+            try:
+                parser = Parser(tokens)
+                parser.parse_program()
+            except Exception as e:
+                # Syntax error: return as output, skip semantic analysis
+                return True, f"{str(e)}", ""
+
+            # --- Semantic analysis ---
             ast_parser = ASTParser(tokens)
             ast = ast_parser.parse_program()
-            
-            # Semantic analysis
             analyzer = SemanticAnalyzer()
             symbol_table, error_handler = analyzer.analyze(ast)
-            
-            # Get output
+
             if error_handler.has_errors() or error_handler.has_warnings():
                 actual_output = error_handler.format_errors(include_warnings=True, include_info=False)
             else:
                 actual_output = "No semantic errors"
-            
+
             return True, actual_output, ""
-            
+
         except Exception as e:
             return False, "", str(e)
-    
+        
     def test_all_semantic_programs(self):
         """Test all .platter files in semantic_programs directory."""
         passed_count = 0

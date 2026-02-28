@@ -1,4 +1,2 @@
-prepare piece[] of a(){
-        serve [3];              # placeholder, update
-}
-start() { }
+chars[] of names = [[][]];
+start() {  }

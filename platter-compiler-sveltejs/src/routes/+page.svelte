@@ -818,6 +818,16 @@ result
 					setTerminalError(semanticError);
 					analysisStatus = 'error';
 					terminalOutput = errorMessage;
+
+					// if failed due to python error, run syntax instead
+					if (
+						typeof data.message === "string" &&
+						data.message.startsWith("Semantic analysis failed:")
+					) {
+						console.log("Calling analyzeSyntax due to semantic backend crash");
+						await analyzeSyntax();
+						return;
+					}
 				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : 'Unknown error';
