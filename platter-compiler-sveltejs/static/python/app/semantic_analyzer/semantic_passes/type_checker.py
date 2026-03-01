@@ -468,6 +468,23 @@ class TypeChecker:
         if not left_type or not right_type:
             return None
         
+        # Check for division by zero
+        if node.operator in ['/', '%']:
+            if isinstance(node.right, Literal):
+                # Check if literal is zero
+                if node.right.value_type in ["piece", "sip"]:
+                    try:
+                        value = float(node.right.value) if node.right.value_type == "sip" else int(node.right.value)
+                        if value == 0:
+                            self.error_handler.add_error(
+                                f"Cannot divide by 0",
+                                node,
+                                ErrorCodes.DIVISION_BY_ZERO
+                            )
+                            return None
+                    except (ValueError, TypeError):
+                        pass  # If we can't parse the value, let other checks handle it
+        
         # Determine result type based on operator
         if node.operator in ['+', '-', '*', '/', '%']:
             # Arithmetic operations require exact type match (no implicit conversions)

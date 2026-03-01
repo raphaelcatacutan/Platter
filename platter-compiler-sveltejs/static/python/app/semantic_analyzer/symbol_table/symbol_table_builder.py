@@ -8,6 +8,7 @@ from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import Symbol, Scope, SymbolKind, TypeInfo
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
 from app.semantic_analyzer.builtin_recipes import BUILTIN_RECIPES
+from app.semantic_analyzer.semantic_passes.error_handler import ErrorCodes
 from typing import Optional
 
 
@@ -138,7 +139,7 @@ class SymbolTableBuilder:
                     self.symbol_table.error_handler.add_error(
                         f"Duplicate field '{field.identifier}' in table prototype '{node.name}'",
                         field,
-                        "E205"
+                        ErrorCodes.DUPLICATE_FIELD
                     )
                 continue
             seen_fields.add(field.identifier)
@@ -152,7 +153,7 @@ class SymbolTableBuilder:
                     self.symbol_table.error_handler.add_error(
                         f"Recursive type not allowed: table prototype '{node.name}' cannot contain field of type '{field.data_type}'",
                         field,
-                        "E206"
+                        ErrorCodes.RECURSIVE_TYPE
                     )
                 continue
             
@@ -164,7 +165,7 @@ class SymbolTableBuilder:
                         self.symbol_table.error_handler.add_error(
                             f"Forward reference not allowed: table prototype '{field.data_type}' must be defined before use in '{node.name}'",
                             field,
-                            "E207"
+                            ErrorCodes.FORWARD_REFERENCE
                         )
                     continue
             
@@ -201,7 +202,8 @@ class SymbolTableBuilder:
             if self.symbol_table.error_handler:
                 self.symbol_table.error_handler.add_error(
                     f"Cannot redefine built-in recipe '{node.name}'", 
-                    node
+                    node,
+                    ErrorCodes.REDEFINED_BUILTIN
                 )
             return
         
