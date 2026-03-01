@@ -53,6 +53,9 @@ class IRGenerator:
         
         # Current function context
         self.current_function = None
+
+        # Declared recipe names (used for parser-compat call fallback)
+        self.recipe_names = set()
         
         # Loop stack for break/continue
         self.loop_stack: List[Tuple[str, str]] = []  # (continue_label, break_label)
@@ -102,6 +105,7 @@ class IRGenerator:
         
         # Generate code for recipe (function) declarations
         if ast.recipe_decl:
+            self.recipe_names = {recipe.name for recipe in ast.recipe_decl}
             self.emit_comment("Recipe Declarations")
             for recipe in ast.recipe_decl:
                 self.visit_recipe_decl(recipe)
@@ -145,16 +149,28 @@ class IRGenerator:
     
     def visit_array_decl(self, node: ArrayDecl):
         """Generate IR for array declaration"""
-        size = len(node.init_value.elements) if node.init_value and hasattr(node.init_value, 'elements') else "unknown"
-
-        self.emit_tac(TACAllocate(node.identifier, size, "array"))
-        self.emit_quad("allocate", "array", size, node.identifier)
-
         if node.init_value and hasattr(node.init_value, 'elements'):
+            size = len(node.init_value.elements)
+            self.emit_tac(TACAllocate(node.identifier, size, "array"))
+            self.emit_quad("allocate", "array", size, node.identifier)
+
             for i, element in enumerate(node.init_value.elements):
                 value_temp = self.visit_expression(element)
                 self.emit_tac(TACArrayAssign(node.identifier, str(i), value_temp))
                 self.emit_quad("[]=", node.identifier, str(i), value_temp)
+        elif node.init_value is not None:
+            # Array initialized from expression (e.g., function call returning array)
+            if isinstance(node.init_value, Identifier) and node.init_value.name in self.recipe_names:
+                # Parser compatibility: some array init paths produce Identifier for zero-arg recipe calls
+                call_temp = self.new_temp()
+                self.emit_tac(TACFunctionCall(call_temp, node.init_value.name, 0))
+                self.emit_quad("call", node.init_value.name, "0", call_temp)
+                value_temp = call_temp
+            else:
+                value_temp = self.visit_expression(node.init_value)
+            self.emit_tac(TACAssignment(node.identifier, value_temp))
+            self.emit_quad("=", value_temp, None, node.identifier)
+        # Note: uninitialized array declarations don't emit runtime code
     
     def visit_table_prototype(self, node: TablePrototype):
         """Generate IR for table prototype (type definition)"""
@@ -168,7 +184,7 @@ class IRGenerator:
         
         if node.init_value and isinstance(node.init_value, TableLiteral):
             # Initialize table fields
-            for field_name, value_expr in node.init_value.field_inits:
+            for field_name, value_expr in self._iter_table_field_inits(node.init_value.field_inits):
                 value_temp = self.visit_expression(value_expr)
                 self.emit_tac(TACTableAssign(node.identifier, field_name, value_temp))
                 self.emit_quad(".=", node.identifier, field_name, value_temp)
@@ -644,7 +660,7 @@ class IRGenerator:
         self.emit_quad("allocate", "table", "table_literal", result_temp)
         
         # Initialize fields
-        for field_name, value_expr in node.field_inits:
+        for field_name, value_expr in self._iter_table_field_inits(node.field_inits):
             value_temp = self.visit_expression(value_expr)
             self.emit_tac(TACTableAssign(result_temp, field_name, value_temp))
             self.emit_quad(".=", result_temp, field_name, value_temp)
@@ -654,6 +670,12 @@ class IRGenerator:
     # =========================================================================
     # Helper methods
     # =========================================================================
+
+    def _iter_table_field_inits(self, field_inits):
+        """Yield (field_name, value_expr) from parser-produced table field tuples."""
+        for item in field_inits:
+            if isinstance(item, tuple) and len(item) >= 2:
+                yield item[0], item[1]
     
     def get_lvalue_address(self, node: ASTNode) -> str:
         """Get the address (name) of an lvalue"""
