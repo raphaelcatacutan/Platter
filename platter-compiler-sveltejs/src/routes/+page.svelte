@@ -127,28 +127,31 @@
 	let theme: 'dark' | 'light' = 'dark';
 	let activeTab: 'lexical' | 'syntax' | 'semantic' = 'lexical';
 
-	let codeInput = `piece of x = 42;
+	let codeInput = `sip of x = 42.2;
 sip of y = 3.67;
+##
 chars[] of names = ["Hello Platter", "Raph", "Jieco"];
 piece[][] of nums = [
 	[12, 21, 2],
     [32, 2, 12]
 ];
+##
 table of yz = [
 	piece  of x;
     sip of xyz;
 ];
 
-prepare sip of sips() { check(topiece(y) > x) { serve x;} instead {serve y;} }
+prepare sip of sips() { check(topiece(y) > topiece(x)) { serve x;} instead {serve y;} }
 
 prepare piece of pieces() {
-	 serve x + 32 / 323;
+	 serve topiece(x) + 32 / 323;
      
 }
 
 start() {
 	piece of z = topiece(topiece(sips()) + pieces());
-	serve z;
+	bill(tochars(z));
+    serve z;
 }`;
 
 	type Token = { type: string; value: string; line: number; col: number };
