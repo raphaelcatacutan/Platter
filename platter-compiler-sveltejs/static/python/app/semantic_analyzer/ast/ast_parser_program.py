@@ -3178,10 +3178,17 @@ class ASTParser:
             node_2 = self.strict_piece_chars_expr()
             token_3 = self.tokens[self.pos]
             self.parse_token(")")
-            node_4 = self.menu_platter()
+            
+            # Parse menu_platter manually to separate cases and default
+            token_bracket = self.tokens[self.pos]
+            self.parse_token("{")
+            cases = self.choice_clause()
+            default = self.usual_clause()
+            token_close_bracket = self.tokens[self.pos]
+            self.parse_token("}")
 
-            # Create MenuStatement node
-            node = MenuStatement(node_2, node_4, token_0.line, token_0.col)
+            # Create MenuStatement node with separated cases and default
+            node = MenuStatement(node_2, cases, default if default else None, token_0.line, token_0.col)
             return node
         else: self.parse_token(self.error_arr)
 
@@ -4122,10 +4129,17 @@ class ASTParser:
             node_2 = self.strict_piece_chars_expr()
             token_3 = self.tokens[self.pos]
             self.parse_token(")")
-            node_4 = self.menu_loop_platter()
+            
+            # Parse menu_loop_platter manually to separate cases and default
+            token_bracket = self.tokens[self.pos]
+            self.parse_token("{")
+            cases = self.choice_clause_loop()
+            default = self.usual_clause_loop()
+            token_close_bracket = self.tokens[self.pos]
+            self.parse_token("}")
 
-            # Create MenuStatement node
-            node = MenuStatement(node_2, node_4, token_0.line, token_0.col)
+            # Create MenuStatement node with separated cases and default
+            node = MenuStatement(node_2, cases, default if default else None, token_0.line, token_0.col)
             return node
         else: self.parse_token(self.error_arr)
 

@@ -161,8 +161,7 @@ class ScopeChecker:
         elif isinstance(node, MenuStatement):
             self._check_expression(node.expr)
             for case in node.cases:
-                for value in case.values:
-                    self._check_expression(value)
+                self._check_expression(case.value)
                 for stmt in case.statements:
                     self._check_statement(stmt)
             if node.default:

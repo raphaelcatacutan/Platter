@@ -300,12 +300,24 @@ class TypeChecker:
     
     def _check_check_statement(self, node: CheckStatement):
         """Check check statement (check/alt/instead)"""
-        # Check condition is flag-compatible
+        # Check condition must be a comparison expression (BinaryOp), not just a flag variable
+        from app.semantic_analyzer.ast.ast_nodes import BinaryOp, Identifier
+        
         cond_type = self._get_expression_type(node.condition)
-        if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
-            self.error_handler.add_warning(
-                f"Condition should be flag type, got {cond_type}",
-                node.condition
+        
+        # First check if the type is not flag at all
+        if cond_type and cond_type.base_type != "flag":
+            self.error_handler.add_error(
+                f"Check condition must be flag type, got {cond_type}",
+                node.condition,
+                ErrorCodes.TYPE_MISMATCH
+            )
+        # If it is flag type but just an identifier (not an expression)
+        elif isinstance(node.condition, Identifier) and cond_type and cond_type.base_type == "flag":
+            self.error_handler.add_error(
+                f"Check condition must be flag bearing expression, not identifier",
+                node.condition,
+                ErrorCodes.TYPE_MISMATCH
             )
         
         # Check branches
@@ -321,17 +333,31 @@ class TypeChecker:
         # Get menu expression type
         menu_type = self._get_expression_type(node.expr)
         
+        # Track choice values to detect duplicates
+        seen_values = []
+        
         # Check choices
         for case in node.cases:
             # Check choice value type matches menu expression type
-            for value in case.values:
-                case_type = self._get_expression_type(value)
-                if menu_type and case_type and not menu_type.is_compatible_with(case_type):
+            case_type = self._get_expression_type(case.value)
+            if menu_type and case_type and not menu_type.is_compatible_with(case_type):
+                self.error_handler.add_error(
+                    f"Choice value type {case_type} does not match menu expression type {menu_type}",
+                    case.value,
+                    ErrorCodes.TYPE_MISMATCH
+                )
+            
+            # Check for duplicate choice values
+            if isinstance(case.value, Literal):
+                value_str = str(case.value.value)
+                if value_str in seen_values:
                     self.error_handler.add_error(
-                        f"Choice value type {case_type} does not match menu expression type {menu_type}",
-                        value,
-                        ErrorCodes.TYPE_MISMATCH
+                        f"Duplicate choice value: {value_str}",
+                        case.value,
+                        ErrorCodes.DUPLICATE_SYMBOL
                     )
+                else:
+                    seen_values.append(value_str)
             
             # Check choice statements
             for stmt in case.statements:

@@ -1,0 +1,1 @@
+[ERROR] [E101] Check condition must be flag type, got piece at line 5, column 11

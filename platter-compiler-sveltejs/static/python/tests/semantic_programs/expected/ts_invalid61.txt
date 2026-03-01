@@ -1,0 +1,1 @@
+[ERROR] [E001] Duplicate choice value: 1 at line 6, column 16

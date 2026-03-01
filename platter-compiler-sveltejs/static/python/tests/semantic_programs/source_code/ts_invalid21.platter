@@ -1,0 +1,8 @@
+start(){ 
+  piece of a = 4;
+  piece of f = 2;
+
+    check(f){
+      bill(tochars(a));
+  }
+}

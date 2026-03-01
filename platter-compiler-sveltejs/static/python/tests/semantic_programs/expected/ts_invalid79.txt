@@ -1,0 +1,2 @@
+[WARNING] [W102] Unused ingredient 'y' at line 6, column 14
+[ERROR] [E303] Flavor 1 of recipe 'square': expected piece, got sip at line 6, column 25
