@@ -7,7 +7,7 @@ NOTE: This version does NOT perform semantic checking - it only collects symbols
 from app.semantic_analyzer.ast.ast_nodes import *
 from app.semantic_analyzer.symbol_table.types import Symbol, Scope, SymbolKind, TypeInfo
 from app.semantic_analyzer.symbol_table.symbol_table import SymbolTable
-from app.semantic_analyzer.builtin_recipes import BUILTIN_RECIPES
+from app.semantic_analyzer.builtin_recipes import BUILTIN_RECIPES, is_builtin_recipe
 from app.semantic_analyzer.semantic_passes.error_handler import ErrorCodes
 from typing import Optional
 
@@ -255,6 +255,11 @@ class SymbolTableBuilder:
         """Process an ingredient declaration"""
         type_info = self._create_type_info(node.data_type, 0)
         
+        # Track usage in initial value BEFORE defining the symbol
+        # This ensures forward references are caught
+        if node.init_value:
+            self._track_expression_usage(node.init_value)
+        
         # Add default value if not initialized
         if not node.init_value:
             node.init_value = self._create_default_value(node.data_type, 0)
@@ -265,10 +270,6 @@ class SymbolTableBuilder:
             type_info,
             node
         )
-        
-        # Track usage in initial value if present
-        if node.init_value:
-            self._track_expression_usage(node.init_value)
     
     def _calculate_array_sizes(self, node, dimensions: int) -> list:
         """Calculate array sizes from ArrayLiteral initialization"""
@@ -295,10 +296,14 @@ class SymbolTableBuilder:
         if node.init_value and isinstance(node.init_value, ArrayLiteral):
             type_info.array_sizes = self._calculate_array_sizes(node.init_value, dims)
         
+        # Track usage in initial value BEFORE defining the symbol
+        # This ensures forward references are caught
+        if node.init_value:
+            self._track_expression_usage(node.init_value)
+        
         # Add default value if not initialized
         if not node.init_value:
             node.init_value = self._create_default_value(node.data_type, dims)
-
         
         self.symbol_table.define_symbol(
             node.identifier,
@@ -306,10 +311,6 @@ class SymbolTableBuilder:
             type_info,
             node
         )
-        
-        # Track usage in initial value if present
-        if node.init_value:
-            self._track_expression_usage(node.init_value)
     
     def _process_table_decl(self, node: TableDecl):
         """Process a table instance declaration"""
@@ -328,11 +329,19 @@ class SymbolTableBuilder:
                 type_info.is_table = True
                 type_info.table_fields = table_type.table_fields
             
+            # Track usage in initial value BEFORE defining the symbol
+            # This ensures forward references are caught
+            if node.init_value:
+                self._track_expression_usage(node.init_value)
+            
             # Add default value if not initialized (only for non-array table instances)
             if not node.init_value and dims == 0:
                 node.init_value = self._create_default_table_value(table_type)
         else:
             type_info = TypeInfo(node.table_type, dims)
+            # Track usage even if table type is not found
+            if node.init_value:
+                self._track_expression_usage(node.init_value)
         
         self.symbol_table.define_symbol(
             node.identifier,
@@ -340,10 +349,6 @@ class SymbolTableBuilder:
             type_info,
             node
         )
-        
-        # Track usage in initial value if present
-        if node.init_value:
-            self._track_expression_usage(node.init_value)
     
     def _process_platter(self, node: Platter):
         """Process a block/compound statement"""
@@ -534,8 +539,8 @@ class SymbolTableBuilder:
                 declared_scope = self._find_declaring_scope(symbol.name)
                 if declared_scope:
                     symbol.add_usage(self.symbol_table.current_scope.name, declared_scope.name)
-            else:
-                # Recipe not declared - track as undeclared but accessed
+            elif not is_builtin_recipe(expr.name):
+                # Recipe not declared and not built-in - track as undeclared but accessed
                 if expr.name not in self.symbol_table.undeclared_symbols:
                     undeclared_symbol = Symbol(
                         name=expr.name,
