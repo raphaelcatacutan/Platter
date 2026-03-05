@@ -461,8 +461,31 @@ start() {
     x:z[0] = 1.1;
     x:f[0] = up;
 }",No Semantic Error,No Semantic Error,TRUE,,
-54,,,,TRUE,,
-55,,,,TRUE,,
+54,"start(){
+        piece of x = 18;
+        flag of hasID = up;
+    check(x >= 18){
+            check(hasID){
+                bill(""okay"");
+        }
+    instead{
+                bill (""noo"");
+    }
+    }
+}",No Semantic Error,No Semantic Error,TRUE,,
+55,"table of Food = [
+        chars of food_name;
+    piece[] of qty_set;
+];
+
+Food of chips = [
+        food_name = ""oishi"";
+    qty_set = [1, 2, 3];
+];
+
+start(){ 
+        piece[] of a = chips:qty_set;
+}",No Semantic Error,No Semantic Error,TRUE,,
 56,,,,TRUE,,
 57,,,,TRUE,,
 58,,,,TRUE,,
@@ -987,11 +1010,68 @@ start(){
     piece of f = calc(4);
     bill(tochars(f));
 }",No Semantic Error,No Semantic Error,TRUE,,
-101,,,,TRUE,,
-102,,,,TRUE,,
-103,,,,TRUE,,
-104,,,,TRUE,,
-105,,,,TRUE,,
+101,"start(){
+	piece of x = 10;
+    
+    check(x>=20){
+    	bill (""proceed"");
+    }
+
+}",No Semantic Error,No Semantic Error,TRUE,,
+102,"start(){
+	piece of x = 10;
+    
+    check(x>=20){
+    	bill (""proceed"");
+    } alt(x < 10){
+    	bill (tochars(x));
+    } instead {
+    	bill(""don't proceed"");
+    }
+
+}",No Semantic Error,No Semantic Error,TRUE,,
+103,"start(){
+
+	piece of x = 18;
+	flag of hasID = up;
+	
+    check(x >= 18){
+    	check(up){
+        	bill(""okay"");
+        }
+        
+    instead{
+        	bill (""noo"");
+    }
+        
+    
+    }
+	
+
+}","No semantic errors with 1 warning(s)
+[WARNING] [W102] Unused ingredient 'hasID' at line 4, column 10","No semantic errors with 1 warning(s)
+[WARNING] [W102] Unused ingredient 'hasID' at line 4, column 10",TRUE,,
+104,"start(){
+ piece of x = 2;
+ 
+ menu(x) {
+
+ choice 1: 
+ 	bill(tochars(x));
+    stop;
+    
+ choice 2:
+ 	bill(tochars(x));
+ }
+}",No Semantic Error,No Semantic Error,TRUE,,
+105,"start(){
+ piece of x = 2;
+ 
+ repeat(x>=2){
+         bill(tochars(x));
+    x+=1;
+ }
+}",No Semantic Error,No Semantic Error,TRUE,,
 106,,,,TRUE,,
 107,,,,TRUE,,
 108,,,,TRUE,,

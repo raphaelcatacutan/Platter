@@ -1,5 +1,5 @@
 Semantic analysis failed with 3 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'Blk1'
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Field 'students' type mismatch: expected Table(Student)[], got chars[][]
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 16, column 17
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 17, column 13
+[ERROR] [E101] Field 'students' type mismatch: expected Table(Student)[], got chars[][] at line 15, column 18
+[WARNING] [W102] Unused ingredient 'Blk1'

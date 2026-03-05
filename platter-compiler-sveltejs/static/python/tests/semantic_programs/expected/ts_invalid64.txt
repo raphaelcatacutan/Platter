@@ -1,3 +1,2 @@
-**should error highlight 'x' of table as well**
-[ERROR] Symbol 'x' already defined in scope 'global'
-[WARNING] Unused variable 'x'
+Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'global' at line 1, column 10

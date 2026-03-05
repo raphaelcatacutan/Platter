@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 14, column 10

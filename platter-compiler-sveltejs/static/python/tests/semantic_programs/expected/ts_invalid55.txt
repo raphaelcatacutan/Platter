@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Forward reference not allowed: table prototype 'LatePrototype' must be defined before use in 'Data'
+[ERROR] [E208] Forward reference not allowed: table prototype 'LatePrototype' must be defined before use in 'Data' at line 2, column 19

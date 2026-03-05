@@ -102,15 +102,10 @@ class TypeChecker:
     
     def _check_table_decl(self, node: TableDecl):
         """Check table declaration type consistency"""
-        # Verify table type exists
+        # Verify table type exists (skip check - already done in scope_checker)
         table_type = self.symbol_table.lookup_table_type(node.table_type)
         if not table_type:
-            self.error_handler.add_error(
-                f"Undefined table type '{node.table_type}'",
-                node,
-                ErrorCodes.UNDEFINED_TYPE
-            )
-            return
+            return  # Error already reported by scope_checker
         
         if node.init_value:
             # For table literals, check field-by-field instead of comparing types directly
@@ -119,9 +114,12 @@ class TypeChecker:
                 for field_name, value, line, col in node.init_value.field_inits:
                     # Check if field exists in table type
                     if field_name not in table_type.table_fields:
+                        # Create an error node with the field's location
+                        from app.semantic_analyzer.ast.ast_nodes import ASTNode
+                        field_node = ASTNode("FieldInit", line, col)
                         self.error_handler.add_error(
                             f"Table type '{node.table_type}' has no field '{field_name}'",
-                            node,
+                            field_node,
                             ErrorCodes.UNDEFINED_FIELD
                         )
                         continue
@@ -131,9 +129,12 @@ class TypeChecker:
                     actual_field_type = self._get_expression_type(value, expected_field_type)
                     
                     if actual_field_type and not expected_field_type.is_exact_match(actual_field_type):
+                        # Create an error node with the field's location
+                        from app.semantic_analyzer.ast.ast_nodes import ASTNode
+                        field_node = ASTNode("FieldInit", line, col)
                         self.error_handler.add_error(
                             f"Field '{field_name}' type mismatch: expected {expected_field_type}, got {actual_field_type}",
-                            node,
+                            field_node,
                             ErrorCodes.TYPE_MISMATCH
                         )
             else:
@@ -230,7 +231,6 @@ class TypeChecker:
         
         # Pass target type as expected type for context-aware inference
         value_type = self._get_expression_type(node.value, target_type)
-        print(f"DEBUG ASSIGN LINE {node.line}: target={target_type.__repr__()}, value_node={type(node.value)}, value_type={value_type.__repr__() if value_type else 'None'}, expected target_type={target_type}")
         
         if target_type and value_type:
             if not target_type.is_exact_match(value_type):
@@ -257,9 +257,12 @@ class TypeChecker:
                     for field_name, value, line, col in node.value.field_inits:
                         # Check if field exists in table type
                         if field_name not in table_type_symbol.table_fields:
+                            # Create an error node with the field's location
+                            from app.semantic_analyzer.ast.ast_nodes import ASTNode
+                            field_node = ASTNode("FieldInit", line, col)
                             self.error_handler.add_error(
                                 f"Table type '{expected_type.base_type}' has no field '{field_name}'",
-                                node,
+                                field_node,
                                 ErrorCodes.UNDEFINED_FIELD
                             )
                             all_fields_valid = False
@@ -270,9 +273,12 @@ class TypeChecker:
                         actual_field_type = self._get_expression_type(value, expected_field_type)
                         
                         if actual_field_type and not expected_field_type.is_compatible_with(actual_field_type):
+                            # Create an error node with the field's location
+                            from app.semantic_analyzer.ast.ast_nodes import ASTNode
+                            field_node = ASTNode("FieldInit", line, col)
                             self.error_handler.add_error(
                                 f"Field '{field_name}' type mismatch: expected {expected_field_type}, got {actual_field_type}",
-                                node,
+                                field_node,
                                 ErrorCodes.TYPE_MISMATCH
                             )
                             all_fields_valid = False
@@ -312,22 +318,12 @@ class TypeChecker:
     
     def _check_check_statement(self, node: CheckStatement):
         """Check check statement (check/alt/instead)"""
-        # Check condition must be a comparison expression (BinaryOp), not just a flag variable
-        from app.semantic_analyzer.ast.ast_nodes import BinaryOp, Identifier
-        
+        # Check condition must be flag type (identifiers and expressions bearing flag are both valid)
         cond_type = self._get_expression_type(node.condition)
         
-        # First check if the type is not flag at all
         if cond_type and cond_type.base_type != "flag":
             self.error_handler.add_error(
                 f"Check condition must be flag type, got {cond_type}",
-                node.condition,
-                ErrorCodes.TYPE_MISMATCH
-            )
-        # If it is flag type but just an identifier (not an expression)
-        elif isinstance(node.condition, Identifier) and cond_type and cond_type.base_type == "flag":
-            self.error_handler.add_error(
-                f"Check condition must be flag bearing expression, not identifier",
                 node.condition,
                 ErrorCodes.TYPE_MISMATCH
             )
@@ -383,10 +379,11 @@ class TypeChecker:
     def _check_repeat_loop(self, node: RepeatLoop):
         """Check repeat loop"""
         cond_type = self._get_expression_type(node.condition)
-        if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
-            self.error_handler.add_warning(
-                f"Loop condition should be flag type, got {cond_type}",
-                node.condition
+        if cond_type and cond_type.base_type != "flag":
+            self.error_handler.add_error(
+                f"Loop condition must be flag type, got {cond_type}",
+                node.condition,
+                ErrorCodes.TYPE_MISMATCH
             )
         self._check_platter(node.body)
     
@@ -394,10 +391,11 @@ class TypeChecker:
         """Check order-repeat loop"""
         self._check_platter(node.body)
         cond_type = self._get_expression_type(node.condition)
-        if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
-            self.error_handler.add_warning(
-                f"Loop condition should be flag type, got {cond_type}",
-                node.condition
+        if cond_type and cond_type.base_type != "flag":
+            self.error_handler.add_error(
+                f"Loop condition must be flag type, got {cond_type}",
+                node.condition,
+                ErrorCodes.TYPE_MISMATCH
             )
     
     def _check_pass_loop(self, node: PassLoop):
@@ -407,10 +405,11 @@ class TypeChecker:
                 self._check_assignment(node.init)
         if node.condition:
             cond_type = self._get_expression_type(node.condition)
-            if cond_type and cond_type.base_type not in ["flag", "piece", "sip"]:
-                self.error_handler.add_warning(
-                    f"Loop condition should be flag type, got {cond_type}",
-                    node.condition
+            if cond_type and cond_type.base_type != "flag":
+                self.error_handler.add_error(
+                    f"Loop condition must be flag type, got {cond_type}",
+                    node.condition,
+                    ErrorCodes.TYPE_MISMATCH
                 )
         if node.update:
             if isinstance(node.update, Assignment):
@@ -609,6 +608,7 @@ class TypeChecker:
             return None
         
         # Bounds checking for constant indices
+        # Only check bounds when we have explicit size information
         if isinstance(node.index, Literal) and node.index.value_type == "piece":
             try:
                 index_value = int(node.index.value)
@@ -621,14 +621,8 @@ class TypeChecker:
                             node.index,
                             ErrorCodes.ARRAY_OUT_OF_BOUNDS
                         )
-                else:
-                    # Array has no size information - treat as uninitialized/empty array (size 0)
-                    # Any access to an uninitialized array is out of bounds
-                    self.error_handler.add_error(
-                        f"Array index {index_value} out of bounds (array is uninitialized/empty, size: 0)",
-                        node.index,
-                        ErrorCodes.ARRAY_OUT_OF_BOUNDS
-                    )
+                # If no size information, skip bounds checking
+                # Arrays can be initialized at various points (literals, table instantiation, etc.)
             except (ValueError, TypeError):
                 # If we can't convert to int, skip bounds checking
                 pass
@@ -858,7 +852,7 @@ class TypeChecker:
         if not node.elements:
             # Empty array literal - treat as 1D array of unknown base type
             # This allows dimension checking for nested empty arrays like [[],[]]
-            return TypeInfo("unknown", 1)
+            return TypeInfo("unknown", 1, array_sizes=[0])
         
         # Determine expected element type if we have an expected array type
         expected_element_type = None
@@ -880,8 +874,24 @@ class TypeChecker:
                     ErrorCodes.TYPE_MISMATCH
                 )
         
-        # Return array type with one more dimension
-        return TypeInfo(first_type.base_type, first_type.dimensions + 1, first_type.table_fields if first_type.is_table else None)
+        # Track array size for this dimension
+        array_size = len(node.elements)
+        
+        # If elements are also arrays, get their sizes too
+        sub_array_sizes = []
+        if first_type.array_sizes:
+            sub_array_sizes = first_type.array_sizes
+        
+        # Combine sizes: [this_dimension_size, *sub_dimension_sizes]
+        all_sizes = [array_size] + sub_array_sizes
+        
+        # Return array type with one more dimension and tracked sizes
+        return TypeInfo(
+            first_type.base_type, 
+            first_type.dimensions + 1, 
+            first_type.table_fields if first_type.is_table else None,
+            array_sizes=all_sizes
+        )
     
     def _get_table_literal_type(self, node: TableLiteral, expected_type: Optional[TypeInfo] = None) -> Optional[TypeInfo]:
         """Get type of table literal
@@ -902,9 +912,12 @@ class TypeChecker:
                         # Get actual field type and validate
                         field_type = self._get_expression_type(value, expected_field_type)
                         if field_type and not expected_field_type.is_exact_match(field_type):
+                            # Create an error node with the field's location
+                            from app.semantic_analyzer.ast.ast_nodes import ASTNode
+                            field_node = ASTNode("FieldInit", line, col)
                             self.error_handler.add_error(
                                 f"Type mismatch in table literal: field '{field_name}' expects {expected_field_type}, got {field_type}",
-                                node,
+                                field_node,
                                 ErrorCodes.TYPE_MISMATCH
                             )
                 # Return the expected table type

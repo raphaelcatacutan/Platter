@@ -1,0 +1,181 @@
+INFO: <parse_program> | Enter: table
+INFO: <parse_program> | STACK: ['piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start']
+INFO: <global_decl> | Enter: table
+INFO: <global_decl> | STACK: ['piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start', 'piece', 'chars', 'sip', 'flag', 'table', 'id']
+INFO: <table_prototype> | Enter: table
+INFO: <table_prototype> | STACK: ['piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare', 'start', 'piece', 'chars', 'sip', 'flag', 'table', 'id', 'table']
+WARNING: <parse_token> | Expected: table | Current: table | Remark: MATCH!
+WARNING: <parse_token> | Expected: of | Current: of | Remark: MATCH!
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+WARNING: <parse_token> | Expected: = | Current: = | Remark: MATCH!
+WARNING: <parse_token> | Expected: [ | Current: [ | Remark: MATCH!
+INFO: <required_decl> | Enter: chars
+INFO: <required_decl> | STACK: ['piece', 'sip', 'flag', 'chars', 'id']
+INFO: <decl_head> | Enter: chars
+INFO: <decl_head> | STACK: ['piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id']
+INFO: <primitive_types_dims> | Enter: chars
+INFO: <primitive_types_dims> | STACK: ['piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id']
+WARNING: <parse_token> | Expected: chars | Current: chars | Remark: MATCH!
+INFO: <dimensions_tail> | Enter: of
+INFO: <dimensions_tail> | STACK: ['[']
+WARNING: <parse_token> | Expected: of | Current: of | Remark: MATCH!
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <required_decl_tail> | Enter: piece
+INFO: <required_decl_tail> | STACK: ['piece', 'sip', 'flag', 'chars', 'id']
+INFO: <required_decl> | Enter: piece
+INFO: <required_decl> | STACK: ['piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id']
+INFO: <decl_head> | Enter: piece
+INFO: <decl_head> | STACK: ['piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id']
+INFO: <primitive_types_dims> | Enter: piece
+INFO: <primitive_types_dims> | STACK: ['piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id', 'piece', 'sip', 'flag', 'chars', 'id']
+WARNING: <parse_token> | Expected: piece | Current: piece | Remark: MATCH!
+INFO: <dimensions_tail> | Enter: [
+INFO: <dimensions_tail> | STACK: ['[']
+INFO: <dimensions> | Enter: [
+INFO: <dimensions> | STACK: ['[', '[']
+WARNING: <parse_token> | Expected: [ | Current: [ | Remark: MATCH!
+WARNING: <parse_token> | Expected: ] | Current: ] | Remark: MATCH!
+INFO: <dimensions_tail> | Enter: of
+INFO: <dimensions_tail> | STACK: ['[']
+WARNING: <parse_token> | Expected: of | Current: of | Remark: MATCH!
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <required_decl_tail> | Enter: ]
+INFO: <required_decl_tail> | STACK: ['piece', 'sip', 'flag', 'chars', 'id']
+WARNING: <parse_token> | Expected: ] | Current: ] | Remark: MATCH!
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <global_decl> | Enter: id
+INFO: <global_decl> | STACK: ['piece', 'chars', 'sip', 'flag', 'table', 'id']
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+INFO: <table_decl> | Enter: of
+INFO: <table_decl> | STACK: ['of', '[']
+WARNING: <parse_token> | Expected: of | Current: of | Remark: MATCH!
+INFO: <table_declare> | Enter: id
+INFO: <table_declare> | STACK: ['id']
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+INFO: <table_init> | Enter: =
+INFO: <table_init> | STACK: ['=']
+WARNING: <parse_token> | Expected: = | Current: = | Remark: MATCH!
+INFO: <strict_table_expr> | Enter: [
+INFO: <strict_table_expr> | STACK: ['[', 'id']
+WARNING: <parse_token> | Expected: [ | Current: [ | Remark: MATCH!
+INFO: <field_assignments> | Enter: id
+INFO: <field_assignments> | STACK: ['id']
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+WARNING: <parse_token> | Expected: = | Current: = | Remark: MATCH!
+INFO: <value> | Enter: chars_lit
+INFO: <value> | STACK: ['topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not', 'append', 'sort', 'reverse', 'remove', '[']
+INFO: <any_expr> | Enter: chars_lit
+INFO: <any_expr> | STACK: ['topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not', 'append', 'sort', 'reverse', 'remove', '[', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not']
+INFO: <ret_chars> | Enter: chars_lit
+INFO: <ret_chars> | STACK: ['topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not', 'append', 'sort', 'reverse', 'remove', '[', 'topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit']
+WARNING: <parse_token> | Expected: chars_lit | Current: chars_lit | Remark: MATCH!
+INFO: <cont_chars> | Enter: ;
+INFO: <cont_chars> | STACK: ['+']
+INFO: <any_cont_c_flag_tail> | Enter: ;
+INFO: <any_cont_c_flag_tail> | STACK: ['+', '==', '!=', '>=', '<=', '<', '>']
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <field_assignments> | Enter: id
+INFO: <field_assignments> | STACK: ['id']
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+WARNING: <parse_token> | Expected: = | Current: = | Remark: MATCH!
+INFO: <value> | Enter: [
+INFO: <value> | STACK: ['topiece', 'size', 'search', 'fact', 'pow', 'piece_lit', 'sqrt', 'rand', 'tosip', 'sip_lit', 'matches', 'flag_lit', 'bill', 'take', 'copy', 'cut', 'tochars', 'chars_lit', 'id', '(', 'not', 'append', 'sort', 'reverse', 'remove', '[']
+WARNING: <parse_token> | Expected: [ | Current: [ | Remark: MATCH!
+INFO: <notation_val> | Enter: piece_lit
+INFO: <notation_val> | STACK: ['piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[', 'id']
+INFO: <array_element> | Enter: piece_lit
+INFO: <array_element> | STACK: ['piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[', 'id', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[']
+WARNING: <parse_token> | Expected: piece_lit | Current: piece_lit | Remark: MATCH!
+INFO: <element_value_tail> | Enter: ,
+INFO: <element_value_tail> | STACK: [',']
+WARNING: <parse_token> | Expected: , | Current: , | Remark: MATCH!
+INFO: <array_element_id> | Enter: piece_lit
+INFO: <array_element_id> | STACK: ['id', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[']
+INFO: <array_element> | Enter: piece_lit
+INFO: <array_element> | STACK: ['id', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[']
+WARNING: <parse_token> | Expected: piece_lit | Current: piece_lit | Remark: MATCH!
+INFO: <element_value_tail> | Enter: ,
+INFO: <element_value_tail> | STACK: [',']
+WARNING: <parse_token> | Expected: , | Current: , | Remark: MATCH!
+INFO: <array_element_id> | Enter: piece_lit
+INFO: <array_element_id> | STACK: ['id', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[']
+INFO: <array_element> | Enter: piece_lit
+INFO: <array_element> | STACK: ['id', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[', 'piece_lit', 'sip_lit', 'flag_lit', 'chars_lit', '[']
+WARNING: <parse_token> | Expected: piece_lit | Current: piece_lit | Remark: MATCH!
+=== DEBUGGING TABLE FIELD ACCESS TYPE ===
+
+chips symbol found:
+  - base_type: Food
+  - dimensions: 0
+  - is_table: True
+  - table_fields: {'food_name': chars, 'qty_set': piece[]}
+  - qty_set field type: piece[]
+  - get_field_type('qty_set'): piece[]
+    - base_type: piece
+    - dimensions: 1
+
+=== ERRORS ===
+[WARNING] [W102] Unused ingredient 'a' at line 13, column 16
+[ERROR] [E101] Type mismatch in array 'a' initialization: expected piece[], got Table(Food) at line 13, column 16
+INFO: <element_value_tail> | Enter: ]
+INFO: <element_value_tail> | STACK: [',']
+WARNING: <parse_token> | Expected: ] | Current: ] | Remark: MATCH!
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <field_assignments> | Enter: ]
+INFO: <field_assignments> | STACK: ['id']
+WARNING: <parse_token> | Expected: ] | Current: ] | Remark: MATCH!
+INFO: <table_declare_tail> | Enter: ;
+INFO: <table_declare_tail> | STACK: [',']
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <global_decl> | Enter: start
+INFO: <global_decl> | STACK: ['piece', 'chars', 'sip', 'flag', 'table', 'id']
+INFO: <recipe_decl> | Enter: start
+INFO: <recipe_decl> | STACK: ['piece', 'chars', 'sip', 'flag', 'table', 'id', 'prepare']
+WARNING: <parse_token> | Expected: start | Current: start | Remark: MATCH!
+WARNING: <parse_token> | Expected: ( | Current: ( | Remark: MATCH!
+WARNING: <parse_token> | Expected: ) | Current: ) | Remark: MATCH!
+INFO: <platter> | Enter: {
+INFO: <platter> | STACK: ['{']
+WARNING: <parse_token> | Expected: { | Current: { | Remark: MATCH!
+INFO: <local_decl> | Enter: piece
+INFO: <local_decl> | STACK: ['piece', 'chars', 'sip', 'flag', 'id']
+WARNING: <parse_token> | Expected: piece | Current: piece | Remark: MATCH!
+INFO: <piece_decl> | Enter: [
+INFO: <piece_decl> | STACK: ['of', '[']
+INFO: <piece_array_decl> | Enter: [
+INFO: <piece_array_decl> | STACK: ['of', '[', '[']
+INFO: <dimensions> | Enter: [
+INFO: <dimensions> | STACK: ['of', '[', '[', '[']
+WARNING: <parse_token> | Expected: [ | Current: [ | Remark: MATCH!
+WARNING: <parse_token> | Expected: ] | Current: ] | Remark: MATCH!
+INFO: <dimensions_tail> | Enter: of
+INFO: <dimensions_tail> | STACK: ['[']
+WARNING: <parse_token> | Expected: of | Current: of | Remark: MATCH!
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+INFO: <piece_array_init> | Enter: =
+INFO: <piece_array_init> | STACK: ['=']
+WARNING: <parse_token> | Expected: = | Current: = | Remark: MATCH!
+INFO: <piece_array_val> | Enter: id
+INFO: <piece_array_val> | STACK: ['id', 'append', 'sort', 'reverse', 'remove', '[']
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+INFO: <id_tail> | Enter: :
+INFO: <id_tail> | STACK: ['(', '[', ':']
+INFO: <accessor_tail> | Enter: :
+INFO: <accessor_tail> | STACK: ['(', '[', ':', '[', ':']
+INFO: <table_accessor> | Enter: :
+INFO: <table_accessor> | STACK: ['(', '[', ':', '[', ':', ':']
+WARNING: <parse_token> | Expected: : | Current: : | Remark: MATCH!
+WARNING: <parse_token> | Expected: id | Current: id | Remark: MATCH!
+INFO: <accessor_tail> | Enter: ;
+INFO: <accessor_tail> | STACK: ['[', ':']
+INFO: <array_declare_tail_piece> | Enter: ;
+INFO: <array_declare_tail_piece> | STACK: ['[', ':', ',']
+WARNING: <parse_token> | Expected: ; | Current: ; | Remark: MATCH!
+INFO: <local_decl> | Enter: }
+INFO: <local_decl> | STACK: ['piece', 'chars', 'sip', 'flag', 'id']
+INFO: <statements> | Enter: }
+INFO: <statements> | STACK: ['piece', 'chars', 'sip', 'flag', 'id', 'id', 'append', 'bill', 'copy', 'cut', 'fact', 'matches', 'pow', 'rand', 'remove', 'reverse', 'search', 'size', 'sort', 'sqrt', 'take', 'tochars', 'topiece', 'tosip', 'check', 'menu', 'pass', 'repeat', 'order', 'serve']
+WARNING: <parse_token> | Expected: } | Current: } | Remark: MATCH!
+INFO: <parse_program> | Exit: EOF

@@ -1,2 +1,2 @@
-Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate field 'age' in table prototype 'Student'
+Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E206] Duplicate field 'age' in table prototype 'Student' at line 3, column 11

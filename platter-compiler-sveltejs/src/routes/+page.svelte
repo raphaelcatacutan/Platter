@@ -662,7 +662,12 @@ try:
         print("="*80)
         
         # Build detailed message with all errors (formal formatting)
-        detailed_message = f"Semantic analysis failed with {error_handler.get_error_count()} error(s) and {error_handler.get_warning_count()} warning(s)\\n"
+        error_count = error_handler.get_error_count()
+        warning_count = error_handler.get_warning_count()
+        if error_count > 0:
+            detailed_message = f"Semantic analysis failed with {error_count} error(s) and {warning_count} warning(s)\\n"
+        else:
+            detailed_message = f"No semantic errors with {warning_count} warning(s)\\n"
         for detail in error_details:
             detailed_message += f"{detail}\\n"
         

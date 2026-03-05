@@ -1,0 +1,8 @@
+start(){
+	piece of x = 10;
+    
+    check(x>=20){
+    	bill ("proceed");
+    }
+
+}

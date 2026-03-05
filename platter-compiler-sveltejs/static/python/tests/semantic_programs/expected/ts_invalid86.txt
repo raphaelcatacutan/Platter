@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Check condition must be flag type, got piece
+[ERROR] [E101] Check condition must be flag type, got piece at line 3, column 11

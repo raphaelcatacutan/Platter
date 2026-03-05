@@ -1,0 +1,13 @@
+start(){
+ piece of x = 2;
+ 
+ menu(x) {
+
+ choice 1: 
+         bill(x);
+    stop;
+    
+ choice 2:
+         bill(x);
+ }
+}

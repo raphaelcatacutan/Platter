@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot index non-array type piece
+[ERROR] [E201] Cannot index non-array type piece at line 3, column 13

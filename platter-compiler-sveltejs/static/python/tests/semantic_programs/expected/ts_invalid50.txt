@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Table type Data has no field 'o'
+[ERROR] [E203] Table type Data has no field 'o' at line 10, column 6

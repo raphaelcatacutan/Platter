@@ -73,7 +73,14 @@ class TestSemanticAnalyzer(unittest.TestCase):
                 # Format output with prefix message like Svelte does
                 error_count = error_handler.get_error_count()
                 warning_count = error_handler.get_warning_count()
-                prefix = f"Semantic analysis failed with {error_count} error(s) and {warning_count} warning(s)"
+                
+                # Different format for errors vs warnings only
+                if error_count > 0:
+                    prefix = f"Semantic analysis failed with {error_count} error(s) and {warning_count} warning(s)"
+                else:
+                    # Only warnings, no errors
+                    prefix = f"No semantic errors with {warning_count} warning(s)"
+                
                 error_details = error_handler.format_errors(include_warnings=True, include_info=False)
                 actual_output = f"{prefix}\n{error_details}"
             else:

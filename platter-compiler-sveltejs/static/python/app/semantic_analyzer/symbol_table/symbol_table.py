@@ -67,17 +67,8 @@ class SymbolTable:
                      declaration_node: ASTNode = None) -> bool:
         """Define a symbol in current scope"""
         
-        # Check for ID shadowing with table prototypes
-        if kind != SymbolKind.TABLE_TYPE:
-            # Check if this identifier conflicts with a table prototype
-            if name in self.table_types:
-                if self.error_handler:
-                    self.error_handler.add_error(
-                        f"Identifier '{name}' conflicts with table prototype of the same name",
-                        declaration_node,
-                        "E208"
-                    )
-                return False
+        # Allow shadowing of table prototypes with variables in local scopes
+        # Table prototypes are in a separate namespace and can be shadowed
         
         symbol = Symbol(name, kind, type_info, self.current_scope.level, declaration_node, self.current_scope)
         

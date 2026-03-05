@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate field 'name' in table prototype 'Student'
+[ERROR] [E206] Duplicate field 'name' in table prototype 'Student' at line 3, column 15

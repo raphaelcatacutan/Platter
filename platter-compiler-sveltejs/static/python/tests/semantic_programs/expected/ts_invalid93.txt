@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in table literal: field 'name' expects chars, got piece
+[ERROR] [E101] Type mismatch in table literal: field 'name' expects chars, got piece at line 9, column 14

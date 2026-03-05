@@ -1,3 +1,3 @@
 Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Type mismatch in ingredient 'r' initialization: expected flag, got piece
+[ERROR] [E101] Type mismatch in ingredient 'r' initialization: expected flag, got piece at line 3, column 10
+[WARNING] [W102] Unused ingredient 'r' at line 3, column 10

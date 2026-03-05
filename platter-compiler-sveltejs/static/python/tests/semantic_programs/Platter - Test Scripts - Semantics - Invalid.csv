@@ -2,54 +2,62 @@ x1,Test Case/Test Scenario,Expected Output,Actual Output,Column 5,Notes,For Docs
 1,"piece of x;
 piece of x;
 start() {}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Symbol 'x' already defined in scope 'global'
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Symbol 'x' already defined in scope 'global'
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] Symbol 'x' already defined in scope 'global' at line 2, column 10
+[WARNING] [W102] Unused ingredient 'x' at line 1, column 10","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'global' at line 2, column 10
+[WARNING] [W102] Unused ingredient 'x' at line 1, column 10",TRUE,,
 2,"start() {
     piece of x;
     piece of x;
-}",Symbol 'x' already defined in scope 'start_platter_1',Symbol 'x' already defined in scope 'start_platter_1',TRUE,,
+}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'start_platter' at line 3, column 14
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'start_platter' at line 3, column 14
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14",TRUE,,
 3,"prepare piece of userDefined() {
     piece of x;
     piece of x;
     serve 0;
 }
-start() {}",Symbol 'x' already defined in scope 'userDefined',Symbol 'x' already defined in scope 'userDefined',TRUE,,
+start() {}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'userDefined' at line 3, column 14
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'userDefined' at line 3, column 14
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14",TRUE,,
 4,"start(){
     x = 5;
     serve 0;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'x' in 'start_platter_1'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'x' in 'start_platter_1'",TRUE,,
+[ERROR] [E002] Undefined ingredient 'x' in 'start_platter' at line 2, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E002] Undefined ingredient 'x' in 'start_platter' at line 2, column 5",TRUE,,
 5,"piece of cook;
 prepare piece of cook(){
     serve 1;
 }
 start() {}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Recipe 'cook' already defined
-[WARNING] Unused ingredient 'cook'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Recipe 'cook' already defined
-[WARNING] Unused ingredient 'cook'",TRUE,,
+[ERROR] Recipe 'cook' already defined at line 2, column 1
+[WARNING] [W102] Unused ingredient 'cook' at line 1, column 10","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Recipe 'cook' already defined at line 2, column 1
+[WARNING] [W102] Unused ingredient 'cook' at line 1, column 10",TRUE,,
 6,"piece of x;
 start() {
     x = 10.1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 5",TRUE,,
 7,"start() {
     piece of x;
     x = 10.1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 5",TRUE,,
 8,"sip of y = 10.2;
 piece of x = y + 3;
 start() {}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Type mismatch in binary operation: sip + piece
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Type mismatch in binary operation: sip + piece
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] [E105] Type mismatch in binary operation: sip + piece at line 2, column 16
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 10","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: sip + piece at line 2, column 16
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 10",TRUE,,
 9,"piece of y = 1;
 piece of z = 22;
 start() {
@@ -57,22 +65,24 @@ start() {
     chars of name = ""Raphael"";
     piece of x = y + 3 % name * z / z;
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Type mismatch in binary operation: piece % chars
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Type mismatch in binary operation: piece % chars
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] [E105] Type mismatch in binary operation: piece % chars at line 6, column 24
+[WARNING] [W102] Unused ingredient 'x' at line 6, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: piece % chars at line 6, column 24
+[WARNING] [W102] Unused ingredient 'x' at line 6, column 14",TRUE,,
 10,"flag of x;
 start() {
     flag of y = x + x == x;
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Invalid type for arithmetic operation: flag
-[WARNING] Unused ingredient 'y'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Invalid type for arithmetic operation: flag
-[WARNING] Unused ingredient 'y'",TRUE,,
+[ERROR] [E105] Invalid type for arithmetic operation: flag at line 3, column 19
+[WARNING] [W102] Unused ingredient 'y' at line 3, column 13","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E105] Invalid type for arithmetic operation: flag at line 3, column 19
+[WARNING] [W102] Unused ingredient 'y' at line 3, column 13",TRUE,,
 11,"prepare piece of add(){
     serve ""invalid type"";
 }
-start() {}","Serve type mismatch: expected piece, got chars","Serve type mismatch: expected piece, got chars",TRUE,,
+start() {}","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got chars at line 3, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got chars at line 3, column 5",TRUE,,
 12,"prepare sip of returnsSip() {
     serve 1.1;
 }
@@ -80,16 +90,16 @@ prepare piece of add(){
     serve returnsSip();
 }
 start() {}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got sip","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got sip",TRUE,,
+[ERROR] [E304] Serve type mismatch: expected piece, got sip at line 5, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got sip at line 5, column 5",TRUE,,
 13,"prepare piece of test(){
     piece of x = 5;
 }
 start(){}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Recipe 'test' must have a guaranteed serve statement in all code paths
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Recipe 'test' must have a guaranteed serve statement in all code paths
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] [E305] Recipe 'test' must have a guaranteed serve statement in all code paths at line 1, column 1
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E305] Recipe 'test' must have a guaranteed serve statement in all code paths at line 1, column 1
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14",TRUE,,
 14,"prepare piece of test(){
     chars of x = take();
     check (x == ""Raphael"") {
@@ -98,8 +108,8 @@ start(){}","Semantic analysis failed with 1 error(s) and 1 warning(s)
     # if not raphael, wala siyang serve dito
 }
 start(){}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Recipe 'test' must have a guaranteed serve statement in all code paths","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Recipe 'test' must have a guaranteed serve statement in all code paths",TRUE,,
+[ERROR] [E305] Recipe 'test' must have a guaranteed serve statement in all code paths at line 1, column 1","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E305] Recipe 'test' must have a guaranteed serve statement in all code paths at line 1, column 1",TRUE,,
 15,"prepare piece of test(){
     piece of i;
     pass(i = 0; i+=1; i <1) {
@@ -109,71 +119,83 @@ start(){}","Semantic analysis failed with 1 error(s) and 0 warning(s)
     }
 }
 start(){}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Recipe 'test' must have a guaranteed serve statement in all code paths","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Recipe 'test' must have a guaranteed serve statement in all code paths",TRUE,,
+[ERROR] [E305] Recipe 'test' must have a guaranteed serve statement in all code paths at line 1, column 1","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E305] Recipe 'test' must have a guaranteed serve statement in all code paths at line 1, column 1",TRUE,,
 16,"prepare piece of sum(piece of a, piece of b){
     serve a + b;
 }
 start() {
     piece of x = sum(1);
-}","Recipe 'sum' expects 2 flavor(s), got 1","Recipe 'sum' expects 2 flavor(s), got 1",TRUE,,
+}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E302] Recipe 'sum' expects 2 flavor(s), got 1 at line 5, column 21
+[WARNING] [W102] Unused ingredient 'x' at line 5, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E302] Recipe 'sum' expects 2 flavor(s), got 1 at line 5, column 21
+[WARNING] [W102] Unused ingredient 'x' at line 5, column 14",TRUE,,
 17,"prepare piece of sum(piece of a, piece of b){
     serve a + b;
 }
 start() {
     piece of x = sum(1, 2, 2);
-}","Recipe 'sum' expects 2 flavor(s), got 3","Recipe 'sum' expects 2 flavor(s), got 3",TRUE,,
+}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E302] Recipe 'sum' expects 2 flavor(s), got 3 at line 9, column 21
+[WARNING] [W102] Unused ingredient 'x' at line 9, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E302] Recipe 'sum' expects 2 flavor(s), got 3 at line 9, column 21
+[WARNING] [W102] Unused ingredient 'x' at line 9, column 14",TRUE,,
 18,"prepare piece of concat(piece of a, chars of b){
     serve a + topiece(b);
 }
 start() {
     piece of x = concat(1, 1);
-}","Flavor 2 of recipe 'concat': expected chars, got piece","Flavor 2 of recipe 'concat': expected chars, got piece",TRUE,,
+}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] Flavor 2 of recipe 'concat': expected chars, got piece at line 9, column 28
+[WARNING] [W102] Unused ingredient 'x' at line 9, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] Flavor 2 of recipe 'concat': expected chars, got piece at line 9, column 28
+[WARNING] [W102] Unused ingredient 'x' at line 9, column 14",TRUE,,
 19,"start() {
     piece of x = 5 / 0;
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Cannot divide by 0","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Cannot divide by 0",TRUE,,
+[ERROR] [E107] Cannot divide by 0 at line 2, column 20
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E107] Cannot divide by 0 at line 2, column 20
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14",TRUE,,
 20,"start() {
     piece of x;
     x = (5 > 3) + 4;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: flag + piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: flag + piece",TRUE,,
+[ERROR] [E105] Type mismatch in binary operation: flag + piece at line 3, column 17","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: flag + piece at line 3, column 17",TRUE,,
 21,"piece of x = 5, y = 3, z = 1;
 
 start(){
 flag of r;
 r = (x > y > z);
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece > flag","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece > flag",TRUE,,
+[ERROR] [E105] Type mismatch in binary operation: flag > piece at line 5, column 8","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: flag > piece at line 5, column 8",TRUE,,
 22,"prepare piece of test(){
  serve down;
 }
 start(){}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got flag","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got flag",TRUE,,
+[ERROR] [E304] Serve type mismatch: expected piece, got flag at line 3, column 2","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got flag at line 3, column 2",TRUE,,
 23,"start(){
  flag of r = (((5 + (3 * 2))));
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Type mismatch in ingredient 'r' initialization: expected flag, got piece","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Type mismatch in ingredient 'r' initialization: expected flag, got piece",TRUE,,
+[ERROR] [E101] Type mismatch in ingredient 'r' initialization: expected flag, got piece at line 3, column 10
+[WARNING] [W102] Unused ingredient 'r' at line 3, column 10","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Type mismatch in ingredient 'r' initialization: expected flag, got piece at line 3, column 10
+[WARNING] [W102] Unused ingredient 'r' at line 3, column 10",TRUE,,
 24,"prepare piece of f(piece of a){
 }
 start(){
  piece of x=f(3);
 }","Semantic analysis failed with 1 error(s) and 2 warning(s)
-[WARNING] Unused ingredient 'a'
-[WARNING] Unused ingredient 'x'
-[ERROR] Recipe 'f' must have a guaranteed serve statement in all code paths","Semantic analysis failed with 1 error(s) and 2 warning(s)
-[WARNING] Unused ingredient 'a'
-[WARNING] Unused ingredient 'x'
-[ERROR] Recipe 'f' must have a guaranteed serve statement in all code paths",TRUE,,
+[ERROR] [E305] Recipe 'f' must have a guaranteed serve statement in all code paths at line 1, column 1
+[WARNING] [W102] Unused ingredient 'a' at line 1, column 26
+[WARNING] [W102] Unused ingredient 'x' at line 7, column 11","Semantic analysis failed with 1 error(s) and 2 warning(s)
+[ERROR] [E305] Recipe 'f' must have a guaranteed serve statement in all code paths at line 1, column 1
+[WARNING] [W102] Unused ingredient 'a' at line 1, column 26
+[WARNING] [W102] Unused ingredient 'x' at line 7, column 11",TRUE,,
 25,"prepare piece of add(piece of a){
  serve a+1;
 }
@@ -181,21 +203,19 @@ start(){
 start(){
  piece of x=add(up);
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Flavor 1 of recipe 'add': expected piece, got flag","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Flavor 1 of recipe 'add': expected piece, got flag",TRUE,,
+[ERROR] [E303] Flavor 1 of recipe 'add': expected piece, got flag at line 11, column 17
+[WARNING] [W102] Unused ingredient 'x' at line 11, column 11","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] Flavor 1 of recipe 'add': expected piece, got flag at line 11, column 17
+[WARNING] [W102] Unused ingredient 'x' at line 11, column 11",TRUE,,
 26,"start(){
  menu((unknown+1)){
   choice 1: serve a;
  }
 }","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'unknown' in 'start_platter_1'
-[ERROR] Undefined ingredient 'a' in 'start_platter_1'
-","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'unknown' in 'start_platter_1'
-[ERROR] Undefined ingredient 'a' in 'start_platter_1'
-",TRUE,,
+[ERROR] [E002] Undefined ingredient 'unknown' in 'start_platter' at line 3, column 8
+[ERROR] [E002] Undefined ingredient 'a' in 'start_platter' at line 5, column 19","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E002] Undefined ingredient 'unknown' in 'start_platter' at line 3, column 8
+[ERROR] [E002] Undefined ingredient 'a' in 'start_platter' at line 5, column 19",TRUE,,
 27,"prepare flag of test(){
  serve up;
 }
@@ -205,8 +225,8 @@ start(){
   choice 1: serve test; 
   }
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Choice value type piece does not match menu expression type flag","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Choice value type piece does not match menu expression type flag",TRUE,,
+[ERROR] [E101] Choice value type piece does not match menu expression type flag at line 13, column 10","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Choice value type piece does not match menu expression type flag at line 13, column 10",TRUE,,
 28,"prepare piece of add(piece of a,piece of b){
  serve a+b;
 }
@@ -214,17 +234,17 @@ start(){
 start(){
  piece of x=add(1,2,3);
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Recipe 'add' expects 2 flavor(s), got 3","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Recipe 'add' expects 2 flavor(s), got 3",TRUE,,
+[ERROR] [E302] Recipe 'add' expects 2 flavor(s), got 3 at line 11, column 16
+[WARNING] [W102] Unused ingredient 'x' at line 11, column 11","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E302] Recipe 'add' expects 2 flavor(s), got 3 at line 11, column 16
+[WARNING] [W102] Unused ingredient 'x' at line 11, column 11",TRUE,,
 29,"start(){
  piece of x = ((3 + (y * (2 + 1))));
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined ingredient 'y' in 'start_platter_1'
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined ingredient 'y' in 'start_platter_1'
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] [E002] Undefined ingredient 'y' in 'start_platter' at line 3, column 22
+[WARNING] [W102] Unused ingredient 'x' at line 3, column 11","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E002] Undefined ingredient 'y' in 'start_platter' at line 3, column 22
+[WARNING] [W102] Unused ingredient 'x' at line 3, column 11",TRUE,,
 30,"start() {
     piece of i;
     flag of done = down;
@@ -232,11 +252,13 @@ start(){
     pass(i = 1; i -= done; i+1+1 >= i) {
         piece of x = i;
 }
-}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Type mismatch in assignment: cannot assign flag to piece","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Type mismatch in assignment: cannot assign flag to piece",TRUE,,
+}","Semantic analysis failed with 2 error(s) and 1 warning(s)
+[ERROR] [E101] Loop condition must be flag type, got piece at line 9, column 29
+[ERROR] [E101] Type mismatch in assignment: cannot assign flag to piece at line 9, column 17
+[WARNING] [W102] Unused ingredient 'x' at line 11, column 18","Semantic analysis failed with 2 error(s) and 1 warning(s)
+[ERROR] [E101] Loop condition must be flag type, got piece at line 9, column 29
+[ERROR] [E101] Type mismatch in assignment: cannot assign flag to piece at line 9, column 17
+[WARNING] [W102] Unused ingredient 'x' at line 11, column 18",TRUE,,
 31,"start() {
     piece of i;
     flag of step = up;
@@ -245,10 +267,10 @@ start(){
         piece of x = i;
     }
  }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Type mismatch in binary operation: piece >= flag","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Type mismatch in binary operation: piece >= flag",TRUE,,
+[ERROR] [E105] Type mismatch in binary operation: piece >= flag at line 5, column 27
+[WARNING] [W102] Unused ingredient 'x' at line 6, column 18","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: piece >= flag at line 5, column 27
+[WARNING] [W102] Unused ingredient 'x' at line 6, column 18",TRUE,,
 32,"start(){
 
  menu(((((y))))){
@@ -256,16 +278,16 @@ start(){
   	stop;
 }
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'y' in 'start_platter_1'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'y' in 'start_platter_1'",TRUE,,
+[ERROR] [E002] Undefined ingredient 'y' in 'start_platter' at line 5, column 11","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E002] Undefined ingredient 'y' in 'start_platter' at line 5, column 11",TRUE,,
 33,"piece of a = 4, b = 2;
 
 start(){
     flag of result;
     result = (((a + b) * 2) and (not down));
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Logical operators require flag operands: piece and flag","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Logical operators require flag operands: piece and flag",TRUE,,
+[ERROR] [E105] Logical operators require flag operands: piece and flag at line 9, column 29","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E105] Logical operators require flag operands: piece and flag at line 9, column 29",TRUE,,
 34,"table of Data = [
     piece of count;
     sip of ratio;
@@ -280,8 +302,8 @@ start(){
     repeat((((d:count) >= (d:ratio)))){
         next;
 }}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece >= sip","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece >= sip",TRUE,di nagpapakita yung error highlight(?) i think tama naman ginawa ko T^T medyo di ko pa sure arrays and tables,
+[ERROR] [E105] Type mismatch in binary operation: piece >= sip at line 12, column 24","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: piece >= sip at line 12, column 24",TRUE,,
 35,"piece of x = 5;
 
 start(){
@@ -290,8 +312,8 @@ start(){
     result =
     ((((((((((((((((x > 2)))))))))))))))) * 1.0 + (((((x + 10.0)))));
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece + sip","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece + sip",TRUE,,
+[ERROR] [E105] Type mismatch in binary operation: flag * sip at line 7, column 43","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: flag * sip at line 7, column 43",TRUE,,
 36,,,,TRUE,,
 37,,,,TRUE,,
 38,,,,TRUE,,
@@ -300,33 +322,37 @@ start(){
 41,"start() {
     piece[][] of m = [[1,2],[3,4]];
     m[0][1] = 1.1;
-}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+}","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E205] Array index 1 out of bounds (array is uninitialized/empty, size: 0)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 10","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E205] Array index 1 out of bounds (array is uninitialized/empty, size: 0)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 10",TRUE,,
 42,"start() {
     piece[][] of m = [[1,2],[3,4]];
     m[0] = 3;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece to piece[]","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece to piece[]",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to piece[] at line 3, column 7","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to piece[] at line 3, column 7",TRUE,,
 43,"start() {
     piece[][] of m = [[1,2],[3,4]];
     m[0][3][3] = 3;
-}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot index non-array type piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot index non-array type piece",TRUE,,
+}","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E205] Array index 3 out of bounds (array is uninitialized/empty, size: 0)
+[ERROR] [E201] Cannot index non-array type piece at line 3, column 13","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E205] Array index 3 out of bounds (array is uninitialized/empty, size: 0)
+[ERROR] [E201] Cannot index non-array type piece at line 3, column 13",TRUE,,
 44,"start() {
     piece[] of nums = [1,2,3];
     nums[10] = 1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Array index 10 out of bounds (array size: 3)","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Array index 10 out of bounds (array size: 3)",TRUE,,
+[ERROR] [E205] Array index 10 out of bounds (array size: 3)","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E205] Array index 10 out of bounds (array size: 3)",TRUE,,
 45,"start() {
     piece[] of nums = [1,2,3];
     nums[0] = 1.1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 10","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 3, column 10",TRUE,,
 46,"table of Data = [
     piece of x;
     chars of y;
@@ -338,8 +364,8 @@ start() {
     Data of x;
     x:x = 1.1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 10, column 6","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 10, column 6",TRUE,,
 47,"table of Data = [
     piece of x;
 ];
@@ -349,21 +375,19 @@ start() {
         y = ""Non existent"";
     ];
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Table type 'Data' has no field 'y'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Table type 'Data' has no field 'y'",TRUE,,
+[ERROR] [E203] Table type 'Data' has no field 'y' at line 7, column 11
+[WARNING] [W102] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E203] Table type 'Data' has no field 'y' at line 7, column 11
+[WARNING] [W102] Unused ingredient 'x'",TRUE,No col row info on warning,
 48,"start() {
     Data of x = [
         y = ""Non existent"";
     ];
-}","Semantic analysis failed with 2 error(s) and 1 warning(s)
-[ERROR] Undefined table type 'Data'
-[WARNING] Unused ingredient 'x'
-[ERROR] Undefined table type 'Data'","Semantic analysis failed with 2 error(s) and 1 warning(s)
-[ERROR] Undefined table type 'Data'
-[WARNING] Unused ingredient 'x'
-[ERROR] Undefined table type 'Data'",TRUE,update error formatting,
+}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E102] Undefined table type 'Data'
+[WARNING] [W102] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E102] Undefined table type 'Data'
+[WARNING] [W102] Unused ingredient 'x'",TRUE,No col row info,
 49,"table of Data = [
     piece of x;
 ];
@@ -372,10 +396,10 @@ start() {
     Data of x;
     piece of Data; # Used already
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Identifier 'Data' conflicts with table prototype of the same name
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Identifier 'Data' conflicts with table prototype of the same name
-[WARNING] Unused ingredient 'x'",TRUE,update error formatting,
+[ERROR] [E208] Identifier 'Data' conflicts with table prototype of the same name at line 7, column 14
+[WARNING] [W102] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E208] Identifier 'Data' conflicts with table prototype of the same name at line 7, column 14
+[WARNING] [W102] Unused ingredient 'x'",TRUE,No col row info,
 50,"table of Data = [
     piece of x;
     chars of y;
@@ -387,8 +411,8 @@ start() {
     Data of x;
     x:o = ""None existent"";
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Table type Data has no field 'o'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Table type Data has no field 'o'",TRUE,,
+[ERROR] [E203] Table type Data has no field 'o' at line 10, column 6","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E203] Table type Data has no field 'o' at line 10, column 6",TRUE,,
 51,"table of Data = [
     piece[] of x;
 ];
@@ -398,10 +422,10 @@ start() {
         x = [1.2, 2.2];
     ];
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Field 'x' type mismatch: expected piece[], got sip[]","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'x'
-[ERROR] Field 'x' type mismatch: expected piece[], got sip[]",TRUE,,
+[ERROR] [E101] Field 'x' type mismatch: expected piece[], got sip[] at line 7, column 11
+[WARNING] [W102] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Field 'x' type mismatch: expected piece[], got sip[] at line 7, column 11
+[WARNING] [W102] Unused ingredient 'x'",TRUE,No col row info on warning,
 52,"table of Data = [
     piece[] of x;
 ];
@@ -410,8 +434,8 @@ start() {
     Data of x;
     x:x = [1.1];
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip[] to piece[]","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip[] to piece[]",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip[] to piece[] at line 7, column 6","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip[] to piece[] at line 7, column 6",TRUE,,
 53,"table of Nested1 = [
     piece of x;
 ];
@@ -424,8 +448,8 @@ start() {
     Data of a;
     a:y:x = 1.1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 11, column 8","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 11, column 8",TRUE,,
 54,"table of Nested1 = [
     piece of x;
 ];
@@ -441,8 +465,8 @@ start() {
     Data of a;
     a:y:n:x = 1.1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign sip to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 14, column 10","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign sip to piece at line 14, column 10",TRUE,,
 55,"table of Data = [
     LatePrototype of y;
     piece of z;
@@ -452,8 +476,8 @@ table of LatePrototype = [
 ];
 
 start() {}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Forward reference not allowed: table prototype 'LatePrototype' must be defined before use in 'Data'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Forward reference not allowed: table prototype 'LatePrototype' must be defined before use in 'Data'",TRUE,,
+[ERROR] [E208] Forward reference not allowed: table prototype 'LatePrototype' must be defined before use in 'Data' at line 2, column 19","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E208] Forward reference not allowed: table prototype 'LatePrototype' must be defined before use in 'Data' at line 2, column 19",TRUE,,
 56,"table of Data = [
     piece of x;
     chars of y;
@@ -466,10 +490,10 @@ prepare Data of getData() {
 }
 
 start() {}","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Field 'f' type mismatch: expected flag, got piece
-[ERROR] Serve type mismatch: expected Table(Data), got Table(anonymous_table)","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Field 'f' type mismatch: expected flag, got piece
-[ERROR] Serve type mismatch: expected Table(Data), got Table(anonymous_table)",TRUE,update error formatting,
+[ERROR] [E101] Field 'f' type mismatch: expected flag, got piece at line 9, column 14
+[ERROR] [E304] Serve type mismatch: expected Table(Data), got Table(anonymous_table) at line 9, column 5","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E101] Field 'f' type mismatch: expected flag, got piece at line 9, column 14
+[ERROR] [E304] Serve type mismatch: expected Table(Data), got Table(anonymous_table) at line 9, column 5",TRUE,,
 57,"table of Data = [
     piece of x;
     chars of y;
@@ -484,18 +508,24 @@ prepare Data of getData() {
 start() {
     getData([f = 1;]);
 }","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Cannot serve empty array when recipe expects Table(Data)
-[ERROR] Recipe 'getData' expects 0 flavor(s), got 1","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Cannot serve empty array when recipe expects Table(Data)
-[ERROR] Recipe 'getData' expects 0 flavor(s), got 1",TRUE,,
+[ERROR] [E304] Cannot serve empty array when recipe expects Table(Data) at line 9, column 5
+[ERROR] [E302] Recipe 'getData' expects 0 flavor(s), got 1 at line 13, column 12","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E304] Cannot serve empty array when recipe expects Table(Data) at line 9, column 5
+[ERROR] [E302] Recipe 'getData' expects 0 flavor(s), got 1 at line 13, column 12",TRUE,,
 58,"table of Data = [
     Data of x;
 ];
 
 start() {}","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Recursive type not allowed: table prototype 'Data' cannot contain field of type 'Data'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Recursive type not allowed: table prototype 'Data' cannot contain field of type 'Data'",TRUE,,
-59,,,,TRUE,,
+[ERROR] [E207] Recursive type not allowed: table prototype 'Data' cannot contain field of type 'Data' at line 2, column 10","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E207] Recursive type not allowed: table prototype 'Data' cannot contain field of type 'Data' at line 2, column 10",TRUE,,
+59,"flag of x = (10 + 10 > 20) + 10 > 10;
+
+start() {}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: flag + piece at line 1, column 28
+[WARNING] [W102] Unused ingredient 'x' at line 1, column 9","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E105] Type mismatch in binary operation: flag + piece at line 1, column 28
+[WARNING] [W102] Unused ingredient 'x' at line 1, column 9",TRUE,,
 60,,,,TRUE,,
 61,"start() {
     piece of x = 1;
@@ -506,54 +536,54 @@ start() {}","Semantic analysis failed with 1 error(s) and 0 warning(s)
             bill(""one"");
     }
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate choice value: 1","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate choice value: 1",TRUE,,
+[ERROR] [E001] Duplicate choice value: 1 at line 6, column 16","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E001] Duplicate choice value: 1 at line 6, column 16",TRUE,,
 62,"chars[] of names = [[][]];
 start() {  }","Syntax Error: Unexpected '[' at line 1, col 23. Expected ',', ']'.","Syntax Error: Unexpected '[' at line 1, col 23. Expected ',', ']'.",TRUE,,
 63,"chars[] of names = [[],[]];
 start() {  }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'names'
-[ERROR] Type mismatch in array 'names' initialization: expected chars[], got unknown[][]","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'names'
-[ERROR] Type mismatch in array 'names' initialization: expected chars[], got unknown[][]",TRUE,error positioning only,
+[ERROR] [E101] Type mismatch in array 'names' initialization: expected chars[], got unknown[][] at line 1, column 12
+[WARNING] [W102] Unused ingredient 'names' at line 1, column 12","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Type mismatch in array 'names' initialization: expected chars[], got unknown[][] at line 1, column 12
+[WARNING] [W102] Unused ingredient 'names' at line 1, column 12",TRUE,,
 64,"piece of x;
 table of x = [ piece of x; ];
-start() {}","**should error highlight 'x' of table as well**
-[ERROR] Symbol 'x' already defined in scope 'global'
-[WARNING] Unused variable 'x'",[ERROR] Symbol 'x' already defined in scope 'global',FALSE,update error formatting,
+start() {}","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E208] Identifier 'x' conflicts with table prototype of the same name at line 1, column 10","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E208] Identifier 'x' conflicts with table prototype of the same name at line 1, column 10",TRUE,,
 65,"piece of x;
 sip of y = x;
 start() {}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'y'
-[ERROR] Type mismatch in ingredient 'y' initialization: expected sip, got piece","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'y'
-[ERROR] Type mismatch in ingredient 'y' initialization: expected sip, got piece",TRUE,,
+[ERROR] [E101] Type mismatch in ingredient 'y' initialization: expected sip, got piece at line 2, column 8
+[WARNING] [W102] Unused ingredient 'y' at line 2, column 8","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Type mismatch in ingredient 'y' initialization: expected sip, got piece at line 2, column 8
+[WARNING] [W102] Unused ingredient 'y' at line 2, column 8",TRUE,,
 66,"prepare piece of a(){
         serve [[]];
 }
 start() { }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got unknown[][]","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got unknown[][]",TRUE,,
+[ERROR] [E304] Serve type mismatch: expected piece, got unknown[][] at line 2, column 9","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got unknown[][] at line 2, column 9",TRUE,,
 67,"prepare piece of a(){
         serve 1.2;
 }
 start() { }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got sip","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got sip",TRUE,,
+[ERROR] [E304] Serve type mismatch: expected piece, got sip at line 2, column 9","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got sip at line 2, column 9",TRUE,,
 68,"piece of x;
 
 start() {
         sip of x;
     x = 1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece to sip","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece to sip",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to sip at line 5, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to sip at line 5, column 5",TRUE,,
 69,"chars of name;
 start() {
         name[0] = 1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot index non-array type chars","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot index non-array type chars",TRUE,,
+[ERROR] [E201] Cannot index non-array type chars at line 3, column 14","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E201] Cannot index non-array type chars at line 3, column 14",TRUE,,
 70,"table of Food = [
     chars of food_name;
     piece[] of qty_set;
@@ -568,25 +598,9 @@ start(){
         piece[][] of a = [[1]];
         chips:qty_set = [a];
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece[][] to piece[]","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece[][] to piece[]",TRUE,,
-71,"table of Food = [
-        chars of food_name;
-    piece[] of qty_set;
-];
-
-Food of chips = [
-        food_name = ""oishi"";
-    qty_set = [1, 2, 3];
-];
-
-start(){ 
-        piece[] of a = chips:qty_set;
-}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Type mismatch in array 'a' initialization: expected piece[], got Table(Food)","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Type mismatch in array 'a' initialization: expected piece[], got Table(Food)",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece[][] to piece[] at line 13, column 14","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece[][] to piece[] at line 13, column 14",TRUE,,
+71,,,,TRUE,,
 72,"table of Student = [
         chars of stud_name;
     piece of age;
@@ -607,14 +621,14 @@ start(){
         ];
     ];
 }","Semantic analysis failed with 3 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'Blk1'
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Field 'students' type mismatch: expected Table(Student)[], got chars[][]","Semantic analysis failed with 3 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'Blk1'
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Field 'students' type mismatch: expected Table(Student)[], got chars[][]",TRUE,,
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 16, column 17
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 17, column 13
+[ERROR] [E101] Field 'students' type mismatch: expected Table(Student)[], got chars[][] at line 15, column 18
+[WARNING] [W102] Unused ingredient 'Blk1'","Semantic analysis failed with 3 error(s) and 1 warning(s)
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 16, column 17
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 17, column 13
+[ERROR] [E101] Field 'students' type mismatch: expected Table(Student)[], got chars[][] at line 15, column 18
+[WARNING] [W102] Unused ingredient 'Blk1'",TRUE,,
 73,,,,TRUE,,
 74,"table of Student = [
         chars of stud_name;
@@ -626,8 +640,8 @@ Student[] of blk1;
 start(){
         blk1 = 1;
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece to Student[]","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece to Table(Student)[]",FALSE,update error formatting,
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to Table(Student)[] at line 9, column 9","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to Table(Student)[] at line 9, column 9",TRUE,update error formatting,
 75,"table of Student = [
         chars of stud_name;
     piece of age;
@@ -641,30 +655,33 @@ start(){
         [ ""aabc"", 1 ]
     ];
 }","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Array literal has inconsistent element types: Table(Student) and chars[]","Semantic analysis failed with 2 error(s) and 0 warning(s)
-[ERROR] Array literal has inconsistent element types: chars and piece
-[ERROR] Array literal has inconsistent element types: Table(Student) and chars[]",TRUE,,
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 11, column 9
+[ERROR] [E101] Array literal has inconsistent element types: Table(Student) and chars[] at line 9, column 16","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E101] Array literal has inconsistent element types: chars and piece at line 11, column 9
+[ERROR] [E101] Array literal has inconsistent element types: Table(Student) and chars[] at line 9, column 16",TRUE,,
 76,"start(){
         piece[][] of a = [[1, 2], [3, 4]];
     
     a = reverse(a[0]); 
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece[] to piece[][]","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece[] to piece[][]",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece[] to piece[][] at line 4, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece[] to piece[][] at line 4, column 5",TRUE,,
 77,"start(){
 
     chars[] of nums = [""1"", ""2"", ""3""];
     
     piece of a = topiece(nums);   
-}",type mismatch chars[] to piece,"Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] No matching overload for built-in recipe 'topiece' with argument types: [('chars', 1)]",FALSE,update error formatting,
+}","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'topiece' with argument types: [('chars', 1)] at line 5, column 18
+[WARNING] [W102] Unused ingredient 'a' at line 5, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'topiece' with argument types: [('chars', 1)] at line 5, column 18
+[WARNING] [W102] Unused ingredient 'a' at line 5, column 14",TRUE,,
 78,"start(){
     piece of a = 1;
     bill(a);
-}",expects chars but got piece in bill,"Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)]",FALSE,update error formatting,
+}","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 5, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 5, column 5",TRUE,,
 79,"prepare piece of square(piece of x) {
     serve x * x;
 }
@@ -672,10 +689,10 @@ start(){
 start() {
     piece of y = square(3.5);
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'y'
-[ERROR] Flavor 1 of recipe 'square': expected piece, got sip","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'y'
-[ERROR] Flavor 1 of recipe 'square': expected piece, got sip",TRUE,,
+[ERROR] [E303] Flavor 1 of recipe 'square': expected piece, got sip at line 6, column 25
+[WARNING] [W102] Unused ingredient 'y' at line 6, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] Flavor 1 of recipe 'square': expected piece, got sip at line 6, column 25
+[WARNING] [W102] Unused ingredient 'y' at line 6, column 14",TRUE,,
 80,"prepare piece of compute() {
     serve 5;
 }
@@ -683,25 +700,25 @@ start() {
 start() {
     compute = compute();
 } ","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot assign to recipe 'compute'. Recipes are not assignable.","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Cannot assign to recipe 'compute'. Recipes are not assignable.",TRUE,,
+[ERROR] [E106] Cannot assign to recipe 'compute'. Recipes are not assignable. at line 6, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E106] Cannot assign to recipe 'compute'. Recipes are not assignable. at line 6, column 5",TRUE,,
 81,"start(){
     piece of y = z + 1;
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined ingredient 'z' in 'start_platter_1'
-[WARNING] Unused ingredient 'y'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined ingredient 'z' in 'start_platter_1'
-[WARNING] Unused ingredient 'y'",TRUE,,
+[ERROR] [E002] Undefined ingredient 'z' in 'start_platter' at line 2, column 18
+[WARNING] [W102] Unused ingredient 'y' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E002] Undefined ingredient 'z' in 'start_platter' at line 2, column 18
+[WARNING] [W102] Unused ingredient 'y' at line 2, column 14",TRUE,,
 82,"start(){
     piece of x = 1;
     piece of x = 2;
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Symbol 'x' already defined in scope 'start_platter_1'
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Symbol 'x' already defined in scope 'start_platter_1'
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] Symbol 'x' already defined in scope 'start_platter' at line 3, column 14
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] Symbol 'x' already defined in scope 'start_platter' at line 3, column 14
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14",TRUE,,
 83,"prepare piece of add(piece of a, piece of b){
     serve a + b;
 }
@@ -710,12 +727,10 @@ start(){
     piece of r = add(1);
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Recipe 'add' expects 2 flavor(s), got 1
-","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Recipe 'add' expects 2 flavor(s), got 1
-",TRUE,,
+[ERROR] [E302] Recipe 'add' expects 2 flavor(s), got 1 at line 6, column 21
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E302] Recipe 'add' expects 2 flavor(s), got 1 at line 6, column 21
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14",TRUE,,
 84,"prepare piece of add(piece of a, piece of b){
     serve a + b;
 }
@@ -724,10 +739,10 @@ start(){
     piece of r = add(""a"", 2);
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Flavor 1 of recipe 'add': expected piece, got chars","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Flavor 1 of recipe 'add': expected piece, got chars",TRUE,,
+[ERROR] [E303] Flavor 1 of recipe 'add': expected piece, got chars at line 6, column 22
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] Flavor 1 of recipe 'add': expected piece, got chars at line 6, column 22
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14",TRUE,,
 85,"prepare piece of bad(){
     serve ""x"";
 }
@@ -736,20 +751,18 @@ start(){
     piece of r = bad();
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Serve type mismatch: expected piece, got chars
-","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Serve type mismatch: expected piece, got chars
-",TRUE,,
+[ERROR] [E304] Serve type mismatch: expected piece, got chars at line 2, column 5
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E304] Serve type mismatch: expected piece, got chars at line 2, column 5
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14",TRUE,,
 86,"start(){
     piece of x = 1;
     check(x){
         bill(""ok"");
     }
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Check condition must be flag type, got piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Check condition must be flag type, got piece",TRUE,,
+[ERROR] [E101] Check condition must be flag type, got piece at line 3, column 11","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Check condition must be flag type, got piece at line 3, column 11",TRUE,,
 87,"table of Student = [
     chars of name;
     piece of age;
@@ -763,10 +776,10 @@ Student of s = [
 start(){
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 's'
-[ERROR] Field 'age' type mismatch: expected piece, got chars","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 's'
-[ERROR] Field 'age' type mismatch: expected piece, got chars",TRUE,,
+[ERROR] [E101] Field 'age' type mismatch: expected piece, got chars at line 8, column 9
+[WARNING] [W102] Unused ingredient 's'","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Field 'age' type mismatch: expected piece, got chars at line 8, column 9
+[WARNING] [W102] Unused ingredient 's'",TRUE,,
 88,"table of Student = [
     chars of name;
     piece of age;
@@ -781,18 +794,18 @@ start(){
     piece of a = s:grade;
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Table type Student has no field 'grade'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Table type Student has no field 'grade'",TRUE,,
+[ERROR] [E203] Table type Student has no field 'grade' at line 12, column 19
+[WARNING] [W102] Unused ingredient 'a' at line 12, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E203] Table type Student has no field 'grade' at line 12, column 19
+[WARNING] [W102] Unused ingredient 'a' at line 12, column 14",TRUE,,
 89,"start(){
     piece of x = foo(1);
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined recipe 'foo' in 'start_platter_1'
-[WARNING] Unused ingredient 'x'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined recipe 'foo' in 'start_platter_1'
-[WARNING] Unused ingredient 'x'",TRUE,,
+[ERROR] [E301] Undefined recipe 'foo' in 'start_platter' at line 2, column 21
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E301] Undefined recipe 'foo' in 'start_platter' at line 2, column 21
+[WARNING] [W102] Unused ingredient 'x' at line 2, column 14",TRUE,,
 90,"table of Student = [
     piece of age;
     piece of age;
@@ -801,25 +814,25 @@ start(){
 start(){
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate field 'age' in table prototype 'Student'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate field 'age' in table prototype 'Student'",TRUE,,
+[ERROR] [E206] Duplicate field 'age' in table prototype 'Student' at line 3, column 11","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E206] Duplicate field 'age' in table prototype 'Student' at line 3, column 11",TRUE,,
 91,"start(){
     piece of x = 1;
     piece[] of arr = [1, 2];
     x = arr;
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece[] to piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in assignment: cannot assign piece[] to piece",TRUE,,
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece[] to piece at line 4, column 5","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece[] to piece at line 4, column 5",TRUE,,
 92,"start(){
     piece of x = 1;
     piece of y = x[0];
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'y'
-[ERROR] Cannot index non-array type piece","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'y'
-[ERROR] Cannot index non-array type piece",TRUE,,
+[ERROR] [E201] Cannot index non-array type piece at line 3, column 20
+[WARNING] [W102] Unused ingredient 'y' at line 3, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E201] Cannot index non-array type piece at line 3, column 20
+[WARNING] [W102] Unused ingredient 'y' at line 3, column 14",TRUE,,
 93,"table of Student = [
     chars of name;
     piece of age;
@@ -833,8 +846,8 @@ start(){
     ];
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in table literal: field 'name' expects chars, got piece","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in table literal: field 'name' expects chars, got piece",TRUE,,
+[ERROR] [E101] Type mismatch in table literal: field 'name' expects chars, got piece at line 9, column 14","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in table literal: field 'name' expects chars, got piece at line 9, column 14",TRUE,,
 94,"table of Student = [
         chars of name;
         piece of name;
@@ -843,16 +856,16 @@ start(){
     start(){
         bill(""done"");
     }","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate field 'name' in table prototype 'Student'","Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Duplicate field 'name' in table prototype 'Student'",TRUE,,
+[ERROR] [E206] Duplicate field 'name' in table prototype 'Student' at line 3, column 15","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E206] Duplicate field 'name' in table prototype 'Student' at line 3, column 15",TRUE,,
 95,"start(){
     Ghost[] of g = [];
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined type 'Ghost'
-[WARNING] Unused ingredient 'g'","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Undefined type 'Ghost'
-[WARNING] Unused ingredient 'g'",TRUE,,
+[ERROR] [E102] Undefined type 'Ghost' at line 2, column 16
+[WARNING] [W102] Unused ingredient 'g' at line 2, column 16","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E102] Undefined type 'Ghost' at line 2, column 16
+[WARNING] [W102] Unused ingredient 'g' at line 2, column 16",TRUE,,
 96,"table of Student = [
     chars of name;
     piece of age;
@@ -866,12 +879,12 @@ start(){
     piece of a = count(1);
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 2 warning(s)
-[WARNING] Unused ingredient 'cls'
-[WARNING] Unused ingredient 'a'
-[ERROR] Flavor 1 of recipe 'count': expected Table(Student)[], got piece","Semantic analysis failed with 1 error(s) and 2 warning(s)
-[WARNING] Unused ingredient 'cls'
-[WARNING] Unused ingredient 'a'
-[ERROR] Flavor 1 of recipe 'count': expected Table(Student)[], got piece",TRUE,,
+[ERROR] [E303] Flavor 1 of recipe 'count': expected Table(Student)[], got piece at line 11, column 24
+[WARNING] [W102] Unused ingredient 'cls' at line 6, column 34
+[WARNING] [W102] Unused ingredient 'a' at line 11, column 14","Semantic analysis failed with 1 error(s) and 2 warning(s)
+[ERROR] [E303] Flavor 1 of recipe 'count': expected Table(Student)[], got piece at line 11, column 24
+[WARNING] [W102] Unused ingredient 'cls' at line 6, column 34
+[WARNING] [W102] Unused ingredient 'a' at line 11, column 14",TRUE,,
 97,"table of Student = [
     chars of name;
     piece of age;
@@ -890,10 +903,10 @@ start(){
     piece of a = one(cls);
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Field 'age' type mismatch: expected piece, got chars","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Field 'age' type mismatch: expected piece, got chars",TRUE,,
+[ERROR] [E101] Field 'age' type mismatch: expected piece, got chars at line 13, column 13
+[WARNING] [W102] Unused ingredient 'a' at line 16, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Field 'age' type mismatch: expected piece, got chars at line 13, column 13
+[WARNING] [W102] Unused ingredient 'a' at line 16, column 14",TRUE,,
 98,"table of Student = [
     chars of name;
     piece of age;
@@ -912,10 +925,10 @@ start(){
     ];
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'cls'
-[ERROR] Type mismatch in table literal: field 'age' expects piece, got chars","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'cls'
-[ERROR] Type mismatch in table literal: field 'age' expects piece, got chars",TRUE,,
+[ERROR] [E101] Type mismatch in table literal: field 'age' expects piece, got chars at line 14, column 17
+[WARNING] [W102] Unused ingredient 'cls' at line 7, column 18","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Type mismatch in table literal: field 'age' expects piece, got chars at line 14, column 17
+[WARNING] [W102] Unused ingredient 'cls' at line 7, column 18",TRUE,,
 99,"table of Student = [
     chars of name;
     piece of age;
@@ -929,10 +942,10 @@ start(){
     piece of a = getAge(1);
     bill(""done"");
 }","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Flavor 1 of recipe 'getAge': expected Table(Student), got piece","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Flavor 1 of recipe 'getAge': expected Table(Student), got piece",TRUE,,
+[ERROR] [E303] Flavor 1 of recipe 'getAge': expected Table(Student), got piece at line 11, column 25
+[WARNING] [W102] Unused ingredient 'a' at line 11, column 14","Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E303] Flavor 1 of recipe 'getAge': expected Table(Student), got piece at line 11, column 25
+[WARNING] [W102] Unused ingredient 'a' at line 11, column 14",TRUE,,
 100,"table of Student = [
     chars of name;
     piece of age;
@@ -944,15 +957,79 @@ start(){
             age = 22;
     ];
     bill(""done"");
-}","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'cls'
-[ERROR] Field 'name' type mismatch: expected chars, got piece","Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'cls'
-[ERROR] Field 'name' type mismatch: expected chars, got piece",TRUE,,
-101,,,,TRUE,,
-102,,,,TRUE,,
-103,,,,TRUE,,
-104,,,,TRUE,,
+}","
+Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Field 'name' type mismatch: expected chars, got piece at line 8, column 18
+[WARNING] [W102] Unused ingredient 'cls'","
+Semantic analysis failed with 1 error(s) and 1 warning(s)
+[ERROR] [E101] Field 'name' type mismatch: expected chars, got piece at line 8, column 18
+[WARNING] [W102] Unused ingredient 'cls'",TRUE,,
+101,"start(){
+	piece of x = 10;
+    
+    check(x>=20){
+    	bill (""proceed"");
+    } alt(x < 10){
+    	bill (x);
+    } instead {
+    	bill(""don't proceed"");
+    }
+
+}","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 13, column 6","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 13, column 6",TRUE,,
+102,"start(){
+
+        piece of x = 18;
+        flag of hasID = ((2));
+        
+    check(x >= 18){
+            check(hasID){
+                bill(""okay"");
+        }
+        
+    instead{
+                bill (""noo"");
+    }
+        
+    
+    }
+        
+
+}","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in ingredient 'hasID' initialization: expected flag, got piece at line 4, column 17","Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in ingredient 'hasID' initialization: expected flag, got piece at line 4, column 17",TRUE,,
+103,"start(){
+ piece of x = 2;
+ 
+ menu(x) {
+
+ choice 1: 
+         bill(x);
+    stop;
+    
+ choice 2:
+         bill(x);
+ }
+}","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 7, column 10
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 11, column 10","Semantic analysis failed with 2 error(s) and 0 warning(s)
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 7, column 10
+[ERROR] [E303] No matching overload for built-in recipe 'bill' with argument types: [('piece', 0)] at line 11, column 10",TRUE,,
+104,"start(){
+ chars of x = ""passed"";
+ 
+ repeat(x (""paased"")){
+ 	bill(x);
+    x+=1;
+ }
+}","Semantic analysis failed with 3 error(s) and 0 warning(s)
+[ERROR] [E301] 'x' is not a recipe at line 7, column 11
+[ERROR] [E101] Loop condition must be flag type, got chars at line 7, column 11
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to chars at line 11, column 5","Semantic analysis failed with 3 error(s) and 0 warning(s)
+[ERROR] [E301] 'x' is not a recipe at line 7, column 11
+[ERROR] [E101] Loop condition must be flag type, got chars at line 7, column 11
+[ERROR] [E101] Type mismatch in assignment: cannot assign piece to chars at line 11, column 5",TRUE,,
 105,,,,TRUE,,
 106,,,,TRUE,,
 107,,,,TRUE,,

@@ -1,1 +1,2 @@
-No semantic errors
+No semantic errors with 1 warning(s)
+[WARNING] [W404] Unreachable code after serve statement at line 4, column 10

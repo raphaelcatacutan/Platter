@@ -66,7 +66,7 @@ class ControlFlowChecker:
                 # Check if there are statements after serve
                 if i + 1 < len(node.statements):
                     next_stmt = node.statements[i + 1]
-                    self.error_handler.add_error(
+                    self.error_handler.add_warning(
                         "Unreachable code after serve statement",
                         next_stmt,
                         ErrorCodes.UNREACHABLE_CODE

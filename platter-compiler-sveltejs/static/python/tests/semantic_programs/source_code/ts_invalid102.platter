@@ -1,0 +1,19 @@
+start(){
+
+        piece of x = 18;
+        flag of hasID = ((2));
+        
+    check(x >= 18){
+            check(hasID){
+                bill("okay");
+        }
+        
+    instead{
+                bill ("noo");
+    }
+        
+    
+    }
+        
+
+}

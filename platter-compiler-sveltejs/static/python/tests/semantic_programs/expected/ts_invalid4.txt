@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Undefined ingredient 'x' in 'start_platter_1'
+[ERROR] [E002] Undefined ingredient 'x' in 'start_platter' at line 2, column 5

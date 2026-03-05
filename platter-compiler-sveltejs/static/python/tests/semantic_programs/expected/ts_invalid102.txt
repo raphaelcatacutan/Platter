@@ -1,0 +1,2 @@
+Semantic analysis failed with 1 error(s) and 0 warning(s)
+[ERROR] [E101] Type mismatch in ingredient 'hasID' initialization: expected flag, got piece at line 4, column 17

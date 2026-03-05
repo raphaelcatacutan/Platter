@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Serve type mismatch: expected piece, got unknown[][]
+[ERROR] [E304] Serve type mismatch: expected piece, got unknown[][] at line 2, column 9

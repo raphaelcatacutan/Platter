@@ -1,1 +1,2 @@
-No semantic errors
+No semantic errors with 1 warning(s)
+[WARNING] [W102] Unused ingredient 'hasID' at line 7, column 10

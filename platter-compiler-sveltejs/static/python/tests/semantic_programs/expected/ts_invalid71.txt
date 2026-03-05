@@ -1,3 +1,0 @@
-Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'a'
-[ERROR] Type mismatch in array 'a' initialization: expected piece[], got Table(Food)

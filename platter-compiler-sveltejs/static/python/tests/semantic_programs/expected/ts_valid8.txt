@@ -1,1 +1,2 @@
-No semantic errors
+No semantic errors with 1 warning(s)
+[WARNING] [W102] Unused ingredient 'c' at line 1, column 9

@@ -1,3 +1,3 @@
 Semantic analysis failed with 1 error(s) and 1 warning(s)
-[WARNING] Unused ingredient 'r'
-[ERROR] Recipe 'add' expects 2 flavor(s), got 1
+[ERROR] [E302] Recipe 'add' expects 2 flavor(s), got 1 at line 6, column 21
+[WARNING] [W102] Unused ingredient 'r' at line 6, column 14

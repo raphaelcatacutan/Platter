@@ -1,2 +1,2 @@
 Semantic analysis failed with 1 error(s) and 0 warning(s)
-[ERROR] Type mismatch in binary operation: piece >= sip
+[ERROR] [E105] Type mismatch in binary operation: piece >= sip at line 12, column 24

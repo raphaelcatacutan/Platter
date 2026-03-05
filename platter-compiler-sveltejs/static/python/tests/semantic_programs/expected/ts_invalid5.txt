@@ -1,3 +1,3 @@
 Semantic analysis failed with 1 error(s) and 1 warning(s)
-[ERROR] Recipe 'cook' already defined
-[WARNING] Unused ingredient 'cook'
+[ERROR] Recipe 'cook' already defined at line 2, column 1
+[WARNING] [W102] Unused ingredient 'cook' at line 1, column 10

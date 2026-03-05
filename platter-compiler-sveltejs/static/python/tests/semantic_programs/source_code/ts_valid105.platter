@@ -1,0 +1,8 @@
+start(){
+ piece of x = 2;
+ 
+ repeat(x>=2){
+         bill(tochars(x));
+    x+=1;
+ }
+}

@@ -684,7 +684,11 @@ class ASTParser:
             self.parse_token("id")
             node_1 = self.id_tail()
 
-            return Identifier(token_0.value, token_0.line, token_0.col)
+            # If id_tail returns accessor (e.g., :field or [index]), apply it
+            base_id = Identifier(token_0.value, token_0.line, token_0.col)
+            if node_1:
+                return node_1(base_id)
+            return base_id
 
             """    43 <piece_array_val>	=>	<ret_array>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<piece_array_val>_1"]:
@@ -739,7 +743,11 @@ class ASTParser:
             self.parse_token("id")
             node_1 = self.id_tail()
 
-            return Identifier(token_0.value, token_0.line, token_0.col)
+            # If id_tail returns accessor (e.g., :field or [index]), apply it
+            base_id = Identifier(token_0.value, token_0.line, token_0.col)
+            if node_1:
+                return node_1(base_id)
+            return base_id
 
             """    48 <sip_array_val>	=>	<ret_array>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<sip_array_val>_1"]:
@@ -794,7 +802,11 @@ class ASTParser:
             self.parse_token("id")
             node_1 = self.id_tail()
 
-            return Identifier(token_0.value, token_0.line, token_0.col)
+            # If id_tail returns accessor (e.g., :field or [index]), apply it
+            base_id = Identifier(token_0.value, token_0.line, token_0.col)
+            if node_1:
+                return node_1(base_id)
+            return base_id
 
             """    53 <chars_array_val>	=>	<ret_array>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<chars_array_val>_1"]:
@@ -849,7 +861,11 @@ class ASTParser:
             self.parse_token("id")
             node_1 = self.id_tail()
 
-            return Identifier(token_0.value, token_0.line, token_0.col)
+            # If id_tail returns accessor (e.g., :field or [index]), apply it
+            base_id = Identifier(token_0.value, token_0.line, token_0.col)
+            if node_1:
+                return node_1(base_id)
+            return base_id
 
             """    58 <flag_array_val>	=>	<ret_array>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_array_val>_1"]:
@@ -904,7 +920,11 @@ class ASTParser:
             self.parse_token("id")
             node_1 = self.id_tail()
 
-            return Identifier(token_0.value, token_0.line, token_0.col)
+            # If id_tail returns accessor (e.g., :field or [index]), apply it
+            base_id = Identifier(token_0.value, token_0.line, token_0.col)
+            if node_1:
+                return node_1(base_id)
+            return base_id
 
             """    63 <table_array_val>	=>	<ret_array>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<table_array_val>_1"]:
@@ -5562,12 +5582,13 @@ class ASTParser:
 
         """    399 <cont_sip>	=>	<sip_ops>	<strict_sip_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cont_sip>"]:
+            op_token = self.tokens[self.pos]
             node_0 = self.sip_ops()
             node_1 = self.strict_sip_expr()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, op_token.line, op_token.col)
                 return node
             return build_op
 
@@ -5585,12 +5606,13 @@ class ASTParser:
 
         """    401 <cont_piece>	=>	<all_ops>	<strict_piece_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cont_piece>"]:
+            op_token = self.tokens[self.pos]
             node_0 = self.all_ops()
             node_1 = self.strict_piece_expr()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, op_token.line, op_token.col)
                 return node
             return build_op
 
@@ -5608,12 +5630,13 @@ class ASTParser:
 
         """    403 <cont_chars>	=>	<chars_ops>	<strict_chars_expr>    """
         if self.tokens[self.pos].type in PREDICT_SET["<cont_chars>"]:
+            op_token = self.tokens[self.pos]
             node_0 = self.chars_ops()
             node_1 = self.strict_chars_expr()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, op_token.line, op_token.col)
                 return node
             return build_op
 
@@ -5719,13 +5742,14 @@ class ASTParser:
         if self.tokens[self.pos].type in PREDICT_SET["<flag_operand>"]:
             node_0 = self.ret_piece()
             node_1 = self.cont_piece()
+            rel_op_token = self.tokens[self.pos]
             node_2 = self.rel_op()
             node_3 = self.strict_piece_expr()
             node_4 = self.flag_eq_tail()
 
             # Build binary operation: first apply arithmetic continuation, then relational op
             left = node_1(node_0) if node_1 else node_0
-            result = BinaryOp(left, node_2, node_3, None, None)
+            result = BinaryOp(left, node_2, node_3, rel_op_token.line, rel_op_token.col)
             if node_4:
                 return node_4(result)
             else:
@@ -5735,13 +5759,14 @@ class ASTParser:
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_1"]:
             node_0 = self.ret_sip()
             node_1 = self.cont_sip()
+            rel_op_token = self.tokens[self.pos]
             node_2 = self.rel_op()
             node_3 = self.strict_sip_expr()
             node_4 = self.flag_eq_tail()
 
             # Build binary operation: first apply arithmetic continuation, then relational op
             left = node_1(node_0) if node_1 else node_0
-            result = BinaryOp(left, node_2, node_3, None, None)
+            result = BinaryOp(left, node_2, node_3, rel_op_token.line, rel_op_token.col)
             if node_4:
                 return node_4(result)
             else:
@@ -5762,13 +5787,14 @@ class ASTParser:
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_operand>_3"]:
             node_0 = self.ret_chars()
             node_1 = self.cont_chars()
+            rel_op_token = self.tokens[self.pos]
             node_2 = self.rel_op()
             node_3 = self.strict_chars_expr()
             node_4 = self.flag_eq_tail()
 
             # Build binary operation: first apply arithmetic continuation, then relational op
             left = node_1(node_0) if node_1 else node_0
-            result = BinaryOp(left, node_2, node_3, None, None)
+            result = BinaryOp(left, node_2, node_3, rel_op_token.line, rel_op_token.col)
             if node_4:
                 return node_4(result)
             else:
@@ -5884,13 +5910,14 @@ class ASTParser:
 
             """    424 <flag_cont_any>	=>	<rel_op>	<any_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cont_any>_5"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.any_expr()
             node_2 = self.flag_eq_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6052,13 +6079,14 @@ class ASTParser:
 
             """    436 <flag_cps_cont_any>	=>	<rel_op>	<strict_cps_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_cps_cont_any>_5"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_cps_expr()
             node_2 = self.flag_eq_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6203,13 +6231,14 @@ class ASTParser:
 
             """    446 <flag_ps_cont_any>	=>	<rel_op>	<strict_ps_expr>	<flag_eq_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<flag_ps_cont_any>_5"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_ps_expr()
             node_2 = self.flag_eq_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6396,13 +6425,14 @@ class ASTParser:
 
             """    459 <any_cont_any>	=>	<rel_op>	<any_expr>	<flag_op_tail>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<any_cont_any>_5"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.any_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6428,13 +6458,14 @@ class ASTParser:
 
         """    462 <any_cont_cps_flag_tail>	=>	<rel_op>	<strict_cps_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_cps_flag_tail>"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_cps_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6454,13 +6485,14 @@ class ASTParser:
 
         """    464 <any_cont_ps_flag_tail>	=>	<rel_op>	<strict_ps_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_ps_flag_tail>"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_ps_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6480,13 +6512,14 @@ class ASTParser:
 
         """    466 <any_cont_p_flag_tail>	=>	<rel_op>	<strict_piece_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_p_flag_tail>"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_piece_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6506,13 +6539,14 @@ class ASTParser:
 
         """    468 <any_cont_s_flag_tail>	=>	<rel_op>	<strict_sip_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_s_flag_tail>"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_sip_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
@@ -6532,13 +6566,14 @@ class ASTParser:
 
         """    470 <any_cont_c_flag_tail>	=>	<rel_op>	<strict_chars_expr>	<flag_op_tail>    """
         if self.tokens[self.pos].type in PREDICT_SET["<any_cont_c_flag_tail>"]:
+            rel_op_token = self.tokens[self.pos]
             node_0 = self.rel_op()
             node_1 = self.strict_chars_expr()
             node_2 = self.flag_op_tail()
 
             # Build binary operation chain
             def build_op(left):
-                node = BinaryOp(left, node_0, node_1, None, None)
+                node = BinaryOp(left, node_0, node_1, rel_op_token.line, rel_op_token.col)
                 if node_2:
                     return node_2(node)
                 return node
