@@ -340,10 +340,20 @@ start() {
 		showFirstVisitCtrlEnterHint();
 
 		handleGlobalCtrlEnter = (event: KeyboardEvent) => {
-			const isCtrlEnter = event.ctrlKey && event.key === 'Enter';
-			if (!isCtrlEnter || event.defaultPrevented || event.repeat) return;
-			event.preventDefault();
-			analyzeSemantic(true);
+			if (event.defaultPrevented || event.repeat) return;
+			if (event.ctrlKey && event.key === 'Enter') {
+				event.preventDefault();
+				analyzeSemantic(true);
+			} else if (event.ctrlKey && event.key === '1') {
+				event.preventDefault();
+				analyzeLexical();
+			} else if (event.ctrlKey && event.key === '2') {
+				event.preventDefault();
+				analyzeSyntax();
+			} else if (event.ctrlKey && event.key === '3') {
+				event.preventDefault();
+				analyzeSemantic(false);
+			}
 		};
 		window.addEventListener('keydown', handleGlobalCtrlEnter);
 		window.addEventListener('resize', syncTerminalPanelHeight);
@@ -471,9 +481,10 @@ start() {
 					viewportMargin: Infinity,
 					mode: 'platter',
 					extraKeys: {
-						'Ctrl-Enter': function() {
-							analyzeSemantic(true);
-						}
+						'Ctrl-Enter': function() { analyzeSemantic(true); },
+						'Ctrl-1': function() { analyzeLexical(); },
+						'Ctrl-2': function() { analyzeSyntax(); },
+						'Ctrl-3': function() { analyzeSemantic(false); }
 					}
 				});
 				cmInstance.setSize('100%', '100%');
@@ -1649,31 +1660,13 @@ tokens
 		<section class="left">
 			<!-- Toolbar row -->
 			<div class="toolbar">
-				<button class="pill {activeTab === 'lexical' ? 'active' : ''}" on:click={() => analyzeLexical()}>
+				<button class="pill active" on:click={() => analyzeSemantic(true)}>
 					{#if theme === 'dark'}
-						<img class="icon" src={synSemLexIcon} alt="Lexical Icon" />
+						<img class="icon" src={synSemLexIcon} alt="Run Icon" />
 					{:else}
-						<img class="icon" src={synSemLexIcon1} alt="Light Theme Icon" />
+						<img class="icon" src={synSemLexIcon1} alt="Run Icon" />
 					{/if}
-
-					<span>Lexical</span>
-				</button>
-				<!-- syntax and semantic methods to be replacesrd -->
-				<button class="pill {activeTab === 'syntax' ? 'active' : ''}" on:click={analyzeSyntax}>
-					{#if theme === 'dark'}
-						<img class="icon" src={synSemLexIcon} alt="Lexical Icon" />
-					{:else}
-						<img class="icon" src={synSemLexIcon1} alt="Light Theme Icon" />
-					{/if}
-					<span>Syntax</span>
-				</button>
-				<button class="pill {activeTab === 'semantic' ? 'active' : ''}" on:click={() => analyzeSemantic(false)}>
-					{#if theme === 'dark'}
-						<img class="icon" src={synSemLexIcon} alt="Semantic Icon" />
-					{:else}
-						<img class="icon" src={synSemLexIcon1} alt="Light Theme Icon" />
-					{/if}
-					<span>Semantic</span>
+					<span>Run Code</span>
 				</button>
 
 				<div class="spacer"></div>
