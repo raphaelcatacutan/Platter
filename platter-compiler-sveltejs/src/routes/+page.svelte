@@ -169,6 +169,18 @@ start() {
 	let cmInstance: any = null;
 	let errorMarkers: any[] = []; // Track CodeMirror text markers for error highlighting
 	let handleGlobalCtrlEnter: ((event: KeyboardEvent) => void) | null = null;
+	const CTRL_ENTER_HINT_SEEN_KEY = 'platter_ctrl_enter_hint_seen_v1';
+
+	function showFirstVisitCtrlEnterHint() {
+		if (typeof window === 'undefined') return;
+		try {
+			if (window.localStorage.getItem(CTRL_ENTER_HINT_SEEN_KEY) === '1') return;
+			window.alert('Ctrl+Enter to run TAC and interpreter');
+			window.localStorage.setItem(CTRL_ENTER_HINT_SEEN_KEY, '1');
+		} catch {
+			// Ignore storage restrictions (private mode, blocked storage, etc.)
+		}
+	}
 
 	// file input for opening .platter files
 	let fileInputEl: HTMLInputElement;
@@ -314,6 +326,8 @@ start() {
 	}
 
 	onMount(async () => {
+		showFirstVisitCtrlEnterHint();
+
 		handleGlobalCtrlEnter = (event: KeyboardEvent) => {
 			const isCtrlEnter = event.ctrlKey && event.key === 'Enter';
 			if (!isCtrlEnter || event.defaultPrevented || event.repeat) return;
@@ -697,9 +711,9 @@ try:
     # Check for semantic errors from error handler
     if error_handler.has_errors():
         error_list = []
-		error_details = []
-		error_messages = []
-		warning_messages = []
+        error_details = []
+        error_messages = []
+        warning_messages = []
         error_markers = []  # For frontend error marking
 
         print("")
@@ -712,10 +726,10 @@ try:
             error_list.append(str(err))
             # Format each error with position info
             severity_label = "ERROR" if err.severity.name == "ERROR" else "WARNING"
-			if severity_label == "ERROR":
-				error_messages.append(err.message)
-			else:
-				warning_messages.append(err.message)
+            if severity_label == "ERROR":
+                error_messages.append(err.message)
+            else:
+                warning_messages.append(err.message)
             position_info = f" at line {err.line}, column {err.column}" if err.line and err.column else ""
             error_details.append(f"[{severity_label}] {err.message}{position_info}")
             
@@ -935,9 +949,9 @@ result
 					// Log error markers received from backend
 					console.log('\n=== SEMANTIC ERROR MARKERS DEBUG ===');
 					console.log('Error markers received:', data.error_markers);
-					console.log('Number of markers:', data.error_markers?.length || 0);
-					
 					const parsedMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
+					console.log('Number of markers:', Array.isArray(parsedMarkers) ? parsedMarkers.length : 0);
+					
 					// Check if we have semantic errors
 					if (data.errors && data.errors.length > 0) {
 						clearErrorMarkers();
@@ -945,7 +959,7 @@ result
 						// Add error markers if position info is available
 						if (parsedMarkers.length > 0) {
 						console.log('Processing error markers...');
-						const semanticTokens = data.error_markers.map((marker: any) => {
+						const semanticTokens = parsedMarkers.map((marker: any) => {
 							console.log(`  Marker: Line ${marker.line}, Col ${marker.col}, Severity: ${marker.severity}, Message: ${marker.message}`);
 							return {
 								type: 'semantic_error',
