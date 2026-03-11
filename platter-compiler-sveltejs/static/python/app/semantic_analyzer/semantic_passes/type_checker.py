@@ -629,8 +629,18 @@ class TypeChecker:
     def _evaluate_constant_expr(self, expr: ASTNode) -> Optional[int]:
         """Evaluate constant expressions to integer values.
         
+        Evaluates:
+        - Literals and operations on literals
+        - Local variables (scope level > 0) with constant initialization
+        
+        Does NOT evaluate:
+        - Global variables (scope level == 0) - they may be modified before use
+        - Parameters - they get values at runtime
+        
+        This avoids false positives while still catching obvious errors.
+        
         Returns:
-            Integer value if expression is constant, None otherwise
+            Integer value if expression is a compile-time constant, None otherwise
         """
         if isinstance(expr, Literal) and expr.value_type == "piece":
             try:
@@ -652,17 +662,23 @@ class TypeChecker:
                 return None
         
         elif isinstance(expr, Identifier):
-            # Look up the symbol and check if it has a constant initialization
+            # Look up the symbol
             symbol = self.symbol_table.lookup_symbol(expr.name)
             if symbol and symbol.declaration_node:
-                # Check if it's a variable with an initialization value
-                if hasattr(symbol.declaration_node, 'init_value') and symbol.declaration_node.init_value:
-                    # Recursively evaluate the initialization expression
-                    return self._evaluate_constant_expr(symbol.declaration_node.init_value)
+                # Only evaluate LOCAL variables (not global, not parameters)
+                # Global variables can be modified before use in functions
+                # Example:
+                #   piece of x = -1;  // Global
+                #   start() { x+=1; y[x]; }  // x is 0 now, not -1
+                # 
+                # But local variables are safe to evaluate:
+                #   start() { piece of x = -1; y[x]; }  // This IS an error
+                if symbol.scope_level > 0 and symbol.kind == SymbolKind.VARIABLE:
+                    # Check if it has a constant initialization value
+                    if hasattr(symbol.declaration_node, 'init_value') and symbol.declaration_node.init_value:
+                        # Recursively evaluate the initialization expression
+                        return self._evaluate_constant_expr(symbol.declaration_node.init_value)
             return None
-        
-        # NOTE: Identifier resolution is intentionally excluded to prevent false-positives
-        # from scoping issues (e.g., global default-zero shadows inner initialized var).
         
         elif isinstance(expr, RecipeCall):
             # Evaluate size(arr) calls using tracked array_sizes

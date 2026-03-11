@@ -1,0 +1,6 @@
+piece of x = -1;
+piece[] of y = [1,2,3];
+start(){
+        x+=1;
+    bill(tochars(y[x]));
+}

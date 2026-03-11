@@ -1,0 +1,10 @@
+start(){
+piece of i;
+pass(i;i+=1;i<10){
+piece of j;
+repeat(j<=10)
+{
+j+=1;
+}
+}
+}

@@ -18,6 +18,13 @@ class ScopeChecker:
         self.symbol_table = symbol_table
         self.error_handler = error_handler
         self.used_symbols: Set[str] = set()
+        # Track scope counters to match symbol table builder's naming
+        self.scope_type_counters: dict[str, int] = {
+            'check': 0, 'alt': 0, 'instead': 0,
+            'pass': 0, 'repeat': 0, 'order_repeat': 0,
+            'menu': 0, 'choice': 0, 'usual': 0,
+            'block': 0
+        }
     
     def check(self, ast_root: Program):
         """Run scope checking pass"""
@@ -179,6 +186,25 @@ class ScopeChecker:
         for stmt in node.statements:
             self._check_statement(stmt)
     
+    def _navigate_and_check_scope(self, scope_type: str, check_func, *args):
+        """Navigate into a scope, run a check function, then exit
+        
+        Args:
+            scope_type: The type of scope ('check', 'pass', 'repeat', etc.)
+            check_func: The function to call while in the scope
+            *args: Arguments to pass to check_func
+        """
+        self.scope_type_counters[scope_type] += 1
+        scope_name = f"{scope_type}_{self.scope_type_counters[scope_type]}"
+        
+        if self.symbol_table.navigate_to_scope(scope_name):
+            check_func(*args)
+            self.symbol_table.exit_scope()
+        else:
+            # Scope not found - this shouldn't happen if builder and checker are in sync
+            # But check anyway without navigation
+            check_func(*args)
+    
     def _check_statement(self, node: ASTNode):
         """Check a statement"""
         if isinstance(node, Assignment):
@@ -189,44 +215,60 @@ class ScopeChecker:
                 self._check_expression(node.value)
         elif isinstance(node, CheckStatement):
             self._check_expression(node.condition)
-            self._check_platter(node.then_block)
+            # Navigate into check scope for then_block
+            self._navigate_and_check_scope('check', self._check_platter, node.then_block)
+            # Navigate into alt scope for each elif_block
             for elif_cond, elif_block in node.elif_clauses:
                 self._check_expression(elif_cond)
-                self._check_platter(elif_block)
+                self._navigate_and_check_scope('alt', self._check_platter, elif_block)
+            # Navigate into instead scope for else_block
             if node.else_block:
-                self._check_platter(node.else_block)
+                self._navigate_and_check_scope('instead', self._check_platter, node.else_block)
         elif isinstance(node, MenuStatement):
             self._check_expression(node.expr)
             for case in node.cases:
                 self._check_expression(case.value)
-                for stmt in case.statements:
-                    self._check_statement(stmt)
+                # Navigate into choice scope
+                def check_choice_stmts():
+                    for stmt in case.statements:
+                        self._check_statement(stmt)
+                self._navigate_and_check_scope('choice', check_choice_stmts)
             if node.default:
-                for stmt in node.default:
-                    self._check_statement(stmt)
+                # Navigate into usual scope
+                def check_usual_stmts():
+                    for stmt in node.default:
+                        self._check_statement(stmt)
+                self._navigate_and_check_scope('usual', check_usual_stmts)
         elif isinstance(node, RepeatLoop):
             self._check_expression(node.condition)
-            self._check_platter(node.body)
+            # Navigate into repeat scope
+            self._navigate_and_check_scope('repeat', self._check_platter, node.body)
         elif isinstance(node, OrderRepeatLoop):
-            self._check_platter(node.body)
-            self._check_expression(node.condition)
-        elif isinstance(node, PassLoop):
-            # Check init, condition, and update expressions
-            # Note: In PassLoop, these should be in the loop's scope (unlike RepeatLoop where condition is outside)
-            # But the symbol table builder tracks them, so we just validate them here
-            if node.init:
-                if isinstance(node.init, Assignment):  
-                    self._check_expression(node.init.target)
-                    self._check_expression(node.init.value)
-            if node.condition:
+            # Navigate into order_repeat scope
+            def check_order_repeat():
+                self._check_platter(node.body)
                 self._check_expression(node.condition)
-            if node.update:
-                if isinstance(node.update, Assignment):
-                    self._check_expression(node.update.target)
-                    self._check_expression(node.update.value)
-            self._check_platter(node.body)
+            self._navigate_and_check_scope('order_repeat', check_order_repeat)
+        elif isinstance(node, PassLoop):
+            # Navigate into pass scope
+            def check_pass_loop():
+                # Check init, condition, and update expressions (these are in pass scope)
+                if node.init:
+                    if isinstance(node.init, Assignment):  
+                        self._check_expression(node.init.target)
+                        self._check_expression(node.init.value)
+                if node.condition:
+                    self._check_expression(node.condition)
+                if node.update:
+                    if isinstance(node.update, Assignment):
+                        self._check_expression(node.update.target)
+                        self._check_expression(node.update.value)
+                # Check loop body
+                self._check_platter(node.body)
+            self._navigate_and_check_scope('pass', check_pass_loop)
         elif isinstance(node, Platter):
-            self._check_platter(node)
+            # Navigate into block scope
+            self._navigate_and_check_scope('block', self._check_platter, node)
         elif isinstance(node, ExpressionStatement):
             self._check_expression(node.expr)
     
