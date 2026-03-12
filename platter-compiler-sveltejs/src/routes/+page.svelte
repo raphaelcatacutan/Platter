@@ -346,6 +346,9 @@ start() {
 			await loadScript(
 				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js'
 			);
+			await loadScript(
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js'
+			);
 			if (textareaEl && (window as any).CodeMirror) {
 				const CM = (window as any).CodeMirror;
 				
@@ -461,6 +464,7 @@ start() {
 					lineWrapping: true,
 					viewportMargin: Infinity,
 					mode: 'platter',
+					matchBrackets: true,
 					extraKeys: {
 						'Ctrl-Enter': function() {
 							analyzeSemantic(true);
@@ -996,7 +1000,7 @@ result
 						}
 					} else {
 						successMsgs.push({ icon: check, text: data.message || 'No semantic errors' });
-						for (const msg of semWarningsSuccess) successMsgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+						for (const msg of semWarningsSuccess) successMsgs.push({ icon: warning, text: `Warning: ${msg}` });
 					}
 
 					termMessages = successMsgs;
@@ -1122,7 +1126,7 @@ result
 					const semWarnings: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
 					const msgs: { icon: any; text: string }[] = [];
 					for (const msg of semErrors) msgs.push({ icon: errorIcon, text: `Semantic Error: ${msg}` });
-					for (const msg of semWarnings) msgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+					for (const msg of semWarnings) msgs.push({ icon: warning, text: `Warning: ${msg}` });
 					termMessages = msgs;
 					analysisStatus = 'error';
 					terminalOutput = data.message;
@@ -2201,6 +2205,13 @@ tokens
 		.grid {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	:global(.CodeMirror-matchingbracket) {
+		outline: 1px solid var(--color-accent, #f0a500) !important;
+		color: inherit !important;
+		background: rgba(240, 165, 0, 0.18) !important;
+		border-radius: 2px;
 	}
 
 	/* Strong CodeMirror overrides to ensure transparency and inherit panel background
