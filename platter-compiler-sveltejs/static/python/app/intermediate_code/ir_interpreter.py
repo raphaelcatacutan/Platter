@@ -154,15 +154,53 @@ class TACInterpreter:
             raise InterpreterError("No 'start' function found in IR.")
 
         self.pc = 0
+        return self._run_from_current_pc()
+
+    def resume(self, additional_stdin: List[str]) -> Dict[str, Any]:
+        """
+        Resume execution from where it paused after adding more stdin input.
+        
+        Args:
+            additional_stdin: New input lines to append to stdin buffer
+            
+        Returns:
+            Same dict format as run()
+        """
+        print(f"[RESUME] Called with additional_stdin: {additional_stdin}")
+        print(f"[RESUME] Current PC: {self.pc}")
+        print(f"[RESUME] Current stdin_lines before extend: {self.stdin_lines}")
+        print(f"[RESUME] Current _stdin_idx: {self._stdin_idx}")
+        
+        # Add new stdin lines to the buffer
+        self.stdin_lines.extend(additional_stdin)
+        print(f"[RESUME] stdin_lines after extend: {self.stdin_lines}")
+        
+        # Continue execution from current pc (don't reset to 0!)
+        print(f"[RESUME] Calling _run_from_current_pc() from PC {self.pc}")
+        return self._run_from_current_pc()
+
+    def _run_from_current_pc(self) -> Dict[str, Any]:
+        """Common execution logic used by both run() and resume()."""
+        print(f"[_run_from_current_pc] Starting execution from PC: {self.pc}")
+        print(f"[_run_from_current_pc] Total instructions: {len(self.instructions)}")
         try:
             self._execute()
+            print(f"[_run_from_current_pc] Execution completed normally")
         except ReturnSignal:
+            print(f"[_run_from_current_pc] Caught ReturnSignal")
             pass
         except InputPauseSignal as p:
+            print(f"[_run_from_current_pc] Caught InputPauseSignal - execution paused")
+            print(f"[_run_from_current_pc] Current PC when paused: {self.pc}")
+            # CRITICAL FIX: PC was incremented before the instruction that raised InputPauseSignal
+            # We need to decrement it so that when we resume, we re-execute the same instruction
+            self.pc -= 1
+            print(f"[_run_from_current_pc] Decremented PC to {self.pc} for resume")
+            print(f"[_run_from_current_pc] stdin_consumed: {self._stdin_idx}")
             return {
                 "success": False,
                 "paused": True,
-                "error": p.message,
+                "error": "",  # No error message needed - just waiting for input
                 "output": "".join(self.output_lines),
                 "stdin_consumed": self._stdin_idx,
                 "globals": {k: v for k, v in self.global_frame.vars.items()
@@ -189,8 +227,10 @@ class TACInterpreter:
     # ── Main execution loop ────────────────────────────────────────────────────
 
     def _execute(self):
+        print(f"[_execute] Starting loop, PC={self.pc}, total instructions={len(self.instructions)}")
         while self.pc < len(self.instructions):
             instr = self.instructions[self.pc]
+            print(f"[_execute] PC={self.pc}: {type(instr).__name__} - {instr}")
 
             # When scanning the top-level (we are in the global frame), skip over
             # recipe bodies — they will be executed only when called via _call_function.
@@ -200,22 +240,30 @@ class TACInterpreter:
                     and instr.func_name != "start"):
                 skip_to = self.func_skip_map.get(self.pc)
                 if skip_to is not None:
+                    print(f"[_execute] Skipping function {instr.func_name}, jumping to PC={skip_to}")
                     self.pc = skip_to
                     continue
 
             self.pc += 1
+            print(f"[_execute] Dispatching instruction, PC now={self.pc}")
             self._dispatch(instr)
+        print(f"[_execute] Loop ended, PC={self.pc}")
 
     def _dispatch(self, instr: TACInstruction):
         t = type(instr)
+        print(f"[_dispatch] Called with type: {t.__name__}, instruction: {instr}")
+        print(f"[_dispatch] Type comparison - TACFunctionCall check: {t is TACFunctionCall}")
 
         if t is TACComment or t is TACNop or t is TACFunctionBegin or t is TACFunctionEnd:
+            print(f"[_dispatch] No-op instruction, returning")
             return  # no-ops
 
         elif t is TACLabel:
+            print(f"[_dispatch] Label instruction, returning")
             return  # labels are markers, not actions
 
         elif t is TACAssignment:
+            print(f"[_dispatch] TACAssignment")
             self._store(instr.result, self._load(instr.arg1))
 
         elif t is TACBinaryOp:
@@ -267,13 +315,17 @@ class TACInterpreter:
             tbl[instr.field] = val
 
         elif t is TACParam:
-            self.param_stack.append(self._load(instr.arg))
+            val = self._load(instr.arg)
+            print(f"[_dispatch] TACParam: pushing {val} onto param_stack")
+            self.param_stack.append(val)
 
         elif t is TACFunctionCall:
+            print(f"[_dispatch] TACFunctionCall: {instr.func_name}, num_params={instr.num_params}, param_stack={self.param_stack}")
             args = self.param_stack[-instr.num_params:] if instr.num_params else []
             self.param_stack = self.param_stack[:-instr.num_params] if instr.num_params else self.param_stack
-
+            print(f"[_dispatch] Calling function '{instr.func_name}' with args: {args}")
             result = self._call_function(instr.func_name, args)
+            print(f"[_dispatch] Function '{instr.func_name}' returned: {result}")
             if instr.result:
                 self._store(instr.result, result)
 
@@ -297,6 +349,7 @@ class TACInterpreter:
     # ── Function call / return ─────────────────────────────────────────────────
 
     def _call_function(self, name: str, args: List[Any]) -> Any:
+        print(f"[_call_function] Called: {name}, args={args}, is_builtin={name in self.BUILTINS}")
         # Built-in functions
         if name in self.BUILTINS:
             return self._call_builtin(name, args)
@@ -349,6 +402,7 @@ class TACInterpreter:
         return text
 
     def _call_builtin(self, name: str, args: List[Any]) -> Any:
+        print(f"[_call_builtin] Calling: {name}, args={args}")
         fn = self.BUILTINS[name]
 
         # ── I/O ──────────────────────────────────────────────────────────
@@ -357,19 +411,34 @@ class TACInterpreter:
             text = str(args[0]) if args else ""
             # Process escape sequences and remove quotes
             text = self._process_string_literal(text)
+            print(f"[bill()] Appending to output: '{text}', current output_lines length: {len(self.output_lines)}")
             self.output_lines.append(text)
+            # Also print to console in real-time so user sees output as it happens
+            print(text, end='')
+            print(f"[bill()] New output_lines length: {len(self.output_lines)}")
             return ""
 
         elif name == "take":
             # take() → no flavors, awaits input, serves chars
+            print(f"[take()] Called - stdin_idx: {self._stdin_idx}, stdin_lines: {self.stdin_lines}")
             if self._stdin_idx < len(self.stdin_lines):
                 val = self.stdin_lines[self._stdin_idx]
                 self._stdin_idx += 1
+                print(f"[take()] Returning value: '{val}', new stdin_idx: {self._stdin_idx}")
                 return val
             else:
-                raise InputPauseSignal(
-                    "Execution paused at take(): provide more runtime input lines and run again."
-                )
+                # Get input from user via JavaScript prompt
+                print(f"[take()] Requesting input from user via prompt")
+                import js
+                user_input = js.prompt("Enter input:")
+                if user_input is None or user_input == "":
+                    user_input = ""
+                user_input = str(user_input)
+                print(f"[take()] User entered: '{user_input}'")
+                # Add to stdin_lines for potential future take() calls
+                self.stdin_lines.append(user_input)
+                self._stdin_idx += 1
+                return user_input
 
         # ── Math/Formatting ──────────────────────────────────────────────
         elif name == "fact":
@@ -444,6 +513,9 @@ class TACInterpreter:
         """Resolve a name or literal to a Python value."""
         if name is None:
             return None
+        # Check for empty variable names (TAC generation bug)
+        if isinstance(name, str) and name.strip() == "":
+            raise InterpreterError("TAC instruction references an empty variable name (TAC generation error)")
         # Platter boolean literals: up = true, down = false
         if name == "up":
             return True

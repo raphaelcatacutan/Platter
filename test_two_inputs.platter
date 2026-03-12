@@ -1,0 +1,14 @@
+# Test program with two take() calls
+start() {
+    bill("What's your name? ");
+    chars of name = take();
+    
+    bill("What's your age? ");
+    chars of age = take();
+    
+    bill("Hello ");
+    bill(name);
+    bill(", you are ");
+    bill(age);
+    bill(" years old!");
+}

@@ -1,0 +1,2021 @@
+<script lang="ts">
+	// Icons and assets
+	import {
+		check,
+		copy,
+		copy1,
+		darkmode,
+		darkmode1,
+		darkBg,
+		lightBg,
+		errorIcon,
+		favicon,
+		lightmode,
+		logo,
+		newFile,
+		newFile1,
+		openFile,
+		openFile1,
+		refresh,
+		refresh1,
+		saveFile,
+		saveFile1,
+		synSemLexIcon,
+		synSemLexIcon1,
+		table,
+		warning
+	} from '$lib';
+	import { editor as editorSvg } from '$lib/assets';
+
+	// Svelte lifecycle
+	import { onMount, onDestroy } from 'svelte';
+
+	// Library modules
+	import {
+		type Theme,
+		type TabType,
+		type TermMsg,
+		type Token,
+		type LexerRow,
+		DEFAULT_CODE_SAMPLE,
+		logger,
+		generateSessionId,
+		pyodideManager,
+		initializeCodeMirror,
+		ErrorMarkerManager,
+		normalizeCurlyQuotes as normalizeCurlyQuotesUtil,
+		createTerminalHelpers,
+		FileOperations,
+		analyzeLexical,
+		analyzeSyntax,
+		analyzeSemantic,
+		type AnalyzerContext,
+		fetchVersion,
+		showFirstVisitCtrlEnterHint,
+		syncTerminalPanelHeight as syncPanelHeight,
+		handleCopyToClipboard as handleCopyUtil
+	} from './lib';
+
+	export let data;
+
+	// Session and version
+	let sessionId = generateSessionId();
+	let appVersion = '1.0.0';
+
+	// UI state
+	let theme: Theme = 'dark';
+	let activeTab: TabType = 'lexical';
+	let codeInput = DEFAULT_CODE_SAMPLE;
+
+	// Lexer state
+	let lexerRows: LexerRow[] = [];
+	let tokens: Token[] = [];
+
+	// CodeMirror
+	let textareaEl: HTMLTextAreaElement | null = null;
+	let cmInstance: any = null;
+	let handleGlobalCtrlEnter: ((event: KeyboardEvent) => void) | null = null;
+
+	// DOM references
+	let editorPanelEl: HTMLElement | null = null;
+	let terminalPanelEl: HTMLElement | null = null;
+	let panelSyncObserver: ResizeObserver | null = null;
+	let fileInputEl: HTMLInputElement;
+
+	// Terminal state
+	let termMessages: TermMsg[] = [];
+	let terminalStdinText = '';
+	let tacExecutionPaused = false;
+	let terminalInputEl: HTMLInputElement | null = null;
+	let currentInputLine = '';
+	let isResumingExecution = false;
+	let lastShownOutputLength = 0;
+	let tacInterpreterInstance: any = null;
+	let pendingResumeInput = '';
+	let accumulatedInputs: string[] = [];
+
+	// Managers
+	const errorMarkerManager = new ErrorMarkerManager();
+	const terminalHelpers = createTerminalHelpers(check, errorIcon);
+
+	// File operations
+	const fileOps = new FileOperations(
+		(msg) => setTerminalOk(msg),
+		(msg) => setTerminalError(msg)
+	);
+
+	// Compute error count
+	$: errorCount = termMessages.filter(
+		(m) =>
+			!(
+				typeof m.text === 'string' &&
+				(m.text.startsWith('Lexical OK') ||
+					m.text.startsWith('No Syntax Error') ||
+					m.text.startsWith('Warning:'))
+			)
+	).length;
+
+	// Compute error count
+	$: errorCount = termMessages.filter(
+		(m) =>
+			!(
+				typeof m.text === 'string' &&
+				(m.text.startsWith('Lexical OK') ||
+					m.text.startsWith('No Syntax Error') ||
+					m.text.startsWith('Warning:'))
+			)
+	).length;
+
+	// Terminal message helpers
+	function setTerminalOk(message = 'No Error') {
+		termMessages = terminalHelpers.createOkMessage(message);
+	}
+
+	function setTerminalError(message: string) {
+		termMessages = terminalHelpers.createErrorMessage(message);
+	}
+
+	function clearTerminal() {
+		termMessages = [];
+	}
+
+	// Normalize curly quotes wrapper
+	function normalizeCurlyQuotes() {
+		if (cmInstance) {
+			normalizeCurlyQuotesUtil(cmInstance);
+			codeInput = cmInstance.getValue();
+		}
+	}
+
+	// File operations
+	function openFileDialog() {
+		normalizeCurlyQuotes();
+		fileOps.openFileDialog();
+	}
+
+	async function handleFileInput() {
+		await fileOps.handleFileInput((code) => {
+			codeInput = code;
+		});
+	}
+
+	async function saveFileDialog() {
+		normalizeCurlyQuotes();
+		await fileOps.saveFile(codeInput);
+	}
+
+	// Theme toggle
+	function toggleTheme() {
+		normalizeCurlyQuotes();
+		theme = theme === 'dark' ? 'light' : 'dark';
+	}
+
+	// Copy to clipboard
+	async function handleCopyToClipboard() {
+		normalizeCurlyQuotes();
+		await handleCopyUtil(cmInstance, codeInput, setTerminalOk, setTerminalError);
+	}
+
+	// Terminal input handling
+	function handleTerminalInputKeydown(event: KeyboardEvent) {
+		if (!(event.key === 'Enter' && !event.shiftKey)) return;
+		if (!tacExecutionPaused) return;
+		event.preventDefault();
+		resumeExecution();
+	}
+
+	function resumeExecution() {
+		if (!tacExecutionPaused) {
+			console.log('[Resume] BLOCKED - not paused');
+			return;
+		}
+		console.log('[Resume] User input:', currentInputLine);
+
+		if (currentInputLine) {
+			accumulatedInputs = [...accumulatedInputs, currentInputLine];
+			console.log('[Resume] Accumulated inputs:', accumulatedInputs);
+			currentInputLine = '';
+		}
+
+		console.log('[Resume] Re-running program with all inputs');
+		tacExecutionPaused = false;
+		isResumingExecution = true;
+		handleAnalyzeSemantic(true);
+	}
+
+	// Auto-focus terminal input when execution pauses
+	$: if (tacExecutionPaused) {
+		setTimeout(() => {
+			if (terminalInputEl) {
+				terminalInputEl.focus();
+				terminalInputEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
+		}, 150);
+	}
+
+	// Create analyzer context
+	function createAnalyzerContext(): AnalyzerContext {
+		return {
+			pyodide: pyodideManager.instance,
+			pyodideReady: pyodideManager.isReady,
+			codeInput,
+			errorIcon,
+			checkIcon: check,
+			accumulatedInputs,
+			onAddErrorMarkers: (errors) => errorMarkerManager.add(errors),
+			onClearErrorMarkers: () => errorMarkerManager.clear(),
+			onSetTerminalOk: setTerminalOk,
+			onSetTerminalError: setTerminalError,
+			onClearTerminal: clearTerminal
+		};
+	}
+
+	// Analysis functions
+	async function handleAnalyzeLexical() {
+		normalizeCurlyQuotes();
+		activeTab = 'lexical';
+		const startTime = performance.now();
+
+		const context = createAnalyzerContext();
+		const result = await analyzeLexical(context, false);
+
+		if (result.tokens) tokens = result.tokens;
+		if (result.lexerRows) lexerRows = result.lexerRows;
+
+		// Update terminal with error messages if any
+		if (result.status === 'error' && result.output) {
+			const errorLines = result.output.split('; ');
+			termMessages = errorLines.map((text) => ({ icon: errorIcon, text }));
+		}
+
+		const duration = performance.now() - startTime;
+		logger.addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: result.output,
+			status: result.status,
+			language: `lexical-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
+	}
+
+	async function handleAnalyzeSyntax() {
+		normalizeCurlyQuotes();
+		activeTab = 'syntax';
+		const startTime = performance.now();
+
+		const context = createAnalyzerContext();
+		await analyzeSyntax(context, analyzeLexical);
+
+		const duration = performance.now() - startTime;
+		const terminalOutput = termMessages.map((m) => m.text).join('; ');
+		const analysisStatus = termMessages.some((m) => m.icon === errorIcon) ? 'error' : 'success';
+
+		logger.addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `syntax-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
+	}
+
+	async function handleAnalyzeSemantic(runTacInterpreter = false) {
+		normalizeCurlyQuotes();
+		const startTime = performance.now();
+
+		if (!isResumingExecution) {
+			tacExecutionPaused = false;
+		}
+
+		const context = createAnalyzerContext();
+		const result = await analyzeSemantic(
+			context,
+			analyzeLexical,
+			runTacInterpreter,
+			isResumingExecution
+		);
+
+		// Handle the result and update terminal messages  
+		// (This part contains the complex terminal message handling from the original)
+		// For now, simplified version:
+		tacExecutionPaused = result.tacExecutionPaused;
+		isResumingExecution = false;
+		activeTab = 'semantic';
+
+		const duration = performance.now() - startTime;
+		const terminalOutput = termMessages.map((m) => m.text).join('; ');
+		const analysisStatus = result.success ? 'success' : 'error';
+
+		logger.addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `${runTacInterpreter ? 'semantic-ir' : 'semantic'}-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
+	}
+
+	// Lifecycle: Component mount
+	onMount(async () => {
+		// Show first-visit hint
+		showFirstVisitCtrlEnterHint();
+
+		// Set up keyboard shortcuts
+		handleGlobalCtrlEnter = (event: KeyboardEvent) => {
+			if (event.defaultPrevented || event.repeat) return;
+			if (event.ctrlKey && event.key === 'Enter') {
+				event.preventDefault();
+				handleAnalyzeSemantic(true);
+			} else if (event.ctrlKey && event.key === '1') {
+				event.preventDefault();
+				handleAnalyzeLexical();
+			} else if (event.ctrlKey && event.key === '2') {
+				event.preventDefault();
+				handleAnalyzeSyntax();
+			} else if (event.ctrlKey && event.key === '3') {
+				event.preventDefault();
+				handleAnalyzeSemantic(false);
+			}
+		};
+		window.addEventListener('keydown', handleGlobalCtrlEnter);
+		window.addEventListener('resize', () => syncPanelHeight(editorPanelEl, terminalPanelEl));
+
+		// Initialize CodeMirror
+		if (textareaEl) {
+			cmInstance = await initializeCodeMirror(
+				textareaEl,
+				codeInput,
+				handleAnalyzeSemantic,
+				handleAnalyzeLexical,
+				handleAnalyzeSyntax,
+				(value) => {
+					codeInput = value;
+				}
+			);
+
+			// Set cmInstance for managers
+			errorMarkerManager.setCmInstance(cmInstance);
+			fileOps.setCmInstance(cmInstance);
+			fileOps.setFileInputElement(fileInputEl);
+		}
+
+		// Fetch app version
+		appVersion = await fetchVersion(data.basePath);
+
+		// Initialize Pyodide
+		await pyodideManager.initialize(data.basePath, setTerminalError);
+
+		// Set up panel height sync
+		requestAnimationFrame(() => {
+			syncPanelHeight(editorPanelEl, terminalPanelEl);
+			if (typeof ResizeObserver !== 'undefined') {
+				panelSyncObserver = new ResizeObserver(() =>
+					syncPanelHeight(editorPanelEl, terminalPanelEl)
+				);
+				if (editorPanelEl) panelSyncObserver.observe(editorPanelEl);
+				if (terminalPanelEl?.parentElement) panelSyncObserver.observe(terminalPanelEl.parentElement);
+			}
+		});
+	});
+
+	// Lifecycle: Component cleanup
+	onDestroy(() => {
+		// Cleanup event listeners
+		window.removeEventListener('resize', () => syncPanelHeight(editorPanelEl, terminalPanelEl));
+		if (panelSyncObserver) {
+			panelSyncObserver.disconnect();
+			panelSyncObserver = null;
+		}
+
+		if (handleGlobalCtrlEnter) {
+			window.removeEventListener('keydown', handleGlobalCtrlEnter);
+			handleGlobalCtrlEnter = null;
+		}
+
+		// Cleanup CodeMirror
+		if (cmInstance && typeof cmInstance.toTextArea === 'function') {
+			cmInstance.toTextArea();
+			cmInstance = null;
+		}
+
+		// Cleanup logger
+		logger.cleanup();
+	});
+</script>
+
+			if execution_success:
+				print("[Execution OK]")
+			elif execution_paused:
+				print(f"[Execution Paused] Awaiting input")
+			else:
+				print(f"[Execution Error] {execution_error}")
+
+			if execution_output:
+				print(execution_output)
+			elif execution_success:
+				print("(no output)")
+		except Exception as ir_err:
+			import traceback
+			error_details = traceback.format_exc()
+			print(f"IR generation error: {str(ir_err)}")
+			print("Full traceback:")
+			print(error_details)
+			execution_output = ""
+			execution_success = False
+			execution_paused = False
+			execution_stdin_consumed = 0
+			execution_error = str(ir_err) + "\\n\\nTraceback:\\n" + error_details
+			execution_globals = {}
+	else:
+		print("")
+		print("="*80)
+		print("Semantic Analysis Complete (IR execution skipped)")
+		print("="*80)
+    
+    # Check for semantic errors from error handler
+    if error_handler.has_errors():
+        error_list = []
+        error_details = []
+        error_messages = []
+        warning_messages = []
+        error_markers = []  # For frontend error marking
+
+        print("")
+        print("="*80)
+        print("SEMANTIC ERROR DETAILS WITH POSITIONS")
+        print("="*80)
+        
+        sorted_errors = sorted(error_handler.get_errors(), key=lambda e: 0 if getattr(e.severity, "name", "") == "ERROR" else 1)
+        for err in sorted_errors:
+            error_list.append(str(err))
+            # Format each error with position info
+            severity_label = "ERROR" if err.severity.name == "ERROR" else "WARNING"
+            if severity_label == "ERROR":
+                error_messages.append(err.message)
+            else:
+                warning_messages.append(err.message)
+            position_info = f" at line {err.line}, column {err.column}" if err.line and err.column else ""
+            error_details.append(f"[{severity_label}] {err.message}{position_info}")
+            
+            # Log position info to console
+            position_log = f"Line: {err.line}, Column: {err.column}" if err.line and err.column else "Position: Unknown"
+            print(f"{severity_label}: {err.message}")
+            print(f"  > {position_log}")
+            print(f"  > Error Code: {err.error_code or 'N/A'}")
+            if err.node:
+                print(f"  > Node Type: {err.node.node_type}")
+            print()
+            
+            # Add position info for error markers if available
+            if err.line and err.column:
+                error_markers.append({
+                    "line": err.line,
+                    "col": err.column,
+                    "value": err.error_code or "semantic_error",
+                    "message": err.message,
+                    "severity": severity_label
+                })
+                print(f"  [OK] Error marker added for line {err.line}, col {err.column}")
+            else:
+                print(f"  [SKIP] No position info available - marker not added")
+        
+        print("")
+        print(f"Total error markers to send to frontend: {len(error_markers)}")
+        print("="*80)
+        
+        # Build detailed message with all errors (formal formatting)
+        error_count = error_handler.get_error_count()
+        warning_count = error_handler.get_warning_count()
+        if error_count > 0:
+            detailed_message = f"Semantic analysis failed with {error_count} error(s) and {warning_count} warning(s)\\n"
+        else:
+            detailed_message = f"No semantic errors with {warning_count} warning(s)\\n"
+        for detail in error_details:
+            detailed_message += f"{detail}\\n"
+        
+        result = {
+            "success": False, 
+            "message": detailed_message,
+            "ast": ast_json,
+            "symbol_table": symbol_table_json,
+            "ir_tac": ir_tac_text,
+            "ir_quads": ir_quads_text,
+            "ir_tac_optimized": ir_tac_optimized_text,
+            "execution_output": execution_output,
+            "execution_success": execution_success,
+			"execution_paused": execution_paused,
+			"execution_stdin_consumed": execution_stdin_consumed,
+            "execution_error": execution_error,
+            "execution_globals": json.dumps(execution_globals),
+            "errors": error_list,
+            "semantic_errors": json.dumps(error_messages),
+            "semantic_warnings": json.dumps(warning_messages),
+            "error_markers": json.dumps(error_markers)
+        }
+    else:
+        # Check for warnings even if no errors
+        warning_messages_success = []
+        warning_markers_success = []
+        if error_handler.has_warnings():
+            for warn in error_handler.get_errors():
+                if warn.severity.name == "WARNING":
+                    warning_messages_success.append(warn.message)
+                    if warn.line and warn.column:
+                        warning_markers_success.append({
+                            "line": warn.line,
+                            "col": warn.column,
+                            "value": warn.error_code or "semantic_warning",
+                            "message": warn.message,
+                            "severity": "warning"
+                        })
+        
+        warning_msg = f" with {len(warning_messages_success)} warning(s)" if warning_messages_success else ""
+        result = {
+            "success": True, 
+            "message": f"No semantic errors{warning_msg}",
+            "ast": ast_json,
+            "symbol_table": symbol_table_json,
+            "ir_tac": ir_tac_text,
+            "ir_quads": ir_quads_text,
+            "ir_tac_optimized": ir_tac_optimized_text,
+            "execution_output": execution_output,
+            "execution_success": execution_success,
+			"execution_paused": execution_paused,
+			"execution_stdin_consumed": execution_stdin_consumed,
+            "execution_error": execution_error,
+            "execution_globals": json.dumps(execution_globals),
+            "semantic_warnings": json.dumps(warning_messages_success),
+            "error_markers": json.dumps(warning_markers_success)
+        }
+except SyntaxError as e:
+    error_msg = str(e)
+    # Try to extract line and col from error message
+    match = re.search(r'line (\\d+), col (\\d+)', error_msg)
+    if match:
+        line = int(match.group(1))
+        col = int(match.group(2))
+        result = {"success": False, "message": error_msg, "error": {"line": line, "col": col, "message": error_msg}}
+    else:
+        result = {"success": False, "message": error_msg}
+except Exception as e:
+    result = {"success": False, "message": f"Semantic analysis failed: {str(e)}"}
+
+result
+					`;
+					const result = await pyodide.runPythonAsync(semanticPythonScript.replace(/\t/g, '    '));
+
+				const data = result.toJs({ dict_converter: Object.fromEntries });
+
+				if (data.success) {
+					clearErrorMarkers();
+					const semWarningsSuccess: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
+					const warningMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
+					if (warningMarkers.length > 0) addErrorMarkers(warningMarkers);
+					const successMsgs: TermMsg[] = [];
+
+					if (runTacInterpreter) {
+						// Ctrl+Enter: show runtime-only messages and no check icon.
+						if (data.execution_success) {
+							if (data.execution_output) {
+								// Show full output (we re-run from scratch each time)
+								successMsgs.push({ text: data.execution_output });
+							}
+						} else if (data.execution_paused) {
+							if (data.execution_output) {
+								// Show full output so far - input will be added inline by resumeExecution
+								successMsgs.push({ text: data.execution_output });
+							}
+							// Don't add separate prompt - input will be inline
+						} else {
+							// Runtime error occurred
+							const errorMsg = data.execution_error || 'Unknown runtime error';
+							successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${errorMsg}` });
+							console.log('[Terminal] Showing runtime error:', errorMsg);
+						}
+				} else {
+					successMsgs.push({ icon: check, text: data.message || 'No semantic errors' });
+					for (const msg of semWarningsSuccess) successMsgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+				}
+
+				// Always replace terminal messages (we re-run from scratch each time)
+				termMessages = successMsgs;
+				isResumingExecution = false;
+				
+				console.log('[Terminal] Updated termMessages:', termMessages);
+				console.log('[Terminal] Execution paused?', data.execution_paused);
+				console.log('[Terminal] Execution success?', data.execution_success);
+				const wasPaused = tacExecutionPaused;
+				tacExecutionPaused = Boolean(runTacInterpreter && data.execution_paused);
+				console.log('[Terminal] tacExecutionPaused changed:', wasPaused, '→', tacExecutionPaused);
+						try {
+							const astObj = JSON.parse(data.ast);
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+							console.log('%c🌳 Abstract Syntax Tree (AST)', 'color: #00ff00; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+							console.log(astObj);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+						} catch (e) {
+							console.warn('Failed to parse AST JSON:', e);
+						}
+					}
+					
+					// Log Symbol Table as console.table for better display of accessed scopes
+					if (data.symbol_table) {
+						try {
+							const symbolTableData = JSON.parse(data.symbol_table);
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+							console.log('%c📋 Symbol Table (Detailed View)', 'color: #00bcd4; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+							console.table(symbolTableData);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+						} catch (e) {
+							console.warn('Failed to parse Symbol Table JSON:', e);
+						}
+					}
+
+					// Log Intermediate Code (TAC)
+					if (data.ir_tac) {
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						console.log('%c⚙️  Intermediate Code — Three Address Code (TAC)', 'color: #ff9800; font-size: 16px; font-weight: bold');
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						console.log(data.ir_tac);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+					}
+
+					// Log Intermediate Code (Quadruples)
+					if (data.ir_quads) {
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						console.log('%c🔢 Intermediate Code — Quadruples', 'color: #ce93d8; font-size: 16px; font-weight: bold');
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						console.log(data.ir_quads);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+					}
+
+					// Log Optimized IR (TAC)
+					if (data.ir_tac_optimized) {
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+						console.log('%c✨ Optimized IR — Three Address Code (Standard Level)', 'color: #80cbc4; font-size: 16px; font-weight: bold');
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+						console.log(data.ir_tac_optimized);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+					}
+
+					if (runTacInterpreter) {
+						// Log Execution Output
+						const execColor = data.execution_success ? '#69f0ae' : data.execution_paused ? '#ffd54f' : '#ff5252';
+						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
+						console.log(`%c▶  Program Execution (IR Interpreter)`, `color: ${execColor}; font-size: 16px; font-weight: bold`);
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
+						if (data.execution_success) {
+							console.log('%cStatus: OK ✓', 'color: #69f0ae; font-weight: bold');
+							console.log(data.execution_output || '(no output)');
+							if (data.execution_globals) {
+								try {
+									const globals = JSON.parse(data.execution_globals);
+									if (Object.keys(globals).length > 0) {
+										console.log('%cFinal variable state:', 'color: #69f0ae; font-weight: bold');
+										console.table(globals);
+									}
+								} catch {
+									// Ignore malformed globals payload.
+								}
+							}
+						} else if (data.execution_paused) {
+							console.log('%cStatus: Paused (awaiting input) ⏸', 'color: #ffd54f; font-weight: bold');
+							if (data.execution_output) console.log(data.execution_output);
+						} else {
+							console.log('%cStatus: Runtime Error ✗', 'color: #ff5252; font-weight: bold');
+							console.log(data.execution_error || 'Unknown error');
+							// Debug: Show TAC to identify empty variable
+							if (data.ir_tac_optimized) {
+								console.log('%c🔍 TAC Instructions (for debugging):', 'color: #ff9800; font-weight: bold');
+								console.log(data.ir_tac_optimized);
+							}
+						}
+						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
+					}
+				 else {
+					// Log error markers received from backend
+					console.log('\n=== SEMANTIC ERROR MARKERS DEBUG ===');
+					console.log('Error markers received:', data.error_markers);
+					const parsedMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
+					console.log('Number of markers:', Array.isArray(parsedMarkers) ? parsedMarkers.length : 0);
+					
+					// Check if we have semantic errors
+					if (data.errors && data.errors.length > 0) {
+						clearErrorMarkers();
+						
+						// Add error markers if position info is available
+						if (parsedMarkers.length > 0) {
+						console.log('Processing error markers...');
+						const semanticTokens = parsedMarkers.map((marker: any) => {
+							console.log(`  Marker: Line ${marker.line}, Col ${marker.col}, Severity: ${marker.severity}, Message: ${marker.message}`);
+							return {
+								type: 'semantic_error',
+								value: marker.value,
+								line: marker.line,
+								col: marker.col,
+								message: marker.message,
+								severity: marker.severity
+							};
+						});
+						console.log('Semantic tokens created:', semanticTokens);
+						console.log('Calling addErrorMarkers with', semanticTokens.length, 'tokens');
+						addErrorMarkers(semanticTokens);
+						console.log('Error markers added to editor');
+					} else {
+						console.log('No error markers to add (array empty or undefined)');
+					}
+					console.log('=== END ERROR MARKERS DEBUG ===\n');
+					// Build one termMessages entry per error/warning so errorCount is accurate
+					const semErrors: string[] = data.semantic_errors ? JSON.parse(data.semantic_errors) : [];
+					const semWarnings: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
+					const msgs: { icon: any; text: string }[] = [];
+					for (const msg of semErrors) msgs.push({ icon: errorIcon, text: `Semantic Error: ${msg}` });
+					for (const msg of semWarnings) msgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+					termMessages = msgs;
+					analysisStatus = 'error';
+					terminalOutput = data.message;
+						// Still log AST to console if available
+						if (data.ast) {
+							try {
+								const astObj = JSON.parse(data.ast);
+								console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.log('%c🌳 Abstract Syntax Tree (AST) - With Semantic Errors', 'color: #ff9800; font-size: 16px; font-weight: bold');
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.log(astObj);
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							} catch (e) {
+								console.warn('Failed to parse AST JSON:', e);
+							}
+						}
+						
+						// Still log Symbol Table if available
+						if (data.symbol_table) {
+							try {
+								const symbolTableData = JSON.parse(data.symbol_table);
+								console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.log('%c📋 Symbol Table - With Semantic Errors', 'color: #ff9800; font-size: 16px; font-weight: bold');
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+								console.table(symbolTableData);
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							} catch (e) {
+								console.warn('Failed to parse Symbol Table JSON:', e);
+							}
+						}
+
+						// Still log Intermediate Code (TAC) if available
+						if (data.ir_tac) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							console.log('%c⚙️  Intermediate Code — Three Address Code (TAC) - With Semantic Errors', 'color: #ff9800; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							console.log(data.ir_tac);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						}
+
+						// Still log Intermediate Code (Quadruples) if available
+						if (data.ir_quads) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+							console.log('%c🔢 Intermediate Code — Quadruples - With Semantic Errors', 'color: #ce93d8; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+							console.log(data.ir_quads);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						}
+
+						// Still log Optimized IR if available
+						if (data.ir_tac_optimized) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+							console.log('%c✨ Optimized IR — Three Address Code - With Semantic Errors', 'color: #80cbc4; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+							console.log(data.ir_tac_optimized);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+						}
+
+						// Log Execution Output (even with semantic errors, may still partially run)
+						if (runTacInterpreter && (data.execution_output !== undefined || data.execution_error)) {
+							const execColor2 = data.execution_success ? '#69f0ae' : '#ff5252';
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor2}`);
+							console.log('%c▶  Program Execution (IR Interpreter)', `color: ${execColor2}; font-size: 16px; font-weight: bold`);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor2}`);
+							if (data.execution_success) {
+								console.log('%cStatus: OK ✓', 'color: #69f0ae; font-weight: bold');
+								console.log(data.execution_output || '(no output)');
+							} else {
+								console.log('%cStatus: Runtime Error ✗', 'color: #ff5252; font-weight: bold');
+								console.log(data.execution_error || 'Unknown error');
+							}
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor2}`);
+						}
+					}
+					// Handle syntax errors with line/col information
+					else if (data.error && data.error.line && data.error.col) {
+						// Create a token-like object for the error marker
+						const errorToken = {
+							type: 'Syntax Error',
+							value: 'error',
+							line: data.error.line,
+							col: data.error.col
+						};
+						addErrorMarkers([errorToken]);
+						const semanticError = data.message || 'Semantic analysis failed';
+						setTerminalError(semanticError);
+						analysisStatus = 'error';
+						terminalOutput = `${lexicalResult.output}\n${semanticError}`;
+					} else {
+						// Generic fallback
+						const semanticError = data.message || 'Semantic analysis failed';
+						setTerminalError(semanticError);
+						analysisStatus = 'error';
+						terminalOutput = `${lexicalResult.output}\n${semanticError}`;
+					}
+				}
+				
+				} catch (err) {
+					const msg = err instanceof Error ? err.message : 'Unknown error';
+					const semanticError = `Semantic analysis failed: ${msg}`;
+					const errorMessage = `${lexicalResult.output}\n${semanticError}`;
+					setTerminalError(semanticError);
+					analysisStatus = 'error';
+					terminalOutput = errorMessage;
+				}
+			
+			}
+		}
+		else if (termMessages.length > 0) {
+			// Lexical errors found
+			const lexicalErrors = termMessages.map(m => m.text).join('; ');
+			termMessages = [
+				{ icon: errorIcon, text: 'Semantic analysis not performed due to lexical errors:' },
+				...termMessages
+			];
+			analysisStatus = 'error';
+			terminalOutput = `Lexical errors: ${lexicalErrors}`;
+		} else {
+			const notImplMessage = 'Semantic analysis initialization failed';
+			setTerminalError(notImplMessage);
+			analysisStatus = 'error';
+			terminalOutput = notImplMessage;
+		}
+
+		activeTab = 'semantic';
+
+		// Log the semantic analysis
+		const duration = performance.now() - startTime;
+		addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `${runTacInterpreter ? 'semantic-ir' : 'semantic'}-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
+	}
+
+	async function analyzeSyntax() {
+		normalizeCurlyQuotes();
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
+		// Run lexical analysis first, skip logging to combine outputs
+		const lexicalResult = await analyzeLexical(true);
+
+		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
+			clearTerminal();
+
+			if (!pyodideReady) {
+				const errorMsg = 'Python runtime not ready';
+				setTerminalError(errorMsg);
+				analysisStatus = 'error';
+				terminalOutput = `${lexicalResult.output}\n${errorMsg}`;
+				// Continue to logging at the end
+			} else {
+				try {
+					// Set the code input in Python
+					pyodide.globals.set('code_input', codeInput);
+
+					// Run syntax analysis
+					const result = await pyodide.runPythonAsync(`
+import sys
+import re
+from app.lexer.lexer import Lexer
+from app.parser.parser_program import Parser
+
+result = None
+try:
+    lexer = Lexer(code_input)
+    tokens = lexer.tokenize()
+    parser = Parser(tokens)
+    parser.parse_program()
+    
+    result = {"success": True, "message": "No Syntax Error"}
+except SyntaxError as e:
+    error_msg = str(e)
+    # Try to extract line and col from error message
+    match = re.search(r'line (\\d+), col (\\d+)', error_msg)
+    if match:
+        line = int(match.group(1))
+        col = int(match.group(2))
+        result = {"success": False, "message": error_msg, "error": {"line": line, "col": col, "message": error_msg}}
+    else:
+        result = {"success": False, "message": error_msg}
+except Exception as e:
+    result = {"success": False, "message": f"Syntax analysis failed: {str(e)}"}
+
+result
+				`);
+
+				const data = result.toJs({ dict_converter: Object.fromEntries });
+
+				if (data.success) {
+					clearErrorMarkers();
+					const syntaxMessage = data.message || 'Syntax analysis completed successfully';
+					const okMessage = `${lexicalResult.output}\n${syntaxMessage}`;
+					setTerminalOk(syntaxMessage);
+					analysisStatus = 'success';
+					terminalOutput = okMessage;
+				} else {
+					// Handle syntax errors with line/col information
+					if (data.error && data.error.line && data.error.col) {
+						// Create a token-like object for the error marker
+						const errorToken = {
+							type: 'Syntax Error',
+							value: 'error',
+							line: data.error.line,
+							col: data.error.col
+						};
+						addErrorMarkers([errorToken]);
+					}
+					const syntaxError = data.message || 'Syntax analysis failed';
+					const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+					setTerminalError(syntaxError);
+					analysisStatus = 'error';
+					terminalOutput = errorMessage;
+				}
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : 'Unknown error';
+				const syntaxError = `Syntax analysis failed: ${msg}`;
+				const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+				setTerminalError(syntaxError);
+				analysisStatus = 'error';
+				terminalOutput = errorMessage;
+			}
+		}
+	} else if (termMessages.length > 0) {
+			// Lexical errors found
+			const lexicalErrors = termMessages.map(m => m.text).join('; ');
+			termMessages = [
+				{ icon: errorIcon, text: 'Syntax analysis not performed due to lexical errors:' },
+				...termMessages
+			];
+			analysisStatus = 'error';
+			terminalOutput = `Lexical errors: ${lexicalErrors}`;
+		} else {
+			const notImplMessage = 'Syntax analysis not yet implemented';
+			setTerminalOk(notImplMessage);
+			analysisStatus = 'not-implemented';
+			terminalOutput = notImplMessage;
+		}
+
+		activeTab = 'syntax';
+
+		// Log the syntax analysis
+		const duration = performance.now() - startTime;
+		addToLogBatch({
+			user_id: sessionId,
+			source_code: codeInput,
+			terminal_output: terminalOutput,
+			status: analysisStatus,
+			language: `syntax-v${appVersion}`,
+			duration_ms: Math.round(duration)
+		});
+	}
+
+	async function analyzeLexical(skipLogging = false) {
+		normalizeCurlyQuotes();
+		activeTab = skipLogging ? activeTab : 'lexical';
+		const startTime = performance.now();
+		let analysisStatus = 'error';
+		let terminalOutput = '';
+
+		if (!codeInput) {
+			const errorMsg = 'Editor is empty';
+			setTerminalError(errorMsg);
+			terminalOutput = errorMsg;
+			
+			// Log even for early returns
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+			return { status: analysisStatus, output: terminalOutput };
+		}
+
+		if (!pyodideReady) {
+			const errorMsg = 'Python runtime not ready. Please wait...';
+			setTerminalError(errorMsg);
+			terminalOutput = errorMsg;
+			
+			// Log even for early returns
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+			return { status: analysisStatus, output: terminalOutput };
+		}
+
+		isAnalyzing = true;
+		try {
+			// Set the code input in Python
+			pyodide.globals.set('code_input', codeInput);
+
+			// Run lexical analysis
+			const tokensProxy = await pyodide.runPythonAsync(`
+from app.lexer.lexer import Lexer
+
+lexer = Lexer(code_input)
+tokenize = lexer.tokenize()
+tokens = []
+
+for token in tokenize:
+    if token is None:
+        break
+    tokens.append({
+        "type": token.type,
+        "value": token.value or '\\\\0',
+        "line": token.line,
+        "col": token.col
+    })
+
+tokens
+			`);
+
+		// Convert Python list to JavaScript array
+		const received = tokensProxy.toJs({ dict_converter: Object.fromEntries });
+		// treat tokens with type starting with 'invalid' or 'exceeds' (case-insensitive) as lexical errors
+		const invalidTokens = received.filter(
+			(t: Token) =>
+				typeof t.type === 'string' &&
+				(t.type.toLowerCase().startsWith('invalid') || t.type.toLowerCase().startsWith('exceeds'))
+		);
+		// tokens to show in the lexer table (exclude invalids and exceeds)
+		tokens = received.filter(
+			(t: Token) =>
+				!(
+					typeof t.type === 'string' &&
+					(t.type.toLowerCase().startsWith('invalid') ||
+						t.type.toLowerCase().startsWith('exceeds'))
+				)
+		);
+
+		// update right table
+		lexerRows.length = 0;
+		// Group consecutive spaces, newlines, and tabs (but reset count when invalid tokens appear)
+		// We need to track position in original received array to detect when errors interrupt whitespace
+		const invalidPositions = new Set(invalidTokens.map((t: Token) => `${t.line}:${t.col}:${t.value}`));
+
+			let i = 0;
+			let receivedIdx = 0;
+
+			while (i < tokens.length) {
+				const t = tokens[i];
+				const tokenType = t.type.toLowerCase();
+
+				// Check if this is a space, newline, or tab token
+				if (tokenType === 'space' || tokenType === 'newline' || tokenType === 'tab') {
+					let count = 1;
+					let nextIdx = i + 1;
+
+					// Count consecutive identical tokens, but stop if an invalid token was between them in original stream
+					while (nextIdx < tokens.length && tokens[nextIdx].type.toLowerCase() === tokenType) {
+						// Check if there's an invalid token between current and next in the original stream
+						const currentToken = tokens[i + count - 1];
+						const nextToken = tokens[nextIdx];
+
+						// Simple heuristic: if line/col gap suggests something was between them, stop counting
+						const hasGap =
+							nextToken.line > currentToken.line + 1 ||
+							(nextToken.line === currentToken.line && nextToken.col > currentToken.col + 1);
+
+						if (hasGap) {
+							// There might be an invalid token between, stop grouping
+							break;
+						}
+
+						count++;
+						nextIdx++;
+					}
+
+					// Add a single row with count if more than 1
+					const displayToken = count > 1 ? `${t.type} (${count})` : t.type;
+					lexerRows.push({ lexeme: t.value ?? '', token: displayToken });
+					i += count;
+				} else {
+					// Regular token, add as-is
+					lexerRows.push({ lexeme: t.value ?? '', token: t.type });
+					i++;
+				}
+			}
+
+			if (invalidTokens.length) {
+				// Format error messages based on token type
+				const combinedErrors: TermMsg[] = [];
+				let i = 0;
+
+				while (i < invalidTokens.length) {
+					const current = invalidTokens[i];
+					let errorText = '';
+
+					if (current.type === 'Invalid Character') {
+						// Format: Error at line X col Y - Invalid Character: <character>
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Character: ${current.value}`;
+					} else if (current.type === 'Invalid Reserved Word Delimeter') {
+						// Format: Error at line X col Y - Invalid Lexeme: Invalid <RW> delimiter '<delimiter>'
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: Invalid delimiter for reserved word '${current.value}'`;
+					}else if (current.type === 'Invalid Identifier') {
+						// Format: Error at line X col Y - Invalid Lexeme: <RW> cannot be an identifier
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: ${current.value} cannot be an identifier`;
+					} else if (current.type === 'Invalid Lexeme') {
+						// Format: Error at line X col Y - Invalid Lexeme: <invalid lexeme>
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: ${current.value}`;
+					} else if (current.type.toLowerCase().startsWith('exceeds')) {
+						// Determine if it's an identifier or literal based on first character
+						const firstChar = current.value?.charAt(0) || '';
+						const isIdentifier = /[a-zA-Z_]/.test(firstChar);
+						const isLiteral = /[0-9]/.test(firstChar);
+
+						let limitType = '';
+						if (isIdentifier) {
+							limitType = 'id';
+						} else if (isLiteral) {
+							limitType = 'piece/sip literal';
+						} else {
+							limitType = 'value';
+						}
+
+						// Format: Error at line X col Y - Invalid Lexeme: <value> exceeds <type> limit
+						errorText = `Error at line ${current.line} col ${current.col} - Invalid Lexeme: ${current.value} exceeds ${limitType} limit`;
+					} else {
+						// Fallback for any other error types
+						errorText = `Error at line ${current.line} col ${current.col} - ${current.type}: ${current.value}`;
+					}
+
+					combinedErrors.push({
+						icon: errorIcon,
+						text: errorText
+					});
+					i += 1;
+				}
+
+				termMessages = combinedErrors;
+				// Highlight errors in CodeMirror
+				addErrorMarkers(invalidTokens);
+					// Update status and output for errors
+				analysisStatus = 'error';
+				terminalOutput = combinedErrors.map(e => e.text).join('; ');
+			} else {
+				clearErrorMarkers();
+
+				const okMessage = tokens.length ? `Lexical OK • ${tokens.length} token(s)` : 'No tokens produced';
+				// Only update terminal if not skipping logging (i.e., when called standalone)
+				if (!skipLogging) {
+					setTerminalOk(okMessage);
+				}
+				analysisStatus = 'success';
+				terminalOutput = okMessage;
+			}
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : 'Unknown error';
+			const errorMessage = `Lexical analysis failed: ${msg}`;
+			setTerminalError(errorMessage);
+			analysisStatus = 'error';
+			terminalOutput = errorMessage;
+		} finally {
+			isAnalyzing = false;
+
+			// Log the analysis only if not called from syntax analyzer
+			if (!skipLogging) {
+				const duration = performance.now() - startTime;
+				addToLogBatch({
+					user_id: sessionId,
+					source_code: codeInput,
+					terminal_output: terminalOutput,
+					status: analysisStatus,
+					language: `lexical-v${appVersion}`,
+					duration_ms: Math.round(duration)
+				});
+			}
+		}
+
+		// Return the result for use by syntax analyzer
+		return { status: analysisStatus, output: terminalOutput };
+	}
+
+	function toggleTheme() {
+		normalizeCurlyQuotes();
+		theme = theme === 'dark' ? 'light' : 'dark';
+	}
+
+	async function handleCopyToClipboard() {
+		normalizeCurlyQuotes();
+		const content =
+			cmInstance && typeof cmInstance.getValue === 'function' ? cmInstance.getValue() : codeInput;
+		try {
+			await copyToClipboard(content);
+			setTerminalOk('Content copied to clipboard');
+		} catch (err) {
+			setTerminalError('Failed to copy to clipboard');
+		}
+	}
+</script>
+
+<div class="ide" data-theme={theme} style={`--bg-img: url(${theme === 'dark' ? darkBg : lightBg})`}>
+	<!-- Top bar -->
+	<header class="titlebar">
+		<div class="brand">
+			<img class="logo" src={logo} alt="Platter logo" />
+			<a href="/cfg" target="_blank" class="name" title="View CFG Visualization">Platter IDE</a>
+		</div>
+		<div class="win-controls">
+			<span class="dot" title="minimize"></span>
+			<span class="dot" title="maximize"></span>
+			<span class="dot" title="close"></span>
+		</div>
+	</header>
+
+	<!-- Main grid: left workspace and right sidebar -->
+	<div class="grid">
+		<!-- LEFT WORKSPACE -->
+		<section class="left">
+			<!-- Toolbar row -->
+			<div class="toolbar">
+				<button class="pill active" on:click={() => analyzeSemantic(true)}>
+					{#if theme === 'dark'}
+						<img class="icon" src={synSemLexIcon} alt="Run Icon" />
+					{:else}
+						<img class="icon" src={synSemLexIcon1} alt="Run Icon" />
+					{/if}
+					<span>Run Code</span>
+				</button>
+
+				<div class="spacer"></div>
+				<!-- replace icons based on theme -->
+				<button
+					class="icon-btn"
+					title="refresh"
+					on:click={() => {
+						normalizeCurlyQuotes();
+						if (cmInstance) cmInstance.setValue('');
+						codeInput = '';
+						clearTerminal();
+						clearErrorMarkers();
+						lexerRows.length = 0;
+						tokens = [];
+					}}
+					>{#if theme === 'dark'}
+						<img class="icon" src={refresh} alt="Dark Theme Icon" />
+					{:else}
+						<img class="icon" src={refresh1} alt="Light Theme Icon" />
+					{/if}</button
+				>
+				<button class="icon-btn" title="copy" on:click={handleCopyToClipboard}
+					>{#if theme === 'dark'}
+						<img class="icon" src={copy} alt="Dark Theme Icon" />
+					{:else}
+						<img class="icon" src={copy1} alt="Light Theme Icon" />
+					{/if}</button
+				>
+				<button class="icon-btn" title="Theme" on:click={toggleTheme}>
+					{#if theme === 'dark'}
+						<img class="icon" src={lightmode} alt="Dark Theme Icon" />
+					{:else}
+						<img class="icon" src={darkmode} alt="Light Theme Icon" />
+					{/if}
+				</button>
+			</div>
+
+			<!-- Editor canvas -->
+			<div class="panel editor" style={`--editor-img: url(${editorSvg})`} bind:this={editorPanelEl}>
+				<img class="editor-frame" src={editorSvg} alt="" aria-hidden="true" />
+				<textarea
+					class="editor-area"
+					bind:this={textareaEl}
+					bind:value={codeInput}
+					placeholder="Write your Platter code here..."
+					spellcheck="false"
+				></textarea>
+			</div>
+
+		</section>
+
+		<!-- RIGHT SIDEBAR -->
+		<aside class="right">
+			<div class="actions">
+				<button
+					class="btn"
+					on:click={() => {
+						normalizeCurlyQuotes();
+						const newWindow = window.open(window.location.href, '_blank');
+						if (newWindow) setTimeout(() => (newWindow.document.body.style.zoom = '80%'), 100);
+					}}
+				>
+					{#if theme === 'dark'}
+						<img class="icon" src={newFile} alt="Dark Theme Icon" />
+					{:else}
+						<img class="icon" src={newFile1} alt="Light Theme Icon" />
+					{/if} <span>New Tab</span></button
+				>
+				<button class="btn" type="button" on:click={openFileDialog}>
+					{#if theme === 'dark'}
+						<img class="icon" src={openFile} alt="Dark Theme Icon" />
+					{:else}
+						<img class="icon" src={openFile1} alt="Light Theme Icon" />
+					{/if}
+					<span>Open File</span></button
+				>
+				<!-- hidden file input for opening .platter files -->
+				<input
+					type="file"
+					accept=".platter"
+					bind:this={fileInputEl}
+					on:change={handleFileInput}
+					style="display:none"
+				/>
+				<button class="btn" type="button" on:click={saveFileDialog}>
+					{#if theme === 'dark'}
+						<img class="icon" src={saveFile} alt="Dark Theme Icon" />
+					{:else}
+						<img class="icon" src={saveFile1} alt="Light Theme Icon" />
+					{/if} <span>Save File</span></button
+				>
+			</div>
+
+			<div class="panel table" style={`--table-img: url(${table})`} bind:this={terminalPanelEl}>
+				<div class="table-title-row">
+					<div class="table-title">Terminal</div>
+					<div class="counter">
+						<span>Errors: {errorCount}</span>
+						{#if errorCount > 0}
+							<img class="icon" src={warning} alt="warning" />
+						{/if}
+					</div>
+				</div>
+				<div class="table-body">
+					{#if termMessages.length === 0 && !tacExecutionPaused}
+						<div class="empty">No output yet. Press Ctrl+Enter to run.</div>
+					{:else}
+						<div class="terminal-content">
+							{#each termMessages as e, i}
+								{#if e.icon}
+									<div class="trow">
+										<img class="ticon-img" src={e.icon} alt="" />
+										<span class="tmsg" class:user-input={e.isInput}>{e.text}</span>
+									</div>
+								{:else}
+									<!-- Output without icon - show inline with potential input -->
+									<div class="terminal-line">
+										<span class="tmsg" class:user-input={e.isInput}>{e.text}</span>{#if tacExecutionPaused && i === termMessages.length - 1}<input
+											type="text"
+											class="terminal-input"
+											bind:this={terminalInputEl}
+											bind:value={currentInputLine}
+											on:keydown={handleTerminalInputKeydown}
+										/>{/if}
+									</div>
+								{/if}
+							{/each}
+						</div>
+					{/if}
+				</div>
+			</div>
+		</aside>
+	</div>
+</div>
+
+<style>
+	:global(html) {
+		height: 100%;
+	}
+
+	:global(body) {
+		margin: 0;
+		min-height: 100%;
+	}
+
+	.ide {
+		--bg: #2b2b2f;
+		--bg-soft: #2f2f34;
+		--ink: #f2f2f2;
+		--ink-muted: #c9c9cf;
+		--accent: #ffffff;
+		--outline: #ffffff;
+		--panel: rgba(255, 255, 255, 0.03);
+		--shadow: 0 0 0 2px var(--outline) inset;
+		--layout-gap: 20px;
+		--layout-pad: 16px;
+		--frame-height: 842px;
+		--editor-inset-x: 30px;
+		--editor-inset-y: 24px;
+		min-height: 100vh;
+		width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+		/* Use Svelte-provided CSS var for image */
+		background-image: var(--bg-img);
+		background-size: auto;
+		background-position: top left;
+		background-repeat: repeat;
+		background-color: #26262a; /* fallback color */
+		color: var(--ink);
+		font-family: 'Inter', Roboto, sans-serif;
+		font-weight: 700; /* Inter bold as default, Roboto as fallback */
+	}
+
+	.ide[data-theme='light'] {
+		--bg: #f7f7fb;
+		--bg-soft: #fff;
+		--ink: #1f1f23;
+		--ink-muted: #555;
+		--accent: #111;
+		--outline: #111;
+		background-image: var(--bg-img);
+		background-color: #e8e8ed; /* fallback color for light theme */
+	}
+
+	.titlebar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		background: #77787e;
+		color: #fff;
+		padding: 8px 12px;
+		user-select: none;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.brand {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 600;
+	}
+	.logo {
+		filter: grayscale(0.1);
+		width: 30px;
+		height: 30px;
+		object-fit: contain;
+	}
+	.name {
+		letter-spacing: 0.2px;
+	}
+	.win-controls {
+		display: flex;
+		gap: 8px;
+	}
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 999px;
+		background: #cfcfd6;
+		display: inline-block;
+	}
+
+	.grid {
+		display: grid;
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
+		grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.85fr);
+		gap: var(--layout-gap);
+		padding: var(--layout-pad);
+	}
+
+	.toolbar {
+		display: flex;
+		width: 100%;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+		background: transparent;
+		color: var(--ink);
+		border-radius: 8px;
+		cursor: pointer;
+		margin: 0 0 8px 0;
+	}
+
+	.pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		border: 4px solid var(--outline);
+		background: transparent;
+		color: var(--ink);
+		padding: 8px 28px;
+		border-radius: 8px;
+		cursor: pointer;
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+	}
+	.pill.active {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	.spacer {
+		flex: 1;
+	}
+	.icon-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		border: 4px solid var(--outline);
+		background: transparent;
+		color: var(--ink);
+		padding: 8px 12px;
+		border-radius: 8px;
+		cursor: pointer;
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+	}
+
+	/* toolbar icon image inside buttons */
+	.icon {
+		width: 18px;
+		height: 18px;
+		object-fit: contain;
+	}
+
+	.left {
+		display: flex;
+		flex-direction: column;
+		gap: var(--layout-gap);
+		min-width: 0;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+	}
+	.panel {
+		/* background: var(--panel); */
+		border-radius: 14px;
+		padding: 10px;
+		border: 4px solid var(--outline);
+
+		box-shadow: var(--shadow);
+	}
+	.editor {
+		position: relative;
+		overflow: hidden;
+		height: var(--frame-height);
+		min-height: var(--frame-height);
+		padding: 0;
+		border: none;
+		box-shadow: none;
+	}
+	.editor-frame {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: fill;
+		object-position: left top;
+		pointer-events: none;
+		z-index: 0;
+	}
+	.editor-area {
+		position: absolute;
+		inset: var(--editor-inset-y) var(--editor-inset-x);
+		background: transparent;
+		z-index: 1;
+		box-sizing: border-box;
+		margin: 0;
+		border: none;
+	}
+
+	.table-title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 8px;
+		color: var(--ink);
+		border: none;
+		box-shadow: none;
+	}
+	.counter {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border-radius: 10px;
+		margin: 0;
+		transform: scale(0.85);
+		transform-origin: right center;
+	}
+	.terminal-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	.terminal-line {
+		display: inline;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+		white-space: pre-wrap;
+	}
+
+	.trow {
+		display: flex;
+		gap: 8px;
+		align-items: flex-start;
+		padding: 0;
+		margin: 0;
+		color: var(--ink);
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	.input-prompt-row {
+		display: flex;
+		align-items: center;
+		margin: 0;
+		padding: 0;
+	}
+
+	.terminal-input {
+		border: none;
+		background: transparent;
+		color: var(--ink);
+		padding: 0;
+		margin: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		font-weight: 400;
+		outline: none;
+		line-height: 1.5;
+		flex: 1;
+		min-width: 100px;
+	}
+
+	.terminal-input:focus {
+		outline: none;
+	}
+
+	.input-line .tmsg {
+		color: #69f0ae;
+		font-weight: 400;
+	}
+
+	.ticon-img {
+		width: 16px;
+		height: 16px;
+		object-fit: contain;
+	}
+
+	.tmsg {
+		white-space: pre-wrap;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+		font-weight: 400;
+		tab-size: 4;
+		-moz-tab-size: 4;
+		-o-tab-size: 4;
+	}
+
+	.right {
+		display: flex;
+		width: 100%;
+		flex-direction: column;
+		gap: var(--layout-gap);
+		min-width: 0;
+		background: transparent;
+		color: var(--ink);
+		padding: 0;
+		margin: 0;
+		border-radius: 8px;
+	}
+	.actions {
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		margin: 0;
+	}
+	.btn {
+		flex: 1 1 180px;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		border: 4px solid var(--outline);
+		background: transparent;
+		color: var(--ink);
+		padding: 8px 12px;
+		border-radius: 10px;
+		cursor: pointer;
+		scale: 1;
+	}
+
+	.table {
+		height: auto;
+		min-height: var(--frame-height);
+		display: flex;
+		flex-direction: column;
+		/* use the `editor` SVG asset for background */
+		/* background-image: var(--table-img); */
+		/* show SVG at its intrinsic size */
+		background-position: left;
+		background-repeat: no-repeat;
+		/* keep normal panel border; do not scale image into a border */
+		border: none;
+		box-shadow: none;
+	}
+	.table-title {
+		text-align: left;
+		font-weight: 700;
+		margin-bottom: 0;
+		/* margin-top: 48px; */
+
+		border: none;
+		box-shadow: none;
+	}
+	.table-body {
+		border: 4px solid var(--outline);
+		border-radius: 10px;
+		padding: 6px;
+		flex: 1; /* occupy remaining space below the head */
+		min-height: 0; /* allow flex child to shrink and enable scrolling */
+		overflow-y: auto;
+		overflow-x: hidden;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		/* 
+		border: none;
+		box-shadow: none; */
+	}
+	.empty {
+		opacity: 0.7;
+		text-align: center;
+		padding: 12px;
+	}
+
+	.terminal-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	.input-prompt-row {
+		display: flex;
+		align-items: center;
+		margin: 0;
+		padding: 0;
+	}
+
+	.terminal-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		color: var(--ink);
+		padding: 0;
+		margin: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 13px;
+		font-weight: 400;
+		outline: none;
+		line-height: 1.5;
+	}
+
+	.terminal-input:focus {
+		outline: none;
+	}
+
+	.input-line .tmsg {
+		color: #69f0ae;
+		font-weight: 400;
+	}
+
+	.user-input {
+		color: #69f0ae !important;
+	}
+
+	@media (max-width: 1280px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
+		.ide {
+			--frame-height: 700px;
+		}
+	}
+
+	/* Strong CodeMirror overrides to ensure transparency and inherit panel background
+   Use !important to beat CDN-loaded CodeMirror theme CSS if present */
+	:global(.CodeMirror),
+	:global(.CodeMirror-scroll),
+	:global(.CodeMirror-gutters),
+	:global(.CodeMirror pre) {
+		background: transparent !important;
+		color: inherit !important;
+	}
+
+	:global(.CodeMirror) {
+		position: absolute !important;
+		inset: var(--editor-inset-y) var(--editor-inset-x) !important;
+		width: auto !important;
+		height: auto !important;
+		box-shadow: none !important;
+		border: none !important;
+		z-index: 1 !important;
+		outline: none !important;
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace !important;
+		/* font-size: 18px !important; */
+		margin: 0 !important;
+		border: none !important;
+	}
+
+	:global(.CodeMirror-scroll) {
+		/* disable horizontal scrolling and allow wrapping */
+		overflow-x: hidden !important;
+		overflow-y: auto !important;
+		white-space: pre-wrap !important; /* allow wrap onto next line */
+	}
+
+	/* Make gutters transparent and inherit muted color */
+	/* :global(.CodeMirror-gutters) {
+		background: transparent !important;
+		border-right: 4px solid var(--outline) !important;
+		color: var(--ink-muted) !important;
+	} */
+
+	/* Frame image is rendered via .editor-frame, so CodeMirror remains transparent above it */
+
+	/* Ensure preformatted code uses the monospace font and no wrapping */
+	:global(.CodeMirror pre) {
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace !important;
+		font-size: 18px !important;
+		line-height: 20px !important;
+		padding: 0 8px !important;
+		margin: 0 !important;
+		white-space: pre-wrap !important; /* allow wrapped lines */
+	}
+
+	/* Cursor color per theme */
+	:global(.ide[data-theme='dark'] .CodeMirror .CodeMirror-cursor) {
+		border-left: 1px solid #ffffff !important; /* white cursor for dark theme */
+	}
+	:global(.ide[data-theme='light'] .CodeMirror .CodeMirror-cursor) {
+		border-left: 1px solid #000000 !important; /* black cursor for light theme */
+	}
+
+	/* Base text color for dark theme */
+	:global(.ide[data-theme='dark'] .CodeMirror) {
+		color: #d4d4d4 !important;
+	}
+
+	/* Base text color for light theme */
+	:global(.ide[data-theme='light'] .CodeMirror) {
+		color: #1f1f23 !important;
+	}
+
+	/* Error underline styling */
+	:global(.error-underline) {
+		border-bottom: 2px solid #ff0000 !important;
+		background-color: rgba(255, 0, 0, 0.1) !important;
+	}
+
+	/* Warning underline styling */
+	:global(.warning-underline) {
+		border-bottom: 2px solid #ffa500 !important;
+		background-color: rgba(255, 165, 0, 0.08) !important;
+	}
+
+	/* Platter Language Syntax Highlighting - TypeScript-inspired colors */
+	
+	/* Dark theme syntax colors */
+	/* Keywords (if, else, for, while, etc.) - Purple/Magenta */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-keyword) {
+		color: #c586c0 !important;
+		font-weight: 500 !important;
+	}
+
+	/* Data types (string, number, boolean, etc.) - Teal/Cyan */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-type) {
+		color: #4ec9b0 !important;
+	}
+
+	/* Built-in methods/functions - Yellow */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-builtin) {
+		color: #dcdcaa !important;
+	}
+
+	/* Boolean literals (true, false) - Blue */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-atom) {
+		color: #569cd6 !important;
+	}
+
+	/* Variables and identifiers - Light blue */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-variable) {
+		color: #9cdcfe !important;
+	}
+
+	/* String literals - Orange/Red */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-string) {
+		color: #ce9178 !important;
+	}
+
+	/* Escape sequences - Yellow-orange */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-string-2) {
+		color: #d7ba7d !important;
+	}
+
+	/* Numbers - Light green */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-number) {
+		color: #b5cea8 !important;
+	}
+
+	/* Operators (+, -, *, /, etc.) - White/Light gray */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-operator) {
+		color: #d4d4d4 !important;
+	}
+
+	/* Punctuation (brackets, parentheses, etc.) - Light gray */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-punctuation) {
+		color: #d4d4d4 !important;
+	}
+
+	/* Comments - Grey */
+	:global(.ide[data-theme='dark'] .CodeMirror .cm-comment) {
+		color: #999999 !important;
+		font-style: italic !important;
+	}
+
+	/* Light theme syntax colors - Darker colors for better contrast */
+	:global(.ide[data-theme='light'] .CodeMirror .cm-keyword) {
+		color: #7c00a8 !important;
+		font-weight: 500 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-type) {
+		color: #1a5c6f !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-builtin) {
+		color: #5c4a1e !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-atom) {
+		color: #0000cc !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-variable) {
+		color: #000c5a !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-string) {
+		color: #7d0e0e !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-string-2) {
+		color: #cc0000 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-number) {
+		color: #07603f !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-operator) {
+		color: #000000 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-punctuation) {
+		color: #000000 !important;
+	}
+
+	:global(.ide[data-theme='light'] .CodeMirror .cm-comment) {
+		color: #666666 !important;
+		font-style: italic !important;
+	}
+</style>

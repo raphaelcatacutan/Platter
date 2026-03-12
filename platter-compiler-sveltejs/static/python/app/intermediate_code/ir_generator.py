@@ -143,8 +143,13 @@ class IRGenerator:
         if node.init_value:
             # Variable with initialization
             value_temp = self.visit_expression(node.init_value)
-            self.emit_tac(TACAssignment(node.identifier, value_temp))
-            self.emit_quad("=", value_temp, None, node.identifier)
+            # Only emit assignment if we have a valid value
+            if value_temp and str(value_temp).strip():
+                self.emit_tac(TACAssignment(node.identifier, value_temp))
+                self.emit_quad("=", value_temp, None, node.identifier)
+            else:
+                # Empty initializer - skip the assignment
+                self.emit_comment(f"Variable {node.identifier} declared (no init)")
         # Note: Simple declarations without init don't generate code
     
     def visit_array_decl(self, node: ArrayDecl):
@@ -168,8 +173,10 @@ class IRGenerator:
                 value_temp = call_temp
             else:
                 value_temp = self.visit_expression(node.init_value)
-            self.emit_tac(TACAssignment(node.identifier, value_temp))
-            self.emit_quad("=", value_temp, None, node.identifier)
+            # Only emit assignment if we have a valid value
+            if value_temp and str(value_temp).strip():
+                self.emit_tac(TACAssignment(node.identifier, value_temp))
+                self.emit_quad("=", value_temp, None, node.identifier)
         # Note: uninitialized array declarations don't emit runtime code
     
     def visit_table_prototype(self, node: TablePrototype):
@@ -561,8 +568,14 @@ class IRGenerator:
         elif isinstance(node, UnaryOp):
             return self.visit_unary_op(node)
         elif isinstance(node, Identifier):
+            # Safeguard against empty identifiers
+            if not node.name or not str(node.name).strip():
+                raise ValueError(f"Empty identifier encountered in IR generation at expression: {node}")
             return node.name
         elif isinstance(node, Literal):
+            # Safeguard against None or empty literal values
+            if node.value is None:
+                return ""  # Return empty string for None values
             return str(node.value)
         elif isinstance(node, ArrayAccess):
             return self.visit_array_access(node)
