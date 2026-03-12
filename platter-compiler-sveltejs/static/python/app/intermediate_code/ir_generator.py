@@ -145,7 +145,18 @@ class IRGenerator:
             value_temp = self.visit_expression(node.init_value)
             self.emit_tac(TACAssignment(node.identifier, value_temp))
             self.emit_quad("=", value_temp, None, node.identifier)
-        # Note: Simple declarations without init don't generate code
+        else:
+            # Uninitialized ingredients get default values based on data type
+            defaults = {
+                "piece": "0",
+                "sip": "0.0",
+                "chars": '""',
+                "flag": "down"
+            }
+            # Fallback to "0" if type unknown, though it should be one of the above
+            default_val = defaults.get(node.data_type, "0")
+            self.emit_tac(TACAssignment(node.identifier, default_val))
+            self.emit_quad("=", default_val, None, node.identifier)
     
     def visit_array_decl(self, node: ArrayDecl):
         """Generate IR for array declaration"""
@@ -563,6 +574,12 @@ class IRGenerator:
         elif isinstance(node, Identifier):
             return node.name
         elif isinstance(node, Literal):
+            if node.value_type == "chars":
+                # Ensure string literals are quoted so TAC interpreter does not mistake an empty string for a variable lookup
+                val = str(node.value)
+                if not (val.startswith('"') and val.endswith('"')) and not (val.startswith("'") and val.endswith("'")):
+                    return f'"{val}"'
+                return val
             return str(node.value)
         elif isinstance(node, ArrayAccess):
             return self.visit_array_access(node)
