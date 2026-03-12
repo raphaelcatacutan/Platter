@@ -64,7 +64,7 @@ class TACInterpreter:
         # Type conversions
         "topiece": lambda args: int(float(args[0])) if args else 0,
         "tosip":   lambda args: float(args[0]) if args else 0.0,
-        "tochars": lambda args: str(args[0]) if args else "",
+        "tochars": lambda args: ("up" if args[0] is True else ("down" if args[0] is False else str(args[0]))) if args else "",
 
         # Math, Formatting, Random
         "pow":     lambda args: args[0] ** args[1],                        # pow(base, exp) → piece
