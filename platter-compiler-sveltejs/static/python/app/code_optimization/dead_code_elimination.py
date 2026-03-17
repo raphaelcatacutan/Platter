@@ -14,8 +14,8 @@ Examples:
 
 from typing import List, Set, Dict
 from .optimizer import OptimizationPass, ControlFlowGraph
-from .tac import *
-from .quadruple import *
+from app.intermediate_code.tac import *
+from app.intermediate_code.quadruple import *
 
 
 class DeadCodeEliminationPass(OptimizationPass):

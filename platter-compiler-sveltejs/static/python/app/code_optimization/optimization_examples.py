@@ -18,7 +18,7 @@ from app.parser.parser_program import Parser
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
 from app.intermediate_code.ir_generator import IRGenerator
 from app.intermediate_code.output_formatter import IRFormatter
-from app.intermediate_code.optimizer_manager import OptimizerManager, OptimizationLevel, optimize_ir
+from app.code_optimization.optimizer_manager import OptimizerManager, OptimizationLevel, optimize_ir
 
 
 def example_constant_folding():

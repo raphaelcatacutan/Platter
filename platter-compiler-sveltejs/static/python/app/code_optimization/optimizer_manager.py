@@ -7,8 +7,8 @@ Supports iterative optimization until a fixed point is reached.
 
 from typing import List, Dict, Any
 from .optimizer import OptimizationPass
-from .tac import TACInstruction
-from .quadruple import QuadrupleTable
+from app.intermediate_code.tac import TACInstruction
+from app.intermediate_code.quadruple import QuadrupleTable
 from .constant_folding import ConstantFoldingPass
 from .propagation import ConstantPropagationPass, CopyPropagationPass
 from .dead_code_elimination import DeadCodeEliminationPass, UnreachableCodeEliminationPass

@@ -7,8 +7,8 @@ various optimization passes on TAC and Quadruple representations.
 
 from typing import List, Set, Dict, Optional, Any
 from abc import ABC, abstractmethod
-from .tac import *
-from .quadruple import *
+from app.intermediate_code.tac import *
+from app.intermediate_code.quadruple import *
 
 
 class OptimizationPass(ABC):

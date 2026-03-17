@@ -12,8 +12,8 @@ Copy Propagation: Replaces uses of variables that are copies of other variables
 
 from typing import List, Dict, Optional, Set
 from .optimizer import OptimizationPass
-from .tac import *
-from .quadruple import *
+from app.intermediate_code.tac import *
+from app.intermediate_code.quadruple import *
 
 
 class ConstantPropagationPass(OptimizationPass):

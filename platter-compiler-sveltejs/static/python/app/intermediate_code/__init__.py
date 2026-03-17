@@ -9,25 +9,12 @@ Modules:
 - quadruple: Quadruple representation and table
 - ir_generator: Main IR generator that traverses AST
 - output_formatter: Formatting and output utilities for IR
-- optimizer: Base optimization infrastructure
-- constant_folding: Constant folding optimization pass
-- propagation: Constant and copy propagation passes
-- dead_code_elimination: Dead code elimination passes
-- algebraic_simplification: Algebraic simplification and strength reduction
-- optimizer_manager: Manages and coordinates optimization passes
 """
 
 from .tac import *
 from .quadruple import *
 from .ir_generator import IRGenerator
 from .output_formatter import IRFormatter, format_tac, format_quadruples, format_ir
-from .optimizer import OptimizationPass, BasicBlock, ControlFlowGraph
-from .constant_folding import ConstantFoldingPass
-from .propagation import ConstantPropagationPass, CopyPropagationPass
-from .dead_code_elimination import DeadCodeEliminationPass, UnreachableCodeEliminationPass
-from .algebraic_simplification import AlgebraicSimplificationPass, StrengthReductionPass
-from .optimizer_manager import OptimizerManager, OptimizationLevel, optimize_ir
-from .ir_interpreter import TACInterpreter, run_tac
 
 __all__ = [
     # TAC Instructions
@@ -77,25 +64,6 @@ __all__ = [
     'format_tac',
     'format_quadruples',
     'format_ir',
-    
-    # Optimization Base
-    'OptimizationPass',
-    'BasicBlock',
-    'ControlFlowGraph',
-    
-    # Optimization Passes
-    'ConstantFoldingPass',
-    'ConstantPropagationPass',
-    'CopyPropagationPass',
-    'DeadCodeEliminationPass',
-    'UnreachableCodeEliminationPass',
-    'AlgebraicSimplificationPass',
-    'StrengthReductionPass',
-    
-    # Optimizer Manager
-    'OptimizerManager',
-    'OptimizationLevel',
-    'optimize_ir',
 ]
 
 __version__ = '1.0.0'
