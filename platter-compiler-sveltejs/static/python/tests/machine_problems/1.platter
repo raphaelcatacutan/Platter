@@ -1,0 +1,13 @@
+start(){
+	piece of x = topiece(take());
+	piece of y = topiece(take());
+	piece of r = x + y;
+	bill(tochars(r));
+}
+--end
+3
+4
+--end
+3
+4
+7
