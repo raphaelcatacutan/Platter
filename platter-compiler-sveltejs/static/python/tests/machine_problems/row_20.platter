@@ -1,0 +1,12 @@
+start(){
+        piece of i,n,sum;
+    bill("Enter a number: ");
+    n = topiece(take());
+    pass(i = 1; i+=1; i<=n){
+            sum += i*i*i;
+    }
+    bill("The sum is "+tochars(sum));
+}
+--end
+
+--end

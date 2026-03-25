@@ -1,0 +1,28 @@
+start() {
+    piece of row, i, j;
+    bill("Enter the number of rows: ");
+    row = topiece(take());
+
+    pass(i = 1; i += 1; i <= row) {
+        pass(j = 0; j += 1; j < row - i) {
+            bill(" ");
+        }
+        pass(j = 0; j += 1; j < (2 * i - 1)) {
+            bill("*");
+        }
+        bill("\n");
+    }
+}
+
+--end
+10
+--end
+        *
+       ***
+      *****
+     *******
+    *********
+   ***********
+  *************
+ ***************
+*****************

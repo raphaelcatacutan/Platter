@@ -1,0 +1,77 @@
+prepare piece of billArray(piece[] of numbers, piece of idx, piece of total){
+    check(idx < total){
+        bill(tochars(numbers[idx]));
+
+        check(idx < total - 1){
+            bill("  ");
+        } instead {
+            bill("\n");
+        }
+
+        billArray(numbers, idx + 1, total);
+    }
+
+    serve 0;
+}
+
+start(){
+    piece of total = 0;
+    piece of i = 0;
+    piece of j = 0, k;
+    piece of value = 0;
+    piece of temp = 0;
+    piece of sort_choice = 0;
+    piece[] of numbers = [];
+
+    bill("Input the number of elements to be stored in the array : ");
+    total = topiece(take());
+
+    check(total > 0){
+        bill("Input " + tochars(total) + " elements in the array :\n");
+
+        pass(i = 0; i += 1; i < total){
+            bill("element - " + tochars(i) + " : ");
+            value = topiece(take());
+            append(numbers, value);
+        }
+
+        bill("Sort Out:\n");
+        bill("1. Ascending\n");
+        bill("2. Descending\n");
+        bill("Enter choice (1 or 2): ");
+        sort_choice = topiece(take());
+
+        check(sort_choice == 1 or sort_choice == 2){
+            pass(i = 0; i += 1; i < total - 1){
+                pass(j = 0; j += 1; j < total - 1){
+                        k = j + 1;
+                    check(sort_choice == 1 and numbers[j] > numbers[k]){
+                        temp = numbers[j];
+                        numbers[j] = numbers[k];
+                        numbers[k] = temp;
+                    } alt(sort_choice == 2 and numbers[j] < numbers[k]){
+                        temp = numbers[j];
+                        numbers[j] = numbers[k];
+                        numbers[k] = temp;
+                    }
+                }
+            }
+
+            check(sort_choice == 1){
+                bill("Sorted array in Ascending order : ");
+            } instead {
+                bill("Sorted array in Descending order : ");
+            }
+
+            billArray(numbers, 0, total);
+        } instead {
+            bill("Invalid Input\n");
+        }
+    } instead {
+        bill("Invalid Input\n");
+    }
+}
+
+--end
+
+--end

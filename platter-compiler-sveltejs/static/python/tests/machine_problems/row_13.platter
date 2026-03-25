@@ -1,0 +1,26 @@
+start() {
+    piece of side, i, j;
+    bill("Enter the size of the square: ");
+    side =  topiece(take());
+
+    pass(i = 0; i += 1; i < side) {
+        pass(j = 0; j += 1; j < side) {
+                check (j == 0 or j == side - 1 or i == 0 or i == side - 1) {
+                    bill("*");
+            } instead {
+                    bill(" ");
+            }
+            bill("  ");
+        }
+        bill("\n");
+    }
+}
+--end
+6
+--end
+Enter the size of the square: 5
+*  *  *  *  *  
+*           *  
+*           *  
+*           *  
+*  *  *  *  * 

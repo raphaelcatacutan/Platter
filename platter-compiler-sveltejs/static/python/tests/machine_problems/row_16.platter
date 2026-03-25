@@ -1,0 +1,26 @@
+start() {
+    piece of n = 10;   # series length
+    piece of a = 0;
+    piece of b = 1;
+    piece of i = 0;
+
+    bill(tochars(a)); 
+    bill(" ");
+    bill(tochars(b)); 
+    bill(" ");
+
+    repeat(i < n - 2) {
+        piece of c = a + b;
+        bill(tochars(c));
+        bill(" ");
+
+        a = b;
+        b = c;
+        i = i + 1;
+    }
+}
+
+--end
+10
+--end
+0 1 1 2 3 5 8 13 21 34

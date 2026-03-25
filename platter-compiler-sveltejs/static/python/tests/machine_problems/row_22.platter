@@ -1,0 +1,96 @@
+prepare piece of floor(piece of x) {
+    piece of result = 0;
+
+    check (x >= 0) {
+        repeat(x >= 1) {
+            x = x - 1;
+            result = result + 1;
+        }
+        serve result;
+    } instead {
+        repeat(x <= -1) {
+            x = x + 1;
+            result = result - 1;
+        }
+        serve result;
+    }
+}
+
+prepare chars of decimalToBinary(piece of decimal) {
+    chars of binary = "";
+
+    check(decimal == 0) {
+        serve "0";
+    }
+
+    repeat(decimal > 0) {
+        piece of remainder = decimal % 2;
+        binary = tochars(remainder) + binary;
+
+        decimal = decimal / 2;
+        decimal = floor(decimal);
+    }
+
+    serve binary;
+}
+
+prepare chars of decimalToOctal(piece of decimal) {
+    chars of octal = "";
+
+    check(decimal == 0) {
+        serve "0";
+    }
+
+    repeat(decimal > 0) {
+        piece of remainder = decimal % 8;
+        octal = tochars(remainder) + octal;
+
+        decimal = decimal / 8;
+        decimal = floor(decimal);
+    }
+
+    serve octal;
+}
+
+prepare chars of decimalToHex(piece of decimal) {
+    chars of hex = "";
+    chars of hexChars = "0123456789ABCDEF";
+
+    check(decimal == 0) {
+        serve "0";
+    }
+
+    repeat(decimal > 0) {
+        piece of remainder = decimal % 16;
+        hex = copy(hexChars, remainder + 1, remainder + 1) + hex;
+
+        decimal = decimal / 16;
+        decimal = floor(decimal);
+    }
+
+    serve hex;
+}
+
+start() {
+    piece of decimalInput = 0;
+
+    bill("Input a Decimal Number: ");
+    decimalInput = topiece(take());
+
+    check(decimalInput < 0) {
+        bill("Invalid Input\n");
+    } instead {
+        bill("\nBinary Value: ");
+        bill(decimalToBinary(decimalInput));
+
+        bill("\nOctal Value: ");
+        bill(decimalToOctal(decimalInput));
+
+        bill("\nHexadecimal Value: ");
+        bill(decimalToHex(decimalInput));
+    }
+}
+
+--end
+
+--end

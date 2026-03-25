@@ -1,0 +1,16 @@
+prepare piece of sumDigits(piece of num){
+	piece of sum = 0;
+    repeat(num != 0){
+		piece of rem = num % 10;
+        sum = sum + rem;
+        num = num / 10;
+    }
+    serve sum;
+}
+
+start(){
+	bill(tochars(sumDigits(topiece(take()))));
+}
+--end
+
+--end

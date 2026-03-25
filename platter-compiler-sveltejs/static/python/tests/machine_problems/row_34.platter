@@ -1,0 +1,41 @@
+piece[] of nums;
+
+start(){
+    piece of inputNum;
+    piece of i;
+    piece of count;
+    flag of isTriplicate = down;
+
+    nums = [];
+
+    repeat (not isTriplicate){
+        inputNum = topiece(take());
+        i = 0;
+        count = 0;
+
+        repeat (i < size(nums)){
+            check (nums[i] == inputNum){
+                count += 1;
+            }
+
+            i += 1;
+        }
+
+        check (count == 2){
+            isTriplicate = up;
+        }
+
+        check (not isTriplicate){
+            append(nums, inputNum);
+        }
+    }
+
+    bill("Triplicate found. Program stopped.");
+}
+--end
+
+--end
+5
+8
+8
+8                                                                                                                                                                                                                                        Triplicate found. Program stopped.

@@ -1,0 +1,44 @@
+prepare piece of billArray(piece[] of numbers, piece of idx, piece of total){
+    check(idx < total){
+        bill(tochars(numbers[idx]));
+
+        check(idx < total - 1){
+            bill("  ");
+        } instead {
+            bill("\n");
+        }
+
+        billArray(numbers, idx + 1, total);
+    }
+
+    serve 0;
+}
+
+start(){
+    piece of total = 0;
+    piece of i = 0;
+    piece of value = 0;
+    piece[] of numbers = [];
+
+    bill("Input the number of elements to be stored in the array : ");
+    total = topiece(take());
+
+    check(total > 0){
+        bill("Input " + tochars(total) + " elements in the array :\n");
+
+        pass(i = 0; i += 1; i < total){
+            bill("Element - " + tochars(i) + " : ");
+            value = topiece(take());
+            append(numbers, value);
+        }
+
+        bill("The elements in the array are : ");
+        billArray(numbers, 0, total);
+    } instead {
+        bill("Invalid Input\n");
+    }
+}
+
+--end
+
+--end

@@ -1,0 +1,15 @@
+piece of num = 1234;
+piece of reversed_num , digit= 0;
+
+start(){
+repeat (num != 0) {
+    digit = num % 10;
+    reversed_num = reversed_num * 10 + digit;
+    num  = num / 10;
+}
+bill("Reversed Number: " + tochars(reversed_num));
+
+}
+--end
+
+--end

@@ -1,0 +1,30 @@
+start() {
+    piece of row, col, i, j;
+    bill("Enter the number of rows: ");
+    row =  topiece(take());
+    bill("Enter the number of columns: ");
+    col =  topiece(take());
+
+    pass(i = 0; i += 1; i < row) {
+        pass(j = 0; j += 1; j < col) {
+                check (j == 0 or j == col - 1 or i == 0 or i == row - 1) {
+                    bill("*");
+            } instead {
+                    bill(" ");
+            }
+            bill("    ");
+        }
+        bill("\n");
+    }
+}
+--end
+5
+4
+--end
+Enter the number of rows: 5
+Enter the number of columns: 4
+*    *    *    *    
+*              *    
+*              *    
+*              *    
+*    *    *    *    

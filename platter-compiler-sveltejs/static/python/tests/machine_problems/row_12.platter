@@ -1,0 +1,22 @@
+start() {
+    piece of side, i, j;
+    bill("Enter the side size: ");
+    side = topiece(take());
+
+    pass(i = 0; i += 1; i < side) {
+        pass(j = 0; j += 1; j < side) {
+            bill(" * ");
+        }
+        bill("\n");
+    }
+}
+--end
+6
+--end
+Enter the side size: 6
+ *  *  *  *  *  * 
+ *  *  *  *  *  * 
+ *  *  *  *  *  * 
+ *  *  *  *  *  * 
+ *  *  *  *  *  * 
+ *  *  *  *  *  * 

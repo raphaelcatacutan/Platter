@@ -1,0 +1,140 @@
+prepare piece of charsSize(chars of input) {
+    piece of i = 1;
+    repeat(up) {
+        chars of char = copy(input, i, i);
+        check (char == "") {
+            serve i - 1;
+        }
+        i += 1;
+    }
+    serve 0;
+}
+
+prepare flag of isBinary(chars of binary) {
+    piece of i = 1;
+    repeat(up) {
+        chars of char = copy(binary, i, i);
+
+        check (char == "") {
+            serve up;
+        }
+        alt (char != "1" and char != "0") {
+            serve down;
+        }
+        i += 1;
+    }
+    serve down;
+}
+
+prepare piece of binaryToDecimal(chars of binary) {
+
+    piece of decimal = 0;
+    piece of power = 0;
+
+    piece of i = charsSize(binary) - 1;
+
+    repeat(i >= 0) {
+        piece of digit = 0;
+
+        check (copy(binary, i + 1, i + 1) == "1") {
+            digit = 1;
+        }
+
+        decimal = decimal + digit * pow(2, power);
+        power += 1;
+        i -= 1;
+    }
+
+    serve decimal;
+}
+
+prepare piece of floor(piece of x) {
+    piece of result = 0;
+    check (x >= 0) {
+        result = 0;
+        repeat(x >= 1) {
+            x = x - 1;
+            result = result + 1;
+        }
+        serve result;
+    } instead {
+        result = 0;
+        repeat(x <= -1) {
+            x = x + 1;
+            result = result - 1;
+        }
+        serve result;
+    }
+}
+prepare chars of decimalToOctal(piece of decimal) {
+    chars of octal = "";
+
+    check (decimal == 0) {
+        serve "0";
+    }
+
+    repeat(decimal > 0) {
+        piece of remainder = decimal % 8;
+        octal = tochars(remainder) + octal;
+
+        decimal = decimal / 8; 
+        decimal = floor(decimal);
+    }
+
+    serve octal;
+}
+
+prepare chars of decimalToHex(piece of decimal) {
+    chars of hex = "";
+    chars of hexChars = "0123456789ABCDEF";
+
+    check (decimal == 0) {
+        serve "0";
+    }
+
+    repeat(decimal > 0) {
+        piece of remainder = decimal % 16;
+        hex = copy(hexChars, remainder + 1, remainder + 1) + hex;
+
+        decimal = decimal / 16;  
+        decimal = floor(decimal);  
+    }
+
+    serve hex;
+}
+
+start() {
+
+    chars of binaryInput;
+    flag of isValidInput;
+    piece of decimalValue;
+
+    bill("Input a Binary: ");
+    binaryInput = take();
+
+    isValidInput = isBinary(binaryInput);
+
+    check (not isValidInput) {
+        bill("Not a valid binary");
+    } instead {
+
+        decimalValue = binaryToDecimal(binaryInput);
+
+        bill("\nDecimal Value: ");
+        bill(tochars(decimalValue));
+
+        bill("\nOctal Value: ");
+        bill(decimalToOctal(decimalValue));
+
+        bill("\nHexadecimal Value: ");
+        bill(decimalToHex(decimalValue));
+    }
+}
+--end
+
+--end
+Input a Binary: 1011
+
+Decimal Value: 11
+Octal Value: 13
+Hexadecimal Value: B

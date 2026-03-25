@@ -1,0 +1,41 @@
+prepare piece of compute_factorial(piece of num){
+    piece of i = num;
+    piece of factorial = 1;
+    
+	repeat(i >= 1){
+    	factorial *= i;
+        i -= 1;
+    }
+    
+    serve factorial;
+}
+
+start(){
+	piece of num;
+    piece of i;
+    
+	order {
+    	bill("Enter a positive number: ");
+    
+	    num = topiece(take());
+    
+    	check(num < 0){
+        	bill("Please enter a positive number\n");
+        }
+        
+    } repeat(num < 0);
+    
+    # Factorial
+    bill(tochars(num) + "! = " + tochars(num) );
+    pass(i = num - 1; i -= 1; i >= 1){
+    	bill(" x " + tochars(i));
+    }
+    bill(" = " + tochars(compute_factorial(num)));
+    bill("\nFactorial of " + tochars(num) + ": " + tochars(compute_factorial(num)));
+}
+--end
+
+--end
+Enter a positive number: 5
+5! = 5 x 4 x 3 x 2 x 1 = 120
+Factorial of 5: 120

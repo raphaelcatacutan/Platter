@@ -1,0 +1,62 @@
+# 4. Write a program that prompts the user to input a username. Use a loop to keep
+# asking for a username until a valid one is entered (e.g., at least 8 characters long,
+# with at least one capital letter and at least one special character, combination of
+# letter(capital/small), number, special character).
+
+prepare flag of checkValid(chars of input) {
+    piece of i = 1;
+    flag of has_upper = down;
+    flag of has_lower = down;
+    flag of has_number = down;
+    flag of has_special = down;
+    flag of done = down;
+    piece of length = 0;
+
+    repeat(not done) {
+        chars of c = copy(input, i, i);
+
+        check(c == "") {
+            done = up;
+        } instead {
+            check(c >= "A" and c <= "Z") {
+                has_upper = up;
+            } alt(c >= "a" and c <= "z") {
+                has_lower = up;
+            } alt(c >= "0" and c <= "9") {
+                has_number = up;
+            } instead {
+                has_special = up;
+            }
+            i += 1;
+        }
+    }
+
+    length = i - 1;
+
+    check(length < 8 or not has_upper or not has_lower or not has_number or not has_special) {
+        bill("Invalid Username!\n");
+        check(length < 8) { bill("- Must be at least 8 characters long\n"); }
+        check(not has_upper) { bill("- Must contain at least one capital letter\n"); }
+        check(not has_lower) { bill("- Must contain at least one lowercase letter\n"); }
+        check(not has_number) { bill("- Must contain at least one number\n"); }
+        check(not has_special) { bill("- Must contain at least one special character\n"); }
+        bill("\n");
+        serve down;
+    } instead {
+        serve up;
+    }
+}
+
+start() {
+    chars of input = "";
+
+    order {
+        bill("Input username: ");
+        input = take();
+    } repeat(not checkValid(input));
+
+    bill("\n" + input + " is a Valid Username!\n");
+}
+--end
+
+--end

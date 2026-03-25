@@ -1,0 +1,67 @@
+start(){
+    piece of num = 0;
+    sip of pi = 3.14159;
+    sip of radius = 0.0;
+    sip of base = 0.0;
+    sip of height = 0.0;
+    sip of side = 0.0;
+    sip of length = 0.0;
+    sip of width = 0.0;
+    sip of area = 0.0;
+
+    order{
+        bill("Choose a shape: \n");
+        bill("1 - Area of a Circle \n");
+        bill("2 - Area of a Triangle \n");
+        bill("3 - Area of a Square \n");
+        bill("4 - Area of a Rectangle \n");
+        bill("Enter your choice (1-4): ");
+
+        num = topiece(take());
+
+        check(num < 1 or num > 4){
+            bill("Invalid Input");
+        } instead {
+            menu(num){
+                choice 1:
+                    bill("Enter radius: ");
+                    radius = tosip(take());
+                    area = pi * radius * radius;
+                    bill("Area of Circle: " + tochars(area));
+                    stop;
+
+                choice 2:
+                    bill("Enter base: ");
+                    base = tosip(take());
+                    bill("Enter height: ");
+                    height = tosip(take());
+                    area = (base * height) / 2.0;
+                    bill("Area of Triangle: " + tochars(area));
+                    stop;
+
+                choice 3:
+                    bill("Enter side: ");
+                    side = tosip(take());
+                    area = side * side;
+                    bill("Area of Square: " + tochars(area));
+                    stop;
+
+                choice 4:
+                    bill("Enter length: ");
+                    length = tosip(take());
+                    bill("Enter width: ");
+                    width = tosip(take());
+                    area = length * width;
+                    bill("Area of Rectangle: " + tochars(area));
+                    stop;
+
+                usual:
+                    bill("Invalid Input");
+            }
+        }
+    } repeat(num < 1 or num > 4);
+}
+
+--end
+
+--end

@@ -13,7 +13,7 @@ from app.semantic_analyzer.symbol_table import print_symbol_table
 from app.intermediate_code.ir_generator import IRGenerator
 from app.intermediate_code.output_formatter import IRFormatter
 from app.intermediate_code.optimizer_manager import OptimizerManager, OptimizationLevel
-from app.intermediate_code.ir_interpreter import run_tac
+from app.intermediate_code.ir_interpreter import TACInterpreter
 
 COPY_ERROR_TO_CLIPBOARD = True
 
@@ -156,47 +156,50 @@ if __name__ == "__main__":
                     print("-" * 80)
                     print(ir_tac_optimized_text)
                     
-                    # Ask if user wants to execute
-                    print("\n" + "=" * 80)
-                    print("PROGRAM EXECUTION")
-                    print("=" * 80)
-                    execute = input("\nExecute the program? (y/n): ").strip().lower()
+                    print("\nExecution Output:")
+                    print("-" * 80)
+                    interpreter = TACInterpreter(optimized_tac)
+                    printed_output_len = 0
+                    pending_input_echo = None
                     
-                    if execute == 'y':
-                        # Collect stdin inputs if needed
-                        stdin_lines = []
-                        print("\nEnter input lines for the program (type 'END' on a new line to finish):")
-                        print("(Press Enter after each input line, use \\n for newlines within a line)")
-                        while True:
+                    while True:
+                        exec_result = interpreter.run()
+
+                        # Stream only newly produced output so execution feels like a real terminal run.
+                        current_output = exec_result.get("output", "")
+                        if len(current_output) > printed_output_len:
+                            new_output = current_output[printed_output_len:]
+
+                            # Suppress interpreter's echoed take() input so terminal input appears only once.
+                            if pending_input_echo and new_output.startswith(pending_input_echo):
+                                new_output = new_output[len(pending_input_echo):]
+                            pending_input_echo = None
+
+                            print(new_output, end="")
+                            printed_output_len = len(current_output)
+
+                        if exec_result.get("success"):
+                            break
+                        if exec_result.get("paused"):
                             try:
                                 line = input()
-                                if line == "END":
-                                    break
-                                # Process escape sequences in input
-                                line = line.replace('\\n', '\n').replace('\\t', '\t')
-                                stdin_lines.append(line)
                             except EOFError:
+                                print("\n[Execution Error] Input stream ended while waiting for take().")
+                                exec_result = {
+                                    "success": False,
+                                    "error": "Input stream ended while waiting for take().",
+                                    "output": exec_result.get("output", ""),
+                                    "globals": exec_result.get("globals", {}),
+                                }
                                 break
+
+                            # Process escape sequences in user input
+                            line = line.replace('\\n', '\n').replace('\\t', '\t')
+                            pending_input_echo = line + "\n"
+                            interpreter.stdin_lines.append(line)
+                            continue
+                        break
                         
-                        # Execute
-                        print("\nExecution Output:")
-                        print("-" * 80)
-                        exec_result = run_tac(optimized_tac, stdin_lines=stdin_lines)
-                        
-                        if exec_result.get("success"):
-                            output = exec_result.get("output", "")
-                            print(output if output else "(no output)")
-                            
-                            # Show globals if any
-                            globals_dict = exec_result.get("globals", {})
-                            if globals_dict:
-                                print("\nFinal variable values:")
-                                for var, val in globals_dict.items():
-                                    print(f"  {var} = {val}")
-                        else:
-                            print(f"[Execution Error] {exec_result.get('error', 'Unknown error')}")
-                        
-                        print("-" * 80)
                     
                 except Exception as ir_err:
                     print(f"\nIR generation error: {ir_err}")

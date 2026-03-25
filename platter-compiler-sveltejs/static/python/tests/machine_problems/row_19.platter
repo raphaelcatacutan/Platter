@@ -1,0 +1,25 @@
+start() {
+    piece of N, sum = 0, i;
+    
+    bill("Enter the value of N: ");
+    N = topiece(take());
+        
+    check(N < 1){
+            bill("Zero or Negative numbers are not accepted!");
+        serve 0;
+    } alt (N >= 1) {
+                pass(i = 1; i += 1; i <= N) {
+                sum = sum + (i * i);
+            }
+    
+    }
+
+    
+    bill("The sum of the squares from 1 to " + tochars(N) + " is: " + tochars(sum));
+}
+
+--end
+8
+--end
+Enter the value of N: 8
+The sum of the squares from 1 to 8 is: 204

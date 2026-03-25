@@ -1,0 +1,9 @@
+start(){
+        sip of n;
+    bill("Enter a number: ");
+    n = tosip(take());
+           bill("Square root of "+tochars(n)+" is "+ tochars(cut(sqrt(n),1.0)));
+}
+--end
+
+--end
