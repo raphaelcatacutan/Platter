@@ -493,9 +493,40 @@ start() {
 						'Ctrl-Enter': function() { analyzeSemantic(true); },
 						'Ctrl-1': function() { analyzeLexical(); },
 						'Ctrl-2': function() { analyzeSyntax(); },
-						'Ctrl-3': function() { analyzeSemantic(false); }
+						'Ctrl-3': function() { analyzeSemantic(false); },
+						'Ctrl-/': function(cm: any) {
+							const doc = cm.getDoc();
+							const sel = doc.getSelection();
+							if (!sel) {
+								// No selection — toggle single-line comment on current line
+								const cursor = doc.getCursor();
+								const lineNo = cursor.line;
+								const lineText = doc.getLine(lineNo);
+								if (lineText.startsWith('# ')) {
+									// Remove comment
+									doc.replaceRange(lineText.slice(2), { line: lineNo, ch: 0 }, { line: lineNo, ch: lineText.length });
+								} else if (lineText.startsWith('#')) {
+									doc.replaceRange(lineText.slice(1), { line: lineNo, ch: 0 }, { line: lineNo, ch: lineText.length });
+								} else {
+									// Add comment
+									doc.replaceRange('# ' + lineText, { line: lineNo, ch: 0 }, { line: lineNo, ch: lineText.length });
+								}
+							} else {
+								// Selection — toggle multi-line comment ## ... ##
+								const trimmed = sel.trim();
+								if (trimmed.startsWith('##') && trimmed.endsWith('##') && trimmed.length > 4) {
+									// Unwrap: remove leading ## and trailing ##
+									const inner = trimmed.slice(2, -2).replace(/^\n/, '').replace(/\n$/, '');
+									doc.replaceSelection(inner);
+								} else {
+									// Wrap with ## ... ##
+									doc.replaceSelection('##\n' + sel + '\n##');
+								}
+							}
+						}
 					}
 				});
+
 				cmInstance.setSize('100%', '100%');
 				cmInstance.on('change', () => {
 					codeInput = cmInstance.getValue();
