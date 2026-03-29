@@ -7,7 +7,7 @@ interpreter over the flat TAC instruction list.
 """
 
 from typing import List, Dict, Any, Optional
-from .tac import (
+from app.intermediate_code.tac import (
     TACInstruction, TACAssignment, TACBinaryOp, TACUnaryOp,
     TACArrayAccess, TACArrayAssign, TACTableAccess, TACTableAssign,
     TACLabel, TACGoto, TACConditionalGoto, TACFunctionCall, TACParam,

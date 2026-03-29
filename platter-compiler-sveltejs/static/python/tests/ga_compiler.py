@@ -6,8 +6,8 @@ from app.parser.parser_program import Parser
 from app.semantic_analyzer import analyze_program
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
 from app.intermediate_code.ir_generator import IRGenerator
-from app.intermediate_code.optimizer_manager import OptimizationLevel, OptimizerManager
-from app.intermediate_code.ir_interpreter import run_tac
+from app.code_optimization.optimizer_manager import OptimizationLevel, OptimizerManager
+from app.interpreter.ir_interpreter import run_tac
 
 
 MACHINE_PROBLEMS_DIR = Path(__file__).resolve().parent / "machine_problems"

@@ -36,6 +36,7 @@
 		copyToClipboard
 	} from '$lib/utils/browser';
 
+
 	export let data;
 
 	// Logger Service for Google Apps Script webhook
@@ -169,6 +170,8 @@ start() {
 	let editorPanelEl: HTMLElement | null = null;
 	let terminalPanelEl: HTMLElement | null = null;
 	let panelSyncObserver: ResizeObserver | null = null;
+	let isWaitingForInput = false;
+	let terminalInputText = '';
 	const CTRL_ENTER_HINT_SEEN_KEY = 'platter_ctrl_enter_hint_seen_v1';
 
 	function syncTerminalPanelHeight() {
@@ -292,13 +295,15 @@ start() {
 			'/python/app/intermediate_code/quadruple.py',
 			'/python/app/intermediate_code/ir_generator.py',
 			'/python/app/intermediate_code/output_formatter.py',
-			'/python/app/intermediate_code/optimizer.py',
-			'/python/app/intermediate_code/constant_folding.py',
-			'/python/app/intermediate_code/propagation.py',
-			'/python/app/intermediate_code/dead_code_elimination.py',
-			'/python/app/intermediate_code/algebraic_simplification.py',
-			'/python/app/intermediate_code/optimizer_manager.py',
-			'/python/app/intermediate_code/ir_interpreter.py',
+			'/python/app/code_optimization/__init__.py',
+			'/python/app/code_optimization/optimizer.py',
+			'/python/app/code_optimization/constant_folding.py',
+			'/python/app/code_optimization/propagation.py',
+			'/python/app/code_optimization/dead_code_elimination.py',
+			'/python/app/code_optimization/algebraic_simplification.py',
+			'/python/app/code_optimization/optimizer_manager.py',
+			'/python/app/interpreter/__init__.py',
+			'/python/app/interpreter/ir_interpreter.py',
 		];
 
 		// Fetch and write Python files to Pyodide's virtual filesystem
@@ -364,6 +369,9 @@ start() {
 			// optional: a theme could be loaded here, but our overrides will ensure transparency
 			await loadScript(
 				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js'
+			);
+			await loadScript(
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js'
 			);
 			if (textareaEl && (window as any).CodeMirror) {
 				const CM = (window as any).CodeMirror;
@@ -480,13 +488,45 @@ start() {
 					lineWrapping: true,
 					viewportMargin: Infinity,
 					mode: 'platter',
+					matchBrackets: true,
 					extraKeys: {
 						'Ctrl-Enter': function() { analyzeSemantic(true); },
 						'Ctrl-1': function() { analyzeLexical(); },
 						'Ctrl-2': function() { analyzeSyntax(); },
-						'Ctrl-3': function() { analyzeSemantic(false); }
+						'Ctrl-3': function() { analyzeSemantic(false); },
+						'Ctrl-/': function(cm: any) {
+							const doc = cm.getDoc();
+							const sel = doc.getSelection();
+							if (!sel) {
+								// No selection — toggle single-line comment on current line
+								const cursor = doc.getCursor();
+								const lineNo = cursor.line;
+								const lineText = doc.getLine(lineNo);
+								if (lineText.startsWith('# ')) {
+									// Remove comment
+									doc.replaceRange(lineText.slice(2), { line: lineNo, ch: 0 }, { line: lineNo, ch: lineText.length });
+								} else if (lineText.startsWith('#')) {
+									doc.replaceRange(lineText.slice(1), { line: lineNo, ch: 0 }, { line: lineNo, ch: lineText.length });
+								} else {
+									// Add comment
+									doc.replaceRange('# ' + lineText, { line: lineNo, ch: 0 }, { line: lineNo, ch: lineText.length });
+								}
+							} else {
+								// Selection — toggle multi-line comment ## ... ##
+								const trimmed = sel.trim();
+								if (trimmed.startsWith('##') && trimmed.endsWith('##') && trimmed.length > 4) {
+									// Unwrap: remove leading ## and trailing ##
+									const inner = trimmed.slice(2, -2).replace(/^\n/, '').replace(/\n$/, '');
+									doc.replaceSelection(inner);
+								} else {
+									// Wrap with ## ... ##
+									doc.replaceSelection('##\n' + sel + '\n##');
+								}
+							}
+						}
 					}
 				});
+
 				cmInstance.setSize('100%', '100%');
 				cmInstance.on('change', () => {
 					codeInput = cmInstance.getValue();
@@ -536,7 +576,7 @@ start() {
 	// default to empty terminal (no messages) so termMessages.length === 0
 	let termMessages: TermMsg[] = [];
 	let terminalStdinText = '';
-	let tacExecutionPaused = false;
+
 
 	// Compute error count: treat messages that start with "Lexical OK" as non-errors (count as zero)
 	$: errorCount = termMessages.filter(
@@ -555,6 +595,79 @@ start() {
 	}
 	function clearTerminal() {
 		termMessages = [];
+	}
+
+		export async function handleTerminalInput() {
+		if (!terminalInputText || !pyodideReady) return;
+		const input = terminalInputText;
+		terminalInputText = '';
+		isWaitingForInput = false;
+
+		try {
+			pyodide.globals.set('user_input', input);
+			const result = await pyodide.runPythonAsync(`
+import sys
+import json
+import traceback
+
+interpreter = getattr(sys.modules.get('__main__'), 'active_interpreter', None)
+if interpreter is None:
+    result = {"success": False, "error": "No active interpreter found"}
+else:
+    try:
+        interpreter.stdin_lines.append(user_input)
+        exec_result = interpreter.run()
+        
+        execution_output = exec_result.get("output", "")
+        execution_success = exec_result.get("success", False)
+        execution_error = exec_result.get("error", "")
+        execution_paused = exec_result.get("paused", False)
+        execution_globals = exec_result.get("globals", {})
+        
+        result = {
+            "success": True,
+            "execution_output": execution_output,
+            "execution_success": execution_success,
+            "execution_error": execution_error,
+            "execution_paused": execution_paused,
+            "execution_globals": json.dumps(execution_globals)
+        }
+    except Exception as e:
+        result = {"success": False, "error": str(e), "traceback": traceback.format_exc()}
+result
+			`);
+
+			const data = result.toJs({ dict_converter: Object.fromEntries });
+
+			if (data.success) {
+				const successMsgs = [];
+				if (data.execution_output) {
+					const lines = data.execution_output.split('\\n');
+					for (let i = 0; i < lines.length; i++) {
+						if (i === lines.length - 1 && lines[i] === '') continue;
+						successMsgs.push({ text: lines[i] });
+					}
+				}
+				if (data.execution_success) {
+					isWaitingForInput = false;
+				} else if (data.execution_paused) {
+					isWaitingForInput = true;
+				} else if (data.execution_error) {
+					successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
+					isWaitingForInput = false;
+				}
+				termMessages = successMsgs;
+			} else {
+				termMessages.push({ icon: errorIcon, text: `Interpreter Error: ${data.error}` });
+				termMessages = [...termMessages];
+				isWaitingForInput = false;
+			}
+		} catch (e) {
+			const errMsg = e instanceof Error ? e.message : String(e);
+			termMessages.push({ icon: errorIcon, text: `Frontend Error: ${errMsg}` });
+			termMessages = [...termMessages];
+			isWaitingForInput = false;
+		}
 	}
 
 	function clearErrorMarkers() {
@@ -621,33 +734,14 @@ start() {
 		}
 	}
 
-	function collectRuntimeInputLines(sourceCode: string): string[] {
-		if (!/\btake\s*\(/.test(sourceCode)) return [];
-		const normalized = terminalStdinText.replace(/\r\n/g, '\n').trim();
-		if (normalized === '') return [];
-		return normalized.split('\n');
-	}
 
-	function consumeRuntimeInputLines(consumedCount: number) {
-		if (!Number.isFinite(consumedCount) || consumedCount <= 0) return;
-		const lines = terminalStdinText.replace(/\r\n/g, '\n').split('\n');
-		terminalStdinText = lines.slice(consumedCount).join('\n');
-	}
-
-	function handleTerminalInputKeydown(event: KeyboardEvent) {
-		if (!(event.key === 'Enter' && !event.shiftKey)) return;
-		if (!tacExecutionPaused) return;
-		event.preventDefault();
-		analyzeSemantic(true);
-	}
 
 	async function analyzeSemantic(runTacInterpreter = false) {
 		normalizeCurlyQuotes();
 		const startTime = performance.now();
 		let analysisStatus = 'error';
 		let terminalOutput = '';
-		tacExecutionPaused = false;
-		const runtimeInputLines = runTacInterpreter ? collectRuntimeInputLines(codeInput) : [];
+
 
 		// Run lexical analysis first, skip logging to combine outputs
 		const lexicalResult = await analyzeLexical(true);
@@ -665,7 +759,6 @@ start() {
 					// Set the code input in Python
 					pyodide.globals.set('code_input', codeInput);
 					pyodide.globals.set('run_ir_pipeline', runTacInterpreter);
-					pyodide.globals.set('stdin_lines_json', JSON.stringify(runtimeInputLines));
 
 					// Run AST parser and semantic analysis
 					const semanticPythonScript = `
@@ -706,17 +799,20 @@ for module_name in [
     'app.intermediate_code.quadruple',
     'app.intermediate_code.ir_generator',
     'app.intermediate_code.output_formatter',
-    'app.intermediate_code.optimizer',
-    'app.intermediate_code.constant_folding',
-    'app.intermediate_code.propagation',
-    'app.intermediate_code.dead_code_elimination',
-    'app.intermediate_code.algebraic_simplification',
-    'app.intermediate_code.optimizer_manager',
-    'app.intermediate_code.ir_interpreter',
+    'app.code_optimization',
+    'app.code_optimization.optimizer',
+    'app.code_optimization.constant_folding',
+    'app.code_optimization.propagation',
+    'app.code_optimization.dead_code_elimination',
+    'app.code_optimization.algebraic_simplification',
+    'app.code_optimization.optimizer_manager',
+    'app.interpreter',
+    'app.interpreter.ir_interpreter',
 ]:
     _safe_reload(module_name)
 
 from app.lexer.lexer import Lexer
+from app.parser.parser_program import Parser as SyntaxParser
 from app.semantic_analyzer.ast.ast_parser_program import ASTParser
 from app.semantic_analyzer.ast.ast_reader import ASTReader, print_ast
 from app.semantic_analyzer import analyze_program
@@ -727,6 +823,11 @@ result = None
 try:
     lexer = Lexer(code_input)
     tokens = lexer.tokenize()
+    # Run syntax check first; raises SyntaxError on failure
+    syntax_tokens = [t for t in tokens if t.type not in ("space", "tab", "newline", "comment_single", "comment_multi")]
+    syntax_parser = SyntaxParser(syntax_tokens)
+    syntax_parser.parse_program()
+    # Syntax OK — proceed with AST parser and semantic analysis
     parser = ASTParser(tokens)
     ast = parser.parse_program()
     
@@ -761,8 +862,7 @@ try:
     ir_tac_optimized_text = ""
     execution_output = ""
     execution_success = False
-	execution_paused = False
-	execution_stdin_consumed = 0
+
 	execution_error = ""
 	execution_globals = {}
 	if run_ir_pipeline:
@@ -772,7 +872,6 @@ try:
 			formatter = __import__('app.intermediate_code.output_formatter', fromlist=['IRFormatter']).IRFormatter()
 			ir_tac_text = formatter.format_tac_text(tac_instructions)
 			ir_quads_text = formatter.format_quadruples_text(quad_table)
-			stdin_lines = json.loads(stdin_lines_json) if 'stdin_lines_json' in globals() else []
 
 			print("")
 			print("=" * 80)
@@ -786,7 +885,7 @@ try:
 			print("=" * 80)
 			print(ir_quads_text)
 
-			optimizer_module = __import__('app.intermediate_code.optimizer_manager', fromlist=['OptimizerManager', 'OptimizationLevel'])
+			optimizer_module = __import__('app.code_optimization.optimizer_manager', fromlist=['OptimizerManager', 'OptimizationLevel'])
 			OptimizerManager = optimizer_module.OptimizerManager
 			OptimizationLevel = optimizer_module.OptimizationLevel
 			optimizer = OptimizerManager(OptimizationLevel.STANDARD)
@@ -804,19 +903,16 @@ try:
 			print("Program Execution (IR Interpreter)")
 			print("=" * 80)
 
-			run_tac = __import__('app.intermediate_code.ir_interpreter', fromlist=['run_tac']).run_tac
-			exec_result = run_tac(optimized_tac, stdin_lines=stdin_lines)
+			run_tac = __import__('app.interpreter.ir_interpreter', fromlist=['run_tac']).run_tac
+			exec_result = run_tac(optimized_tac)
 			execution_output = exec_result.get("output", "")
 			execution_success = exec_result.get("success", False)
-			execution_paused = exec_result.get("paused", False)
-			execution_stdin_consumed = exec_result.get("stdin_consumed", 0)
 			execution_error = exec_result.get("error", "")
 			execution_globals = exec_result.get("globals", {})
 
 			if execution_success:
 				print("[Execution OK]")
-			elif execution_paused:
-				print(f"[Execution Paused] {execution_error}")
+
 			else:
 				print(f"[Execution Error] {execution_error}")
 
@@ -830,8 +926,7 @@ try:
 			traceback.print_exc()
 			execution_output = ""
 			execution_success = False
-			execution_paused = False
-			execution_stdin_consumed = 0
+
 			execution_error = str(ir_err)
 			execution_globals = {}
     else:
@@ -911,8 +1006,7 @@ try:
             "ir_tac_optimized": ir_tac_optimized_text,
             "execution_output": execution_output,
             "execution_success": execution_success,
-			"execution_paused": execution_paused,
-			"execution_stdin_consumed": execution_stdin_consumed,
+
             "execution_error": execution_error,
             "execution_globals": json.dumps(execution_globals),
             "errors": error_list,
@@ -948,8 +1042,7 @@ try:
             "ir_tac_optimized": ir_tac_optimized_text,
             "execution_output": execution_output,
             "execution_success": execution_success,
-			"execution_paused": execution_paused,
-			"execution_stdin_consumed": execution_stdin_consumed,
+
             "execution_error": execution_error,
             "execution_globals": json.dumps(execution_globals),
             "semantic_warnings": json.dumps(warning_messages_success),
@@ -973,9 +1066,6 @@ result
 					const result = await pyodide.runPythonAsync(semanticPythonScript.replace(/\t/g, '    '));
 
 				const data = result.toJs({ dict_converter: Object.fromEntries });
-				if (runTacInterpreter && Number.isFinite(data.execution_stdin_consumed)) {
-					consumeRuntimeInputLines(Number(data.execution_stdin_consumed));
-				}
 
 				if (data.success) {
 					clearErrorMarkers();
@@ -992,24 +1082,17 @@ result
 									successMsgs.push({ text: line });
 								}
 							}
-						} else if (data.execution_paused) {
-							if (data.execution_output) {
-								for (const line of data.execution_output.split('\n')) {
-									successMsgs.push({ text: line });
-								}
-							}
-							successMsgs.push({ icon: warning, text: data.execution_error || 'Execution paused at take().' });
+
 						} else if (data.execution_error) {
 							successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
 						}
 					} else {
 						successMsgs.push({ icon: check, text: data.message || 'No semantic errors' });
-						for (const msg of semWarningsSuccess) successMsgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+						for (const msg of semWarningsSuccess) successMsgs.push({ icon: warning, text: `Warning: ${msg}` });
 					}
 
 					termMessages = successMsgs;
-					tacExecutionPaused = Boolean(runTacInterpreter && data.execution_paused);
-					analysisStatus = runTacInterpreter && data.execution_paused ? 'paused' : 'success';
+					analysisStatus = 'success';
 					terminalOutput = runTacInterpreter ? data.execution_output || data.message || '' : data.message || '';
 					
 					// Log AST to browser console
@@ -1069,7 +1152,7 @@ result
 
 					if (runTacInterpreter) {
 						// Log Execution Output
-						const execColor = data.execution_success ? '#69f0ae' : data.execution_paused ? '#ffd54f' : '#ff5252';
+						const execColor = data.execution_success ? '#69f0ae' : '#ff5252';
 						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
 						console.log(`%c▶  Program Execution (IR Interpreter)`, `color: ${execColor}; font-size: 16px; font-weight: bold`);
 						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
@@ -1087,10 +1170,7 @@ result
 									// Ignore malformed globals payload.
 								}
 							}
-						} else if (data.execution_paused) {
-							console.log('%cStatus: Paused at take() ⏸', 'color: #ffd54f; font-weight: bold');
-							if (data.execution_output) console.log(data.execution_output);
-							console.log(data.execution_error || 'Execution paused awaiting input.');
+
 						} else {
 							console.log('%cStatus: Runtime Error ✗', 'color: #ff5252; font-weight: bold');
 							console.log(data.execution_error || 'Unknown error');
@@ -1135,7 +1215,7 @@ result
 					const semWarnings: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
 					const msgs: { icon: any; text: string }[] = [];
 					for (const msg of semErrors) msgs.push({ icon: errorIcon, text: `Semantic Error: ${msg}` });
-					for (const msg of semWarnings) msgs.push({ icon: errorIcon, text: `Warning: ${msg}` });
+					for (const msg of semWarnings) msgs.push({ icon: warning, text: `Warning: ${msg}` });
 					termMessages = msgs;
 					analysisStatus = 'error';
 					terminalOutput = data.message;
@@ -1784,17 +1864,19 @@ tokens
 							</div>
 						{/each}
 					{/if}
-				</div>
-				<div class="terminal-input-wrap">
-					<label class="terminal-input-label" for="terminal-stdin">Runtime input (for take())</label>
-					<textarea
-						id="terminal-stdin"
-						class="terminal-input"
-						bind:value={terminalStdinText}
-						on:keydown={handleTerminalInputKeydown}
-						rows="4"
-						placeholder="Type one input per line. If program has no take(), execution runs immediately."
-					></textarea>
+					{#if isWaitingForInput}
+						<div class="trow input-row">
+							<span class="tmsg prompt-caret">&gt; </span>
+							<!-- svelte-ignore a11y-autofocus -->
+							<input 
+								type="text" 
+								class="terminal-input" 
+								bind:value={terminalInputText}
+								on:keydown={(e) => { if (e.key === 'Enter') handleTerminalInput() }}
+								autofocus
+							/>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</aside>
@@ -2152,6 +2234,13 @@ tokens
 		.ide {
 			--frame-height: 700px;
 		}
+	}
+
+	:global(.CodeMirror-matchingbracket) {
+		outline: 1px solid var(--color-accent, #f0a500) !important;
+		color: inherit !important;
+		background: rgba(240, 165, 0, 0.18) !important;
+		border-radius: 2px;
 	}
 
 	/* Strong CodeMirror overrides to ensure transparency and inherit panel background

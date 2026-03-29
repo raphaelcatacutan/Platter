@@ -10,8 +10,8 @@ Examples:
 
 from typing import List, Optional, Union
 from .optimizer import OptimizationPass
-from .tac import *
-from .quadruple import *
+from app.intermediate_code.tac import *
+from app.intermediate_code.quadruple import *
 
 
 class ConstantFoldingPass(OptimizationPass):

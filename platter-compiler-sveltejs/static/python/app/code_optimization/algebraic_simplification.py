@@ -16,8 +16,8 @@ Examples:
 
 from typing import List
 from .optimizer import OptimizationPass
-from .tac import *
-from .quadruple import *
+from app.intermediate_code.tac import *
+from app.intermediate_code.quadruple import *
 
 
 class AlgebraicSimplificationPass(OptimizationPass):
