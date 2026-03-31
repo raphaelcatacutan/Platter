@@ -210,6 +210,11 @@ if __name__ == "__main__":
                             interpreter.stdin_lines.append(line)
                             continue
                         break
+                    
+                    # Print any runtime error that occurred
+                    if not exec_result.get("success") and exec_result.get("error"):
+                        print(f"\n{exec_result.get('error')}")
+                    
                     # Set clipboard to the full execution output
                     set_clipboard(final_output)
                 except Exception as ir_err:

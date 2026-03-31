@@ -41,14 +41,17 @@ class OptimizerManager:
         
         if self.optimization_level >= OptimizationLevel.BASIC:
             # Basic optimizations
-            self.passes.append(ConstantFoldingPass())
             self.passes.append(DeadCodeEliminationPass())
         
         if self.optimization_level >= OptimizationLevel.STANDARD:
             # Standard optimizations
+            # CRITICAL ORDER: Propagation BEFORE Folding to ensure overflow checks
+            # If propagation runs after folding, it can create new foldable expressions
+            # that bypass our overflow detection on the second iteration
             self.passes.append(AlgebraicSimplificationPass())
             self.passes.append(ConstantPropagationPass())
             self.passes.append(CopyPropagationPass())
+            self.passes.append(ConstantFoldingPass())  # Moved AFTER propagation
             self.passes.append(DeadCodeEliminationPass())
         
         if self.optimization_level >= OptimizationLevel.AGGRESSIVE:

@@ -36,7 +36,7 @@ class IRGenerator:
     """
     Generates intermediate representation from AST.
     Produces both TAC instructions and Quadruples.
-    """
+    """ 
     
     def __init__(self):
         # TAC instructions list

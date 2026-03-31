@@ -129,23 +129,25 @@ class ConstantFoldingPass(OptimizationPass):
         if value is None:
             return None
         
-        # Try boolean
-        if value in ('true', 'True', '1'):
-            return True
-        if value in ('false', 'False', '0'):
-            return False
+        # If value contains a decimal point, always parse as float (sip)
+        # This preserves type information for sip literals like "999999999999999.0"
+        if '.' in value:
+            try:
+                return float(value)
+            except ValueError:
+                pass
         
-        # Try int
+        # Try int (must be before boolean check to avoid '1' → True, '0' → False)
         try:
             return int(value)
         except ValueError:
             pass
         
-        # Try float
-        try:
-            return float(value)
-        except ValueError:
-            pass
+        # Try boolean (only explicit string literals, not numeric strings)
+        if value in ('true', 'True'):
+            return True
+        if value in ('false', 'False'):
+            return False
         
         return None
     
@@ -154,23 +156,25 @@ class ConstantFoldingPass(OptimizationPass):
                         right: Union[int, float, bool]) -> Optional[Union[int, float, bool]]:
         """Evaluate binary operation"""
         try:
+            result = None
             if op == '+':
-                return left + right
+                result = left + right
             elif op == '-':
-                return left - right
+                result = left - right
             elif op == '*':
-                return left * right
+                result = left * right
             elif op == '/':
                 if right == 0:
                     return None  # Don't fold division by zero
                 # Integer division for ints, float division for floats
                 if isinstance(left, int) and isinstance(right, int):
-                    return left // right
-                return left / right
+                    result = left // right
+                else:
+                    result = left / right
             elif op == '%':
                 if right == 0:
                     return None
-                return left % right
+                result = left % right
             elif op == '==':
                 return left == right
             elif op == '!=':
@@ -187,18 +191,73 @@ class ConstantFoldingPass(OptimizationPass):
                 return bool(left) and bool(right)
             elif op == 'or':
                 return bool(left) or bool(right)
+            
+            # Check for numeric overflow on arithmetic results
+            if result is not None and op in ('+', '-', '*', '/', '%'):
+                if self._check_overflow(result, left, right, op):
+                    return None  # Don't fold if overflow detected
+            
+            return result
         except (TypeError, ZeroDivisionError, ValueError):
             return None
         
         return None
     
+    def _check_overflow(self, result: Union[int, float], left: Union[int, float, bool], 
+                       right: Union[int, float, bool], op: str) -> bool:
+        """Check if result exceeds numeric limits. Returns True if overflow detected."""
+        # piece: max 15 digits (±999,999,999,999,999)
+        PIECE_MAX = 999_999_999_999_999
+        # sip: max 15 non-fractional + 7 fractional digits
+        # Due to floating-point precision issues, we check digit count instead of magnitude
+        
+        left_is_int = isinstance(left, int) and not isinstance(left, bool)
+        right_is_int = isinstance(right, int) and not isinstance(right, bool)
+        left_is_float = isinstance(left, float)
+        right_is_float = isinstance(right, float)
+        
+        # Both operands are integers → result should be piece
+        if left_is_int and right_is_int and isinstance(result, int):
+            if abs(result) > PIECE_MAX:
+                return True  # Overflow detected
+        # Either operand is float → result should be sip
+        elif (left_is_float or right_is_float) and isinstance(result, float):
+            # Check digit count for sip (15 non-fractional + 7 fractional digits)
+            # Convert to string and count digits (handling scientific notation)
+            result_str = f"{abs(result):.7f}"  # Format with 7 decimal places
+            # Count non-fractional digits
+            if '.' in result_str:
+                integer_part = result_str.split('.')[0]
+            else:
+                integer_part = result_str
+            non_fractional_digits = len(integer_part)
+            
+            if non_fractional_digits > 15:
+                return True  # Overflow detected for sip
+        # Integer division of piece/piece produces piece
+        elif op == "/" and left_is_int and right_is_int and isinstance(result, int):
+            if abs(result) > PIECE_MAX:
+                return True  # Overflow detected
+        
+        return False  # No overflow
+    
     def _evaluate_unary(self, op: str, value: Union[int, float, bool]) -> Optional[Union[int, float, bool]]:
         """Evaluate unary operation"""
         try:
+            result = None
             if op in ('-', 'unary-'):
-                return -value
+                result = -value
+                # Check overflow for negation
+                if isinstance(value, int) and not isinstance(value, bool):
+                    if abs(result) > 999_999_999_999_999:
+                        return None  # Overflow detected
+                elif isinstance(value, float):
+                    if abs(result) > 999_999_999_999_999.9999999:
+                        return None  # Overflow detected
             elif op == 'not':
-                return not bool(value)
+                result = not bool(value)
+            
+            return result
         except (TypeError, ValueError):
             return None
         

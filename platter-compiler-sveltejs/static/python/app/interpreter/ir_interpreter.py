@@ -347,7 +347,9 @@ class TACInterpreter:
             if not args:
                 return 0
             try:
-                return int(float(args[0]))
+                result = int(float(args[0]))
+                self._check_piece_overflow(result)
+                return result
             except (ValueError, TypeError):
                 raise InterpreterError(
                     f"topiece(): cannot convert {self._platter_type(args[0])} value '{args[0]}' to piece"
@@ -357,7 +359,9 @@ class TACInterpreter:
             if not args:
                 return 0.0
             try:
-                return float(args[0])
+                result = float(args[0])
+                self._check_sip_overflow(result)
+                return result
             except (ValueError, TypeError):
                 raise InterpreterError(
                     f"tosip(): cannot convert {self._platter_type(args[0])} value '{args[0]}' to sip"
@@ -393,6 +397,7 @@ class TACInterpreter:
             result = 1
             for i in range(2, n + 1):
                 result *= i
+            self._check_piece_overflow(result)
             return result
 
         elif name == "cut":
@@ -444,6 +449,19 @@ class TACInterpreter:
         elif name == "matches":
             # matches(array|table, array|table) → flag (up/down as bool)
             return args[0] == args[1]
+
+        # ── Math functions with overflow checking ────────────────────────
+        elif name == "pow":
+            # pow(base, exp) → piece
+            result = args[0] ** args[1]
+            self._check_piece_overflow(result)
+            return result
+
+        elif name == "sqrt":
+            # sqrt(piece) → sip
+            result = round(args[0] ** 0.5, 7)
+            self._check_sip_overflow(result)
+            return result
 
         # ── Generic lambda-based builtins ────────────────────────────────
         else:
@@ -551,13 +569,74 @@ class TACInterpreter:
         if op not in ops:
             raise InterpreterError(f"Unknown binary operator '{op}'")
         try:
-            return ops[op](left, right)
+            result = ops[op](left, right)
+            
+            # Check for numeric overflow on arithmetic operations
+            if op in ("+", "-", "*", "/", "%"):
+                self._check_numeric_overflow(result, left, right, op)
+            
+            return result
         except ZeroDivisionError:
             raise InterpreterError("Division by zero")
 
+    def _check_numeric_overflow(self, result: Any, left: Any, right: Any, op: str):
+        """
+        Check if arithmetic operation result exceeds numeric limits.
+        piece: max 15 digits (±999,999,999,999,999)
+        sip: max 15 non-fractional digits + 7 fractional digits
+        """
+        # Determine result type based on operands
+        left_is_int = isinstance(left, int) and not isinstance(left, bool)
+        right_is_int = isinstance(right, int) and not isinstance(right, bool)
+        left_is_float = isinstance(left, float)
+        right_is_float = isinstance(right, float)
+        
+        # If both operands are integers, result type is piece
+        if left_is_int and right_is_int and isinstance(result, int):
+            self._check_piece_overflow(result)
+        # If either operand is float, result type is sip
+        elif (left_is_float or right_is_float) and isinstance(result, float):
+            self._check_sip_overflow(result)
+        # Integer division of piece/piece produces piece
+        elif op == "/" and left_is_int and right_is_int and isinstance(result, int):
+            self._check_piece_overflow(result)
+    
+    def _check_piece_overflow(self, value: int):
+        """Check if piece (integer) exceeds 15 digits"""
+        # Max 15 digits: ±999,999,999,999,999
+        PIECE_MAX = 999_999_999_999_999
+        if abs(value) > PIECE_MAX:
+            raise InterpreterError("piece overflow")
+    
+    def _check_sip_overflow(self, value: float):
+        """Check if sip (float) exceeds 15 non-fractional + 7 fractional digits"""
+        # Max non-fractional digits: 15 (±999,999,999,999,999)
+        # Max fractional digits: 7
+        # Due to floating-point precision issues, check digit count instead of magnitude
+        
+        # Format with 7 decimal places to get proper representation
+        value_str = f"{abs(value):.7f}"
+        
+        # Count non-fractional digits
+        if '.' in value_str:
+            integer_part = value_str.split('.')[0]
+        else:
+            integer_part = value_str
+        
+        non_fractional_digits = len(integer_part)
+        
+        if non_fractional_digits > 15:
+            raise InterpreterError("sip overflow")
+
     def _eval_unary(self, op: str, val: Any) -> Any:
         if op == "-":
-            return -val
+            result = -val
+            # Check overflow for negation
+            if isinstance(val, int) and not isinstance(val, bool):
+                self._check_piece_overflow(result)
+            elif isinstance(val, float):
+                self._check_sip_overflow(result)
+            return result
         if op in ("not", "!"):
             return not self._to_bool(val)
         raise InterpreterError(f"Unknown unary operator '{op}'")
@@ -571,7 +650,16 @@ class TACInterpreter:
         }
         if target_type not in casts:
             raise InterpreterError(f"Unknown cast type '{target_type}'")
-        return casts[target_type](val)
+        
+        result = casts[target_type](val)
+        
+        # Check for overflow on type casts
+        if target_type == "piece" and isinstance(result, int):
+            self._check_piece_overflow(result)
+        elif target_type == "sip" and isinstance(result, float):
+            self._check_sip_overflow(result)
+        
+        return result
 
     def _to_bool(self, val: Any) -> bool:
         if isinstance(val, bool):
