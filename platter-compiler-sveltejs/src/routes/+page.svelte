@@ -578,6 +578,8 @@ else:
         execution_error = exec_result.get("error", "")
         execution_paused = exec_result.get("paused", False)
         execution_globals = exec_result.get("globals", {})
+        execution_exit_message = exec_result.get("exit_message", "")
+        execution_terminate_message = exec_result.get("terminate_message", "")
         
         result = {
             "success": True,
@@ -585,7 +587,9 @@ else:
             "execution_success": execution_success,
             "execution_error": execution_error,
             "execution_paused": execution_paused,
-            "execution_globals": json.dumps(execution_globals)
+            "execution_globals": json.dumps(execution_globals),
+            "execution_exit_message": execution_exit_message,
+            "execution_terminate_message": execution_terminate_message
         }
     except Exception as e:
         result = {"success": False, "error": str(e), "traceback": traceback.format_exc()}
@@ -604,11 +608,22 @@ result
 					}
 				}
 				if (data.execution_success) {
+					// Show exit code message if present
+					if (data.execution_exit_message) {
+						const exitLines = data.execution_exit_message.split('\n');
+						for (const l of exitLines) {
+							if (l !== '') successMsgs.push({ text: l });
+						}
+					}
 					isWaitingForInput = false;
 				} else if (data.execution_paused) {
 					isWaitingForInput = true;
 				} else if (data.execution_error) {
 					successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
+					// Show termination message if present
+					if (data.execution_terminate_message) {
+						successMsgs.push({ text: data.execution_terminate_message });
+					}
 					isWaitingForInput = false;
 				}
 				termMessages = successMsgs;
