@@ -1,5 +1,7 @@
+# Difference of 2 input numbers
+
 start(){
-        chars of x = "", y = "";
+                chars of x = "", y = "";
         sip of a, b, result;
         
         bill("Input first number: ");
@@ -10,12 +12,7 @@ start(){
         a = tosip(x);
         b = tosip(y);
 
-        check (b == 0.0) {
-                bill("Modulo by zero is not allowed");
-                serve 0;
-        }
-
-        result = a % b;
+        result = a - b;
 
         bill("Answer: " + tochars(result));
 }

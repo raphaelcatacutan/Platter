@@ -1,3 +1,5 @@
+# Inverted drawing using * Triangle input rows (hollow)
+
 start() {
     piece of row, i, j;
     bill("Enter the number of rows: ");

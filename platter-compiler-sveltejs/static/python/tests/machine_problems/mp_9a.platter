@@ -1,3 +1,5 @@
+# Square drawing using * input side length (filled)
+
 start() {
     piece of side, i, j;
     bill("Enter the side size: ");

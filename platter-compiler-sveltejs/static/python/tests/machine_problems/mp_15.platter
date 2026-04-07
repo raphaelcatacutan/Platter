@@ -1,3 +1,5 @@
+# Reverse of the Digit
+
 piece of num;
 piece of reversed_num , digit= 0;
 

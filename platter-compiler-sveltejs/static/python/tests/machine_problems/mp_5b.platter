@@ -1,8 +1,8 @@
+# Multiplaction Table (no arrays)
+
 start(){
         piece of i, v;
         piece of col, row;
-                piece[][] of mulTable;
-        
         
         bill("Enter number of columns: ");
         col = topiece(take());
@@ -18,27 +18,13 @@ start(){
                 serve 0;
         }
         
-        # Calculation
         pass(v = 1; v += 1; v <= row) {
-                piece[] of rowLine;
             pass(i = 1; i += 1; i <= col) {
-                    rowLine = append(rowLine, v * i);
-                   }
-            mulTable = append(mulTable, rowLine);
-        }
-        
-        # Printing
-        pass(v = 0; v += 1; v < row) {
-                piece[] of rowLine;
-            rowLine = mulTable[v];
-            pass(i = 0; i += 1; i < col) {
-                    piece of value = rowLine[i];
-                                bill(tochars(value) + "\t");
-                   }
-            bill("\n");
-        }
-        
-
+              bill(tochars(v * i) + "\t");
+                }
+                bill("\n");
+            }
+  
 }
 --end
 10

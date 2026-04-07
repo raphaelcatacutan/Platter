@@ -1,3 +1,5 @@
+# Sum of the cube of the numbers from 1 to N
+
 start(){
         piece of i,n,sum;
     bill("Enter a number: ");

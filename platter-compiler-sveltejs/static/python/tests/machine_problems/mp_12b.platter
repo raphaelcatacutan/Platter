@@ -1,0 +1,35 @@
+# Sum of the square of the number from N to M. 
+# Modified to allow negative ranges
+# Also moves the smallest number as the first number
+
+prepare piece of sum_square( piece of N, piece of M){
+    piece of sum = 0, i;
+    pass(i = N; i += 1; i <= M) {
+        sum = sum + (i * i);
+     }
+     serve sum;
+}
+start() {
+    piece of N, M, temp, result;
+
+    bill("Enter the value of N: ");
+    N = topiece(take());
+    bill("Enter the value of M: ");
+    M = topiece(take());
+        
+    check(N >= M){
+        temp = N;
+        N = M;
+        M = temp;
+    }
+    
+    result = sum_square(N, M);
+    bill("The sum of square from " + tochars(N) + " to " + tochars(M) + " is: " + tochars(result));
+}
+--end
+8
+2
+--end
+Enter the value of N: 8
+Enter the value of M: 2
+The sum of square from 2 to 8 is: 203

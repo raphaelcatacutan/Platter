@@ -1,3 +1,5 @@
+# Square root of input number (using sqrt() built in recipe)
+
 start(){
         sip of n;
     bill("Enter a number: ");

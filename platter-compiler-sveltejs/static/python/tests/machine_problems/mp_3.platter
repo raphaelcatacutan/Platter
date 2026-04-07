@@ -1,3 +1,5 @@
+# Product of 2 input numbers
+
 start(){
                 chars of x = "", y = "";
         sip of a, b, result;

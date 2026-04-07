@@ -1,3 +1,5 @@
+# Conversion - Binary to Octal, Decimal, Hexadecimal
+
 prepare piece of charsSize(chars of input) {
     piece of i = 1;
     repeat(up) {

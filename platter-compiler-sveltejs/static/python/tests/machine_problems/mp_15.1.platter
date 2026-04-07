@@ -1,3 +1,5 @@
+# Compute and display the sum of the digits
+
 prepare piece of sumDigits(piece of num){
     piece of sum = 0;
     repeat(num != 0){

@@ -1,0 +1,40 @@
+# Rectangle drawing using * input height and width (filled)
+
+start() {
+    piece of height, width, i, j;
+    bill("Enter the number of height: ");
+    height =  topiece(take());
+    check (height < 1) {
+        bill("Not a valid value");
+        serve 0;
+    }
+    bill("Enter the number of width: ");
+    width =  topiece(take());
+    check (width < 1) {
+        bill("Not a valid value");
+        serve 0;
+    }
+
+    pass(i = 0; i += 1; i < height) {
+        pass(j = 0; j += 1; j < width) {
+            bill(" * ");
+        }
+        bill("\n");
+    }
+}
+--end
+10
+5
+--end
+Enter the number of height: 10
+Enter the number of width: 5
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 
+ *  *  *  *  * 

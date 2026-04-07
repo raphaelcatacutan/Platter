@@ -1,21 +1,23 @@
+# Rectangle drawing using * input height and width (hollow)
+
 start() {
-    piece of row, col, i, j;
-    bill("Enter the number of rows: ");
-    row =  topiece(take());
-    check (row < 1) {
+    piece of height, width, i, j;
+    bill("Enter the number of height: ");
+    height =  topiece(take());
+    check (height < 1) {
         bill("Not a valid value");
         serve 0;
     }
-    bill("Enter the number of columns: ");
-    col =  topiece(take());
-    check (col < 1) {
+    bill("Enter the number of width: ");
+    width =  topiece(take());
+    check (width < 1) {
         bill("Not a valid value");
         serve 0;
     }
 
-    pass(i = 0; i += 1; i < row) {
-        pass(j = 0; j += 1; j < col) {
-                check (j == 0 or j == col - 1 or i == 0 or i == row - 1) {
+    pass(i = 0; i += 1; i < height) {
+        pass(j = 0; j += 1; j < width) {
+                check (j == 0 or j == width - 1 or i == 0 or i == height - 1) {
                     bill("*");
             } instead {
                     bill(" ");
@@ -29,8 +31,8 @@ start() {
 10
 5
 --end
-Enter the number of rows: 10
-Enter the number of columns: 5
+Enter the number of height: 10
+Enter the number of width: 5
 *    *    *    *    *    
 *                   *    
 *                   *    

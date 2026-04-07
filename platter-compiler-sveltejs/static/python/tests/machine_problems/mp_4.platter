@@ -1,3 +1,5 @@
+# Quotient of 2 input numbers
+
 start(){
                 chars of x = "", y = "";
         sip of a, b, result;
@@ -10,7 +12,12 @@ start(){
         a = tosip(x);
         b = tosip(y);
 
-        result = a + b;
+        check (b == 0.0) {
+                bill("Division by zero is not allowed");
+                serve 0;
+        }
+
+        result = a / b;
 
         bill("Answer: " + tochars(result));
 }
@@ -20,4 +27,4 @@ start(){
 --end
 Input first number: 1
 Input second number: 1
-Answer: 2.0
+Answer: 1.0

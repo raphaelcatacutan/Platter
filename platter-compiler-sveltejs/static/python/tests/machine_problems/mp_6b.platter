@@ -1,3 +1,5 @@
+# Triangle drawing using * input rows (hollow)
+
 start() {
     piece of row, i, j;
     bill("Enter the number or rows: ");

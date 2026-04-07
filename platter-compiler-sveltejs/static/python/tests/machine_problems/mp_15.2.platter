@@ -1,3 +1,5 @@
+# Display the reverse of the digits
+
 prepare piece of reverseDigit(piece of num){
 	piece of r = 0;
     repeat(num != 0){
