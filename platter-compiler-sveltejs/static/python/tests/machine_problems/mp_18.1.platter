@@ -1,0 +1,12 @@
+# Print Natural Numbers Recursively Variants
+# Write a program using your compiler to print the first 50 natural numbers using recursion.
+
+start(){
+        piece of i;
+    
+        bill("Printing 1 to 50 using recursion: \n");
+    pass(i = 1; i += 1; i <= 50){
+            bill(tochars(i) + " ");
+    }
+        bill("\nDone");
+}
