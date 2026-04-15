@@ -1,0 +1,51 @@
+## 2.Perfect # : Sum of it's a proper ddivisors  equals the no.
+e.g 
+6 = 1+2+3
+tell whether the # is a perfect # or not. 
+##
+
+piece of num, sum, i;
+flag of first = up;
+
+start(){
+
+    sum = 0;
+    i = 1;
+
+    bill("Enter a number: ");
+    num = topiece(take());
+
+    bill(tochars(num) + " = ");
+
+    repeat(i < num){
+
+        check(num % i == 0){
+
+            sum = sum + i;
+
+            check(not first){
+                bill(" + ");
+            }
+
+            bill(tochars(i));
+
+            first = down;
+        }
+
+        i = i + 1;
+    }
+
+    bill("\n");
+
+    check(sum == num){
+        bill(tochars(num) + " is a Perfect Number.");
+    } instead {
+        bill(tochars(num) + " is not a Perfect Number.");
+    }
+}
+--end
+6
+--end
+Enter a number: 6
+6 = 1 + 2 + 3
+6 is a Perfect Number.

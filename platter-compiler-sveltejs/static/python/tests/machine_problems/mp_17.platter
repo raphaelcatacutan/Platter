@@ -1,0 +1,128 @@
+
+## Area of the following: Circle, Triangle, Square, Rectangle
+
+1. Each action is done in the sub function with parameter passing. 
+The output should be displayed in the main function. 
+
+2. Inputs will be done at the main function. 
+Process will be done at the sub-functions. 
+Final Output will be displayed at the main function.
+##
+
+prepare sip of area_circle(sip of radius){
+    sip of pi = 3.14159;
+    sip of area = 0.0;
+
+    area = pi * radius * radius;
+    serve area;
+}
+
+prepare sip of area_triangle(sip of base, sip of height){
+    sip of area = 0.0;
+
+    area = (base * height) / 2.0;
+    serve area;
+}
+
+prepare sip of area_square(sip of side){
+    sip of area = 0.0;
+
+    area = side * side;
+    serve area;
+}
+
+prepare sip of area_rectangle(sip of length, sip of width){
+    sip of area = 0.0;
+
+    area = length * width;
+    serve area;
+}
+
+start(){
+    piece of menu_choice = 0;
+    sip of radius = 0.0;
+    sip of base = 0.0;
+    sip of height = 0.0;
+    sip of side = 0.0;
+    sip of length = 0.0;
+    sip of width = 0.0;
+    sip of area = 0.0;
+
+    order{
+        bill("Choose a shape:\n");
+        bill("1 - Area of a Circle\n");
+        bill("2 - Area of a Triangle\n");
+        bill("3 - Area of a Square\n");
+        bill("4 - Area of a Rectangle\n");
+        bill("Enter your choice (1-4):\n");
+
+        menu_choice = topiece(take());
+
+        check(menu_choice < 1 or menu_choice > 4){
+            bill("Invalid Input\n");
+        } instead {
+            menu(menu_choice){
+                choice 1:
+                    bill("Enter radius:\n");
+                    radius = tosip(take());
+                    area = area_circle(radius);
+                    bill("Area of Circle: " + tochars(area) + "\n");
+                    stop;
+
+                choice 2:
+                    bill("Enter base:\n");
+                    base = tosip(take());
+                    bill("Enter height:\n");
+                    height = tosip(take());
+                    area = area_triangle(base, height);
+                    bill("Area of Triangle: " + tochars(area) + "\n");
+                    stop;
+
+                choice 3:
+                    bill("Enter side:\n");
+                    side = tosip(take());
+                    area = area_square(side);
+                    bill("Area of Square: " + tochars(area) + "\n");
+                    stop;
+
+                choice 4:
+                    bill("Enter length:\n");
+                    length = tosip(take());
+                    bill("Enter width:\n");
+                    width = tosip(take());
+                    area = area_rectangle(length, width);
+                    bill("Area of Rectangle: " + tochars(area) + "\n");
+                    stop;
+
+                usual:
+                    bill("Invalid Input\n");
+            }
+        }
+    } repeat(menu_choice < 1 or menu_choice > 4);
+}
+--end
+5
+2
+3
+2
+--end
+Choose a shape:
+1 - Area of a Circle
+2 - Area of a Triangle
+3 - Area of a Square
+4 - Area of a Rectangle
+Enter your choice (1-4):
+5
+Invalid Input
+Choose a shape:
+1 - Area of a Circle
+2 - Area of a Triangle
+3 - Area of a Square
+4 - Area of a Rectangle
+Enter your choice (1-4):
+2
+Enter base:
+3
+Enter height:
+2
+Area of Triangle: 3.0

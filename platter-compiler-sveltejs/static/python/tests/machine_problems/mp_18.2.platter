@@ -1,0 +1,35 @@
+# Input value for the first N natural numbers.
+
+prepare piece of firstNatural(piece of current, piece of limit){
+    check(current <= limit){
+        bill(tochars(current));
+
+        check(current < limit){
+            bill(" ");
+        } instead {
+            bill("\n");
+        }
+
+        firstNatural(current + 1, limit);
+    }
+
+    serve 0;
+}
+
+start(){
+    piece of n_limit = 0;
+
+    bill("Input a number: ");
+    n_limit = topiece(take());
+
+    check(n_limit > 0){
+        firstNatural(1, n_limit);
+    } instead {
+        bill("Invalid Input\n");
+    }
+}
+--end
+6
+--end
+Input a number: 6
+1 2 3 4 5 6

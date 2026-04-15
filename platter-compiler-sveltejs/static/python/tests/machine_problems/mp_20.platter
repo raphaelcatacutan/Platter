@@ -1,0 +1,31 @@
+# Count Digits Recursion Variants
+
+# PENDING MODIFICATION
+
+prepare piece of count_digits(piece of value){
+    check(value < 10){
+        serve 1;
+    } instead {
+        serve 1 + count_digits(value / 10);
+    }
+}
+
+start(){
+    piece of input_number = 0;
+    piece of digit_count = 0;
+
+    bill("Input a number : ");
+    input_number = topiece(take());
+
+    check(input_number < 0){
+        input_number = 0 - input_number;
+    }
+
+    digit_count = count_digits(input_number);
+    bill("The number of digits in the number is :  " + tochars(digit_count));
+}
+--end
+5000
+--end
+Input a number : 5000
+The number of digits in the number is :  4

@@ -1,0 +1,70 @@
+##
+Disarium Number 
+- A no. where the sum of digits proved w/ their positions equals the number
+e.g 135 = 1^2 + 3^2 + 5^3 = 135
+175 = 1^2 + 7^2 + 5^3 = 175
+
+## 
+
+piece[] of digits;
+
+start(){
+    piece of num, temp, rem;
+    piece of i, pos, sum;
+
+    bill("Enter a number: ");
+    num = topiece(take());
+
+    temp = num;
+    sum = 0;
+    digits = [];
+
+    check(num < 0){
+        bill("Invalid input");
+        serve 0;
+    }
+
+    check(num == 0){
+        bill("0 = 0^1 = 0\n");
+        bill("0 is a Disarium Number.\n");
+        serve 0;
+    }
+
+    # store digits in reverse
+    repeat(temp > 0){
+        rem = temp % 10;
+        digits = append(digits, rem);
+        temp = temp / 10;
+    }
+
+    bill(tochars(num) + " = ");
+
+    i = size(digits) - 1;
+    pos = 1;
+
+    repeat(i >= 0){
+        bill(tochars(digits[i]) + "^" + tochars(pos));
+        sum = sum + pow(digits[i], pos);
+
+        check(i != 0){
+            bill(" + ");
+        }
+
+        i = i - 1;
+        pos = pos + 1;
+    }
+
+    bill(" = " + tochars(sum) + "\n");
+
+    check(sum == num){
+        bill(tochars(num) + " is a Disarium Number.\n");
+    } instead {
+        bill(tochars(num) + " is not a Disarium Number.\n");
+    }
+}
+--end
+135
+--end
+Enter a number: 135
+135 = 1^1 + 3^2 + 5^3 = 135
+135 is a Disarium Number.

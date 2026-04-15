@@ -1,0 +1,201 @@
+# Array Elements Print Recursion Variants
+# Sort Array Elements in Ascending or Descending 
+# Depends on the user input (choices:1 or 2)
+
+prepare flag of isValidNumber(chars of input){
+    piece of i = 1;
+    flag of done = down;
+    flag of is_valid = up;
+    chars of c = "";
+    chars of firstChar = copy(input, 1, 1);
+
+    check(firstChar == ""){
+        serve down;
+    }
+
+    repeat(not done){
+        c = copy(input, i, i);
+
+        check(c == ""){
+            done = up;
+        } instead {
+            check(i == 1 and c == "-"){
+                # Negative sign is fine at start
+            } alt(c < "0" or c > "9"){
+                is_valid = down;
+                done = up;
+            }
+            i += 1;
+        }
+    }
+
+    check(is_valid){
+        check(i == 2 and firstChar == "-"){
+            serve down;
+        } instead {
+            serve up;
+        }
+    } instead {
+        serve down;
+    }
+}
+
+prepare piece of billArray(piece[] of numbers, piece of idx, piece of total){
+    check(idx < total){
+        bill(tochars(numbers[idx]));
+
+        check(idx < total - 1){
+            bill("  ");
+        } instead {
+            bill("\n");
+        }
+
+        billArray(numbers, idx + 1, total);
+    }
+
+    serve 0;
+}
+
+start(){
+    piece of total = 0;
+    piece of i = 0;
+    piece of j = 0, k;
+    piece of value = 0;
+    piece of temp = 0;
+    piece of sort_choice = 0;
+    piece[] of numbers = [];
+    flag of running = up;
+    flag of validInput = down;
+    chars of raw = "";
+
+    validInput = down;
+    repeat(not validInput){
+        bill("Input the number of elements to be stored in the array : ");
+        raw = take();
+        check(isValidNumber(raw)){
+            total = topiece(raw);
+            validInput = up;
+        } instead {
+            bill("Invalid input. Integer only.\n");
+        }
+    }
+
+    check(total > 0){
+        bill("Input " + tochars(total) + " elements in the array :\n");
+
+        pass(i = 0; i += 1; i < total){
+            validInput = down;
+            repeat(not validInput){
+                bill("integer element - " + tochars(i) + " : ");
+                raw = take();
+                check(isValidNumber(raw)){
+                    value = topiece(raw);
+                    validInput = up;
+                } instead {
+                    bill("Invalid input. Numbers only.\n");
+                }
+            }
+            append(numbers, value);
+        }
+
+        repeat(running){
+            bill("\nSort Out:\n");
+            bill("1. Ascending\n");
+            bill("2. Descending\n");
+            bill("3. Exit\n");
+
+            validInput = down;
+            repeat(not validInput){
+                bill("Enter choice (1, 2, or 3): ");
+                raw = take();
+                check(isValidNumber(raw)){
+                    sort_choice = topiece(raw);
+                    validInput = up;
+                } instead {
+                    bill("Invalid input. Numbers only.\n");
+                }
+            }
+
+            check(sort_choice == 1 or sort_choice == 2){
+                pass(i = 0; i += 1; i < total - 1){
+                    pass(j = 0; j += 1; j < total - 1){
+                        k = j + 1;
+                        check(sort_choice == 1 and numbers[j] > numbers[k]){
+                            temp = numbers[j];
+                            numbers[j] = numbers[k];
+                            numbers[k] = temp;
+                        } alt(sort_choice == 2 and numbers[j] < numbers[k]){
+                            temp = numbers[j];
+                            numbers[j] = numbers[k];
+                            numbers[k] = temp;
+                        }
+                    }
+                }
+
+                check(sort_choice == 1){
+                    bill("Sorted array in Ascending order : ");
+                } instead {
+                    bill("Sorted array in Descending order : ");
+                }
+
+                billArray(numbers, 0, total);
+
+            } alt(sort_choice == 3){
+                bill("Program Terminated.\n");
+                running = down;
+
+            } instead {
+                bill("Invalid Input\n");
+            }
+        }
+    } instead {
+        bill("Invalid Array Size\n");
+    }
+}
+--end
+5
+1
+2
+3
+4
+5
+4
+2
+1
+3
+--end
+Input the number of elements to be stored in the array : 5
+Input 5 elements in the array :
+integer element - 0 : 1
+integer element - 1 : 2
+integer element - 2 : 3
+integer element - 3 : 4
+integer element - 4 : 5
+
+Sort Out:
+1. Ascending
+2. Descending
+3. Exit
+Enter choice (1, 2, or 3): 4
+Invalid Input
+
+Sort Out:
+1. Ascending
+2. Descending
+3. Exit
+Enter choice (1, 2, or 3): 2
+Sorted array in Descending order : 5  4  3  2  1
+
+Sort Out:
+1. Ascending
+2. Descending
+3. Exit
+Enter choice (1, 2, or 3): 1
+Sorted array in Ascending order : 1  2  3  4  5
+
+Sort Out:
+1. Ascending
+2. Descending
+3. Exit
+Enter choice (1, 2, or 3): 3
+Program Terminated.
