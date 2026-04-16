@@ -1,47 +1,69 @@
-# Write a program to find the GCD of two numbers using recursion.   
-
-prepare piece of hcf(piece of n1, piece of n2){
-    check(n2 != 0){
-        serve hcf(n2, n1 % n2);
-    } instead {
-        serve n1;
-    }
-}
-
-start(){
-    piece of n1 = 0, n2 = 0, result;
-    flag of isValid = down;
-
-    order {
-        bill("Enter two positive integers:\n");
-        bill("First number: ");
-        n1 = topiece(take());
-        bill("Second number: ");
-        n2 = topiece(take());
-
-        check(n1 > 0 and n2 > 0){
-            isValid = up;
-        } instead {
-            bill("Invalid input. Both numbers must be positive.\n\n");
+## 
+Addition of two matrices. Ask the user to input 5 numbers/elements in each array A and Array B, store the sum of the numbers in  Array A & Array B in Array C.
+##
+prepare piece[] of sumArray(piece[] of A, piece[] of B){
+	piece[] of C;
+    piece of index = 0;
+    check(size(A)==size(B)){
+    	repeat(index < size(A)){
+        	C = append(C, A[index] + B[index]);
+            index+=1;
         }
-    } repeat(isValid == down);
-
-    result = hcf(n1, n2);
-
-    bill("G.C.D of " + tochars(n1) + " and " + tochars(n2) + " is " + tochars(result));
+    } instead {
+    	bill("Array sizes are not the same");
+    }
+    serve C;
+}
+prepare piece of printNumArray(piece[] of input){
+	piece of index = 0;
+    repeat(index < size(input)){
+    	bill(tochars(input[index])+" ");
+        index+=1;
+    }
+    serve 0;
+}
+start(){
+	piece[] of A = [0,0,0,0,0], B = [0,0,0,0,0];
+    piece of index = 0;
+    # input for A
+    bill("Enter numbers for Array A\n");
+   	repeat(index < 5){
+    	A[index] = topiece(bill("Number "+tochars(index+1)+": ")+take());
+        index+=1;
+    }
+    # input for B
+    index = 0;
+    bill("Enter numbers for Array B\n");
+   	repeat(index < 5){
+    	B[index] = topiece(bill("Number "+tochars(index+1)+": ")+take());
+        index+=1;
+    }
+    bill("Sum of Array A and B in C = [");
+    printNumArray(sumArray(A,B));
+    bill("]");
 }
 --end
--10
-90
-60
-6
+1
+2
+3
+4
+5
+1
+2
+3
+4
+5
 --end
-Enter two positive integers:
-First number: -10
-Second number: 90
-Invalid input. Both numbers must be positive.
-
-Enter two positive integers:
-First number: 60
-Second number: 6
-G.C.D of 60 and 6 is 6
+Enter numbers for Array A
+Number 1: 1
+Number 2: 2
+Number 3: 3
+Number 4: 4
+Number 5: 5
+Enter numbers for Array B
+Number 1: 1
+Number 2: 2
+Number 3: 3
+Number 4: 4
+Number 5: 5
+Sum of Array A and B in C = [2 4 6 8 10 ]
