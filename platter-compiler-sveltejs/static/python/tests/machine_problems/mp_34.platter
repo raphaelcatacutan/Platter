@@ -1,0 +1,32 @@
+# Write a program  to find the first capital letter in a string using recursion. Input any length of string then determine the first capital letter.
+
+
+prepare chars of checkCapital(chars of str, piece of i){
+    chars of c;
+    c = copy(str, i, i);
+    check(c == ""){
+        serve "";
+    }
+    check(c >= "A" and c <= "Z"){
+        serve c;
+    }
+    serve checkCapital(str, i + 1);
+}
+
+start(){
+    chars of input, result;
+    bill("Input a string to including one or more capital letters : ");
+    input = take();
+    result = checkCapital(input, 1);
+    check(result == ""){
+        bill("There is no capital letter in the string :  " + input + ".");
+    } instead {
+        bill("The first capital letter appears in the string " 
+             + input + " is " + result + ".");
+    }
+}
+--end
+testString
+--end
+Input a string to including one or more capital letters : testString
+The first capital letter appears in the string testString is S.
