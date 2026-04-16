@@ -1,0 +1,64 @@
+# Write a program to get the largest element of an array using recursion.
+
+sip of maxOfRest;
+
+prepare sip of findMax(sip[] of numbers, piece of idx, piece of total){
+    check(idx == total - 1){
+        serve numbers[idx];
+    }
+
+    maxOfRest = findMax(numbers, idx + 1, total);
+
+    check(numbers[idx] > maxOfRest){
+        serve numbers[idx];
+    } instead {
+        serve maxOfRest;
+    }
+}
+
+start(){
+    piece of total = 0, i = 0; 
+    sip of value = 0.0, maxVal;
+    sip[] of numbers = [];
+    flag of sizeIsValid = down;
+    
+    order {
+        bill("Input the number of elements: ");
+        total = topiece(take());
+
+        check(total > 0){
+            sizeIsValid = up;
+        } instead {
+            bill("Invalid Array Size. Please enter a number greater than 0.\n");
+        }
+    } repeat(sizeIsValid == down);
+
+    bill("Input " + tochars(total) + " elements:\n");
+
+    pass(i = 0; i += 1; i < total){
+        bill("Element - " + tochars(i) + " : ");
+        value = tosip(take());
+        append(numbers, value);
+    }
+
+    maxVal = findMax(numbers, 0, total);
+    bill("The largest element in the array is: " + tochars(maxVal) + "\n");
+}
+--end
+6
+30
+58
+.4
+97
+65
+1000
+--end
+Input the number of elements: 6
+Input 6 elements:
+Element - 0 : 30
+Element - 1 : 58
+Element - 2 : .4
+Element - 3 : 97
+Element - 4 : 65
+Element - 5 : 1000
+The largest element in the array is: 1000.0

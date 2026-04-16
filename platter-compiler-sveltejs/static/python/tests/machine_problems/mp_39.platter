@@ -1,0 +1,161 @@
+## Find the frequency in digits
+e.g 
+125
+1 – 1
+1 – 1
+1 – 5
+
+2125
+2-2
+1-1
+1-5 ##    
+
+piece of c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
+
+start(){
+    chars of input, ch;
+    piece of i, afterCount, digitCount;
+    flag of hasDot, invalid;
+
+    bill("Enter a number: ");
+    input = take();
+
+    c0 = 0; c1 = 0; c2 = 0; c3 = 0; c4 = 0;
+    c5 = 0; c6 = 0; c7 = 0; c8 = 0; c9 = 0;
+
+    i = 1;
+    afterCount = 0;
+    digitCount = 0;
+    hasDot = down;
+    invalid = down;
+
+    repeat(copy(input, i, i) != ""){
+        ch = copy(input, i, i);
+
+        check(ch == "-"){
+            check(i != 1){
+                invalid = up;
+            }
+        }
+        alt(ch == "."){
+            check(hasDot){
+                invalid = up;
+            } instead {
+                hasDot = up;
+            }
+        }
+        alt(ch == "0"){
+            c0 = c0 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "1"){
+            c1 = c1 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "2"){
+            c2 = c2 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "3"){
+            c3 = c3 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "4"){
+            c4 = c4 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "5"){
+            c5 = c5 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "6"){
+            c6 = c6 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "7"){
+            c7 = c7 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "8"){
+            c8 = c8 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        alt(ch == "9"){
+            c9 = c9 + 1;
+            digitCount = digitCount + 1;
+            check(hasDot){
+                afterCount = afterCount + 1;
+            }
+        }
+        instead {
+            invalid = up;
+        }
+
+        i = i + 1;
+    }
+
+    check(digitCount == 0){
+        invalid = up;
+    }
+
+    check(afterCount > 7){
+        invalid = up;
+    }
+
+    check(hasDot and afterCount == 0){
+        invalid = up;
+    }
+
+    check(invalid){
+        bill("Invalid input");
+        serve 0;
+    }
+
+    bill("Digit Frequency\n");
+
+    check(c0 != 0){ bill("0     " + tochars(c0) + "\n"); }
+    check(c1 != 0){ bill("1     " + tochars(c1) + "\n"); }
+    check(c2 != 0){ bill("2     " + tochars(c2) + "\n"); }
+    check(c3 != 0){ bill("3     " + tochars(c3) + "\n"); }
+    check(c4 != 0){ bill("4     " + tochars(c4) + "\n"); }
+    check(c5 != 0){ bill("5     " + tochars(c5) + "\n"); }
+    check(c6 != 0){ bill("6     " + tochars(c6) + "\n"); }
+    check(c7 != 0){ bill("7     " + tochars(c7) + "\n"); }
+    check(c8 != 0){ bill("8     " + tochars(c8) + "\n"); }
+    check(c9 != 0){ bill("9     " + tochars(c9) + "\n"); }
+}
+--end
+125
+--end
+Enter a number: 125
+Digit Frequency
+1     1
+2     1
+5     1

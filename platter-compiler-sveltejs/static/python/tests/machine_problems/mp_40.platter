@@ -1,0 +1,48 @@
+## 
+5.        Automorphic Number
+25 -> 25^2 = 625
+76 -> 76^2 = 5776
+6 -> 6^2 = 36
+##
+
+prepare flag of isAutomorphic(piece of num){
+
+    piece of square;
+
+    square = num * num;
+
+    repeat(num > 0){
+
+        check(num % 10 != square % 10){
+            serve down;
+        }
+
+        num = num / 10;
+        square = square / 10;
+    }
+
+    serve up;
+}
+
+start(){
+    piece of number;
+
+    bill("Enter a number: ");
+    number = topiece(take());
+
+    bill("Number: " + tochars(number) + "\n");
+    bill("Square: " + tochars(number * number) + "\n");
+
+    check(isAutomorphic(number)){
+        bill(tochars(number) + " is an Automorphic Number\n");
+    } instead {
+        bill(tochars(number) + " is not an Automorphic Number\n");
+    }
+}
+--end
+25
+--end
+Enter a number: 25
+Number: 25
+Square: 625
+25 is an Automorphic Number

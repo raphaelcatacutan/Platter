@@ -1,47 +1,64 @@
-# Write a program to find the GCD of two numbers using recursion.   
+##  Addition of two matrices. 
+Ask the user to input 5 numbers/elements in each array A and Array B, 
+store the sum of the numbers in  Array A & Array B in Array C.##
 
-prepare piece of hcf(piece of n1, piece of n2){
-    check(n2 != 0){
-        serve hcf(n2, n1 % n2);
-    } instead {
-        serve n1;
-    }
-}
 
 start(){
-    piece of n1 = 0, n2 = 0, result;
-    flag of isValid = down;
+    piece of total = 5;
+    piece of i = 0;
+    sip[] of arrayA = [];
+    sip[] of arrayB = [];
+    sip[] of arrayC = [];
+    sip of tempValue = 0.0;
 
-    order {
-        bill("Enter two positive integers:\n");
-        bill("First number: ");
-        n1 = topiece(take());
-        bill("Second number: ");
-        n2 = topiece(take());
+    bill("Input " + tochars(total) + " elements for Array A:\n");
+    pass(i = 0; i += 1; i < total){
+        bill("A[" + tochars(i) + "]: ");
+        tempValue = tosip(take());
+        append(arrayA, tempValue);
+    }
 
-        check(n1 > 0 and n2 > 0){
-            isValid = up;
-        } instead {
-            bill("Invalid input. Both numbers must be positive.\n\n");
-        }
-    } repeat(isValid == down);
+    bill("\nInput " + tochars(total) + " elements for Array B:\n");
+    pass(i = 0; i += 1; i < total){
+        bill("B[" + tochars(i) + "]: ");
+        tempValue = tosip(take());
+        append(arrayB, tempValue);
+    }
 
-    result = hcf(n1, n2);
+    pass(i = 0; i += 1; i < total){
+        append(arrayC, arrayA[i] + arrayB[i]);
+    }
 
-    bill("G.C.D of " + tochars(n1) + " and " + tochars(n2) + " is " + tochars(result));
+    bill("\nThe sum (Array C) is: ");
+    pass(i = 0; i += 1; i < total){
+        bill(tochars(arrayC[i]) + " ");
+    }
+    bill("\n");
 }
 --end
--10
-90
-60
+1
+2
+3
+4
+5
 6
+7
+8
+9
+1
 --end
-Enter two positive integers:
-First number: -10
-Second number: 90
-Invalid input. Both numbers must be positive.
+Input 5 elements for Array A:
+A[0]: 1
+A[1]: 2
+A[2]: 3
+A[3]: 4
+A[4]: 5
 
-Enter two positive integers:
-First number: 60
-Second number: 6
-G.C.D of 60 and 6 is 6
+Input 5 elements for Array B:
+B[0]: 6
+B[1]: 7
+B[2]: 8
+B[3]: 9
+B[4]: 1
+
+The sum (Array C) is: 7.0 9.0 11.0 13.0 6.0 
