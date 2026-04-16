@@ -135,7 +135,8 @@ class TACInterpreter:
         self.global_frame = Frame("__global__")
         self.current_frame: Frame = self.global_frame
         self._evaluating_for_bill: bool = False  # Phase 1: skip overflow checks during bill evaluation
-        self.exit_code: int = 0                   # Phase 3: exit code from serve statements
+        self.exit_code: Any = 0                   # Phase 3: exit code from serve statements
+        self.exit_code_type: str = "piece"
 
     # ── Public entry point ─────────────────────────────────────────────────────
 
@@ -185,7 +186,7 @@ class TACInterpreter:
             "success": True,
             "paused": False,
             "output": "".join(self.output_lines),
-            "exit_message": f"\nProgram ended with exit code {self.exit_code}",
+            "exit_message": f"\nProgram ended with exit code {self._format_exit_code_display()}",
             "stdin_consumed": self._stdin_idx,
             "globals": {k: v for k, v in self.global_frame.vars.items()
                         if not k.startswith("t")},  # hide temps
@@ -317,12 +318,10 @@ class TACInterpreter:
             val = self._load(instr.value) if instr.value else None
 
             if not self.call_stack:
-                # Phase 3: returning from the outermost recipe — capture exit code
+                # Phase 3: returning from the outermost recipe — capture typed exit code
                 if val is not None:
-                    try:
-                        self.exit_code = int(val)
-                    except (ValueError, TypeError):
-                        self.exit_code = 0
+                    self.exit_code = val
+                    self.exit_code_type = self._platter_type_descriptor(val)
                 self.pc = len(self.instructions)
             else:
                 saved = self.call_stack.pop()
@@ -500,6 +499,46 @@ class TACInterpreter:
             return "table"
         return type(val).__name__
 
+    def _platter_type_descriptor(self, val: Any) -> str:
+        """Return a richer Platter type descriptor for output formatting."""
+        if isinstance(val, list):
+            if not val:
+                return "array[]"
+            first_type = self._platter_type(val[0])
+            if all(self._platter_type(item) == first_type for item in val):
+                return f"{first_type}[]"
+            return "array"
+        if isinstance(val, dict):
+            return "table(obj)"
+        return self._platter_type(val)
+
+    def _format_platter_value(self, val: Any) -> str:
+        """Format a runtime value using Platter-native literals."""
+        if isinstance(val, bool):
+            return "up" if val else "down"
+        if isinstance(val, list):
+            return "[" + ", ".join(self._format_platter_value(item) for item in val) + "]"
+        if isinstance(val, dict):
+            parts = []
+            for key, item in val.items():
+                parts.append(f"{key}: {self._format_platter_value(item)}")
+            return "{" + ", ".join(parts) + "}"
+        if isinstance(val, str):
+            return val
+        return str(val)
+
+    def _format_exit_code_display(self) -> str:
+        """Format top-level serve output without coercing values to integers."""
+        exit_type = self.exit_code_type or self._platter_type_descriptor(self.exit_code)
+        formatted_value = self._format_platter_value(self.exit_code)
+        if exit_type in ("piece", "sip"):
+            return formatted_value
+        if exit_type in ("flag", "chars"):
+            return formatted_value
+        if exit_type.endswith("[]") or exit_type.startswith("table") or exit_type == "array":
+            return f"{exit_type} {formatted_value}"
+        return f"{exit_type} {formatted_value}"
+
     @staticmethod
     def _translate_error(msg: str) -> str:
         """Replace Python type names with Platter equivalents in error messages."""
@@ -655,7 +694,7 @@ class TACInterpreter:
         """Validate piece ingredient: max 15 digits (±999,999,999,999,999)"""
         PIECE_MAX = 999_999_999_999_999
         if abs(value) > PIECE_MAX:
-            raise InterpreterError("Runtime Error: Value exceeds range for type piece")
+            raise InterpreterError("Value exceeds range for type piece")
 
     def _validate_sip_storage(self, value: float, var_name: str = ""):
         """Validate sip ingredient: max 15 non-fractional + 7 fractional digits"""
@@ -666,7 +705,7 @@ class TACInterpreter:
             integer_part = value_str
         non_fractional_digits = len(integer_part)
         if non_fractional_digits > 15:
-            raise InterpreterError("Runtime Error: Value exceeds range for type sip")
+            raise InterpreterError("Value exceeds range for type sip")
 
     def _eval_unary(self, op: str, val: Any) -> Any:
         if op == "-":

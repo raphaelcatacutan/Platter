@@ -2563,6 +2563,12 @@ class ASTParser:
 
             """    184 <endsb_tail>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail>_1"]:
+            # Snapshot context identifier before parsing following statements,
+            # which may overwrite parser context in nested expressions.
+            saved_context_id = self._context_identifier
+            saved_context_line = self._context_identifier_line
+            saved_context_col = self._context_identifier_col
+
             node_0 = self.array_accessor_val()
             node_1 = self.assignment_op()
             node_2 = self.value()
@@ -2571,7 +2577,7 @@ class ASTParser:
             node_4 = self.statements()
 
             # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            base = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            base = Identifier(saved_context_id, saved_context_line, saved_context_col)
             result = [Assignment((node_0(base) if node_0 else base), node_1, node_2)] + node_4
             return result
 
@@ -3625,6 +3631,12 @@ class ASTParser:
 
             """    259 <endsb_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_menu>_1"]:
+            # Snapshot context identifier before parsing following statements,
+            # which may overwrite parser context in nested expressions.
+            saved_context_id = self._context_identifier
+            saved_context_line = self._context_identifier_line
+            saved_context_col = self._context_identifier_col
+
             node_0 = self.array_accessor_val()
             node_1 = self.assignment_op()
             node_2 = self.value()
@@ -3633,7 +3645,7 @@ class ASTParser:
             node_4 = self.statements_menu()
 
             # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            base = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            base = Identifier(saved_context_id, saved_context_line, saved_context_col)
             result = [Assignment((node_0(base) if node_0 else base), node_1, node_2)] + node_4
             return result
 
@@ -3959,6 +3971,12 @@ class ASTParser:
 
             """    281 <endsb_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>    """
         elif self.tokens[self.pos].type in PREDICT_SET["<endsb_tail_loop>_1"]:
+            # Snapshot context identifier before parsing following statements,
+            # which may overwrite parser context in nested expressions.
+            saved_context_id = self._context_identifier
+            saved_context_line = self._context_identifier_line
+            saved_context_col = self._context_identifier_col
+
             node_0 = self.array_accessor_val()
             node_1 = self.assignment_op()
             node_2 = self.value()
@@ -3967,7 +3985,7 @@ class ASTParser:
             node_4 = self.statements_loop()
 
             # Collect: [Assignment(($0(CONTEXT) if $0 else CONTEXT), $1, $2)] + $4
-            base = Identifier(self._context_identifier, self._context_identifier_line, self._context_identifier_col)
+            base = Identifier(saved_context_id, saved_context_line, saved_context_col)
             result = [Assignment((node_0(base) if node_0 else base), node_1, node_2)] + node_4
             return result
 

@@ -1,0 +1,7 @@
+start(){
+    piece[] of obj = [1,2,3];
+    serve obj;
+}
+--end
+--end
+[[EXIT_MESSAGE]]Program ended with exit code piece[] [1, 2, 3]

@@ -11,6 +11,7 @@ from app.interpreter.ir_interpreter import run_tac
 
 
 MACHINE_PROBLEMS_DIR = Path(__file__).resolve().parent / "machine_problems"
+RUNTIME_FIXES_DIR = Path(__file__).resolve().parent / "runtime_fixes"
 
 
 def parse_machine_problem_file(file_path: Path) -> dict:
@@ -50,9 +51,39 @@ def parse_machine_problem_file(file_path: Path) -> dict:
     }
 
 
-def load_cases() -> list[dict]:
-    case_files = sorted(MACHINE_PROBLEMS_DIR.glob("*.platter"))
+def load_cases(directory: Path) -> list[dict]:
+    case_files = sorted(directory.glob("*.platter"))
     return [parse_machine_problem_file(path) for path in case_files]
+
+
+def parse_runtime_expectations(expected_block: str) -> dict:
+    """
+    Parse runtime-fixes expectations from the expected output block.
+
+    Supported directives:
+    [[RUNTIME_ERROR]]<message>
+    [[EXIT_MESSAGE]]<message>
+
+    Any non-directive lines are treated as expected runtime output.
+    """
+    runtime_error = None
+    exit_message = None
+    output_lines = []
+
+    for raw_line in expected_block.splitlines():
+        line = raw_line.strip()
+        if line.startswith("[[RUNTIME_ERROR]]"):
+            runtime_error = line.replace("[[RUNTIME_ERROR]]", "", 1).strip()
+        elif line.startswith("[[EXIT_MESSAGE]]"):
+            exit_message = line.replace("[[EXIT_MESSAGE]]", "", 1).strip()
+        else:
+            output_lines.append(raw_line)
+
+    return {
+        "runtime_error": runtime_error,
+        "exit_message": exit_message,
+        "output": "\n".join(output_lines).rstrip(),
+    }
 
 
 def run_compiler(code: str, inputs: list[str]) -> dict:
@@ -84,6 +115,7 @@ def run_compiler(code: str, inputs: list[str]) -> dict:
             "stage": "runtime",
             "error": exec_result.get("error", "Unknown runtime error"),
             "output": exec_result.get("output", ""),
+            "exit_message": exec_result.get("exit_message", ""),
         }
 
     return {
@@ -91,13 +123,14 @@ def run_compiler(code: str, inputs: list[str]) -> dict:
         "stage": "done",
         "error": "",
         "output": exec_result.get("output", ""),
+        "exit_message": exec_result.get("exit_message", ""),
     }
 
 
 class TestCompiler(unittest.TestCase):
     def test_compiler_cases(self):
         self.maxDiff = None
-        cases = load_cases()
+        cases = load_cases(MACHINE_PROBLEMS_DIR)
         if not cases:
             self.skipTest(f"No case files found in {MACHINE_PROBLEMS_DIR}")
 
@@ -113,6 +146,49 @@ class TestCompiler(unittest.TestCase):
                     ),
                 )
                 self.assertEqual(result["output"].rstrip(), case["expected_output"].rstrip())
+
+    def test_runtime_fix_cases(self):
+        self.maxDiff = None
+        cases = load_cases(RUNTIME_FIXES_DIR)
+        if not cases:
+            self.skipTest(f"No case files found in {RUNTIME_FIXES_DIR}")
+
+        for case in cases:
+            with self.subTest(case=case["name"]):
+                result = run_compiler(case["code"], case["inputs"])
+                expected = parse_runtime_expectations(case["expected_output"])
+
+                expected_runtime_error = expected["runtime_error"]
+                expected_exit_message = expected["exit_message"]
+                expected_output = expected["output"]
+
+                if expected_runtime_error:
+                    self.assertFalse(
+                        result["success"],
+                        msg=f"Case {case['name']} expected runtime failure but succeeded."
+                    )
+                    self.assertEqual(result["stage"], "runtime")
+                    self.assertEqual(result["error"], expected_runtime_error)
+                    # Frontend owns the prefix; runtime should return raw message.
+                    self.assertNotIn("Runtime Error:", result["error"])
+                    continue
+
+                self.assertTrue(
+                    result["success"],
+                    msg=(
+                        f"Case {case['name']} failed at stage '{result['stage']}'.\n"
+                        f"Error: {result['error']}"
+                    ),
+                )
+
+                self.assertEqual(result["output"].rstrip(), expected_output.rstrip())
+
+                if expected_exit_message is not None:
+                    self.assertEqual(
+                        result.get("exit_message", "").strip(),
+                        expected_exit_message.strip(),
+                        msg=f"Case {case['name']} exit message mismatch."
+                    )
 
 
 if __name__ == "__main__":
