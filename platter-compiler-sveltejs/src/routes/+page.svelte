@@ -832,6 +832,8 @@ try:
     execution_error = ""
     execution_globals = {}
     execution_paused = False
+    execution_exit_message = ""
+    execution_terminate_message = ""
     if run_ir_pipeline:
         try:
             ir_gen = __import__('app.intermediate_code.ir_generator', fromlist=['IRGenerator']).IRGenerator()

@@ -1,0 +1,50 @@
+##
+Strong numbers:
+- Sum of factorial of digits equals the number
+e.g. 145 = 1! + 4! + 5!
+              = 1 + 24 + 120
+              = 145
+Input a number, then determine if the number is a Strong number or not
+##
+
+prepare piece of factorial(piece of num){
+    piece of i = num;
+    piece of factorial = 1;
+    
+    repeat(i >= 1){
+        factorial *= i;
+        i -= 1;
+    }
+    serve factorial;
+}
+
+start(){
+  	piece of originalNum;
+    piece of temp;
+    piece of sum = 0;
+    piece of digit;
+
+
+	bill("Enter a number: ");
+	originalNum = topiece(take());
+    
+    temp = originalNum;
+    
+    repeat (temp > 0) {
+      digit = temp % 10;
+      sum += factorial(digit);
+      temp /= 10;
+      
+    }
+
+    check (sum == originalNum) {
+    	bill(tochars(originalNum) + " is a Strong number.");
+    } instead {
+    	bill(tochars(originalNum) + " is NOT a Strong number.");
+    }
+}
+--end
+145
+--end
+Enter a number: 145
+145 is a Strong number.

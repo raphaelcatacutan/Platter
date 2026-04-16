@@ -1,0 +1,58 @@
+##
+Pascal's Triangle: It starts and ends with 1 for each row, the middle number in the row below is the sum of the two numbers above
+e.g.
+        1
+     1    1
+  1   2    1
+1  3     3   1
+##
+
+prepare piece of pascalTriangle(piece of rows){
+    piece of i, j, coefficient, spaces, numerator, denominator;
+
+    pass(i = 0; i += 1; i < rows){
+        pass(spaces = 0; spaces += 1; spaces < rows - i - 1){
+            bill(" ");
+        }
+
+        coefficient = 1;
+
+        pass(j = 0; j += 1; j <= i){
+            bill(tochars(coefficient));
+
+            check(j < i){
+                bill(" ");
+                numerator = i - j;
+                numerator = coefficient * numerator;
+                denominator = j + 1;
+                coefficient = numerator / denominator;
+            }
+        }
+
+        bill("\n");
+    }
+    
+    serve 0;
+}
+
+start(){
+	piece of rows;
+    bill("Enter the number of rows: ");
+    rows = topiece(take());
+    
+    check(rows < 1){
+        bill("Not a valid value");
+    } instead {
+		pascalTriangle(rows);
+    }
+
+}
+--end
+5
+--end
+Enter the number of rows: 5
+    1
+   1 1
+  1 2 1
+ 1 3 3 1
+1 4 6 4 1

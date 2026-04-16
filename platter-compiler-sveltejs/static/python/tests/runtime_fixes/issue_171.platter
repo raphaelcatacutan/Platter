@@ -1,0 +1,6 @@
+start(){
+    serve "true";
+}
+--end
+--end
+[[EXIT_MESSAGE]]Program ended with exit code true
