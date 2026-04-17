@@ -1,26 +1,48 @@
 ##
-Write a  program to find the Hailstone Sequence of a given number up to 1.
-Example: Input any number (positive) to start for Hailstone Sequence : 13
-The hailstone sequence starting at 13 is :                                                               
-13  40  20  10  5  16  8  4  2 1 
+Same scenario with problem number 4, this time display the number of capital letters in a word.
+Example: BeautiFuL
+No of capital letters: 3
 ##
+chars[] of UPPERCASE = [
+    "A","B","C","D","E","F","G","H","I","J","K","L","M",
+    "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
+];
+
 start(){
-	piece of num = topiece(bill("Input any positive number to start the Hailstone Sequence : ")+take());
-    check(num < 1){ bill("Invalid Input"); serve 1;}
-    bill("The hailstone sequence starting from "+tochars(num)+" is :\n"+tochars(num)+" ");
-    repeat(num != 1){
-    	check(num%2 == 0){
-        	num/=2;
-            bill(tochars(num)+" ");
-        } instead {
-        	num = 3 * num + 1;
-            bill(tochars(num)+" ");            
+    chars of input = bill("Enter string: ") + take();
+    
+    piece of count = 0;
+    piece of i = 1; # 'copy' uses 1-based indexing, so we start at 1
+    
+    # Outer infinite loop to iterate through the string
+    repeat(up) {
+        # Extract a single character at position 'i'
+        chars of currentChar = copy(input, i, i);
+        piece of j = 0;
+        
+        # Sentinel check: if copy returns an empty string, we reached the end
+        check(currentChar == "") {
+            stop;
         }
+        
+        j = 0;
+        
+        # We can still use size() here because UPPERCASE is an actual array
+        repeat(j < size(UPPERCASE)) {
+            check(currentChar == UPPERCASE[j]) {
+                count += 1;
+                stop; # Stop inner loop once a match is found
+            }
+            j += 1;
+        }
+        
+        i += 1; # Move to the next character in the input string
     }
+    
+    bill("No of capital letters: " + tochars(count) + "\n");
 }
 --end
-13
+hEllO
 --end
-Input any positive number to start the Hailstone Sequence : 13
-The hailstone sequence starting from 13 is :
-13 40 20 10 5 16 8 4 2 1 
+Enter string: hEllO
+No of capital letters: 2
