@@ -7,6 +7,14 @@ from app.semantic_analyzer.symbol_table.types import TypeInfo
 from typing import List, Tuple
 
 
+PRIMITIVE_TYPES = {"piece", "sip", "chars", "flag", "void"}
+
+
+def _is_table_like_type(type_name: str) -> bool:
+    """Return True for user-defined table prototype names and generic 'table'."""
+    return type_name == "table" or type_name not in PRIMITIVE_TYPES
+
+
 class BuiltinRecipeSignature:
     """Represents a built-in recipe's type signature"""
     
@@ -214,6 +222,11 @@ BUILTIN_RECIPES = {
             [("flag", 1)],
             "Get the size (length) of flag array"
         ),
+        BuiltinRecipeSignature(
+            "size", "piece", 0,
+            [("table", 1)],
+            "Get the size (length) of table array"
+        ),
     ],
     
     "sort": [
@@ -296,6 +309,11 @@ BUILTIN_RECIPES = {
             [("flag", 1), ("flag", 0)],
             "Append flag element to flag array"
         ),
+        BuiltinRecipeSignature(
+            "append", "table", 1,
+            [("table", 1), ("table", 0)],
+            "Append table element to table array"
+        ),
     ],
     
     "remove": [
@@ -318,6 +336,11 @@ BUILTIN_RECIPES = {
             "remove", "flag", 1,
             [("flag", 1), ("piece", 0)],
             "Remove flag at index from piece array element and return new array"
+        ),
+        BuiltinRecipeSignature(
+            "remove", "table", 1,
+            [("table", 1), ("piece", 0)],
+            "Remove table at index from table array element and return new array"
         ),
     ],
     
@@ -464,6 +487,13 @@ def find_compatible_builtin_overload(name: str, arg_types: List[Tuple[str, int]]
             if expected_dims != actual_dims:
                 compatible = False
                 break
+
+            # Generic table overloads should accept user-defined table types
+            if expected_type == "table":
+                if not _is_table_like_type(actual_type):
+                    compatible = False
+                    break
+                continue
             
             # Types must match or be compatible (piece <-> sip)
             if expected_type != actual_type:

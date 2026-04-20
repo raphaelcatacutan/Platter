@@ -910,6 +910,14 @@ class TypeChecker:
             if builtin_overload:
                 # Validate built-in recipe constraints
                 self._validate_builtin_recipe_call(node)
+
+                # append/remove return the same array type as the first argument.
+                # This is required for user-defined table arrays (e.g., Student[]).
+                if node.name in ["append", "remove"] and len(node.args) > 0:
+                    array_type = self._get_expression_type(node.args[0])
+                    if array_type:
+                        return array_type
+
                 return builtin_overload.get_return_type_info()
             else:
                 # No matching overload found - error will be caught elsewhere
