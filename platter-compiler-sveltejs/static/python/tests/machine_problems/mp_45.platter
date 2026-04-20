@@ -1,0 +1,172 @@
+## 
+Matrix Operations
+- Matrix Addition
+- Matrix Subtraction
+- Matrix Transpose
+##
+
+piece[] of arrayA;
+piece[] of arrayB;
+piece[] of arrayC;
+piece[] of arrayTemp;
+piece of arraySize;
+
+
+prepare piece of addMatrix(piece[] of a, piece[] of b){
+	piece of i;
+    piece of ans;
+	pass(i = 0; i += 1; i < arraySize){
+    	ans = a[i] + b[i];
+        append(arrayC, ans);
+    }
+    
+    bill("Sum matrix: [");
+    pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(arrayC[i])); 
+        check (i == arraySize - 1){ bill("]"); }
+        instead { bill(", "); }
+	}
+#     bill("]");
+	serve 0;
+}
+
+prepare piece of subMatrix(piece[] of a, piece[] of b){
+	piece of i;
+    piece of ans;
+	pass(i = 0; i += 1; i < arraySize){
+    	ans = a[i] - b[i];
+        append(arrayC, ans);
+    }
+    
+    bill("Difference matrix: [");
+    pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(arrayC[i])); 
+        check (i == arraySize - 1){ bill("]"); }
+        instead { bill(", "); }
+	}
+	serve 0;
+}
+
+prepare piece of transposeMatrix(piece[] of a, piece[] of b){
+	piece of i;
+    arrayTemp = arrayA;
+    arrayA = arrayB;
+    arrayB = arrayTemp;
+    bill("Matrix Swapped!");
+	serve 0;
+}
+
+start(){
+      piece of i;
+      piece of input;
+      piece of element;
+
+      bill("Enter array size: ");
+      arraySize = topiece(take());
+		
+      pass(i = 0; i += 1; i < arraySize){
+          bill("Enter element for array A at index [" + tochars(i) + "]: ");
+          element = topiece(take());
+          append(arrayA, element);   
+      }
+      
+      pass(i = 0; i += 1; i < arraySize){
+          bill("Enter element for array B at index [" + tochars(i) + "]: ");
+          element = topiece(take());
+          append(arrayB, element);   
+      }
+
+      bill("\n");
+      order {
+      		bill("Matrix Operations\n");
+            bill("\t1. Matrix Addition\n");
+            bill("\t2. Matrix Subtraction\n");
+            bill("\t3. Matrix Transpose\n");
+            bill("\t4. Exit\n");
+          bill("Enter choice: ");
+          input = topiece(take());
+
+          menu(input){
+              choice 1:
+                  bill("Matrix Addition\n");
+                  addMatrix(arrayA, arrayB);
+                  stop;
+              choice 2:
+                  bill("Matrix Subtraction\n");
+                  subMatrix(arrayA, arrayB);
+                  stop;
+              choice 3:
+                  bill("Matrix Transpose\n");
+                  transposeMatrix(arrayA, arrayB);
+                  stop;
+              choice 4:
+                  bill("Menu exited\n");
+                  stop;
+              usual:
+                  bill("Not a valid choice!\n");
+                  stop;
+          }
+          bill("\n\n");
+      } repeat(input != 4);
+}
+--end
+2
+1
+2
+3
+4
+1
+2
+3
+1
+4
+--end
+Enter array size: 2
+Enter element for array A at index [0]: 1
+Enter element for array A at index [1]: 2
+Enter element for array B at index [0]: 3
+Enter element for array B at index [1]: 4
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 1
+Matrix Addition
+Sum matrix: [4, 6]
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 2
+Matrix Subtraction
+Difference matrix: [-2, -2]
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 3
+Matrix Transpose
+Matrix Swapped!
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 1
+Matrix Addition
+Sum matrix: [4, 6]
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 4
+Menu exited
