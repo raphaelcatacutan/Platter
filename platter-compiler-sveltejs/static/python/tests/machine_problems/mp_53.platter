@@ -39,9 +39,11 @@ prepare flag of isWholeNumber(chars of text) {
 
 prepare piece of findClientIndex(piece of accountNumber) {
 	piece of i = 0;
+	ClientRecord of currentClient = [];
 
 	pass(i = 0; i += 1; i < registeredClients) {
-		check(clients[i]:accountNumber == accountNumber) {
+		currentClient = clients[i];
+		check(currentClient:accountNumber == accountNumber) {
 			serve i;
 		}
 	}
@@ -50,28 +52,33 @@ prepare piece of findClientIndex(piece of accountNumber) {
 }
 
 prepare piece of displaySummary(piece of idx) {
+	ClientRecord of currentClient = [];
+	currentClient = clients[idx];
+
 	bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
-	bill("Client Name: " + clients[idx]:name + "\n");
-	bill("Account Number: " + tochars(clients[idx]:accountNumber) + "\n");
-	bill("Date: " + clients[idx]:date + "\n");
-	bill("Deposit Transactions: " + tochars(clients[idx]:depositCount) + "\n");
-	bill("Total Deposited: " + tochars(clients[idx]:dailyDepositTotal) + "\n");
-	bill("Withdrawal Transactions: " + tochars(clients[idx]:withdrawalCount) + "\n");
-	bill("Total Withdrawn: " + tochars(clients[idx]:dailyWithdrawalTotal) + "\n");
-	bill("Balance Inquiries: " + tochars(clients[idx]:inquiryCount) + "\n");
-	bill("Current Balance: " + tochars(clients[idx]:balance) + "\n");
+	bill("Client Name: " + currentClient:name + "\n");
+	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
+	bill("Date: " + currentClient:date + "\n");
+	bill("Deposit Transactions: " + tochars(currentClient:depositCount) + "\n");
+	bill("Total Deposited: " + tochars(currentClient:dailyDepositTotal) + "\n");
+	bill("Withdrawal Transactions: " + tochars(currentClient:withdrawalCount) + "\n");
+	bill("Total Withdrawn: " + tochars(currentClient:dailyWithdrawalTotal) + "\n");
+	bill("Balance Inquiries: " + tochars(currentClient:inquiryCount) + "\n");
+	bill("Current Balance: " + tochars(currentClient:balance) + "\n");
 	bill("==================================\n");
 	serve 0;
 }
 
 prepare piece of displayClientChoices(flag of lockDoneClients) {
 	piece of i = 0;
+	ClientRecord of currentClient = [];
 
 	pass(i = 0; i += 1; i < clientCount) {
-		check(lockDoneClients == up and clients[i]:done == up) {
-			bill(tochars(i + 1) + ". " + clients[i]:name + " (Account: " + tochars(clients[i]:accountNumber) + ") - LOCKED\n");
+		currentClient = clients[i];
+		check(lockDoneClients == up and currentClient:done == up) {
+			bill(tochars(i + 1) + ". " + currentClient:name + " (Account: " + tochars(currentClient:accountNumber) + ") - LOCKED\n");
 		} instead {
-			bill(tochars(i + 1) + ". " + clients[i]:name + " (Account: " + tochars(clients[i]:accountNumber) + ")\n");
+			bill(tochars(i + 1) + ". " + currentClient:name + " (Account: " + tochars(currentClient:accountNumber) + ")\n");
 		}
 	}
 
@@ -82,11 +89,14 @@ prepare piece of processClientTransactions(piece of idx, piece of transactionsPe
 	piece of completed = 0;
 	piece of amount = 0;
 	piece of rawInput = 0;
+	ClientRecord of currentClient = [];
+
+	currentClient = clients[idx];
 
 	bill("\n==================================\n");
-	bill("Processing Client: " + clients[idx]:name + "\n");
-	bill("Account Number: " + tochars(clients[idx]:accountNumber) + "\n");
-	bill("Date: " + clients[idx]:date + "\n");
+	bill("Processing Client: " + currentClient:name + "\n");
+	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
+	bill("Date: " + currentClient:date + "\n");
 	bill("==================================\n");
 
 	repeat(completed < transactionsPerClient) {
@@ -115,12 +125,13 @@ prepare piece of processClientTransactions(piece of idx, piece of transactionsPe
 					check(amount <= 0) {
 						bill("Deposit amount must be greater than 0\n");
 					} instead {
-						check(clients[idx]:dailyDepositTotal + amount > 50000) {
+						check(currentClient:dailyDepositTotal + amount > 50000) {
 							bill("Daily deposit limit exceeded. Maximum total deposit per day is 50000\n");
 						} instead {
-							clients[idx]:balance += amount;
-							clients[idx]:dailyDepositTotal += amount;
-							clients[idx]:depositCount += 1;
+							currentClient:balance += amount;
+							currentClient:dailyDepositTotal += amount;
+							currentClient:depositCount += 1;
+							clients[idx] = currentClient;
 							completed += 1;
 							bill("Deposit successful\n");
 						}
@@ -140,15 +151,16 @@ prepare piece of processClientTransactions(piece of idx, piece of transactionsPe
 					check(amount <= 0) {
 						bill("Withdrawal amount must be greater than 0\n");
 					} instead {
-						check(clients[idx]:dailyWithdrawalTotal + amount > 20000) {
+						check(currentClient:dailyWithdrawalTotal + amount > 20000) {
 							bill("Daily withdrawal limit exceeded. Maximum total withdrawal per day is 20000\n");
 						} instead {
-							check(amount > clients[idx]:balance) {
+							check(amount > currentClient:balance) {
 								bill("Insufficient balance. Withdrawal must be less than or equal to balance\n");
 							} instead {
-								clients[idx]:balance -= amount;
-								clients[idx]:dailyWithdrawalTotal += amount;
-								clients[idx]:withdrawalCount += 1;
+								currentClient:balance -= amount;
+								currentClient:dailyWithdrawalTotal += amount;
+								currentClient:withdrawalCount += 1;
+								clients[idx] = currentClient;
 								completed += 1;
 								bill("Withdrawal successful\n");
 							}
@@ -160,12 +172,14 @@ prepare piece of processClientTransactions(piece of idx, piece of transactionsPe
 				stop;
 
 			choice 3:
-				clients[idx]:inquiryCount += 1;
+				currentClient:inquiryCount += 1;
+				clients[idx] = currentClient;
 				completed += 1;
-				bill("Current balance: " + tochars(clients[idx]:balance) + "\n");
+				bill("Current balance: " + tochars(currentClient:balance) + "\n");
 				stop;
 
 			choice 4:
+				clients[idx] = currentClient;
 				displaySummary(idx);
 				stop;
 
@@ -174,7 +188,8 @@ prepare piece of processClientTransactions(piece of idx, piece of transactionsPe
 		}
 	}
 
-	bill("\nCompleted required transactions for account " + tochars(clients[idx]:accountNumber) + "\n");
+	clients[idx] = currentClient;
+	bill("\nCompleted required transactions for account " + tochars(currentClient:accountNumber) + "\n");
 	displaySummary(idx);
 	serve 0;
 }
@@ -192,6 +207,7 @@ start() {
 	chars of clientDate = "";
 	piece of rawInput = 0;
 	ClientRecord of newClient;
+	ClientRecord of selectedClient = [];
 
 	order {
 		bill("Enter number of clients (1 to 5): ");
@@ -311,7 +327,9 @@ start() {
 	repeat(completedClients < clientCount) {
 		currentClientIndex = firstClientNumber - 1;
 		processClientTransactions(currentClientIndex, transactionsPerClient);
-		clients[currentClientIndex]:done = up;
+		selectedClient = clients[currentClientIndex];
+		selectedClient:done = up;
+		clients[currentClientIndex] = selectedClient;
 		completedClients += 1;
 
 		check(completedClients < clientCount) {
@@ -331,7 +349,8 @@ start() {
 
 				check(firstClientNumber >= 1 and firstClientNumber <= clientCount) {
                 	firstClientDec = firstClientNumber - 1;
-					check(clients[firstClientDec]:done == up) {
+					selectedClient = clients[firstClientDec];
+					check(selectedClient:done == up) {
 						firstClientNumber = 0;
 						bill("Client already completed and is locked\n");
 					}
