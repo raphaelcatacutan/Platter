@@ -1820,7 +1820,7 @@ tokens
 
 				<div class="spacer"></div>
 				<!-- replace icons based on theme -->
-				<button
+				<!-- <button
 					class="icon-btn"
 					title="refresh"
 					on:click={() => {
@@ -1837,21 +1837,21 @@ tokens
 					{:else}
 						<img class="icon" src={refresh1} alt="Light Theme Icon" />
 					{/if}</button
-				>
-				<button class="icon-btn" title="copy" on:click={handleCopyToClipboard}
+				> -->
+				<!-- <button class="icon-btn" title="copy" on:click={handleCopyToClipboard}
 					>{#if theme === 'dark'}
 						<img class="icon" src={copy} alt="Dark Theme Icon" />
 					{:else}
 						<img class="icon" src={copy1} alt="Light Theme Icon" />
 					{/if}</button
-				>
-				<button class="icon-btn" title="Theme" on:click={toggleTheme}>
+				> -->
+				<!-- <button class="icon-btn" title="Theme" on:click={toggleTheme}>
 					{#if theme === 'dark'}
 						<img class="icon" src={lightmode} alt="Dark Theme Icon" />
 					{:else}
 						<img class="icon" src={darkmode} alt="Light Theme Icon" />
 					{/if}
-				</button>
+				</button> -->
 			</div>
 
 			<!-- Editor canvas -->
@@ -1879,45 +1879,45 @@ tokens
 
 		<!-- RIGHT SIDEBAR -->
 		<aside class="right">
-			<div class="actions">
-				<button
+			<!-- <div class="actions"> -->
+				<!-- <button
 					class="btn"
 					on:click={() => {
 						normalizeCurlyQuotes();
 						const newWindow = window.open(window.location.href, '_blank');
 						if (newWindow) setTimeout(() => (newWindow.document.body.style.zoom = '80%'), 100);
 					}}
-				>
-					{#if theme === 'dark'}
+				> -->
+					<!-- {#if theme === 'dark'}
 						<img class="icon" src={newFile} alt="Dark Theme Icon" />
 					{:else}
 						<img class="icon" src={newFile1} alt="Light Theme Icon" />
 					{/if} <span>New Tab</span></button
-				>
-				<button class="btn" type="button" on:click={openFileDialog}>
+				> -->
+				<!-- <button class="btn" type="button" on:click={openFileDialog}>
 					{#if theme === 'dark'}
 						<img class="icon" src={openFile} alt="Dark Theme Icon" />
 					{:else}
 						<img class="icon" src={openFile1} alt="Light Theme Icon" />
 					{/if}
 					<span>Open File</span></button
-				>
+				> -->
 				<!-- hidden file input for opening .platter files -->
-				<input
+				<!-- <input
 					type="file"
 					accept=".platter"
 					bind:this={fileInputEl}
 					on:change={handleFileInput}
 					style="display:none"
-				/>
-				<button class="btn" type="button" on:click={saveFileDialog}>
+				/> -->
+				<!-- <button class="btn" type="button" on:click={saveFileDialog}>
 					{#if theme === 'dark'}
 						<img class="icon" src={saveFile} alt="Dark Theme Icon" />
 					{:else}
 						<img class="icon" src={saveFile1} alt="Light Theme Icon" />
 					{/if} <span>Save File</span></button
-				>
-			</div>
+				> -->
+			<!-- </div> -->
 
 			<div class="panel table" style={`--table-img: url(${table})`} bind:this={terminalPanelEl}>
 				<div class="table-title-row">
