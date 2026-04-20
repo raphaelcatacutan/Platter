@@ -157,6 +157,31 @@ start() {
 	let tokens: Token[] = [];
 	let isAnalyzing = false;
 
+	// Resizable panels
+	let gridEl: HTMLElement | null = null;
+	let leftWidthPercent = 65;
+	let isResizingPanel = false;
+
+	function startPanelResize(e: MouseEvent) {
+		isResizingPanel = true;
+		document.addEventListener('mousemove', doPanelResize);
+		document.addEventListener('mouseup', stopPanelResize);
+		e.preventDefault();
+	}
+	function doPanelResize(e: MouseEvent) {
+		if (!isResizingPanel || !gridEl) return;
+		const rect = gridEl.getBoundingClientRect();
+		const newLeft = ((e.clientX - rect.left) / rect.width) * 100;
+		leftWidthPercent = Math.min(Math.max(newLeft, 15), 85);
+		document.body.style.cursor = 'col-resize';
+	}
+	function stopPanelResize() {
+		isResizingPanel = false;
+		document.removeEventListener('mousemove', doPanelResize);
+		document.removeEventListener('mouseup', stopPanelResize);
+		document.body.style.cursor = '';
+	}
+
 	// Pyodide integration
 	let pyodide: any = null;
 	let pyodideLoading = false;
@@ -554,6 +579,8 @@ start() {
 	});
 
 	onDestroy(() => {
+		document.removeEventListener('mousemove', doPanelResize);
+		document.removeEventListener('mouseup', stopPanelResize);
 		window.removeEventListener('resize', syncTerminalPanelHeight);
 		if (panelSyncObserver) {
 			panelSyncObserver.disconnect();
@@ -575,17 +602,10 @@ start() {
 	type TermMsg = { icon?: string; text: string };
 	// default to empty terminal (no messages) so termMessages.length === 0
 	let termMessages: TermMsg[] = [];
-	let terminalStdinText = '';
 
 
 	// Compute error count: treat messages that start with "Lexical OK" as non-errors (count as zero)
-	$: errorCount = termMessages.filter(
-		(m) =>
-			!(
-				typeof m.text === 'string' &&
-				(m.text.startsWith('Lexical OK') || m.text.startsWith('No Syntax Error') || m.text.startsWith('Warning:'))
-			)
-	).length;
+	$: errorCount = termMessages.filter((m) => m.icon === errorIcon).length;
 
 	function setTerminalOk(message = 'No Error') {
 		termMessages = [{ icon: check, text: message }];
@@ -595,9 +615,11 @@ start() {
 	}
 	function clearTerminal() {
 		termMessages = [];
+		isWaitingForInput = false;
+		terminalInputText = '';
 	}
 
-		export async function handleTerminalInput() {
+	export async function handleTerminalInput() {
 		if (!terminalInputText || !pyodideReady) return;
 		const input = terminalInputText;
 		terminalInputText = '';
@@ -623,6 +645,8 @@ else:
         execution_error = exec_result.get("error", "")
         execution_paused = exec_result.get("paused", False)
         execution_globals = exec_result.get("globals", {})
+        execution_exit_message = exec_result.get("exit_message", "")
+        execution_terminate_message = exec_result.get("terminate_message", "")
         
         result = {
             "success": True,
@@ -630,7 +654,9 @@ else:
             "execution_success": execution_success,
             "execution_error": execution_error,
             "execution_paused": execution_paused,
-            "execution_globals": json.dumps(execution_globals)
+            "execution_globals": json.dumps(execution_globals),
+            "execution_exit_message": execution_exit_message,
+            "execution_terminate_message": execution_terminate_message
         }
     except Exception as e:
         result = {"success": False, "error": str(e), "traceback": traceback.format_exc()}
@@ -649,11 +675,22 @@ result
 					}
 				}
 				if (data.execution_success) {
+					// Show exit code message if present
+					if (data.execution_exit_message) {
+						const exitLines = data.execution_exit_message.split('\n');
+						for (const l of exitLines) {
+							if (l !== '') successMsgs.push({ text: l });
+						}
+					}
 					isWaitingForInput = false;
 				} else if (data.execution_paused) {
 					isWaitingForInput = true;
 				} else if (data.execution_error) {
 					successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
+					// Show termination message if present
+					if (data.execution_terminate_message) {
+						successMsgs.push({ text: data.execution_terminate_message });
+					}
 					isWaitingForInput = false;
 				}
 				termMessages = successMsgs;
@@ -862,9 +899,11 @@ try:
     ir_tac_optimized_text = ""
     execution_output = ""
     execution_success = False
-
-	execution_error = ""
-	execution_globals = {}
+    execution_paused = False
+    execution_error = ""
+    execution_globals = {}
+    execution_exit_message = ""
+    execution_terminate_message = ""
 	if run_ir_pipeline:
 		try:
 			ir_gen = __import__('app.intermediate_code.ir_generator', fromlist=['IRGenerator']).IRGenerator()
@@ -903,16 +942,24 @@ try:
 			print("Program Execution (IR Interpreter)")
 			print("=" * 80)
 
-			run_tac = __import__('app.interpreter.ir_interpreter', fromlist=['run_tac']).run_tac
-			exec_result = run_tac(optimized_tac)
+			interpreter_module = __import__('app.interpreter.ir_interpreter', fromlist=['TACInterpreter'])
+			TACInterpreter = interpreter_module.TACInterpreter
+			interpreter = TACInterpreter(optimized_tac)
+			import sys
+			sys.modules['__main__'].active_interpreter = interpreter
+			exec_result = interpreter.run()
 			execution_output = exec_result.get("output", "")
 			execution_success = exec_result.get("success", False)
 			execution_error = exec_result.get("error", "")
+			execution_paused = exec_result.get("paused", False)
 			execution_globals = exec_result.get("globals", {})
+			execution_exit_message = exec_result.get("exit_message", "")
+			execution_terminate_message = exec_result.get("terminate_message", "")
 
 			if execution_success:
 				print("[Execution OK]")
-
+			elif execution_paused:
+				print("[Execution Paused - waiting for input]")
 			else:
 				print(f"[Execution Error] {execution_error}")
 
@@ -926,9 +973,11 @@ try:
 			traceback.print_exc()
 			execution_output = ""
 			execution_success = False
-
+			execution_paused = False
 			execution_error = str(ir_err)
 			execution_globals = {}
+			execution_exit_message = ""
+			execution_terminate_message = ""
     else:
         print("")
         print("="*80)
@@ -1006,9 +1055,11 @@ try:
             "ir_tac_optimized": ir_tac_optimized_text,
             "execution_output": execution_output,
             "execution_success": execution_success,
-
+            "execution_paused": execution_paused,
             "execution_error": execution_error,
             "execution_globals": json.dumps(execution_globals),
+            "execution_exit_message": execution_exit_message,
+            "execution_terminate_message": execution_terminate_message,
             "errors": error_list,
             "semantic_errors": json.dumps(error_messages),
             "semantic_warnings": json.dumps(warning_messages),
@@ -1042,9 +1093,11 @@ try:
             "ir_tac_optimized": ir_tac_optimized_text,
             "execution_output": execution_output,
             "execution_success": execution_success,
-
+            "execution_paused": execution_paused,
             "execution_error": execution_error,
             "execution_globals": json.dumps(execution_globals),
+            "execution_exit_message": execution_exit_message,
+            "execution_terminate_message": execution_terminate_message,
             "semantic_warnings": json.dumps(warning_messages_success),
             "error_markers": json.dumps(warning_markers_success)
         }
@@ -1075,16 +1128,32 @@ result
 					const successMsgs: TermMsg[] = [];
 
 					if (runTacInterpreter) {
-						// Ctrl+Enter: show runtime-only messages and no check icon.
+						// Show any output produced before pause/completion
+						if (data.execution_output) {
+							const lines = data.execution_output.split('\n');
+							for (let i = 0; i < lines.length; i++) {
+								if (i === lines.length - 1 && lines[i] === '') continue;
+								successMsgs.push({ text: lines[i] });
+							}
+						}
 						if (data.execution_success) {
-							if (data.execution_output) {
-								for (const line of data.execution_output.split('\n')) {
-									successMsgs.push({ text: line });
+							// Append exit code message if present
+							if (data.execution_exit_message) {
+								const exitLines = data.execution_exit_message.split('\n');
+								for (const l of exitLines) {
+									if (l !== '') successMsgs.push({ text: l });
 								}
 							}
-
+							isWaitingForInput = false;
+						} else if (data.execution_paused) {
+							isWaitingForInput = true;
 						} else if (data.execution_error) {
 							successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
+							// Append termination message if present
+							if (data.execution_terminate_message) {
+								successMsgs.push({ text: data.execution_terminate_message });
+							}
+							isWaitingForInput = false;
 						}
 					} else {
 						successMsgs.push({ icon: check, text: data.message || 'No semantic errors' });
@@ -1735,7 +1804,7 @@ tokens
 	</header>
 
 	<!-- Main grid: left workspace and right sidebar -->
-	<div class="grid">
+	<div class="grid" bind:this={gridEl} style="--left-width: {leftWidthPercent}%">
 		<!-- LEFT WORKSPACE -->
 		<section class="left">
 			<!-- Toolbar row -->
@@ -1798,6 +1867,15 @@ tokens
 			</div>
 
 		</section>
+
+		<!-- Panel Resizer -->
+		<div
+			class="resizer"
+			on:mousedown={startPanelResize}
+			role="separator"
+			aria-label="Drag to resize panels"
+			title="Drag to resize panels"
+		></div>
 
 		<!-- RIGHT SIDEBAR -->
 		<aside class="right">
@@ -1973,12 +2051,12 @@ tokens
 	}
 
 	.grid {
-		display: grid;
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
 		width: 100%;
 		max-width: 100%;
 		box-sizing: border-box;
-		grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.85fr);
-		gap: var(--layout-gap);
 		padding: var(--layout-pad);
 	}
 
@@ -2037,8 +2115,10 @@ tokens
 		display: flex;
 		flex-direction: column;
 		gap: var(--layout-gap);
+		flex: 0 0 var(--left-width, 65%);
+		width: var(--left-width, 65%);
 		min-width: 0;
-		width: 100%;
+		overflow: hidden;
 		padding: 0;
 		margin: 0;
 	}
@@ -2120,15 +2200,41 @@ tokens
 
 	.right {
 		display: flex;
-		width: 100%;
+		flex: 1 1 0;
+		min-width: 0;
 		flex-direction: column;
 		gap: var(--layout-gap);
-		min-width: 0;
 		background: transparent;
 		color: var(--ink);
 		padding: 0;
 		margin: 0;
 		border-radius: 8px;
+	}
+	.resizer {
+		flex: 0 0 14px;
+		width: 14px;
+		cursor: col-resize;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10;
+		user-select: none;
+		-webkit-user-select: none;
+	}
+	.resizer::after {
+		content: '';
+		width: 4px;
+		height: 52px;
+		background: var(--outline);
+		border-radius: 4px;
+		opacity: 0.35;
+		transition: opacity 0.15s ease, width 0.15s ease;
+		pointer-events: none;
+	}
+	.resizer:hover::after {
+		opacity: 0.85;
+		width: 6px;
 	}
 	.actions {
 		display: flex;
@@ -2195,41 +2301,32 @@ tokens
 		padding: 12px;
 	}
 
-	.terminal-input-wrap {
-		margin-top: 10px;
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-	}
-
-	.terminal-input-label {
-		font-size: 12px;
-		font-weight: 700;
-		opacity: 0.9;
-	}
-
 	.terminal-input {
-		width: 100%;
-		box-sizing: border-box;
-		border: 3px solid var(--outline);
-		border-radius: 10px;
+		flex: 1;
 		background: transparent;
+		border: none;
+		outline: none;
 		color: var(--ink);
-		padding: 8px;
-		resize: vertical;
-		min-height: 84px;
+		caret-color: var(--ink);
 		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
-		font-size: 12px;
-	}
-
-	.terminal-input::placeholder {
-		color: var(--ink-muted);
-		opacity: 0.8;
+		font-size: 18px;
+		padding: 0;
+		margin: 0;
+		/* Force browser to use theme colour for typed text, not system default */
+		-webkit-text-fill-color: var(--ink);
 	}
 
 	@media (max-width: 1280px) {
 		.grid {
-			grid-template-columns: 1fr;
+			flex-direction: column;
+		}
+		.left,
+		.right {
+			flex: none;
+			width: 100% !important;
+		}
+		.resizer {
+			display: none;
 		}
 		.ide {
 			--frame-height: 700px;
