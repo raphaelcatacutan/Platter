@@ -1,0 +1,450 @@
+table of Student = [
+	chars of name;
+	chars of studentNumber;
+	chars of course;
+];
+
+prepare piece of charsLen(chars of txt){
+	piece of i = 1;
+
+	repeat(copy(txt, i, i) != ""){
+		i = i + 1;
+	}
+
+	serve i - 1;
+}
+
+prepare flag of validLen(chars of txt, piece of minLen, piece of maxLen){
+	piece of n = charsLen(txt);
+	serve n >= minLen and n <= maxLen;
+}
+
+prepare flag of validStudNo(chars of studNo){
+	piece of i = 1;
+	chars of ch = "";
+
+	check(studNo == ""){
+		serve down;
+	}
+
+	repeat(copy(studNo, i, i) != ""){
+		ch = copy(studNo, i, i);
+		check((ch >= "0" and ch <= "9") or ch == "-"){
+			# valid character
+		} instead {
+			serve down;
+		}
+		i = i + 1;
+	}
+
+	serve up;
+}
+
+prepare flag of hasStudNo(Student[] of records, chars of studNo){
+	piece of i = 0;
+
+	repeat(i < size(records)){
+		check(records[i]:studentNumber == studNo){
+			serve up;
+		}
+		i = i + 1;
+	}
+
+	serve down;
+}
+
+start(){
+	Student[] of records = [];
+	Student of newRecord = [];
+	piece of c = 0, i = 0, editChoice = 0;
+	chars of inputName = "", inputStudNo = "", inputCourse = "";
+	chars of searchStudNo = "";
+	flag of running = up, found = down, studNoOk = down;
+
+	repeat(running){
+		bill("\n==============================\n");
+		bill("Student Records Menu\n");
+		bill("==============================\n");
+		bill("1. Add Record\n");
+		bill("2. Display Record (all)\n");
+		bill("3. Search Record (individual)\n");
+		bill("4. Edit Student Record\n");
+		bill("5. Delete Student Record\n");
+		bill("6. Exit\n");
+		bill("Enter choice: ");
+		c = topiece(take());
+
+		check(c == 1){
+			bill("\n==============================\n");
+			bill("Add Student Record\n");
+			bill("==============================\n");
+
+			repeat(up){
+				bill("Enter student name: ");
+				inputName = take();
+				check(validLen(inputName, 3, 25)){
+					stop;
+				} instead {
+					bill("Invalid name length. Minimum 3 and maximum 25 characters.\n");
+				}
+			}
+
+			studNoOk = down;
+			repeat(not studNoOk){
+				bill("Enter student number: ");
+				inputStudNo = take();
+
+				check(not validLen(inputStudNo, 3, 10)){
+					bill("Invalid student number length. Minimum 3 and maximum 10 characters.\n");
+				} alt(not validStudNo(inputStudNo)){
+					bill("Invalid student number format. Numbers and dash only.\n");
+				} alt(hasStudNo(records, inputStudNo)){
+					bill("Student number already taken\n");
+				} instead {
+					studNoOk = up;
+				}
+			}
+
+			repeat(up){
+				bill("Enter course: ");
+				inputCourse = take();
+				check(validLen(inputCourse, 3, 25)){
+					stop;
+				} instead {
+					bill("Invalid course length. Minimum 3 and maximum 25 characters.\n");
+				}
+			}
+
+			newRecord = [
+				name = inputName;
+				studentNumber = inputStudNo;
+				course = inputCourse;
+			];
+			records = append(records, newRecord);
+
+			bill("==============================\n");
+			bill("Record added successfully.\n");
+			bill("==============================\n");
+
+		} alt(c == 2){
+			check(size(records) == 0){
+				bill("\n==============================\n");
+				bill("No records found.\n");
+				bill("==============================\n");
+			} instead {
+				bill("\n==============================\n");
+				bill("All Student Records\n");
+				bill("==============================\n");
+				pass(i = 0; i += 1; i < size(records)){
+					bill("Record #" + tochars(i + 1) + "\n");
+					bill("Name: " + records[i]:name + "\n");
+					bill("Student Number: " + records[i]:studentNumber + "\n");
+					bill("Course: " + records[i]:course + "\n");
+					bill("------------------------------\n");
+				}
+			}
+
+		} alt(c == 3){
+			bill("Enter student number to search: ");
+			searchStudNo = take();
+			found = down;
+
+			pass(i = 0; i += 1; i < size(records)){
+				check(records[i]:studentNumber == searchStudNo and not found){
+					bill("\n==============================\n");
+					bill("Record Found\n");
+					bill("==============================\n");
+					bill("Name: " + records[i]:name + "\n");
+					bill("Student Number: " + records[i]:studentNumber + "\n");
+					bill("Course: " + records[i]:course + "\n");
+					bill("==============================\n");
+					found = up;
+				}
+			}
+
+			check(not found){
+				bill("\n==============================\n");
+				bill("Record not found.\n");
+				bill("==============================\n");
+			}
+
+		} alt(c == 4){
+			bill("Enter student number to edit: ");
+			searchStudNo = take();
+			found = down;
+
+			pass(i = 0; i += 1; i < size(records)){
+				check(records[i]:studentNumber == searchStudNo and not found){
+					bill("\n==============================\n");
+					bill("Edit Record Menu\n");
+					bill("==============================\n");
+					bill("Student number can't be edited\n");
+					bill("1. Edit Name\n");
+					bill("2. Edit Course\n");
+					bill("3. Edit Name and Course\n");
+					bill("4. Cancel\n");
+					bill("Enter edit choice: ");
+					editChoice = topiece(take());
+
+					check(editChoice == 1){
+						repeat(up){
+							bill("Enter new student name: ");
+							inputName = take();
+							check(validLen(inputName, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid name length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+						records[i]:name = inputName;
+						bill("Record updated successfully.\n");
+					} alt(editChoice == 2){
+						repeat(up){
+							bill("Enter new course: ");
+							inputCourse = take();
+							check(validLen(inputCourse, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid course length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+						records[i]:course = inputCourse;
+						bill("Record updated successfully.\n");
+					} alt(editChoice == 3){
+						repeat(up){
+							bill("Enter new student name: ");
+							inputName = take();
+							check(validLen(inputName, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid name length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+
+						repeat(up){
+							bill("Enter new course: ");
+							inputCourse = take();
+							check(validLen(inputCourse, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid course length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+						records[i]:name = inputName;
+						records[i]:course = inputCourse;
+						bill("Record updated successfully.\n");
+					} alt(editChoice == 4){
+						bill("Edit cancelled.\n");
+					} instead {
+						bill("Invalid edit choice.\n");
+					}
+
+					bill("==============================\n");
+					found = up;
+				}
+			}
+
+			check(not found){
+				bill("\n==============================\n");
+				bill("Record not found.\n");
+				bill("==============================\n");
+			}
+
+		} alt(c == 5){
+			bill("Enter student number to delete: ");
+			searchStudNo = take();
+			found = down;
+
+			pass(i = 0; i += 1; i < size(records)){
+				check(records[i]:studentNumber == searchStudNo and not found){
+					records = remove(records, i);
+					bill("\n==============================\n");
+					bill("Record deleted successfully.\n");
+					bill("==============================\n");
+					found = up;
+				}
+			}
+
+			check(not found){
+				bill("\n==============================\n");
+				bill("Record not found.\n");
+				bill("==============================\n");
+			}
+
+		} alt(c == 6){
+			bill("\n==============================\n");
+			bill("Exiting Student Records program.\n");
+			bill("==============================\n");
+			running = down;
+
+		} instead {
+			bill("\n==============================\n");
+			bill("Invalid choice. Please select 1 to 6.\n");
+			bill("==============================\n");
+		}
+	}
+}
+--end
+1
+Alice Cruz
+2024-0001
+BSCS
+1
+Bob Lee
+2024A0002
+2024-0001
+2024-0002
+BSIT
+4
+2024-0002
+2
+BSIS
+3
+2024-0002
+5
+2024-0001
+2
+6
+--end
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 1
+
+==============================
+Add Student Record
+==============================
+Enter student name: Alice Cruz
+Enter student number: 2024-0001
+Enter course: BSCS
+==============================
+Record added successfully.
+==============================
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 1
+
+==============================
+Add Student Record
+==============================
+Enter student name: Bob Lee
+Enter student number: 2024A0002
+Invalid student number format. Numbers and dash only.
+Enter student number: 2024-0001
+Student number already taken
+Enter student number: 2024-0002
+Enter course: BSIT
+==============================
+Record added successfully.
+==============================
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 4
+Enter student number to edit: 2024-0002
+
+==============================
+Edit Record Menu
+==============================
+Student number can't be edited
+1. Edit Name
+2. Edit Course
+3. Edit Name and Course
+4. Cancel
+Enter edit choice: 2
+Enter new course: BSIS
+Record updated successfully.
+==============================
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 3
+Enter student number to search: 2024-0002
+
+==============================
+Record Found
+==============================
+Name: Bob Lee
+Student Number: 2024-0002
+Course: BSIS
+==============================
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 5
+Enter student number to delete: 2024-0001
+
+==============================
+Record deleted successfully.
+==============================
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 2
+
+==============================
+All Student Records
+==============================
+Record #1
+Name: Bob Lee
+Student Number: 2024-0002
+Course: BSIS
+------------------------------
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 6
+
+==============================
+Exiting Student Records program.
+==============================

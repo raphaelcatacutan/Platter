@@ -239,6 +239,20 @@ class FunctionChecker:
                         arg,
                         ErrorCodes.FLAVOR_TYPE_MISMATCH
                     )
+
+        # append(array, value): value must exactly match array element type.
+        if node.name == "append" and len(node.args) == 2:
+            array_type = self._get_expression_type(node.args[0])
+            value_type = self._get_expression_type(node.args[1])
+
+            if array_type and value_type:
+                element_type = array_type.get_element_type()
+                if element_type and not element_type.is_exact_match(value_type):
+                    self.error_handler.add_error(
+                        f"Flavor 2 of built-in recipe 'append': expected {element_type}, got {value_type}",
+                        node.args[1],
+                        ErrorCodes.FLAVOR_TYPE_MISMATCH
+                    )
     
     def _is_compatible_for_builtin(self, arg_type: TypeInfo, expected_type: TypeInfo) -> bool:
         """Check if a type is compatible for built-in recipe calls (more flexible)"""

@@ -12,8 +12,8 @@ from app.semantic_analyzer import analyze_program
 from app.semantic_analyzer.symbol_table import print_symbol_table
 from app.intermediate_code.ir_generator import IRGenerator
 from app.intermediate_code.output_formatter import IRFormatter
-from app.intermediate_code.optimizer_manager import OptimizerManager, OptimizationLevel
-from app.intermediate_code.ir_interpreter import TACInterpreter
+from app.code_optimization.optimizer_manager import OptimizerManager, OptimizationLevel
+from app.interpreter.ir_interpreter import TACInterpreter
 
 COPY_ERROR_TO_CLIPBOARD = True
 

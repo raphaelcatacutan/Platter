@@ -1,0 +1,3151 @@
+﻿Overview of the Programming Language
+Platter is a beginner-friendly programming language designed to help learners grasp the fundamentals of coding through the familiar lens of culinary arts. Developed by the group DeServe, Platter draws inspiration from the concept of mise en place, the practice of organizing ingredients before cooking, to promote clarity, structure, and readiness in programming. Reserved words and syntax are modeled after kitchen terminology, making abstract concepts more intuitive and relatable. Instead of traditional code blocks, Platter uses the term platter, visually and conceptually echoing the {} braces that contain logic, much like a real-life platter holding a complete dish.
+Platter’s syntax and semantics are inspired by a blend of established programming languages: it adopts the program structure, identifiers, data types, declarations, structs, and comments of C; the operators and typecasting of Python; and the statements and methods of Java, without the complexity of object-oriented design. This hybrid approach allows learners to build transferable skills while staying grounded in a simplified, modular environment. Recipes in Platter serve as reusable units of logic, akin to subprograms, helping learners write clean, maintainable code with a focus on task-specific clarity.
+To reinforce discipline and design awareness, Platter enforces a 25-character limit on identifiers, inspired by the 25% plating criterion in culinary competitions. This constraint encourages concise naming and thoughtful structure, mirroring the precision required in both programming and presentation. With its culinary metaphors, modular design, and pedagogical clarity, Platter offers a fresh and engaging way to learn programming serving both as a teaching tool and a stepping stone toward deeper technical fluency.
+________________
+1. Structure Overview
+<global_decl/s>/none
+
+
+<recipe_decl/s>/none
+
+
+start(){
+     <local_decl/s>/none
+     <statements/s>/none
+}
+
+
+<comment>/s/none
+	<recipe_decl> = prepare <serve_type> of <recipe_id>(<spices>/none){
+     <local_decl/s>/none
+     <statements/s>
+     <comment>/s/none
+                             }
+	
+________________
+2. General Rules
+1. The program structure order should follow the order of global declarations, recipe declarations, and start recipe.
+2. The program executes from top to bottom, unless a control structure changes the flow of execution.
+3. Identifiers are case sensitive and must only be composed of alphanumeric characters (a to z, A to Z, 0 to 9) and underscores ( _ ), not start with any number, no other special characters and spaces, and have a limit of  25 characters.
+4. All global declarations, including ingredients, arrays, table prototypes and instances, and recipe declarations cannot use the same identifier regardless of their differences in data types and serve types.
+5. Local declarations (ingredients, arrays, tables, spices, recipe calls) cannot share the same identifier within a scope. Each recipe, including the start recipe, and each platter has its own local scope. Recipe identifiers belong to the global scope, while spices and platter identifiers belong to the recipe’s local scope.
+6. Identifiers declared in a broader scope but not in the current local scope can be accessed. This way, changes made in the local scope affect the same identifier in the broader scope. Nested platters in loops or conditionals create deeper local scopes with their own declarations and a separate set of identifiers.
+7. The primitive data types refer to the following: piece, sip, chars, and flag, while collections refers to arrays and tables.
+8. The literals are referred to the following: (a) numeric: piece and sip literals, (b) textual: chars literal, and (c) boolean: flag literal.
+9. Ingredients are the variables, arrays are the arrays, and tables are the structs.
+10. Ingredients are containers of primitive data types that can be accessed using its assigned identifier and must be declared with a specific data type using the ( of ) keyword, and if initialized, the assigned value must be compatible with the declared type. 
+11. All uninitialized ingredients are assigned a default value based on their data type.
+12. Null and void data types are not supported since all data types have their own default value when uninitialized. 
+13. Values are units of usable data. Categorized into the following: (a) Expressions and (b) Notation Value. Notation value can either be Array Notation Value or Table Notation Value.
+14. Values can be referred to as chars_value, numeric_value: piece_value and sip_value, or boolean_value referring to all values that are expected to resolve to those data types.
+15. Operands are the resolved sources of values used in expressions. It may originate from the following sources: (a) Chars literals, (b) Flag literals, (c) Numeric literals (piece and sip literals), (d) Chars Ingredient, (e) Flag Ingredient, (f) Numeric ingredient (piece and sip ingredient), (g) Recipe calls of primitive serve type (piece, sip, flag, chars), (h) Accessed array index of a single dimension array, (i) Accessed field of primitive data types in a table, and (j) Valid Expression.
+16. Expressions can be defined as arithmetic, relational, logical, and complex expressions.
+17. There are also assignment and compound assignment operators.
+18. Arithmetic expressions support up to 15 digits of precision for discrete values and up to 15 digits before and 7 digits after the decimal point for continuous values.
+19. When writing an expression, no two operands may appear consecutively without an operator.
+20. Prefix unary operators are supported, no postfix unary operators are allowed.
+21. Nesting expressions are allowed, wherein parentheses should be used, and they must be balanced.
+22. Nested expressions are evaluated from the innermost to outermost pair of parentheses.
+23. Evaluating expressions follow an order of precedence, and expressions of the same precedence are evaluated from left to right.
+24. Arithmetic, Relational, and Logical expressions and Recipe calls may be combined to create complex expressions.
+25. All expressions must resolve to values within the valid range of their declared data type. If an expression produces a value outside this range, the program halts and reports the originating recipe or statement that caused a value beyond the data type’s range as part of the error. This rule applies to all arithmetic, assignment, and serve operations, ensuring semantic integrity and preventing overflow and invalid state propagation.
+26. All global declarations may only consist of the following: ingredient, arrays, table instance and table prototype
+27. All global declarations must be declared prior to the recipes and the start recipe.
+28. Ingredients, arrays and tables must be declared before they are used in statements.
+29. No assigning or reassigning can be done within the global scope as no other statements apart from declarations are allowed.
+30. Globally declared ingredients, arrays, table instances and prototypes are visible throughout the entire program, across all recipes, the start recipe, control-flow statements, platters, arrays, and tables. 
+31. A program is not required to have global declarations.
+32. An array is a collection of values of the same type that can be organized in multiple dimensions.
+33. An array notation represents a list of elements enclosed by a pair of square brackets and separated by a comma ( , ).
+34. An array accessor which uses a piece as an index to the element within each pair of brackets following the array’s identifier, is used to read and write a value to an array.
+35. A table prototype defines the fields for a table instance and is used as the template for table declaration.
+36. A table instance is a collection of fields defined by a table prototype.
+37. A table instance notation represents a list of fields and its values enclosed by a pair of square brackets ( [ ] ).
+38. A table accessor which uses a colon and the field name following the table’s identifier, is used to read and write a value to a table.
+39. An array or table may contain pieces, sips, chars, flags, nested arrays, or nested tables.
+40. Values in an array or table must match the type specified in its declaration.
+41. Operators cannot be applied directly between arrays or tables.
+42. A platter is a block of executable statements enclosed in open and close curly brackets ({ }). 
+43. Every executable statement inside a platter does not require to be indented.
+44. A platter defines a local scope.
+45. Every statement that is associated with a platter is assigned its own distinct instance of that platter, including recipes and the start recipe.
+46. Recipes are user-defined subprograms that should be defined after the global declarations, if there are any, and before the start recipe.
+47. All recipes must be defined first before it is called.
+48. There can be zero or many user-defined recipes in a program, in which there can be no recipes defined within the start recipe or another recipe.
+49. Recipe parameters are referred as spices, while passed arguments are referred as flavors for recipe calls.
+50. When defining recipes, it must include its serve type, keyword ( of ), identifier, spice list, which may be empty, and a platter, with at least one reachable serve statement.
+51. A recipe may have many or not have any local declarations and depend on available global declarations for its ingredients, arrays, or tables. 
+52. Return statements are referred to as serve statements.
+53. Recipes can only have one serve type, in which it can either be piece, sip, flag,  chars, arrays, or tables. 
+54. Each recipe must contain exactly one top-level, defined at the program’s outermost scope,  platter. 
+55. Nested recipe definitions are not allowed.
+56. Recipes only allow passing by value, no addresses or container references are passed around as flavors and each recipe serves a value as its output.
+57. A recipe can call any other recipe that was defined before it.
+58. Recipes cannot be called globally or anywhere outside a local scope.
+59. A recipe calling itself within its own platter is allowed.
+60. A recipe call can be used as a standalone statement and must end with a statement terminator (;). In this form, the recipe is invoked for its behavior, and its served value is discarded unless explicitly handled.
+61. User-defined recipes cannot have the same identifiers as built-in recipes.
+62. Calling built-in recipes adhere to the same rules that apply to user-defined recipes.
+63. Built-in recipes are classified as the following: (a) Type Casting: topiece, tosip, and tochars, (b) Input and Output: take and bill, (c) Math, Formatting, and Random: pow, sqrt, fact, cut, copy, and rand, and (d) Arrays and Tables: size, sort, search, reverse, append, remove, and matches.
+64. A standalone take recipe call is referred to as the input statement and a standalone bill recipe call is referred to as the output statement.
+65. Local declarations may contain ingredient, array, or table declarations.
+66. Local declarations are only visible within the platter or recipe in which it is defined. The scope of a local declaration begins at its point of declaration and ends at the closing curly bracket of the platter where it was declared.
+67. All local declarations can only be declared within a platter.
+68. Local declarations are not required within a platter.
+69. The following are defined as statements: (a) local assignment, (b) standalone recipe call, (c) conditional: check and menu, (d) looping: pass, repeat, and order-repeat, and (e) jump: next, stop, and serve. Although they are technically statements, global and local declarations are not included in our definition of statements for clear distinction and separation in the program structure and syntax. Initialization is considered a part of declaration and assigning of values without a declaration will be considered as a local assignment statement.
+70. The semicolon ( ; ) is used as a statement terminator and it is only used to terminate the following: (a) declaration: global and local, (b) local assignment, (c) standalone recipe calls, (e) pass: initialization and update, and (e) order-repeat.
+71. The control-flow statements refers to the following: check as the if statement, menu as the switch statement, pass as the for statement, repeat as the while statement, order-repeat as the do-while statement.
+72. Conditional, looping, and jump statements cannot be created in the global scope. They are also not considered as recipe calls as they do not serve any value and cannot be used in expressions.
+73. All control-flow statements are paired with a platter, following the platter rules.
+74. All control-flow statements can only be used within user-defined recipes or within the start recipe. 
+75. All control-flow statements can read, modify, or reference an ingredient outside its platter scope.
+76. Nested control-flow statements are allowed. They can be nested inside another control-flow statement, including one of the same type.
+77. The next statement and stop statement can be placed in nested loops and only the innermost loop where it is placed will be affected.
+78. There must be exactly one start recipe in a program. 
+79. The start recipe is defined after the global ingredients, and recipe declarations. 
+80. The start must have an empty spice list. 
+81. The start recipe cannot be invoked in any part of the program.
+82. A comment is not read by the compiler when the program is compiled. 
+83. Comments can be added anywhere where it will not interrupt a specific reserved word or identifier by being added between it.
+84. A comment can contain any number of characters, including alphanumeric and special characters.
+85. A Multi-line comment begins with a closing double hash (##) and ends when another ( ## ) is encountered.
+Reserved Words
+alt
+	and
+	append
+	bill
+	chars
+	check
+	choice
+	copy
+	cut
+	down
+	fact
+	flag
+	instead
+	matches
+	menu
+	next
+	not
+	of
+	or
+	order
+	pass
+	piece
+	pow
+	prepare
+	rand
+	remove
+	repeat
+	reverse
+	search
+	serve
+	sip
+	size
+	sort
+	sqrt
+	start
+	stop
+	table
+	take
+	tochars
+	topiece
+	tosip
+	up
+	usual
+	
+
+	
+
+Reserved Symbols
++
+	-
+	*
+	/
+	%
+	>
+	<
+	=
+	==
+	>=
+	<=
+	!=
+	+=
+	-=
+	*=
+	/=
+	%=
+	,
+	{
+	}
+	(
+	)
+	[
+	]
+	;
+	:
+	\n
+	\t
+	˽
+	
+
+	
+
+	
+
+	3. Specific Rules
+Identifiers
+Identifiers are used to name user-defined ingredients, recipes, arrays, spices, and tables. Identifiers enable access and manipulation of these elements in the program by providing a way to reference them.
+
+
+Rules:
+1. May only contain lower (a to z) and upper (A to Z) case English letters, digits (0 to 9), and underscores ( _ ). All other special characters are not allowed.
+2. Must begin with at least one letter (A to Z, a to z) or an underscore.
+3. Cannot begin with a digit.
+4. Must only be made of a maximum of 25 characters.
+5. Cannot contain whitespaces anywhere between the characters.
+6. Case sensitive where the upper and lower case letters are considered different from each other and creates a completely different identifier.
+7. Cannot match any reserved word.
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	user_name
+	user-name            
+	____
+	name#tag
+	noValue
+	0value 
+	this_only_has_16
+	this_has_more_than_25_characters
+	Serve
+	serve
+	prepareDish
+	prepare
+	________________
+Data Types and Literals
+Data Types
+Data types are used to define the type of value stored by ingredients, arrays, and spices, as well as the serve types of recipes. The primitive data types in Platter consist of piece, sip, flag, and chars. Data types in Platter are all immutable, meaning a data type cannot be changed once declared on an ingredient or array, and statically and explicitly typed.
+
+
+Literals
+Literals are the values themselves that are stored in ingredients or used in different sections of the program. Platter categorizes its literals as numeric: piece and sip literals; textual: chars literal; and boolean: flag literal.
+
+
+
+
+piece
+A data type for storing 15-digit signed integers.
+Rules for piece:
+1. piece ingredients can only store up to 15-digit signed integers and will not allow assigning of values beyond this nor will it allow assigning of a sip, flag, or chars data type or literal.
+2. Defaults to 0 if uninitialized.
+
+
+Rules in defining a piece literal:
+1. piece values must only be an integer.
+2. piece values cannot include fractions or decimal points.
+3. piece values cannot contain whitespaces or any other non-digit characters in between the digits.
+4. piece values cannot contain any other non-digit character before, aside from the unary minus (-), and after the digits.
+5. piece values must remain within the range of -999999999999999 to 999999999999999. Any value that exceeds this range will not be allowed.
+6. piece values may either be positive, negative, or zero values.
+7. piece values cannot have leading zeros.
+8. piece values that are unsigned (without the negative sign) are positive.
+9. piece values should not have the unary plus (+) sign as a prefix of positive values.
+10. piece values that have the unary minus (-) sign as prefix are considered as negative values.
+11. A piece with a value of 0 can have a unary minus (-) prefix (-0) but will resolve to an unsigned 0 if created.
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	123
+	123.0 
+	123456789
+	123_456_789
+	123456
+	123abc
+	1000
+	1 000
+	-3
+	+/-3
+	0
+	012345678           
+	-0
+	+100
+	-987654321
+	- 123456789
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+sip 
+A data type for storing up to 15 signed non-fractional digits and 7 fractional digits separated by a decimal point (.).
+
+
+Rules for sip:
+1. sip ingredients can only store up to  15 signed non-fractional digits and 7 fractional digits separated by a decimal point (.), and will not allow assigning of values beyond this nor will it allow assigning of a piece, flag, or chars data type or literal.        
+2. Defaults to 0.0 if uninitialized.
+
+
+Rules in defining a sip literal:
+1. sip values must have a single decimal point.
+2. sip values must have at least a single digit (0 to 9) before and after the decimal point.
+3. sip values cannot contain whitespaces or any other non-digit characters in between the digits aside from the decimal point.
+4. sip values cannot contain any other non-digit character before, aside from the unary minus (-), and after the digits.
+5. sip values must remain within the range of -999999999999999.9999999face to 999999999999999.9999999. Any value that exceeds this range will not be allowed.
+6. sip values cannot have leading zeros in the non-fractional digits, unless the non-fractional value is just 0.
+7. sip values can have trailing zeros within the digit range limit.
+8. sip values cannot be in exponential or scientific notation
+9. sip values may either be positive, negative, or zero values.
+10. sip values that are unsigned (without the negative sign) are positive.
+11. sip values should not have the unary plus (+) sign as a prefix of positive values.
+12. sip values that have the unary minus (-) sign as prefix are considered as negative values.
+13. A sip with a value of zero for both the fractional and non-fractional digits (0.0) can have the unary minus (-) as a prefix (-0.0) but will resolve to 0.0 if created.
+
+
+
+
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	123.0
+	123
+	21.03
+	21.1.100
+	456.0
+	456.
+	-0.0
+	34.23f
+	123456.654321
+	1234567.123456789
+	0.123456
+	01.2134
+	0.001
+	1x10^-3
+	100.001
+	+100.000
+	
+
+________________
+flag 
+A data type for storing up (true) and down (false) values. 
+
+
+Rules for flag:
+1. flag ingredients can only store either up or down, and will not allow assigning of values beyond this nor will it allow assigning of a piece, sip, or chars data type or literal.
+2. Defaults to down if uninitialized.
+
+
+Rules in defining a flag literal:
+1. flag values are case-sensitive and must all be in lowercase.
+2. flag does not include the values 1, 0, true, and false, and will not recognize them.
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	up
+	Up,uP,UP
+	True, 1
+	^
+	down
+	up/down, Down, DOWN
+	False, false, 0
+	
+
+________________
+chars 
+A data type for storing an empty or a sequence of ascii encoded characters. 
+
+
+Rules for chars:
+1. chars ingredients can only store  an empty or a sequence of ascii encoded characters enclosed in double quotes (“”), and will not allow assigning of values beyond this nor will it allow assigning of a piece, sip, or flag data type or literal.
+2. Defaults to “” if uninitialized.
+
+
+Rules in defining a chars literal:
+1. chars values are case-sensitive.
+2. chars values are enclosed between double quotes (“”).
+3. chars values can be a digit.
+4. chars values will only recognize spaces and not other whitespaces such as a line feed or horizontal tab and can only be ascii values within ascii 32 - ascii 126.
+5. chars values can use escape sequences to have access to specific symbols within a string or apply print formatting, using a backslash (\) for a non-recognized escape sequence will just print the backslash (\) together with the symbol that follows.
+
+
+      Recognized escape sequences:
+Escape Sequence
+	Purpose
+	\n
+	For creating a new line
+	\t
+	For creating a horizontal tab
+	\\
+	For creating a backslash (\)
+	\”
+	For creating a double quote (“)
+	
+
+________________
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	“Hello”
+	Hello
+	“Hi\tthere”
+	"Hi
+	“\”Hello”
+	“ “hello“
+	“\”Hello\”\nThis is Platter”
+	\n”nextLine”
+	“C:\Users\Is Still Allowed”
+	“\carriage return””
+	
+
+Summary of Primitive Data Types:
+General Type
+	Platter Data Type
+	Value Range
+	Integer
+	piece
+	-999999999999999 to 999999999999999
+	Float
+	sip
+	-999999999999999.9999999 to 999999999999999.9999999
+	Boolean
+	flag
+	up or down
+	String
+	chars
+	empty, single, or multiple ascii encoded characters
+	
+
+ 
+________________
+Operators and Expressions
+Values 
+Values are units of usable data. Categorized into the following:
+1. Expressions
+2. Notation Value 
+   1. Array Notation
+   2. Table Notation
+
+
+Operands 
+Operands are the resolved sources of values used in expressions. They may only originate from any of the following sources:
+   1. Chars literals
+   2. Flag literals
+   3. Numeric literals (piece and sip literals)
+   4. Chars Ingredient
+   5. Flag Ingredient
+   6. Numeric ingredient (piece and sip ingredient)
+   7. Recipe calls of primitive serve type (piece, sip, flag, chars)
+   8. Accessed array index of a single dimension array
+   9. Accessed field of primitive data types in a table
+   10. Valid Expression
+ 
+
+
+Operators 
+        Operators are the built-in symbols or keywords that are used with operands and produce a result. These include:
+1. Unary Operators ( -, not )
+2. Arithmetic Operators ( +, -, *, /, % )
+3. Logical Operators (and, or, not)
+4. Relational Operators ( >, <, ==, !=, >=, <= )
+5. Assignment Operator ( = )
+6. Compound Assignment Operators ( +=, -=, *=, /=, %= )
+
+
+
+
+
+
+
+
+Expressions 
+Expressions are combinations of values and operators or a single value that evaluates to a single result value. They ensure calculations, comparisons, decisions, and text operations can be written clearly and consistently.
+
+
+Rules:
+1. An expression must consist of either a single operand or a valid sequence of operands and operators, where each operator connects exactly two operands (except for unary operators).
+2. No two operands may appear consecutively in an expression without an operator. 
+3. No two non-unary operators may appear consecutively without an operand between them. 
+4. Operands are resolved first individually before being used in expressions. 
+5. Operand data types should match the given syntax for each expression.
+6. Nesting expressions are allowed, wherein parentheses must be balanced. Every opening parenthesis ( ( ) must have a matching closing parenthesis ( ) ). An empty pair of parentheses is not allowed.
+7. Nested expressions are evaluated from the innermost to the outermost pair of parentheses.
+8. An expression may only start with: (a) An operand, (b) An opening parenthesis, (c) A unary operator ( -, not ). 
+9. An expression may only end with: (a) An operand, (b) A closing parenthesis.
+10. When an expression combines different types of operands, it results in an error.
+11. Each expression resolves to one primitive data type, which could either be piece, sip, flag, or chars.
+12. Precedence Order for Evaluating Expressions:
+   1. Recipe calls / Accessing
+   2. Parentheses ( )
+   3. Unary operators ( not, - )
+   4. Multiplication, Division, Modulus ( *,  /,  % )
+   5. Addition, Subtraction (+ , - )         
+   6. Ordering ( < , <= , > , >= )
+   7. Equality ( ==, != )
+   8. Logical AND ( and )
+   9. Logical OR ( or )
+13. All expressions are left-associative, where expressions of the same precedence are evaluated from left to right, unless parentheses ( ) are used to override default precedence. 
+14. Assignment operators ( =, +=, -=, *=, /=, %= ) are evaluated last and cannot be used more than once as it can only be used as the first operator in an assignment statement.
+15. Expressions on their own are not valid statements.
+
+
+Syntax: 
+# Simple Expression
+<operand>
+<operand> <operator> <operand>;
+	
+
+Unary Expressions
+Rules:
+1. Unary Expressions consist of the unary minus ( - ) and the NOT logical operator ( not ), in which it operates on a single operand.
+2. Unary minus ( - ) sign negates a numeric literal only.
+3. ( - ) must appear immediately before a numeric literal, with no whitespace.
+4. The not operator negates a flag value. 
+5. The not operator can only be used before an operand. The not operator may appear adjacent to other logical operators and itself.
+
+
+Syntax:
+# Unary Minus
+-<numeric_literal>
+
+
+# Not Operator
+not <flag_value>
+	
+
+
+
+
+
+
+
+
+
+Examples:
+piece of x=10;
+flag of flag1 = up, flag2 = down;
+flag[] of flagArray = [up, down];
+	Valid
+	Invalid
+	-14
+	- x
+	not flag1
+	 not x
+	not flagArray[0]
+	not-flag2
+	-421.23
+	not numarray[0]
+	
+
+Arithmetic Expressions
+Rules:
+1. Operators for arithmetic expressions include addition ( + ), subtraction ( - ), multiplication ( * ), division ( / ), and modulus ( % ).
+2. Modulus ( % ) can only be used to operate on piece values.
+3. Division between piece values produces an integer quotient, discarding the remainder value; exact decimal results only occur if the operands are of type sip, and zero or an expression evaluating to zero as the divisor results in an error. 
+4. Two minus ( - ) symbols next to each other are only allowed if separated by a space or opening parenthesis ( ( ). 
+5. Arithmetic expressions follow the ordered precedence for expressions.
+6. Arithmetic operators do not operate on flag types and will result in an error.
+7. Arithmetic operators subtraction ( - ), multiplication ( * ), division ( / ), and modulus ( % ), do not apply to chars types while addition ( + ) will only be utilized for chars concatenation.
+8. Arithmetic expressions may also contain unary expressions with the unary minus ( - ) operator on piece and flag literals.
+
+
+Syntax:
+<piece_operand> <arithmetic_operator> <piece_operand>
+<sip_operand> <arithmetic_operator> <sip_operand>
+	Examples:
+piece of num = 2, c=3, x=10, y=5;
+sip of sip1 = 2.5, sip2 = 6.4, sip3 = 9.3;
+piece[] of numArray = [1, 2, 3]; sip[] of sipArray = [1.0, 2.0, 3.0];
+	Valid
+	Invalid
+	x + c * y     
+	2 / num 1 + 2
+	(x - y) % num   
+	  2 % 0.4
+	x / num + y    
+	piece of x = (10 / 3.0);
+	(c - num) * (x - y)   
+	4++2+5*2/5
+	sip2 / sip1 + sip3   
+	piece of z = double(3) + 2 * (y - 0.4)
+	(sip3 - sip2) * sip1 
+	sip1 + num 
+	(x % c) + (y % num) 
+	4--2+1-4
+	numArray[0] + numArray[1] 
+	numArray[0] + sipArray[0];
+	
+
+Logical Expressions
+Rules:
+1. Operators for logical expressions include AND ( and ), OR ( or ), and NOT ( not ). 
+2. Logical expressions only operate on flag values and produce a flag result (up/down).          
+3. The not operator can only be used before an operand, where the not operator may also appear adjacent to other logical operators and itself.
+4. Logical operators must not attach to its operands and should be space or parenthesis separated.
+5. and results in up only if both operands evaluate to up, else it results in down; or results in up if at least one operand evaluates to up, else it results in down; not negates a flag value.
+6. Expressions may not begin or end with an and or or logical operator.
+7. Logical Expressions are evaluated following the precedence order for expressions.
+Syntax:
+<flag_operand> and <flag_operand>
+<flag_operand> or <flag_operand>
+	Where: 
+<flag_operand> = not <flag_operand> /
+                   <flag_operand>
+	
+
+Examples:
+flag of a=up,b=down,c=up,d=down,x=up,y=up,z=down;
+piece of w = 5;
+sip of s = 2.5;
+flag[] of upArray = [up, up, up]; piece of pieceArray = [1,2,3];
+	Valid Examples
+	Invalid Examples
+	not a and not b  
+	5 and 10
+	not (up or down)
+	up AND down
+	up or not not down
+	x or y or x and y not
+	not a or not b and c or not x 
+	a and or a b a and b or a
+	a or b 
+	a or;
+	not y and not z   
+	not w and not s 
+	upArray[0] or upArray[0] 
+	upArray[0] and pieceArray[0]
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+Relational Expressions
+Rules: 
+1. Relational expressions compare two values and produce a flag result ( up / down).
+2. Relational operators include greater than ( > ), less than ( < ), greater than or equal to ( >= ), less than or equal to ( <= ), equal to ( == ),  and not equal to ( != ).
+3. Comparisons are only allowed between piece with piece, sip with sip,  flag with flag, and  chars with chars. Any attempt to compare across incompatible types results in an error.
+4. When comparing flag to flag values:
+   1. Only ( == ) and ( != ) are allowed.
+   2. Ordering relational operators ( <, >, <=, >= ) are not allowed.
+5. When comparing chars to chars values:
+1. Equality operators ( == ) and ( != ) is case sensitive and will evaluate if both chars contain the exact same length and characters. 
+2. Ordering relational operators ( <, >, <=, >= ) are evaluated lexicographically.
+6. Relational expressions must compare exactly two operands at a time. Each relational operation must be a standalone comparison between a single pair of compatible operands. Adjacent relational expressions should be separated with a non-unary logical operator.
+7. Relational expressions may also contain unary expressions with the unary operator not.
+Syntax:
+<piece_operand> <relational_op> <piece_operand>
+<sip_operand> <relational_op> <sip_operand>
+<chars_operand> <relational_op> <chars_operand>
+
+
+<flag_rel_operand> <eq_operator> <flag_rel_operand>
+	Where:
+<flag_rel_operand> = 
+<flag_literal> /
+<flag_ingredient_id> /
+<accessed_flag_array_index> / 
+<accessed_table_flag_field> /
+<recipe_call_serving_flag>
+<relational_op> = > / < / == / != / >= / <=  
+<eq_operator> = != / ==
+	Examples:
+piece of a=2, b=3, p=4, x=1, y=2, z=5;
+sip of r = 5.5;
+flag[] of flagArray = [up, down, up]; piece[] of pieceArray = [1, 2, 3];
+	Valid Examples
+	Invalid Examples
+	a == 3 
+	‘a' < 3
+	“Hello” == “Hello”
+	up > down
+	(x <= y) == (x == z)
+	(x <= y)>=(x == z)
+	tosip(p) <= r
+	p <= “r”
+	(a>b)==(b<p)
+	a>b><p>x>y
+	flagArray[0] != flagArray[1]
+	flagArray[0] == pieceArray[0]
+	
+
+Complex Expressions
+Rules:
+1. Arithmetic, Relational, and Logical operators may be combined and used to create complex expressions.
+2. All rules for arithmetic, relational, and logical expressions still apply for complex expressions.
+3. Evaluation of complex expressions still follows the expression evaluation precedence order and resolves each expression as a new operand.
+4. Usage of parenthesis to group expressions are encouraged to promote readability.
+
+
+
+
+Syntax:
+<rel_expr> <logical_op> <rel_expr>        
+	Where: 
+     <rel_expr> = 
+<piece_operand/piece_expr> <relational_op> <piece_operand/piece_expr> /
+<sip_operand/sip_expr> <relational_op> <sip_operand/sip_expr> /
+<chars_operand/chars_expr> <relational_op> <chars_expr> /
+<flag_rel_operand> <eq_operator> <flag_rel_operand> 
+	
+
+Examples:
+piece of x = 5, y = 2, z = 3, q = 7; sip of a = 3.1;
+flag[] of flagArray = [up, down, up]; piece[] of pieceArray = [1, 2, 3, 4];
+	Valid
+	Invalid
+	(3 + 5) * 2 > 10 and up
+
+
+	(tosip(z) + x) >= a
+	((up) or (up or down)) == up
+
+
+	(up) + (up or false)) > up
+	not (4 % 2 == 1)
+
+
+	(4 % 2) / (2-  2) 
+	x + pieceArray[0] * pieceArray[z]
+
+
+	a - pieceArray[1] + flagArray[y]
+	((20 / 5) + 3) * 2 <= 14 or (18 - 10) % 4 == 1
+
+
+	(4 + 3) * 2 <= 14 or (8.2 % 4) == 1
+	(50 / (5 * 2)) + (12 % 5) < 10 or (6 * 3) - 4 == 14
+
+
+	(x > y > z) == (z < y < x) or up or down or not up or not down == (x or y)
+	not (x >= y) and not (y >= x)
+
+
+	not x >= y and not y >= x
+	(double(3) + 5) * 2 >= 10 * 2 + 2
+
+
+	up or down == y == not down == ( 5 > x) == (up or down and not up)
+	((x + y) < z) and q == 4 
+	((x + y) < z) and (p || q)
+	(x > y) == (x < z) and up or not down and (5+ 2) >= 7 or not down
+
+
+	up and not up and  not up and not down and not(x>z) and up and not up and not down and up or down and not and not and not up and not down
+	
+
+________________
+Character Expressions
+Rules:
+1. Concatenation is the connecting of separate chars values into a single chars and is the effect of ( + ) on a character expression.
+2. chars values can only be concatenated using the operator ( + ), where the operands are concatenated in order, and the result is a single chars value.
+3. All operands must be of chars type, else the expression returns an error.
+
+
+Syntax:
+<chars_operand> + <chars_operand> 
+	
+
+Examples:
+chars of greet = “hello”;
+chars of name = “jane”; 
+piece of age = 32;
+chars[] of charArray = [“Hello”, “World”];
+	Valid Examples
+	Invalid Examples
+	tochars(age) + “ years old”
+	age + ” years old”
+	greet + “ ” + “world”
+	greet “+” world
+	“Identifiers are used” + “to name user-defined ingredients, “ + “recipes, arrays, spices, and tables.”
+	“Identifiers are used” + “to name user-defined ingredients, “ + “recipes, arrays, spices, and tables.”
+	“hi” + name
+	“hi” + + + name
+	charArray[0] + charArray[1]
+	charArray[0] - charArray
+	
+
+________________
+Assignment Operators        
+Rules:
+1. Assignment operators include the equal sign (=) and compound assignments (+=, -=, *=, /=, %=). 
+2. Assignment operators are used to store the result of an expression into a mutable target such as an ingredient, array index, or table field. Only one assignment operator may appear in an assignment statement; chained assignments are not allowed.
+3. Assignment statements must begin with a valid mutable operand on the left-hand side and end with a valid expression on the right-hand side. Assignment operators do not operate on incompatible types; the result of the expression must match the declared type of the target.
+
+
+Syntax:
+<mutable_operand> <assignment_operator> <expression>;
+	Where:
+<mutable_operand> = 
+                          <ingredient>
+                          <array_index>
+                          <table_field>
+	
+
+Examples:
+piece of one = 51, three = 10;
+sip of four = 653.234, six = 6.6, seven;
+flag[] of flagArray = [up, down, up]; piece[] of pieceArray = [1, 2, 3, 4];
+	Valid Examples
+	Invalid Examples
+	seven = one+12;
+	seven == one + one
+	three += one;
+	three++ 
+	four -= six + tosip(three);
+	four =+ {
+     six + 6.6
+}
+	six *= 7.7;
+	12 *= four
+	one /= 51;
+	5 = %seven
+	one %= three;
+	four: /three
+	pieceArray[3] += 6/3*2;
+	pieceArray[2] /= 0
+	
+
+________________
+Global Declaration
+Ingredients 
+These are user-defined containers of every data in a Platter code. They store values of different data types and can be accessed at different points of the program within its scope.
+
+
+Rules in declaring an ingredient:
+1. Ingredients can be declared in the global scope and all global ingredient declarations must be declared before the recipe definitions and the start recipe.
+2. Ingredients must be explicitly declared with a specific data type that matches the type of the value they will store.
+3. The reserved word ( of ), must be placed between the data type and the ingredient identifier. This serves as a connector to ensure natural readability.
+4. The declaration is terminated by the statement terminator ( ; ) if not initialized.
+5. Uninitialized ingredients acquire the data type’s default value. 
+6. Multiple ingredient declarations in a single declaration statement is valid. Each identifier must be separated by a comma ( , ). And all ingredients in the same declaration statement will acquire the same data type.
+7. Redeclaring the same ingredient identifier within the same scope is treated as a duplicate and returns an error, a global and local declaration is not considered as a declaration on the same scope.
+8. Ingredient identifiers must be unique within their scope and must not conflict with any other declared identifier in the same scope, including ones used by recipes, table, table prototypes, and arrays. Using the same identifier for multiple declarations, regardless of data type or kind, is prohibited and results in an error.
+
+
+Syntax:
+# Single ingredient declaration
+<dataType> of <id>;
+
+
+# Multiple ingredient declaration
+<dataType> of <id>,<id>, <id>;
+	
+
+
+
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	piece of counter;
+	sip of x = 1.25; y = 3.50;
+	flag of isReady;                                                                                                                      
+	flag of isReady
+	sip of a,b,c;
+	start(){
+sip of a, b, c;
+piece of a;
+}
+# invalid local identifier override
+	piece of globalVariable;
+
+
+start(){
+piece of globalVariable;
+}
+# valid local identifier override
+	piece of
+func;
+	 piece of func;
+ sip of func;
+	
+
+________________
+
+
+Rules in initializing an ingredient:
+1. Ingredients are initialized using the assignment operator ( = ) only, after the ingredient identifier of the ingredient declaration followed by the corresponding expression that resolves to the assigned data type. Compound assignment operators are not allowed and will return an error.
+2. If multiple ingredients are initialized in the same line, use the assignment operator ( = ), after the ingredient identifier, followed by the corresponding expression that resolves to the assigned data type. Each initialization should be separated by a comma ( , ). And all ingredients in the same initialization statement acquire the same data type, thus, the expressions should evaluate to the same type as well. A combination of initialized and uninitialized ingredients are allowed.
+3. The initialization is terminated by the statement terminator ( ; ) after the last expression.
+
+
+Syntax:
+# Single ingredient initialization
+<dataType> of <id> = <expression>;
+# Multiple ingredient initialization
+<dataType> of <id1> = <expression>,<id2> = <expression>,<id> = <expression>;
+
+
+# Combination of multiple initialized and uninitialized ingredients
+<dataType> of <id1> = <expression>,<id2>,<id1> = <expression>;
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	chars of name = "John Doe";
+	chars of name = John Doe;
+	sip of x = 1.25, y = 3.50;
+	sip of x = 1.25; y = 3.50;
+	piece of x = 5, y, z = 15;
+	piece of x = 5, y = 10.1 z = 15;
+	flag of isActive = up;
+	flag of isActive = "up";
+	piece of y = 5;
+	piece of y = -.0;
+	Array 
+An array is a collection of values of the same data type, table prototype or another array that can be organized in multiple dimensions and accessed using an index. Values inside an array are called elements.
+
+
+Rules in declaring an array:
+1. When declaring an array, it must have the following in order:
+   1. The data type or table prototype identifier
+   2. Dimension square bracket pairs ( [ ] )
+   3. The keyword (of)
+   4. The array identifier or identifiers separated by comma ( , )
+   5. A statement terminator ( ; )
+2. Globally declared arrays can be accessed anywhere in the program after they are declared.
+3. The number of bracket pairs indicates the dimension of the array. 
+4. Multiple array declarations in a single statement is valid. Each identifier must be separated by a comma ( , )
+5. Multiple arrays in the same declaration statement will acquire the same array type.
+6. The size of an array dimension is not explicitly declared.
+7. An array has a dynamic size, allowing elements to be freely added or removed using built-in recipes.
+8. An array may be a collection of a primitive data type: piece, sip, chars, or flag
+9. An array may be a collection of a table when using a table prototype in its declaration
+10. Arrays can be multidimensional. This means an array may also be a collection of arrays of primitive data, table, or another array.
+11. Arrays that are not initialized will have an empty array as its value.        
+12. Operators cannot be used between arrays except the assignment operator equal (=) only.
+13. Arrays can be declared in the global scope and all global array declarations must be declared before the recipe definitions and the start recipe.
+
+
+
+
+
+
+
+
+Syntax:
+<data_type>[][]...[] of <array_id>;
+<table_prototype_id>[][]...[] of <array_id>;
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	piece[] of numbers;
+	piece[ of numbers;
+	sip[][] of matrix;
+	[] of numbers;
+	chars[] of words;
+	piece[[]] of x, y;
+	flag[] of toggles;
+	piece[2] of numbers;
+	Student[] of classList;
+	table of Student[] classList;
+	
+
+Rules in initializing an array
+1. Initializing an array follows the format: (a) Array declaration, (b) The equal assignment operator (=), (c) The array value.
+2. A multi-dimensional array notation requires an outer pair of square brackets ( [ ] ) that contain subarrays, each enclosed in their own brackets and separated by commas ( , ), reflecting the structure and depth of the declared dimensions.
+3. Multiple array initialization in a single statement is valid. Each identifier and value pair must be separated by a comma ( , )
+4. An array value can be of different forms:
+   1. An array notation of the same type.
+   2. An identifier of another array with the same type
+   3. A reference that results to an array with the same type
+5. When an array identifier is used as a value for initialization, the new array stores a copy to the same data.
+6. An array can be reassigned multiple times and its size will adjust based on the new value.[a]
+7. An empty array is allowed, and it represents an array value with no elements which means its size is 0.
+8. Elements in an array can be of different forms:
+   1. A declared ingredient containing the value
+1. A literal value
+2. A table instance (array of table instances)
+3. Another array
+9. Elements in an array cannot be:
+   1. A recipe call
+   2. An expression
+   3. A value from an accessed table or array
+10. Each element in an array must match the type in its declaration.
+11. Expressions, identifiers, and recipe calls cannot be used as a substitute to an array element in an array notation.
+12. An array must not be a collection of table prototypes or a recipe.
+13. Whitespaces between the square brackets ( [ ] ), comma ( , ), and array elements are ignored.
+
+
+Syntax:
+<array_id> = [ <array_element1>,<array_element2>, …];
+<array_id> = [
+     <array_element1>,
+     <array_element2>,
+     …
+];
+	Where:
+<array_element> = <piece_lit>/
+                                   <sip_lit>/
+                                   <flag_lit>/
+                                   <chars_lit>/
+	
+
+
+
+
+
+
+________________
+
+Examples:
+piece[] of nums;
+chars[] of texts;
+piece[][] of matrix;
+	Valid Examples
+	Invalid Examples
+	piece[] of anotherArray = [4, 5, 6];
+nums = anotherArray;
+	piece[] of nums = [1, 2;
+	piece[][] of matrix = [];
+	piece[] of nums =   [  “Hello”,  “World” ];
+	piece[][] of matrix = [
+  [1, 2, 3],
+  [4, 5, 6]
+];
+	piece[] of nums = [1 2 3];
+	chars[] of texts = [
+    “A literal chars”,
+    “Another literal chars”
+];
+	piece[] of wrongDimension = [
+    [
+        [1, 2, 3]
+    ], 
+    4, 5,   [ 6, 7, 8 ]
+];
+	table of Student = [
+     chars of name;
+     piece of age;
+];
+Student[] of PLM = [
+    [
+        name = “Maria”;
+        age = 10;
+    ],
+    [
+        name = “James”;
+        age = 20;
+    ]
+];
+	piece[] of nums = [1, 2], [3, 4]
+	
+
+Rules in reading an element in an array
+1. Reading or accessing a value from an array is done through an array accessor which uses a piece as an index within each pair of brackets ( [ ] ) after the array identifier.
+2. The array must be declared before it is accessed or read.
+3. Accessing an element returns the corresponding value of the element based on the index.
+4. Array access is only permitted on array identifiers, optionally followed by additional accessors. Using array literals or expressions that produce arrays in this context is not allowed.
+5. The accessor index can only be an id or a piece literal.
+6. The accessor index must be a positive piece. 
+7. The accessor index must be less than the current number of elements in an array.
+8. The accessor index starts with the index 0 as the first element.
+9. When multiple accessors are used, they are applied from left to right, with each one reducing the array to a lower dimension.
+10. The number of accessors used must not exceed the number of dimensions that the array defines.
+
+
+Syntax:
+<array_id>[ <piece_lit/id> ]
+	
+
+Examples:
+sip[] of sipArray = [1.2, 2.3, 0.8];
+piece[] of pieceArray = [2, 4, 5, 6];
+piece of examplePiece = 0;
+piece[][] of matrix = [ [1, 2, 3],  [4, 5, 6] ];
+	Valid Examples
+	Invalid Examples
+	sipArray[0]
+sipArray[1]
+sipArray[2]
+	sipArray[4];
+sipArray[5];
+sipArray[6];
+	matrix[examplePiece]
+	matrix[“hello”]
+	pieceArray [1] 
+	matrix[0][1][2][3]
+	matrix[0][1]
+	matrix[0][-1]
+	sipArray[0]
+	sipRecipe()[0]
+	Table 
+A table is a collection of values containing multiple fields based on a prototype. A field is an internal ingredient, array or another table that represents a unit of data within the table.
+
+
+Rules in defining a table prototype
+1. A table prototype can only be defined in global scope.
+2. When defining a table prototype, it must have the following in order:
+   1. The keyword table.
+   2. Followed by the keyword ( of ).
+   3. The table prototype identifier.
+   4. The equal assignment operator ( = ).
+   5. Field declarations enclosed in square brackets ( [ ] ).
+   6. A statement terminator ( ; ).
+3. Table prototypes can be accessed anywhere in the program after they are defined.
+4. Defining multiple table prototypes in one line is not allowed.
+5. Each field declaration must end with a statement terminator ( ; ).
+6. Each field only allows one identifier to be declared.
+7. Fields within a table follow the same declaration rules for ingredients, array and table with the following exception:
+   1. A field declaration in a table prototype cannot be initialized.
+   2. Multiple field declaration in one statement is not allowed
+8. Once declared, the list of fields in a table cannot be changed.
+9. Fields cannot be re-declared within the same table prototype.
+10. Fields identifiers will not cause a conflict outside of its table prototype.
+11. A table prototype must contain 1 or more fields. Defining an empty table prototype will cause an error.
+12. A table prototype cannot use itself directly as a type for its field. Only defined table prototypes before the new table definition can be used as a type for its values.
+13. All defined table prototypes must have field declarations.
+14. A table’s fields may contain the following values
+   1. Primitive data types: piece, sip, chars, or flag
+   2. Another table or array
+15. A table’s field cannot contain another table prototype or recipe as a value.
+16. Operators cannot be used between table prototypes.
+
+
+Syntax:
+table of <prototype_id> = [
+    <field_type> of <field_id>;
+];
+	Where:
+<field_type> = 
+    <data_type> /
+    <data_type><dimension/s> /
+    <table_prototype_id> /
+    <table_prototype_id><dimension/s>
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	table of Vector3= [
+  piece of x;
+  piece of y;
+  piece of z;
+];
+	table of Course = [
+  chars of title
+  sip of title
+  flag of title
+];
+	table of Course = [ 
+  chars of title; 
+  sip of grade; 
+  flag of isActive; 
+];
+	table of Course = {
+  chars of name;
+  sip of grade;
+  flag of isActive;
+};
+	table of Instructor = [ chars of name; ];
+	table of Course = [];
+	table of Instructor = [
+  chars  of name;
+];
+table of Subject = [
+  chars of code;
+  Instructor of teacher;
+];
+	table of Course = [
+  chars of name;
+  sip of grade;
+  Course of anotherCourse;
+];
+	table of Student = [ chars of name; piece of age; ];
+table of School = [ chars of schoolName; Student[] of students; ];
+	table of uninitialize;
+	
+
+Rules in declaring a table instance
+1. When declaring a table instance, it must have the following in order:
+   1. The table prototype identifier.
+   2. The keyword ( of ).
+   3. The table identifier or identifiers separated by comma ( , )
+   4. A statement terminator ( ; ).
+2. Globally declared table instances can be accessed anywhere in the program after they are declared.
+3. A table prototype's fields can be inherited by the table instance by using it as a type in a declaration.
+4. The table prototype used by the table instance must be an existing prototype.
+5. A table prototype can be used in multiple table instances.
+6. Multiple table instance declarations in a single statement is valid. Each identifier must be separated by a comma ( , )
+7. Multiple table instances in the same declaration statement will acquire the same table prototype.
+8. An existing identifier within the scope cannot be used as the table instance identifier.
+9. Operators cannot be used on table instances except the assignment operator equal (=) only.
+10. Table instances can be declared in the global scope and all global table declarations must be declared before the recipe definitions and the start recipe.
+Syntax:
+<prototype_id> of <table_id>;
+	
+
+Examples:
+table of Student = [ chars of name; piece of age; ];
+table of Course = [ chars of title; sip of grade; flag of isActive; ];
+table of Vector3= [ piece of x; piece of y; piece of z; ];
+	Valid Examples
+	Invalid Examples
+	Student of example;
+	Student of Student;
+	Course of existingPrototype;
+	Students of notExisting;
+	Student of s1;
+Student of repeatedPrototype;
+	Student of Vector3;
+	Vector3 of v1; Vector3 of v2;
+	Student of s;
+Course of s;
+	Vector3 of _;
+	Student;
+	
+
+Rules in initializing a table instance 
+1. Initializing a table instance follows the format: (a) table declaration, (b) The equal assignment operator ( = ), (c) The table value.
+2. All fields and values are separated by an assignment operator ( = ).
+3. All fields and value pairs end with a statement terminator ( ; ).
+4. Multiple table instance initialization in a single statement is valid. Each identifier and value pair must be separated by a comma ( , )
+5. Multiple field initialization in a single statement within a table is not valid.
+6. A table instance value can be of different forms:
+   1. An identifier of another table instance with the same table prototype
+   2. A table notation of the same table prototype
+   3. A reference resulting in a table instance with the same prototype
+7. When a table identifier is used as a value, the new table stores a copy to the same data.
+8. Tables that are not initialized will have their field values set to default according to their type.
+9. A table can be reassigned multiple times.
+10. Field values in a table instance can be of different forms:
+   1. A declared ingredient containing the value.
+   2. A literal value.
+   3. An expression resulting in the value.
+   4. An array or a table instance value.
+11. The fields used must be present in the table prototype.
+12. A table instance does not have to initialize a value to all fields. The remaining fields that are not initialized will have the default value of its type. 
+13. Using an empty square bracket creates a table instance with all fields initialized to the default values of their type.
+14. When reassigning a table with an incomplete field, all fields will be reset to their default values.
+15. A table instance does not have to respect the declaration order from the table prototype.
+Syntax:
+<prototype_id> of <table_id> = [
+    <field_id> = <value>;
+    ...
+];
+	
+
+Examples:
+table of Student = [ chars of name; piece of age; ];
+table of Course = [ chars of title; sip of grade; flag of isActive; ];
+table of Instructor = [ chars of name; ];
+table of Vector3 = [ piece of x; piece of y; piece of z; ];
+table of School = [ chars of schoolName; Student[] of students; ];
+	Valid Examples
+	Invalid Examples
+	Student of uninitialized;
+	Students of wrongPrototype;
+	Student of normal = [ 
+   name = "Maria"; 
+    age = 18; 
+];
+	Student of format = [
+    name = “Maria”
+    age = 18
+];
+	Course of notOrdered = [  
+  grade = 1.75; 
+  title = "Intro to CS"; 
+];
+	Student of wrongValue = [
+  chars  of name;
+  sip of grade;
+];
+	Instructor of empty = [ ];
+	Student of typeMismatch = [
+  grade = “twenty”;
+  title = 1;
+];
+	Vector3 of incomplete = [ x = 0; ];
+	Student of Student = []
+	Instructor of p1 = [
+        name = “Jacob”;
+], p2 = [
+        name = “Andrew”;
+];
+	Instructor of p1 = [
+     name = “Jacob”;
+], p2 = [
+    age = “Andrew”;
+];
+	
+
+Rules in reading a field in a table
+1. Reading or accessing a field in a table uses the table instance and field identifier separated by a colon ( : ).
+2. The table instance must be declared before it is accessed or read.
+3. Only valid field identifiers declared in the table prototype are allowed to be used as accessors. 
+4. Fields inside a table instance have their own scope and can only be accessed using a colon ( : ). 
+5. Table access is only permitted on table instance identifiers, optionally followed by additional accessors. Using table notations or expressions that produce a table instance in this context is not allowed.
+6. A chained table accessor is allowed when the field is a table and will be evaluated from left to right.
+7. Whitespaces are ignored between the table identifier, the colon, and the field identifier.
+
+
+
+
+Syntax:
+<table_id>:<field_id> 
+	
+
+Examples:
+table of Course = [ chars of title; sip of grade; flag of isActive; ];
+table of Student = [ chars of name; piece of age; Course of course ];
+Course of c1 = [ title = "Math"; grade = 2.0; isActive = up; ];
+Student of s1 = [ name = "Alice"; age = 20; course = c1; ];
+	Valid Examples
+	Invalid Examples
+	s1:name
+	s1[height];
+	s1:course:title
+	s1.height
+	c1:title
+	c1:age
+	s1:age
+	Student:name
+	s1:course:grade
+	tableRecipe():name
+	
+
+________________
+platter
+A platter is a block of code where it groups a sequence of executable statements and encloses it with curly brackets ( {} ).
+Rules:
+1. A platter starts with the opening curly bracket ( { ), followed by the local declarations (optional) and statements (optional), and ends with a closing curly bracket ( } ).
+2. A platter may contain zero statements.
+3. Each platter contains its own local scope. 
+4. A platter cannot be used alone without a statement, clause, or recipe definition.
+5. A platter has five variants, each designed to accommodate specific jump statements:
+   1. platter - allows serve only.
+   2. loop platter - allows all jump statements 
+   3. menu check platter - allows stop and serve only.
+   4. menu platter - allows only stop and serve and is exclusive to menu statements.
+   5. menu loop platter - allows all jump statements and is exclusive to menu statements.
+6. The Recipes and the Start Recipe must be paired with a platter.
+7. A platter is paired with the following control-flow statements and clauses: (a) check, (b) alt, (c) instead, (d) menu, (e) pass, (f) repeat statement, (g) order.
+Syntax:
+# platter
+{
+     <local_decl/s>/none
+     <statements/s>/none
+}
+
+
+# loop platter
+{
+     <local_decl_loop/s>/none
+     <statements_loop/s>/none
+}
+
+
+# menu_check_platter
+{
+     <local_decl_menu/s>/none
+     <statements_menu/s>/none
+}
+
+
+# menu_platter
+{
+     <choice_clause/s>/none
+     <usual_clause>/none
+}
+
+
+# menu_loop_platter
+{
+     <choice_clause_loop/s>/none
+     <usual_clause_loop>/none
+}
+	Where:
+
+
+<local_decl> = piece        <piece_decl> /
+chars        <chars_decl> /
+sip        <sip_decl> /
+flag        <flag_decl> /
+id        <local_id_tail>
+
+
+<statements> = <id_statements> /
+<built_in_rec_call> ; /
+<conditional_st> /
+<looping_st> /
+<jump_serve>
+
+
+<local_decl_loop> = piece <piece_decl> /
+     chars <piece_decl> /
+     sip <sip_decl> /
+     flag <flag_decl> /
+     id <local_id_tail_loop> 
+
+
+<statements_loop> = <id_statements_loop> /
+     <built_in_rec_call> ; /
+     <conditional_st_loop> /
+     <looping_st> /
+     <jump_st> 
+
+
+<jump_st> = <jump_next> / <jump_stop> / <jump_serve>
+
+
+<local_decl_menu> = piece <piece_decl> /
+     chars <piece_decl> /
+     sip <sip_decl> /
+     flag <flag_decl> /
+     id <local_id_tail_menu> 
+
+
+<statements_menu> = <id_statements_menu> / 
+     <built_in_rec_call> ; /
+     <conditional_st_menu> / 
+     <looping_st> / 
+     <jump_stop> / 
+     <jump_serve>
+
+
+<choice_clause> = choice <choice_val> : <statements_menu>
+<usual_clause> = usual : <statements_menu>
+
+
+<choice_clause_loop> = choice <choice_val> : <choice_usual_loop_st> 
+<usual_clause_loop> = usual : <choice_usual_loop_st>
+	
+
+Examples:
+piece of cake = 1;
+	Valid Examples
+	Invalid Examples
+	start(){
+     serve 0;
+}
+	start(){
+     stop;
+)
+	prepare flag of cooked(){
+     serve up;
+}
+	prepare flag of cooked()(
+     next;
+     serve up;
+)
+	pass (cake; cake-=1; cake >= 0){  }
+	pass (cake; cake-=1; cake >= 0)
+	Recipes
+Recipes are reusable platters, similar to subprograms, crafted to perform specific tasks. They help make code cleaner, more organized, and easier to maintain.
+
+
+Rules in defining a recipe: 
+1. A recipe is defined by creating (1) the recipe header, which consists of the keyword prepare to declare a recipe, the recipe serve type, the keyword of, the recipe identifier, the list of spices, and then (2) the platter.
+2. The serve type indicates the data type, array type, or table prototype identifier that the recipe will serve after being called. Recipes can only have one serve type, which could either be piece, sip, flag, chars, array type, or table prototype. 
+3. Recipes with the same identifier are not allowed. It must be a completely unique identifier within the global scope and should not have the same identifier with any globally declared ingredients, arrays, tables, or table prototype. Conflict with the same identifier on a local scope will only occur if the recipe with the same identifier is called in that local scope.
+4. A recipe must be defined after the global declarations, if there are any present, and before the start recipe. Recipes cannot be defined before the global declarations. Recipes cannot be defined inside nor after the start recipe. 
+5. Recipes cannot be forward-defined, the full definition must be written before calling it.
+6. A recipe cannot be defined inside another recipe, nesting recipe definitions is not allowed.
+7. There is no maximum limit to the number of recipes that may be declared in a single program. 
+Syntax:
+prepare <serve_type> of <id>(<spice1>,<spicen>/none){
+     <local_decl/s>/none
+     <statements/s>
+}
+	Where: 
+
+
+<serve_type> = <piece/sip/flag/chars/id>
+<spice> = <piece/sip/flag/chars/id> of <id>
+<statements> = 
+     <id_statements> /
+     <built_in_rec_call> /
+     <conditional_st> /
+     <looping_st> /
+     <jump_serve>
+	
+
+Rules for Spice:
+1. A spice refers to the parameters that the recipe will require to be provided when calling it. These will serve as the input values of the recipe.
+2. The list of spices shall be defined in the recipe header, and enclosed in a pair of parentheses following the ingredient, array, and table declaration rules respectively except that multiple spices cannot share a single declaration.         
+3. The list of spices may be empty, indicated by an empty pair of parentheses ( () ). In such cases, the recipe performs its task without requiring input values.
+4. The spice is also considered a local declaration of the recipe’s platter.
+5. Multiple spices may exist in the list of spices, and are separated by a comma ( , ).
+Syntax:
+(<spice_type> of <id>, .../none) 
+	Where:
+<spice_type> = piece / sip / flag / chars / <array_type> / <table_prototype_id>
+	
+
+
+
+Rules for the Recipe Platter:
+1. A recipe must contain exactly one top-level platter, in which the platter begins with ( { ) and ends with ( } ).         
+2. A recipe platter follows the platter rules, but a recipe’s platter must always have at least one serve statement.
+3. The recipe platter contains all the statements in the recipe, including the required serve statement. 
+
+
+Syntax:
+{
+    <local_decl/s>/none
+    <statements/s>
+}
+	Where: 
+<local_decl> = piece        <piece_decl> /
+chars        <chars_decl> /
+sip        <sip_decl> /
+flag        <flag_decl> /
+id        <local_id_tail>
+
+
+<statements> = 
+     <id_statements> /
+     <built-in_rec_call> /
+     <conditional_st> /
+     <looping_st> /
+     <jump_serve>
+	________________
+Rules for the Serve Statement:
+1. A serve statement must start with the keyword serve, a whitespace, followed by the value to be served by the recipe, and then it should end with a statement terminator ( ; ).
+2. A serve statement can be used anywhere after the local declarations in a recipe platter to output a value and exit the recipe.
+3. The type of the value to be served must match the serve type for the primitive data types.
+4. The dimension or array type of the value to be served must match the serve type of the recipe for arrays.
+5. The table prototype of the table value to be served must match the serve type of the recipe for tables. 
+6. Recipes must contain at least one serve statement in the recipe platter; multiple serve statements may exist but only one will be executed and will serve a value when the recipe is called. A serve statement placed inside an unreachable branch, like by being locked behind a never-entered condition, does not satisfy this requirement.
+7. An incomplete serve statement with a missing value is not allowed and will cause an error.
+8. For recipes that do not serve a meaningful value, such as the bill recipe, use 0 as the serve value to fulfill the serve statement requirement, and in such cases, the recipe must be defined with piece as its serve type.
+Syntax:
+serve <value>;
+	Where: 
+<value> = <any_expr> /
+     <ret_array> /
+     [<notation_val>] 
+	
+
+________________
+Rules for Flavor:
+1. Flavors are the values passed in the recipe call. 
+2. Flavors must match the quantity and type of the spices in the recipe definition and in the right order.
+3. Recipes only allow passing by value, the flavor added in the recipe call acts as the initialization value of the declared spices. And the original references of the passed flavors are not going to be modified through this.
+
+
+Rules for Recipe Calls:
+1. Calling or invoking a recipe means executing its platter using a specific array of flavors that match the recipe's declared spices in the same quantity and order. Invocation must respect the recipe’s serve type.
+2. The flavors are evaluated before the execution of the recipe.
+3. To call a recipe, it must contain the recipe identifier, and the list of flavors to be passed, enclosed in parentheses ( () ). This list can be empty indicated by an empty pair of parentheses ( () ).
+4. ​Recipes may call other recipes any number of times, with no imposed limit on the amount of calls within a recipe or the start recipe, however the called recipes must already be completely defined prior to the call.
+5. User-defined recipes cannot be called in the global scope.
+6. Recipes can be called in any local scope after the local scope’s local declarations as recipes are globally defined, but calling a recipe with the same identifier to a declared local ingredient, array, or table will cause an error.
+7. Nested invocation of recipes is allowed and is evaluated from the inside out. Inner recipes are resolved first, and their results are passed as flavors to the outer recipe call. 
+8. A recipe call used without a statement terminator is treated as an expression operand. It executes its defined statements and prioritizes the served value for use within the surrounding expression.
+9. A recipe call used as a standalone statement must end with a statement terminator (;). In this form, the recipe is invoked for its behavior, and its served value is discarded unless explicitly handled.
+
+
+________________
+
+
+Syntax:
+# recipe call
+<recipe_id>(<flavor>, <flavor>, .../none)
+
+
+# recipe call statement
+<recipe_id>(<flavor>, <flavor>, .../none); 
+
+
+# nested recipe call inside a recipe call statement
+<recipe_id>(<recipe_call>);
+<recipe_id>(<recipe_id>(<recipe_call>));
+...
+	Where: 
+<flavor> = 
+     <value>
+	
+
+Rules for Recursive Recipe Definition and Calls:
+1. A recipe can call itself within its own platter.
+2. Each recursive call must supply the correct number and types of flavors as defined in the recipe’s spice list.
+3. Recursive recipes must still contain exactly one top-level platter and at least one serve statement.
+
+
+Syntax: 
+prepare <serve_type> of <recipe_id>(<spice_list>){
+     <recipe_id>(<flavor>, <flavor>, ...);      # recursive call
+     serve <value>;
+}
+	
+
+________________
+
+
+Examples for Recipes:
+Valid Examples
+	Invalid Examples
+	prepare piece of addOne(sip of val){
+    piece of result = val + 1;
+    serve result;
+}
+start () {
+}
+	start () {
+}
+prepare piece of addOne(sip of val){
+    piece of result = val + 1;
+    serve result;
+}
+	prepare piece of divide(piece of a, piece of b){
+    serve a / b;
+}
+	prepare piece or sip of badRecipe(piece of x, y) {   
+    serve x;
+}
+	prepare sip of average(piece of x, piece of y) { 
+serve (x + y) / 2; 
+}
+	prepare sip of average(x, y)  
+    serve(x + y) / 2; 
+
+
+	prepare piece of addTwo(piece of x){
+serve x + 2;
+}
+	prepare piece of addTwo(piece of x){
+piece of y = x + 2;
+}
+	prepare piece of increment(piece of x){
+serve x + 1;
+} 
+start(){
+    increment(5);
+}
+	prepare piece of increment(piece of x){
+serve x + 1;
+} 
+start(){
+    piece of y = increment”2”;
+}
+	prepare piece of fib(piece of n){
+    check (n <= 1) {
+      serve n; 
+    } 
+    serve fib(n - 1) + fib(n - 2); 
+}
+	prepare piece of bad(piece of n){
+    serve factorial(n - 1),
+    factorial(n - 2); 
+}
+	prepare flag of isPositive(piece of n){
+    serve n > 0; 
+}
+	prepare piece of 123badName(piece of n){
+    serve n > 1;
+}
+	prepare piece of printing(){
+    bill(“print”);
+    serve 0;
+}
+	prepare piece of printing(){
+    bill(“hello”);
+    serve;
+}
+	prepare chars of greet(piece of a) {
+     check (a == 1) {
+     serve “hello, world”;
+   } instead { 
+     serve “hi, world”;
+   }
+   serve “”;
+}
+	prepare chars of greet() {
+     serve “hello, world”;
+     serve “hi, world”;
+}
+	table of Student = [
+    chars of name;
+    piece of age;
+];
+prepare Student of getStudent() {
+    serve [
+         name = “Michael”;
+         age = 21;
+    ];
+}
+	prepare piece[] of getPiece() {
+    serve [ 
+      “Hello”,
+      “World”
+   ];
+}
+	________________
+Built-in Recipes
+Built-in-recipes are the predefined recipes that come with Platter. They perform special tasks and follow strict syntax rules that cannot be redefined.
+
+
+Type Casting
+
+
+topiece
+A topiece recipe type casts sip, chars, or flag values into a piece type.
+
+
+Rules:
+1. A topiece recipe only accepts one piece, sip, chars, or flag value.
+2. Casting piece values to piece does nothing and serves the original value.
+3. Casting sip values to piece truncates the fractional part, dropping everything after the decimal point then the decimal point itself. 
+4. Casting chars values to piece extracts the piece value contained within the chars. The piece value is detected within the chars value by reading each character if it follows a piece literal format. 
+5. If the chars contains a character that resembles a sip literal, it also truncates the fractional part and serves the non-fractional part as a piece.
+6. If the chars does not contain a valid numeric representation following the piece or sip literal rules, it will serve an error.
+7. Leading zeroes are dropped when casted with topiece, except if the value consists entirely of zeros in which case it collapses into a single 0.
+8. Casting flag values to piece serves 0 for down and 1 for up.
+9. Any other flavor type will result in an error.
+10. The topiece recipe serves a value of type piece based on the passed flavor.
+
+
+Syntax:
+topiece(<any_expr>)
+	
+
+________________
+
+
+Examples:
+sip of n1 = 5.2;
+sip of n2 = 5.1;
+chars of n3= “12”;
+ chars of n4= “6.7”;
+	Valid Examples
+	Invalid Examples
+	topiece(n1);
+topiece(n1 + n2);
+topiece(n4);
+topiece(5.5);
+piece of n5 = topiece(“5”);
+piece of n6 = topiece(up);
+	topiece(“hello”);
+piece of n7 = topiece(n1, n2);
+piece of n8 = topiece(n3));
+sip of n9 = topiece(n1, n2);
+chars of c =topiece(5.1);
+
+
+	
+
+tosip 
+A tosip recipe type casts piece, chars, or flag values into a sip type. 
+
+
+Rules:
+1. A tosip recipe only accepts one piece, sip, chars, or flag value.
+2. Casting piece values to sip will add a decimal point and one trailing zero at its decimal place.
+3. Casting sip values to sip does nothing and serves the original value.
+4. Casting chars values to sip extracts the sip value contained within the chars. The sip value is detected within the chars value by reading each character if it follows a sip literal format.
+5. If the chars contains a character that resembles a piece literal, it also adds a decimal point and one trailing zero at its decimal place. It then serves the digits before the period, the period, and the digits after the period as a single sip value.
+6. If the chars does not contain a valid numeric representation following the piece or sip literal rules, it will serve an error.
+7. Leading zeroes in the non-fractional digits are dropped when casted with tosip, except if that part consists entirely of zeros in which case it collapses into a single 0 followed by the decimal value.
+8. Leading zeroes are dropped when casted with tosip, except if the non-fractional digits contain only one zero digit.
+9. Casting flag values to sip serves 0.0 for down and 1.0 for up.
+10. Any other flavor type will result in an error.
+11. The tosip recipe serves a value of type sip based on the passed flavor.
+
+
+________________
+
+
+Syntax:
+tosip(<any_expr>)
+	
+
+Examples:
+piece of a = 5;
+piece of b = 3;
+ chars of numA = “168”;
+chars of numB = “125.32”;
+	Valid Examples
+	Invalid Examples
+	tosip(5);
+tosip(1230);
+tosip(a);
+tosip(a + b);
+sip of c = tosip(5);
+sip of d = tosip(a);
+sip of e = tosip(“10.00”);
+sip of f = tosip(numA);
+sip of g = tosip(numB);
+	tosip(‘a’);
+tosip(sum(1, @));
+piece of x = tosip(8);
+chars  of z = tosip(b);
+
+
+	
+
+
+
+________________
+tochars
+A tochars recipe type casts piece, sip, or flag values into a chars type.  
+
+
+Rules:
+1. A tochars recipe only accepts one piece, sip, chars, or flag value.
+2. Casting a piece value to chars produces the string representation of its digits (e.g., 1 becomes "1").
+3. Casting a sip value to chars produces the string representation of its digits and the decimal point (e.g., 1.0 becomes "1.0").
+4. Casting a chars value to chars does nothing and serves the original value.
+5. Casting a flag value to chars converts the flag into "up" or "down".
+6. Any other flavor type will result in an error.
+7. The tochars recipe serves a value of type chars based on the passed flavor.
+
+
+Syntax:
+tochars(<any_expr>)
+	
+
+Examples:
+piece of p1 = 42;
+sip of s1 = 5.5;
+	Valid Examples
+	Invalid Examples
+	tochars(p1);
+tochars(s1);
+tochars(3.14);
+bill(tochars(p1));
+chars of s3 = tochars(5.5);
+
+
+	tochars p1;
+tochars(p1, s1);                      
+tochars("hello);                    
+chars of s = tochars(p1, s1);
+tochars(sum(1, 2));                  
+tochars();    
+	
+
+________________
+Input and Output Recipes
+Built-in recipes handle the processing of data received from external sources using the take recipe, and produce output or results through the bill recipe.
+
+
+take
+        A take recipe allows the program to accept and store user input.
+
+
+Rules:
+1. The take recipe awaits for user input and halts the program until it encounters a chars input delimited by a newline.
+2. The user input is stored as a chars literal omitting the last newline used to delimit and end the input.
+3. If the user input starts with a newline, it will be omitted as well and the take recipe serves an empty chars.
+4. When assigning a take recipe to another data type than chars, it must be explicitly typecasted. 
+5. If the user inputted characters of unsupported ascii characters based on the accepted chars literal rules, the take recipe will only serve all characters that are supported.
+6. The take recipe serves a value of type chars.
+
+
+Syntax:
+take()
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	piece of a = topiece(take());
+piece of b = topiece(take());
+sip of d =tosip(take());
+chars of f = take();
+piece of b = topiece(take());
+	take):
+	take(“I like fruits”);
+	table of x = take();
+	pieces[] of g = take();
+sips[] of j = take();
+	bill
+        A bill recipe allows the program to display or output chars.
+
+
+Rules:
+1. The bill recipe must start with the bill reserve word followed by an opening parenthesis ( ( ),followed by a flavor, and then end with a closing parenthesis ( ) ). 
+2. A bill recipe must contain exactly one flavor and must not be empty.
+3. The bill recipe only takes chars values as its flavor. Flavors that are not of type chars must be explicitly typecasted using the type casting recipes. 
+4. The bill recipe supports chars concatenation as its recipe flavor following the rules of character expressions.
+5. A bill recipe serves an empty chars after being successfully called without an error.
+
+
+Syntax:
+bill(<chars_value>)
+	
+
+Examples:
+piece of a = 2;
+	Valid Examples
+	Invalid Examples
+	bill(“Hello”);
+bill(“Hello”);
+bill(“Hello, “ + “everyone!”);
+bill(“UAAP” + tochars(2025));
+bill(tochars(a));
+	bill;
+bill();
+bill(3.14);
+bill(solveSum(1, 2)); 
+bill(5 + 5);
+	
+
+
+
+________________
+Math and Formatting 
+Platter provides built-in recipes for more mathematical operations, numeric and chars formatting. These recipes operate on numeric or chars ingredients.
+
+
+pow
+A built-in recipe that raises a number to the power of another number.
+
+
+Rules: 
+1. pow requires two flavors, the base and the exponent
+2. Both flavors must be valid piece values.
+3. The result of a pow recipe is based on the mathematical result of base raise to the power of the exponent with the serve type piece.
+4. Any other flavor type will result in an error.
+Syntax:
+pow(<strict_piece_expr>, <strict_piece_expr>)
+	
+
+Examples:
+piece of a = 2; piece of b = 3
+	Valid Examples
+	Invalid Examples
+	piece of result = pow(a, b);
+bill(tochars(pow(b,a)));
+	pow("hello", b);
+pow(a, "world");
+	sqrt 
+A built-in recipe that returns the square root of a number.
+
+
+Rules: 
+1. sqrt requires exactly one non-negative piece flavor.
+2. sqrt takes the square root of the input flavor, regardless if it's a perfect or non-perfect square number.
+3. sqrt serves a sip value of the result with the fractional digit up to the highest precision type within the 7 fractional digit range, all fractional digits beyond this are dropped.
+4. Using a non-positive piece and any other flavor type will result in an error.
+Syntax:
+sqrt(<strict_piece_expr>)
+	
+
+Examples:
+piece of a = 9;
+	Valid Examples
+	Invalid Examples
+	bill(tochars(sqrt(a)));
+	sqrt("nine");
+sqrt(flag);
+	
+
+fact
+A built-in recipe that returns the factorial of a number.
+
+
+Rules:
+1. fact requires exactly one non-negative piece flavor.
+2. fact takes the factorial of the input flavor and serves it as a piece.
+3. Using a non-positive piece and any other flavor type will result in an error.
+
+
+Syntax:
+fact(<strict_piece_expr>)
+	
+
+Examples:
+piece of n = 5;
+	Valid Examples
+	Invalid Examples
+	bill(tochars(fact(n)));
+	fact(-1);
+fact(3.5);
+	
+
+________________
+cut
+A built-in recipe that formats numeric values into fixed-length chars.
+
+
+Rules:
+1. cut requires one sip value and a non-negative formatting sip value.
+2. The formatting sip must follow the format X.Y, where:
+   1. x is the number of digits to keep before the decimal point.
+   2. y is the number of digits to keep after the decimal point.
+3. The result is a chars value following the amount of digits before and after the decimal point based on the given formatting, adding the necessary leading and trailing zeros to completely follow the said formatting.
+4. Passing other primitive values for the first argument aside from sip values will result in an error. 
+5. Using other primitive values aside from a non-negative sip value for the formatting sip will result in an error.
+
+
+Syntax:
+cut(<strict_sip_expr>, <strict_sip_expr>)
+	
+
+Examples:
+sip of a = 1.0, b = 3.2, c = -2.0;
+	Valid Examples
+	Invalid Examples
+	cut(b ,3.3);
+bill(cut(a, 2.0));
+
+
+	cut(0, c);
+cut(1, 2.0);
+cut("hello", 2.0);
+cut(a, "2.0");
+cut(a, up);
+	
+
+________________
+copy
+A built-in recipe that returns a sliced portion of a chars value.
+
+
+Rules: 
+1. copy accepts three flavors: the chars to slice, the start position, and the end position, with the first chars character being at position 1.
+2. The first flavor must be of type chars.
+3. The start and end position flavors must be positive piece values.
+4. copy serves the sliced chars as another chars value.
+5. If either the start or end index exceeds the length of the chars, the result is an empty chars.
+6. Using flavors that do not match the copy recipe call syntax will result in an error.
+Syntax:
+copy(<strict_chars_expr>,<strict_piece_expr>,<strict_piece_expr>)
+	
+
+Examples:
+chars of text = “Hello World”;
+	Valid Examples
+	Invalid Examples
+	bill(copy(text, 1, 5));
+	copy(text,-1, 23);
+copy(-1, text, 23);
+	________________
+rand 
+A built-in recipe that returns a random sip value between 0 and 1.
+
+
+Rules: 
+1. rand requires no input flavors.
+2. rand serves a sip value between 0.0000000 and 0.9999999.
+3. The result is generated using a uniform distribution.
+4. The fractional precision is up to 7 digits, and all digits beyond this are dropped.
+5. rand can be used in expressions, assignments, or passed to other recipes.
+6. Calling rand multiple times will produce different results.
+7. Using flavors with rand will result in an error.
+
+
+Syntax:
+rand()
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	sip of r = rand();
+bill(tochars(rand()));
+piece of x = topiece(rand() * 10);
+	rand(1);
+rand("seed");
+rand(up);
+	
+
+
+
+________________
+Arrays and Tables
+        Platter provides built-in recipes to check equality for arrays and tables as well as getting the size, searching, sorting, reversing, appending and removing a value to an array.
+
+
+size
+A built-in recipe to get the size of an array. 
+
+
+Rules: 
+1. size requires exactly one array value as a flavor.
+2. This recipe serves the number of elements in an array and if the size is greater than a piece’s maximum value, the maximum value is served.
+3. If the array is multidimensional, only the first-level elements are counted. Nested arrays are ignored.
+4. Any other non-array flavor type will result in an error.
+
+
+Syntax:
+size(<strict_array_expr>)
+	
+
+Examples:
+piece[] of nums = [1, 2, 3]; 
+	Valid Examples
+	Invalid Examples
+	size(nums);
+	size(“Hello”);
+	sort  
+A built-in recipe to sort an array.
+
+
+Rules: 
+1. sort requires an array value as a flavor.
+2. The array flavor only accepts a valid array value.
+3. The array flavor must be a one dimensional array.
+4. This recipe only sorts chars, piece and sip arrays.[b]
+5. chars arrays will be sorted alphabetically while numerical arrays (piece and sip) will be sorted in ascending order.
+6. This recipe serves a new array that has its values sorted.
+7. An invalid flavor will result in an error.
+
+
+Syntax:
+sort(<strict_array_expr>)
+	
+
+Examples:
+piece[] of nums = [1, 2, 3];
+	Valid Examples
+	Invalid Examples
+	sort(nums);
+sort([1, 2, 3]);
+	sort(1);
+	search 
+A built-in recipe to search a value in an array.
+
+
+Rules: 
+1. search requires an array value as a flavor and a value to search.
+2. The search value can be any value supported in an array.
+3. The search value must match the type declared in the array
+4. The array flavor must be a valid array value.
+5. This recipe serves a piece that corresponds to the first index that matches the value.
+6. If the index is greater than a piece’s maximum value, the maximum value is served.
+7. If the value is not found, -1 will be served.
+8. If multiple values are matched, the element with the smallest index will be served.
+9. An invalid flavor will result in an error.
+
+
+Syntax:
+search(<strict_array_expr>, <value>)
+	
+
+Examples:
+piece[] of nums = [1, 2, 3];
+piece of num = 1;
+	Valid Examples
+	Invalid Examples
+	search(nums, num);
+search([1, 2, 3], 1);
+	search(nums, “Hi”);
+search([1, 2, 3]);
+	
+
+reverse
+A built-in recipe to reverse the order of an array.
+
+
+Rules: 
+1. reverse requires an array value as a flavor.
+2. The array flavor must be a valid array value.
+3. reverse functions by reversing the order of the elements based on their original indices regardless of value.
+4. reverse serves a new array that has its values reversed in order.
+5. An invalid flavor will result in an error.
+
+
+Syntax:
+reverse(<strict_array_expr>)
+	
+
+Examples:
+piece[] of nums = [1, 2, 3];
+	Valid Examples
+	Invalid Examples
+	reverse(nums);
+reverse([1, 2, 3]);
+	reverse(1);
+	append 
+A built-in recipe to add a value to an array.
+
+
+Rules: 
+1. append requires an array value and the value to add as the flavors.
+2. The array flavor must be a valid array value.
+3. The value to add can be any value supported in an array.
+4. The value must match the type of the values declared in the array.
+5. This recipe serves a new array that has the new value
+6. An invalid flavor will result in an error.
+
+
+Syntax:
+append(<strict_array_expr>, <value>)
+	Examples:
+piece[] of nums = [1, 2, 3];
+piece of num = 1;
+	Valid Examples
+	Invalid Examples
+	append(nums, num);
+nums = append([1, 2, 3], 1); 
+	append(nums, “Hi”);
+append([1, 2, 3]);
+	remove
+A built-in recipe to remove a value from an array.
+
+
+Rules: 
+1. remove requires an array value and an index as the flavors.
+2. The array flavor must be a valid array value.
+3. The index value represents the index of the element to remove.
+4. The index must be a positive piece and is less than the size of the array.
+5. The index flavor may be an expression, an ingredient or a literal that results in a piece value.
+6. This recipe serves a new array that has the value removed.
+7. An invalid flavor will result in an error.
+Syntax:
+remove(<strict_array_expr>, <strict_piece_expr>)
+	
+
+
+
+Examples:
+piece[] of nums = [1, 2, 3];
+piece of num = 1;
+	Valid Examples
+	Invalid Examples
+	remove(nums, num);
+remove([1, 2, 3], 1);
+	remove(nums, “Hi”);
+remove([1, 2, 3]);
+remove(nums, -1);
+	matches
+A built-in recipe to check for an equality of two arrays or two tables.
+
+
+Rules: 
+1. matches accepts 2 arrays or 2 tables as a flavor. It cannot accept one array and one table at the same time.
+2. This recipe checks for equality recursively for multi-dimensional arrays or for complex tables.
+3. The flavors must be a valid array value or table value.
+4. This recipe always serves a flag and serves up if the two flavors match, else, it serves down.
+5. An invalid flavor will result in an error.
+
+
+Syntax:
+matches(<array_value>, <array_value>)
+matches(<table_value>, <table_value>)
+	
+
+Examples:
+piece[] of nums1 = [1, 2, 3];
+piece[] of nums2 = [1, 3, 2];
+piece of num = 1;
+
+
+table of Course = [
+  chars of title;
+  sip of grade;
+  flag of isActive;
+];
+Course of cs101 = [
+  title = "Intro to CS";
+];
+Course of cs102 = [
+  title = "Fundamentals of Programming";
+];
+	Valid Examples
+	Invalid Examples
+	matches(nums1, nums2);
+matches(cs101 , cs102);
+	matches(nums1, cs101)
+matches(nums1);
+	________________
+Local Declaration
+Ingredients 
+Ingredients follow the same global declaration rules in its local declaration with some additional rules:
+1. All local ingredient declarations must be declared before any other statement within its scope.
+2. It follows the same syntax of global ingredient declarations.
+3. If an ingredient is declared both globally and locally, the local declaration will override the global one for its local scope and its value will be the one accessed and modified instead. 
+4. For this reason, a global and a local ingredient can have the same identifier and the global ingredient will only be accessible if the local scope did not use the same identifier for any ingredient, array, or table.
+5. Ingredients declared in a local scope can only be accessed within its said local scope. Trying to access an ingredient outside of its scope returns an error.
+6. Ingredients  follow the same global initialization rules for local ingredient initialization.
+7. The syntax for both the declaration and initialization follows the same one for the global ingredient declarations.
+
+
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	sip of x = 1.25, y = 3.50;
+	sip of x = 1.25; y = 3.50,
+	piece of x = 5, y, z = 15;
+	piece of x = 5, y = 10.1 z = 15;
+	flag of isActive = up;
+	flag of isActive = "up";
+	piece of y = 5;
+	piece counter;
+	
+
+
+
+________________
+Arrays and Tables 
+Arrays and tables follow the same global declaration rules in its local declaration with some additional rules:
+
+
+1. All local arrays and table declarations must be declared before any other statement within its scope.
+2. Table prototypes cannot be defined in a local scope. It can only be defined in the global scope.
+3. Arrays and tables must not have the same identifier name as table prototypes, a recipe, or an ingredient in global scope or within the same local scope.
+4. If an array or table is declared both globally and locally, the local declaration will override the global one for its local scope. The compiler will always use the version that is closest to the point of reference.
+5. Arrays and tables declared in a local scope can only be accessed within that same local scope.
+
+
+Rules in re-assigning and accessing arrays and tables:
+1. Local reassignment can modify global arrays or tables only if no array, table, or ingredient with the same identifier exists in the local scope.
+2. Reassigning a new value to an array or table replaces the old value entirely. The old value may come from a broader scope (e.g., a global declaration) or from a prior assignment within the same scope.
+3. Array and table reassignment can only occur within a platter and is not permitted at the top level.
+
+
+________________
+Statements
+A statement is a complete instruction that specifies an action for the program to perform. The following are defined as statements: (a) local assignment, (b) standalone recipe call, (c) conditional: check and menu, (d) looping: pass, repeat, and order-repeat, and (e) jump: next, stop, and serve.
+
+
+Local Assignment Statements
+These includes the assignment and reassignment of values for ingredients, arrays, and tables defined 
+
+
+Rules in reassigning ingredients: 
+1. Ingredients are mutable containers of data and can be reassigned any value as long as it is accessible within the current scope.
+2. Reassigning new values to an ingredient causes the old value to be replaced by the new value. Old value refers to values assigned in a broader scope or values assigned to the ingredient in the earlier parts of the code.
+3. Local reassignment can modify global ingredients if no ingredient, array, or table has the same identifier in the local scope. Reassigning a global ingredient value will modify the global scope value of the ingredient, and the new value is not limited to the local scope in which it was assigned.
+4. Reassigning an ingredient’s value by accessing it from a deeper nested platter level causes it to behave like a local scope accessing a global scope variable in which the global scope variable is modified and accessed from the deeper local scope.
+5. Value reassignment is done by using the ingredient identifier, followed by an assignment operator, and the valid expression, both the ingredient and the resolved expression should be of the same data type. 
+6. Only a single ingredient reassignment is allowed, multiple ingredient reassignment is not allowed in a single statement and each reassignment should be completed with a statement terminator ( ; ).
+
+
+Syntax:
+# Ingredient Reassignment
+<ingredient_id> <assignment_op> <value>;
+	
+
+Rules in writing in an array: 
+1. Writing to an array element uses array accessors followed by an assignment operator and the new value.
+2. The array must be declared before it can be modified.
+3. Array accessor when writing in an array follows the same format when reading in an array.
+4. Writing on an element index overwrites the previous value.
+5. The new value must have the same type and dimension as the element being targeted.
+Syntax:
+<array_id><[index]/s> <assignment_op> <expr>;
+<array_id><[index]/s> <assignment_op> <array_value>;
+<array_id><[index]/s> <assignment_op> <table_value>;
+	
+
+Examples:
+sip[] of sipArray = [1.2, 2.3, 0.8];
+piece[] of pieceArray = [2, 4, 5, 6];
+piece of examplePiece = 0;
+piece[][] of matrix = [ [1, 2, 3],  [4, 5, 6] ];
+	Valid Examples
+	Invalid Examples
+	sipArray[0] = 3.4;
+	sipArray[“hello”] = 1.2;
+	sipArray[0] += 3.4;
+	pieceArray[0] = 1.2;
+	pieceArray[examplePiece] = 0;
+	matrix[0] = 1;
+	matrix[0][1] = examplePiece;
+	matrix.0 = [1, 2, 3];
+	matrix[0] = pieceArray;
+	sipArray = “hello”;
+	
+
+
+
+
+
+
+
+
+
+Rules in writing in a table
+1. Assigning a value to a table instance uses an assignment operator.
+2. The table instance must be declared before it can be modified.
+3. Writing to a table instance field uses colon to target a field, the same rule for accessing, followed by the assignment operator and the value.
+4. Writing on a field overwrites the previous value.
+5. The type of the value must be the same as the type declared from the table prototype’s field.
+6. You can’t reassign a value to a table prototype.
+Syntax:
+<table_id>:<field_id> <assignment_op> <any_expr>;
+<table_id>:<field_id> <assignment_op> <ret_array>;
+<table_id>:<field_id> <assignment_opr> [ <notation_val> ];
+	
+
+Examples:
+table of Student = [ chars of name; piece of age; ];
+table of Course = [ chars of title; sip of grade; flag of isActive; ];
+Student of s1 = [ name = "Alice"; age = 20; Course course; ];
+Course of c1 = [ title = "Math"; grade = 2.0; ];
+	Valid Examples
+	Invalid Examples
+	s1:name = “Raphael”;
+	s1[age] = 10 ;
+	s1:course = c1;
+	s1:name = 1;
+	s1:age += 30;
+	s1:grade = 3.0;
+	c1:title = “Science”;
+	Student:name = 20;
+	c1:grade -= 22 / 5;
+	s1 = 12;
+	
+
+
+
+
+
+
+
+
+
+Standalone Recipe Call Statements
+        A recipe call statement refers to user-defined and built-in recipes invoked as a complete, independent statement that ends with a terminator.
+Input and Output Statements
+I/O statements handle communication between the program and the outside world. They include input statements (for receiving data) and output statements (for displaying or sending data). These require a standalone recipe call for take or bill.
+
+
+Syntax:
+take();
+bill(<chars_value>);
+	Conditional Statements
+A conditional statement is a control-flow statement that allows a program to make decisions based on whether a given condition is up (true) or down (false).
+
+
+check
+A decision-making control structure that allows the program to choose one block of code from multiple alternatives, based on which condition is true.
+
+
+Rules:
+1. A check statement must start with the reserved word check, followed by its condition enclosed in parentheses ( () ), and then a platter.
+   1. When creating a check statement with an instead clause, the platter of the check statement must be followed by an instead reserved word and then end with a platter. 
+   2. When creating a check statement with an alt clause, the platter of the check statement must be followed by an alt reserved word, followed by its condition enclosed in parentheses ( () ), and end with a platter.
+   3. When creating a check statement with an alt and instead clause, the platter of the check statement must be followed by an alt reserved word, followed by its condition enclosed in parentheses ( () ), then a platter, and then followed by an instead reserved word, and end with a platter.
+2. A check statement may include an alt clause, an instead clause, or both.
+3. A check statement can be used without an alt and instead clauses.
+4. A check statement and each alt clause must have exactly one condition and that condition must evaluate to a flag value.
+5. Zero or more alt clauses are allowed. If present, it must be associated with a preceding check statement.
+6. An instead clause is optional. If present, it must appear at most once and it must be associated with a preceding check statement. If one or more alt clauses exists within the same check statement, the instead clause must appear after all of them.
+7. The execution of a check statement proceeds as follows: 
+   1. The check condition is evaluated first.
+      1. If condition evaluates to up, the platter of check executes, and all alt and instead clauses are skipped, if any.
+      2. If condition evaluates to down, the alt clause/s, if any, are evaluated sequentially in the order they appear.
+   2. When an alt condition evaluates to up, its platter executes, and the remaining alt clause/s and instead clause, if any, are skipped.
+   3. If no alt condition evaluates to up, and an instead clause exists, the instead platter executes.
+   4. If no alt conditions are up and no instead clause exists, no platter is executed.
+
+
+Syntax:
+check(<strict_flag_expr>) <platter>
+<alt_clause/s>/none
+<instead_clause>/none
+
+
+check(<strict_flag_expr>) <menu_check_platter>
+<alt_clause/s>/none
+<instead_clause>/none
+
+
+check(<strict_flag_expr>) <loop_platter>
+<alt_clause_loop/s>/none
+<instead_clause_loop>/none
+	Where:
+
+
+<strict_flag_expr> =  <flag_value>
+
+
+<platter> =
+{
+     <local_decl/s>/none
+     <statements/s>/none
+}
+
+
+<alt_clause> = alt(<strict_flag_expr>) <platter>
+<instead_clause> = instead <platter>
+
+
+<menu_check_platter> =
+{
+     <local_decl_menu/s>/none
+     <statements_menu/s>/none
+}
+
+
+<loop_platter> =
+{
+     <local_decl_loop/s>/none
+     <statements_loop/s>/none
+}
+	
+
+Examples:
+prepare piece of isTrue(){ serve up; }
+piece of candy = 1;
+peanut = 0;
+	Valid Examples
+	Invalid Examples
+	check(candy == 1){
+     bill(“one candy”);
+} alt(candy == 2){
+     bill(“two candies”);
+} instead{
+     bill(“many candies”);
+}
+	check (){
+     bill(“one candy”);
+} instead (candy == 2)
+     bill(“two candies”);
+} alt {
+     bill(“many candies”);
+}
+	check(isTrue() == up){  }
+	check(1 and 1){  }
+	check(peanut > 0){  } 
+instead{  }
+	instead(peanut > 0) {  }
+	check(candy == 1){  } 
+alt(candy == 2){  }
+	alt (candy = 1){  }
+	check((1 + 4) > 5){
+} alt((5 + 6)> 10){
+} instead{  }
+	instead(peanut > 5) {
+} alt (peanut == 1){  }
+	repeat(up){
+     check(peanut == 0){
+          next;
+     }
+}
+	check(peanut == 0){
+     stop;
+}
+	menu(1){
+     choice 1:
+          check(candy > 2){
+               stop;
+          }
+}
+	check(candy > 2){
+     stop;
+}
+	
+
+menu
+A multi-way branching control structure that allows the program to choose one choice clause to execute based on the value of the menu expression.
+Rules:
+1. A menu statement must start with the reserved word menu followed by an opening parenthesis ( ( ), followed by a condition, followed by a closing parenthesis ( ) ), and then end with a platter.
+   1. When creating a choice clause inside the platter of the menu, it must start with the reserved word choice, followed by a choice value, then a colon ( : ). It may then contain zero or more statements.
+   2. When creating a usual clause inside the platter of the menu, it must start with the reserved word usual, then a colon ( : ). It may then contain zero or more statements..
+2. A menu statement may contain a choice clause or a usual clause. 
+3. A menu statement must have exactly one condition and that condition must evaluate to a flag value.
+4. The menu statement only accepts piece values and chars values as its condition.
+5. Zero or more choice clauses are allowed. If present, it must be associated with a preceding menu statement.
+6. Every choice must have exactly one choice value and it must be unique within the same menu statement.
+7. All choices only accept piece and chars literals as their choice value.
+8. Each choice clause may optionally end with a stop statement. If a stop statement is omitted for a certain choice, the execution continues to the next choice until a stop statement is encountered or until the menu statement terminates.
+9. A usual clause is optional. If present, it must appear at most once and it must be associated with a preceding menu statement. If one or more choice clauses exists within the same menu statement, the usual clause must appear after all of them.
+10. A usual clause may optionally end with a stop statement.
+11. The execution of a menu statement proceeds as follows:
+   1. The condition is evaluated first.
+   2. The result is compared to each choice value in order.
+   3. When a matching choice value is found, that choice clause is executed.
+      1. Execution continues until a stop statement is encountered.
+      2. If a stop statement is encountered, the program exits the menu statement immediately after that choice clause;
+      3. Otherwise, execution falls through the next choice clause, until a stop statement is encountered.
+   4. If no choice values match, the usual clause is executed.
+   5. If no choice values match and no usual clause exists, then the entire menu statement will be executed until the end of its platter.
+
+
+Syntax:
+menu(<strict_piece_chars_expr>) <menu_platter>
+menu(<strict_piece_chars_expr>) <menu_loop_platter>
+	Where:
+
+
+<strict_piece_chars_expr> = <piece/chars value>
+
+
+<menu_platter> = 
+{
+     <choice_clause/s>/none
+     <usual_clause>/none
+}
+
+
+<choice_clause> = 
+     choice <choice_val> :
+           <statements_menu/s>/none
+
+
+<usual_clause> =
+     usual : 
+          <statements_menu/s>/none
+
+
+<menu_loop_platter> =
+{
+     <choice_clause_loop/s>/none
+     <usual_clause_loop>/none
+}
+
+
+<choice_clause_loop> = 
+     choice <choice_val> :
+          <choice_usual_loop_st/s>/none 
+
+
+<usual_clause_loop> = 
+     usual : 
+          <choice_usual_loop_st/s>/none
+	
+
+Examples:
+piece of a = 1;
+chars of b = “Platter”;
+	Valid Examples
+	Invalid Examples
+	menu(a){
+    choice 1:
+          bill(“choice 1”);
+   choice 2:
+          bill(“choice 2”);
+          stop;
+   usual:
+          bill(“no matching choice”);
+}
+	menu(){
+     usual:
+          bill(“usual”);
+          stop;
+     choice 1:
+          bill(“choice 1”);
+          stop;
+     choice 1
+          bill(“no matching choice”);
+          stop;
+}
+	menu(a){
+     choice “hotdog”:
+          stop;
+}
+	menu(1 < 2){
+     choice “hotdog”:
+          stop;
+}
+	prepare piece of num(piece of a){
+      menu(a){
+          usual:
+              serve 0;
+     }
+}
+	menu(“hotdog”){
+     usual “egg”:
+          stop;
+     usual “hotdog”:
+          stop;
+}
+	menu(b){  }
+	menu(){ bill(“abc”); }
+	repeat(up){
+     menu(1){
+          choice 1:
+              next;
+          choice 2:
+              stop;
+          choice 3:
+              serve;
+     }
+}
+	menu(1){
+     choice 1:
+          next;
+}
+	
+
+Looping Statements
+A looping statement is a control-flow statement that allows a program to repeat one or more instructions as long as a specified condition is true.
+pass 
+A for loop statement that repeats a block of code a specific number of times when the condition is true.
+
+
+Rules:
+1. A pass statement must start with the pass reserved word followed by an opening parenthesis ( ( ), followed by the following: its initialization, update, and condition, followed by a closing parenthesis ( ) ), and end with a loop platter. 
+2. The initialization, update, and condition must be separated with a semicolon (;).
+3. The initialization, update, and condition must each contain exactly one:
+   1. Ingredient to assign or reassign for initialization. The assigned ingredient is limited to type piece. When assigning a value, it must resolve to a piece value.
+   2. Ingredient to update using the assignment operators, followed by a piece expression.
+   3. A condition that evaluates to a flag value.
+4. The execution of a pass statement proceeds as follows:
+   1. The initialization is executed once.
+   2. The condition is evaluated.
+      1. If the condition evaluates to up, the loop platter is executed, followed by the update, and the process repeats from the condition evaluation step.
+      2. If the condition evaluates to down, then the loop terminates.
+
+
+Syntax:
+pass(<initialization> <update> <condition>) <loop_platter>
+	Where:
+
+
+<initialization> = <id> <loop_init> ;
+<update> = <id> <accessor_tail> <assignment_op> <strict_piece_expr> ;
+<condition> = <strict_flag_expr>
+
+
+<loop_platter> = 
+{
+     <local_decl_loop/s>/none
+     <statements_loop/s>/none
+}
+	
+
+Examples:
+prepare piece of sum(){ serve 1+1; }
+piece of a;
+piece of b;
+piece of c = 3;
+sip of d = 1.0;
+	Valid Examples
+	Invalid Examples
+	pass(a = 3; a -= 1; a > 0){  }
+	pass(a = 3; a > 0; a -= 1){  }
+	pass(b = sum(); c -= 1; c > 0){  }
+	mpass (b = “Hello”; b += 1; b > 0) {  }
+	pass(c; c += 1; c < 10){  }
+	pass(piece of d = 2; d -= 1; d > 0){  }
+	pass(a; a -= sum(); a > 0){  }
+	pass(d; a -= 1.0; d > 0){  }
+	
+
+repeat
+A while loop statement that repeatedly executes a block of code as long as the given condition is true.
+
+
+Rules:
+1. A repeat statement must start with the repeat reserved word followed by its condition enclosed in parentheses ( () ), and then end with a loop platter. 
+2. A repeat statement must have exactly one condition and that condition must evaluate to a flag value.
+3. The execution of a repeat statement proceeds as follows:
+   1. If the condition evaluates to up, then the loop platter for repeat is executed, and the process repeats from the condition evaluation step.
+   2. If the condition evaluates to down, then the loop terminates.
+
+
+Syntax:
+repeat(<strict_flag_expr>) <loop_platter>
+	Where:
+
+
+<strict_flag_expr> =  <flag_value>
+<loop_platter> = 
+{
+     <local_decl_loop/s>/none
+     <statements_loop/s>/none
+}
+	
+
+
+
+
+
+
+
+Examples:
+piece of cake = 5;
+prepare flag of isCorrect(){ serve up; }
+prepare of sum(){ serve 1 + 1; }
+	Valid Examples
+	Invalid Examples
+	repeat(up){  }
+	repeat(){  }
+	repeat(1 == (cake - 1)){  }
+	repeat (cake + 0){ cake-=1; }
+	repeat(isTrue()){  }
+	repeat(a[1]){  }
+	order-repeat 
+A do-while loop statement that executes a block of code at least once, and then repeats it as long as the given condition remains true.
+
+
+Rules:
+1. An order-repeat statement must start with the order reserved word followed by a loop platter, followed by a repeat reserved word, followed by its condition enclosed in parentheses ( () ), and then end with a statement terminator ( ; ).
+2. The repeat is treated as a clause in order-repeat and not a statement.
+3. An order-repeat statement must always be paired with a repeat clause to form a complete order-repeat statement.
+4. A repeat clause must have exactly one condition and that condition must evaluate to a flag value.
+5. The repeat clause for the order-repeat statement must not be paired with a platter.
+6. The execution of an order-repeat statement proceeds as follows: 
+   1. The loop platter of the order statement is executed once.
+   2. If the condition of the repeat clause evaluates to up, the loop platter of the order is repeated, and the process repeats from the condition evaluation step.
+   3. If the condition evaluates to down, then the loop terminates.
+
+
+Syntax:
+order <loop_platter>
+repeat(<strict_flag_expr>);
+	Where:
+
+
+<loop_platter> = 
+{
+     <local_decl_loop/s>/none
+     <statements_loop/s>/none
+}
+
+
+<strict_flag_expr> = <flag_value>
+	
+
+Examples:
+piece of bread = 15;
+prepare flag of isCorrect(){ serve up; }
+	Valid Examples
+	Invalid Examples
+	order{
+} repeat(down);
+	order {
+} repeat();
+	order {
+} repeat(2 < (bread - 5));
+	order {
+} repeat(bread + 5)
+	order{
+} repeat(isCorrect());
+	repeat(isCorrect());
+	
+
+
+
+
+
+
+
+
+
+Jump Statements
+Jump statements change the flow of control — they make the program “jump” to another point instead of executing sequentially.
+
+
+next
+A jump statement that skips the current iteration and proceeds to the next iteration.
+
+
+Rules:
+1. The next statement must start with the next reserved word and end with a statement terminator ( ; ).
+2. The next statement must only be used inside looping statements.
+3. If a next statement is encountered during a certain iteration, then that iteration will immediately be skipped and continues to the next iteration.
+4. The next statement is applied on the nearest enclosing loop.
+
+
+Syntax:
+next;
+	
+
+
+
+Examples:
+piece of a = 3;
+sip of bread = 0.2;
+piece of biscuit = 4;
+	Valid Examples
+	Invalid Examples
+	pass(a = 3; a-=1; a > 0){
+     next;
+}
+	start(){
+     next;
+     serve 0;
+}
+	repeat(up){
+     next;
+}
+	prepare piece of loaf () {
+    piece of biscuit = 2;  
+     next;
+     serve biscuit;
+}
+	order{
+     next;
+} repeat(a > 5);
+	check(a == 3){
+     menu(y){
+          choice 3:
+                next;
+     }
+}
+	pass(a = 3; a-=1; a > 0){
+     check(y == 3){
+          next;
+     }
+}
+	check(y == 3){
+     next;
+}
+	repeat(up){
+     menu(“a”){
+          choice “b”:
+               next;
+    }
+}
+	menu(“a”){
+     choice “b”:
+          next;
+}
+	stop
+A jump statement that exits the execution of a loop or jumps out of a menu statement when encountered.
+
+
+Rules:
+1. The stop statement must start with the stop reserved word and end with a statement terminator  ( ; ).
+2. The stop statement must only be used inside looping statements and choice clauses.
+3. If a stop statement is encountered in a loop, that loop is exited immediately.
+4. The stop statement exits the nearest enclosing loop or menu.
+
+
+Syntax:
+stop;
+	
+
+Examples:
+piece of x = 8;
+piece of y;
+	Valid Examples
+	Invalid Examples
+	pass(y = 5; y-=1; y >= 0){
+     stop;
+}
+	start(){
+     stop;
+     serve 0;
+}
+
+
+	repeat(up){
+     stop;
+}
+	prepare piece of loaf() {
+    piece of bread = 2;  
+     stop;
+     serve bread;
+}
+	order{
+     stop;
+} repeat(x > 5);
+	pass(a = 0; stop; a > 5){
+     a += 1
+}
+	pass(y = 5; y-=1; y >= 0){
+     check(y == 3){
+          stop;
+     }
+}
+	check(y == 3){
+     stop;
+}
+	menu(1){
+    choice 1:
+          stop;
+    usual: 
+         check(x == y){
+              stop;
+          }
+          stop;
+}
+	menu(1){
+     stop;
+}
+	repeat(up){
+     menu(“a”){
+          choice “b”:
+               stop;
+    }
+}
+	repeat(up){
+     { 
+           stop; 
+     }
+}
+	serve
+A jump statement that terminates the execution of a function and transfers the flow of control back to the point where the function was originally invoked.
+
+
+Rules:
+1. The serve statement must start with the serve reserved word, followed by the serve value and end with a statement terminator ( ; ).
+2. The serve statement can be used across all platter types.
+3. If a serve statement is encountered, it terminates the execution of the current recipe and returns to where the recipe was invoked.
+4. Any code written after the serve statement becomes unreachable code.
+5. A serve statement can serve any of the following values:
+   1. piece, sip, flag, or chars
+   2. Array 
+   3. Table instance
+
+
+Syntax:
+serve <value>;
+	Where:
+
+
+<value> = <any_expr> / <strict_table_expr> / <strict_array_expr>
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	start(){
+     serve 0;
+}
+	start(){
+    serve 
+}
+	prepare piece of sum(piece of a, piece of b){
+     serve a + b;
+}
+	prepare piece of sum(piece of a, piece of b){
+     serve “a + b”;
+}
+	________________
+
+
+The Start Recipe
+The start recipe is the designated entry point of every Platter program. It represents the main sequence of instructions that is executed when the program runs.
+
+
+Rules:
+1. In declaring the start recipe, it must have:
+   1. The keyword start.
+   2. An empty pair of parenthesis ( ( ) ), indicating empty spices.
+   3. A platter which defines the main program body, following the platter rules.
+2. Multiple definitions of the start recipe in the same program is not allowed.
+3. Every program must have exactly one start recipe declaration
+4. The start recipe must be defined at the program’s top level and is never nested inside a recipe or platter.
+5. Within the start recipe, the following are accessible:
+   1. Global ingredients, arrays, table prototype and tables.
+   2. Local ingredients, arrays, table prototype and tables within its scope.
+   3. Recipes defined within the program.
+6. A start recipe must not have any spices inside its header.
+7. The start recipe can have more than one serve statement that can be used to return an error.
+8. The program ends without an error when the start recipe has finished executing all the statements in its platter, which will implicitly serve an exit code of 0. If a serve statement is encountered during execution inside the start recipe, the program exits with the serve value as the exit code.
+9. The start recipe implicitly serves 0 when the program is executed successfully without errors.
+10. The start recipe cannot be called in the program.
+11. The start recipe is defined only after the global declarations, and recipes in the program.
+________________
+
+
+Syntax:
+start() <platter>
+	Where:
+
+
+<platter> = 
+     {
+         <local_decl/s>/none
+         <statement/s>/none
+     }
+<local_decl> = 
+     <piece/chars/sip/flag/id_decl>
+<statements> = 
+     <id_statements> /
+     <built_in_rec_call> /
+     <conditional_st> /
+     <looping_st> /
+     <jump_serve>
+	
+
+Examples:
+Valid Examples
+	Invalid Examples
+	start(){
+}
+	start(){
+    piece of x = 10;
+}
+piece of start ()
+	start() {
+   bill(“Hello, World”);
+}
+	start(){
+    start (){
+          bill(“Hello World”);
+    }
+}
+	piece[] of numbers = [1, 2, 3];
+
+
+start() {
+    piece of total = 0;
+    total = total + numbers[0];
+    total = total + numbers[1];
+    total = total + numbers[2];
+}
+	start(piece of x){
+    piece of x = 10;
+    serve x;
+}
+	piece of sum(piece of a, piece of b) {
+    serve a + b;
+}
+
+
+start() {
+    piece of result = sum(1, 5);
+}
+	piece of sum(piece of a, piece of b){
+    start(){
+          piece of total = a + b;
+          serve total;
+    }
+}
+	Comments
+        Comments are descriptive non-executable lines or annotations that provide explanations, reminders, or reasoning behind a certain coding decision. 
+
+
+Rules:
+1. A Single-line comment must start with a hash sign ( # ), followed by a space, and then the comment text.
+2. Comments cannot be put in the middle of a statement or any reserved word as  it can separate the symbols and cause the words to not be properly recognized. It also cannot be placed right after a reserved word without at least any whitespace to separate them.
+3. A Single-line comment ends when a newline is encountered.
+4. Multi-line comments must start with a double hash sign ( ## ), followed by the comment text, and ends with a double hash sign ( ## ).
+________________
+Syntax:
+#␣<single_line_comment>
+
+
+##<multi_line_comment>##
+ 
+##<multi_line_
+comment>##
+	
+
+
+
+Examples:
+Valid Examples
+	Invalid Examples
+	# This is single_line comment
+	check (#Invalid){}
+	##This is multi_line 
+comment##
+	## 
+This is invalid
+	
