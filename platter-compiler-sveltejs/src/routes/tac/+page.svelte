@@ -1991,9 +1991,9 @@ tokens
 		box-sizing: border-box;
 		/* Use Svelte-provided CSS var for image */
 		background-image: var(--bg-img);
-		background-size: auto;
-		background-position: top left;
-		background-repeat: repeat;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 		background-color: #26262a; /* fallback color */
 		color: var(--ink);
 		font-family: 'Inter', Roboto, sans-serif;
@@ -2008,6 +2008,9 @@ tokens
 		--accent: #111;
 		--outline: #111;
 		background-image: var(--bg-img);
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 		background-color: #e8e8ed; /* fallback color for light theme */
 	}
 
