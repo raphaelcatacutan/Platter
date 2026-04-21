@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ccc07f86e9124abf2f46ff3b7e8d61364641e08b
 ##  Addition of two matrices. 
 Ask the user to input 5 numbers/elements in each array A and Array B, 
 store the sum of the numbers in  Array A & Array B in Array C.##
@@ -38,54 +34,6 @@ start(){
         bill(tochars(arrayC[i]) + " ");
     }
     bill("\n");
-<<<<<<< HEAD
-=======
-## 
-Addition of two matrices. Ask the user to input 5 numbers/elements in each array A and Array B, store the sum of the numbers in  Array A & Array B in Array C.
-##
-prepare piece[] of sumArray(piece[] of A, piece[] of B){
-	piece[] of C;
-    piece of index = 0;
-    check(size(A)==size(B)){
-    	repeat(index < size(A)){
-        	C = append(C, A[index] + B[index]);
-            index+=1;
-        }
-    } instead {
-    	bill("Array sizes are not the same");
-    }
-    serve C;
-}
-prepare piece of printNumArray(piece[] of input){
-	piece of index = 0;
-    repeat(index < size(input)){
-    	bill(tochars(input[index])+" ");
-        index+=1;
-    }
-    serve 0;
-}
-start(){
-	piece[] of A = [0,0,0,0,0], B = [0,0,0,0,0];
-    piece of index = 0;
-    # input for A
-    bill("Enter numbers for Array A\n");
-   	repeat(index < 5){
-    	A[index] = topiece(bill("Number "+tochars(index+1)+": ")+take());
-        index+=1;
-    }
-    # input for B
-    index = 0;
-    bill("Enter numbers for Array B\n");
-   	repeat(index < 5){
-    	B[index] = topiece(bill("Number "+tochars(index+1)+": ")+take());
-        index+=1;
-    }
-    bill("Sum of Array A and B in C = [");
-    printNumArray(sumArray(A,B));
-    bill("]");
->>>>>>> 5a52cd56274f53a5a14f0c5be9956be0e7914e34
-=======
->>>>>>> ccc07f86e9124abf2f46ff3b7e8d61364641e08b
 }
 --end
 1
@@ -93,10 +41,6 @@ start(){
 3
 4
 5
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ccc07f86e9124abf2f46ff3b7e8d61364641e08b
 6
 7
 8
@@ -118,27 +62,3 @@ B[3]: 9
 B[4]: 1
 
 The sum (Array C) is: 7.0 9.0 11.0 13.0 6.0 
-<<<<<<< HEAD
-=======
-1
-2
-3
-4
-5
---end
-Enter numbers for Array A
-Number 1: 1
-Number 2: 2
-Number 3: 3
-Number 4: 4
-Number 5: 5
-Enter numbers for Array B
-Number 1: 1
-Number 2: 2
-Number 3: 3
-Number 4: 4
-Number 5: 5
-Sum of Array A and B in C = [2 4 6 8 10 ]
->>>>>>> 5a52cd56274f53a5a14f0c5be9956be0e7914e34
-=======
->>>>>>> ccc07f86e9124abf2f46ff3b7e8d61364641e08b

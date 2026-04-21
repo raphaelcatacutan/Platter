@@ -45,10 +45,6 @@ start(){
     bill("The largest element in the array is: " + tochars(maxVal) + "\n");
 }
 --end
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ccc07f86e9124abf2f46ff3b7e8d61364641e08b
 6
 30
 58
@@ -66,19 +62,3 @@ Element - 3 : 97
 Element - 4 : 65
 Element - 5 : 1000
 The largest element in the array is: 1000.0
-<<<<<<< HEAD
-=======
-3
--10
--11
-0
---end
-Input the number of elements: 3
-Input 3 elements:
-Element - 0 : -10
-Element - 1 : -11
-Element - 2 : 0
-The largest element in the array is: 0.0
->>>>>>> 5a52cd56274f53a5a14f0c5be9956be0e7914e34
-=======
->>>>>>> ccc07f86e9124abf2f46ff3b7e8d61364641e08b
