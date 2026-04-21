@@ -27,7 +27,7 @@
 	} from '$lib';
 	import { editor as editorSvg } from '$lib/assets';
 
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import {
 		loadScript,
 		loadCSS,
@@ -125,33 +125,12 @@
 	let theme: 'dark' | 'light' = 'dark';
 	let activeTab: 'lexical' | 'syntax' | 'semantic' = 'lexical';
 	let rightPanelTab: 'terminal' | 'lexer' = 'terminal';
-
-	let codeInput = `sip of x = 42.2;
-sip of y = 3.67;
-##
-chars[] of names = ["Hello Platter", "Raph", "Jieco"];
-piece[][] of nums = [
-	[12, 21, 2],
-    [32, 2, 12]
-];
-##
-table of yz = [
-	piece  of x;
-    sip of xyz;
-];
-
-prepare sip of sips() { check(topiece(y) > topiece(x)) { serve x;} instead {serve y;} }
-
-prepare piece of pieces() {
-	 serve topiece(x) + 32 / 323;
-     
-}
-
-start() {
-	piece of z = topiece(topiece(sips()) + pieces());
-	bill(tochars(z));
-    serve z;
+	const DEFAULT_PLATTER_FILE = '/python/tests/semantic_programs/source_code/default.platter';
+	const DEFAULT_CODE_FALLBACK = `start() {
+	serve 0;
 }`;
+
+	let codeInput = DEFAULT_CODE_FALLBACK;
 
 	type Token = { type: string; value: string; line: number; col: number };
 	const lexerRows: Array<{ lexeme: string; token: string }> = [];
@@ -198,7 +177,69 @@ start() {
 	let panelSyncObserver: ResizeObserver | null = null;
 	let isWaitingForInput = false;
 	let terminalInputText = '';
+	let terminalInputEl: HTMLInputElement | null = null;
+	let terminalViewportEl: HTMLDivElement | null = null;
 	const CTRL_ENTER_HINT_SEEN_KEY = 'platter_ctrl_enter_hint_seen_v1';
+
+	function sanitizeProgramText(source: string): string {
+		return source
+			.replace(/\u201C/g, '\u0022')
+			.replace(/\u201D/g, '\u0022')
+			.replace(/\u2018/g, '\u0027')
+			.replace(/\u2019/g, '\u0027')
+			.replace(/\r\n/g, '\n');
+	}
+
+	async function loadDefaultEditorCode() {
+		try {
+			const response = await fetch(`${data.basePath}${DEFAULT_PLATTER_FILE}`);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}`);
+			}
+			codeInput = sanitizeProgramText(await response.text());
+		} catch (err) {
+			console.warn('Failed to load default starter file, using fallback code.', err);
+			codeInput = sanitizeProgramText(DEFAULT_CODE_FALLBACK);
+		}
+	}
+
+	function getTerminalInputElement(): HTMLInputElement | null {
+		if (terminalInputEl) return terminalInputEl;
+		if (!terminalPanelEl) return null;
+		return terminalPanelEl.querySelector('input.terminal-input');
+	}
+
+	async function focusTerminal(preferInput = false) {
+		rightPanelTab = 'terminal';
+		await tick();
+		if (preferInput || isWaitingForInput) {
+			const inputEl = getTerminalInputElement();
+			if (inputEl) {
+				inputEl.focus();
+				terminalInputEl = inputEl;
+				return;
+			}
+		}
+		if (terminalViewportEl) {
+			terminalViewportEl.focus();
+			return;
+		}
+	}
+
+	function handleTerminalPanelClick(event: PointerEvent) {
+		event.preventDefault();
+		if (!isWaitingForInput || rightPanelTab !== 'terminal') return;
+		void focusTerminal(true);
+	}
+
+	function runCode() {
+		void focusTerminal(false);
+		void analyzeSemantic(true);
+	}
+
+	$: if (isWaitingForInput && rightPanelTab === 'terminal') {
+		void focusTerminal(true);
+	}
 
 	function syncTerminalPanelHeight() {
 		if (!editorPanelEl || !terminalPanelEl) return;
@@ -369,12 +410,14 @@ start() {
 
 	onMount(async () => {
 		showFirstVisitCtrlEnterHint();
+		await loadDefaultEditorCode();
+		await tick();
 
 		handleGlobalCtrlEnter = (event: KeyboardEvent) => {
 			if (event.defaultPrevented || event.repeat) return;
 			if (event.ctrlKey && event.key === 'Enter') {
 				event.preventDefault();
-				analyzeSemantic(true);
+				runCode();
 			} else if (event.ctrlKey && event.key === '1') {
 				event.preventDefault();
 				analyzeLexical();
@@ -392,6 +435,7 @@ start() {
 		try {
 			// load CodeMirror assets from CDN (lightweight integration)
 			await loadCSS('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css');
+			await loadCSS('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.css');
 			// optional: a theme could be loaded here, but our overrides will ensure transparency
 			await loadScript(
 				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js'
@@ -399,8 +443,40 @@ start() {
 			await loadScript(
 				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js'
 			);
+			await loadScript(
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldcode.min.js'
+			);
+			await loadScript(
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.js'
+			);
+			await loadScript(
+				'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/brace-fold.min.js'
+			);
 			if (textareaEl && (window as any).CodeMirror) {
 				const CM = (window as any).CodeMirror;
+				const foldBySelectionOrCursor = (cm: any) => {
+					const doc = cm.getDoc();
+					const rangeFinder = CM.fold?.brace;
+					if (!rangeFinder) {
+						cm.foldCode(doc.getCursor());
+						return;
+					}
+
+					if (doc.somethingSelected()) {
+						const selections = doc.listSelections();
+						for (const sel of selections) {
+							const from = sel.from();
+							const to = sel.to();
+							for (let line = from.line; line <= to.line; line++) {
+								cm.foldCode({ line, ch: 0 }, { rangeFinder }, 'fold');
+							}
+						}
+						return;
+					}
+
+					// No selection: fold/unfold the current brace-highlighted block at cursor.
+					cm.foldCode(doc.getCursor(), { rangeFinder }, 'toggle');
+				};
 				
 				// Define Platter syntax highlighting mode
 				CM.defineMode('platter', function() {
@@ -510,16 +586,85 @@ start() {
 				
 				cmInstance = CM.fromTextArea(textareaEl, {
 					lineNumbers: true,
-					// enable soft-wrapping so long lines flow to the next visual line
-					lineWrapping: true,
+					lineWrapping: false,
 					viewportMargin: Infinity,
 					mode: 'platter',
 					matchBrackets: true,
+					foldGutter: true,
+					gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
 					extraKeys: {
-						'Ctrl-Enter': function() { analyzeSemantic(true); },
+						'Ctrl-Enter': function() { runCode(); },
 						'Ctrl-1': function() { analyzeLexical(); },
 						'Ctrl-2': function() { analyzeSyntax(); },
 						'Ctrl-3': function() { analyzeSemantic(false); },
+						'Ctrl-Q': function(cm: any) {
+							foldBySelectionOrCursor(cm);
+						},
+						'Ctrl-Shift-Q': function(cm: any) {
+							foldBySelectionOrCursor(cm);
+						},
+						'Ctrl-D': function(cm: any) {
+							const doc = cm.getDoc();
+							const selections = doc.listSelections();
+							const toRange = (sel: any) => {
+								const start = cm.indexFromPos(sel.anchor);
+								const end = cm.indexFromPos(sel.head);
+								return [Math.min(start, end), Math.max(start, end)];
+							};
+
+							const hasSelection = selections.some((sel: any) => {
+								const [start, end] = toRange(sel);
+								return end > start;
+							});
+
+							if (!hasSelection) {
+								const word = cm.findWordAt(doc.getCursor());
+								const text = doc.getRange(word.anchor, word.head);
+								if (text.trim()) {
+									doc.setSelection(word.anchor, word.head);
+								}
+								return;
+							}
+
+							const headSel = selections[selections.length - 1];
+							const selectedText = doc.getRange(headSel.anchor, headSel.head);
+							if (!selectedText) return;
+
+							const selectedRanges = selections.map((sel: any) => toRange(sel));
+							const headIndex = Math.max(
+								cm.indexFromPos(headSel.anchor),
+								cm.indexFromPos(headSel.head)
+							);
+
+							const content = doc.getValue();
+							const firstMatch = content.indexOf(selectedText);
+							if (firstMatch < 0) return;
+
+							let searchIndex = headIndex;
+							let tries = 0;
+							const maxTries = content.length + 1;
+							while (tries < maxTries) {
+								let nextIndex = content.indexOf(selectedText, searchIndex);
+								if (nextIndex < 0) {
+									nextIndex = content.indexOf(selectedText, 0);
+								}
+								if (nextIndex < 0) return;
+
+								const nextRange: [number, number] = [nextIndex, nextIndex + selectedText.length];
+								const alreadySelected = selectedRanges.some(
+									([start, end]: [number, number]) => start === nextRange[0] && end === nextRange[1]
+								);
+								if (!alreadySelected) {
+									const nextAnchor = cm.posFromIndex(nextRange[0]);
+									const nextHead = cm.posFromIndex(nextRange[1]);
+									doc.addSelection(nextAnchor, nextHead);
+									return;
+								}
+
+								searchIndex = nextRange[1];
+								tries += 1;
+							}
+						},
 						'Ctrl-/': function(cm: any) {
 							const doc = cm.getDoc();
 							const sel = doc.getSelection();
@@ -554,6 +699,8 @@ start() {
 				});
 
 				cmInstance.setSize('100%', '100%');
+				cmInstance.setValue(sanitizeProgramText(codeInput));
+				codeInput = cmInstance.getValue();
 				cmInstance.on('change', () => {
 					codeInput = cmInstance.getValue();
 				});
@@ -1810,7 +1957,16 @@ tokens
 		<section class="left">
 			<!-- Toolbar row -->
 			<div class="toolbar">
-				<button class="pill active" on:click={() => analyzeSemantic(true)}>
+				<button class="pill {activeTab === 'lexical' ? 'active' : ''}" on:click={() => analyzeLexical()}>
+					<span>Lexical</span>
+				</button>
+				<button class="pill {activeTab === 'syntax' ? 'active' : ''}" on:click={analyzeSyntax}>
+					<span>Syntax</span>
+				</button>
+				<button class="pill {activeTab === 'semantic' ? 'active' : ''}" on:click={() => analyzeSemantic(false)}>
+					<span>Semantic</span>
+				</button>
+				<button class="pill" on:click={runCode}>
 					{#if theme === 'dark'}
 						<img class="icon" src={synSemLexIcon} alt="Run Icon" />
 					{:else}
@@ -1846,13 +2002,13 @@ tokens
 						<img class="icon" src={copy1} alt="Light Theme Icon" />
 					{/if}</button
 				> -->
-				<!-- <button class="icon-btn" title="Theme" on:click={toggleTheme}>
+				<button class="icon-btn" title="Theme" on:click={toggleTheme}>
 					{#if theme === 'dark'}
 						<img class="icon" src={lightmode} alt="Dark Theme Icon" />
 					{:else}
 						<img class="icon" src={darkmode} alt="Light Theme Icon" />
 					{/if}
-				</button> -->
+				</button>
 			</div>
 
 			<!-- Editor canvas -->
@@ -1947,7 +2103,14 @@ tokens
 							{/if}
 						</div>
 					</div>
-					<div class="table-body">
+					<div
+						class="table-body terminal-body"
+						role="region"
+						aria-label="Terminal output"
+						bind:this={terminalViewportEl}
+						tabindex="-1"
+						on:pointerdown={handleTerminalPanelClick}
+					>
 						{#if termMessages.length === 0}
 							<div class="empty">No terminal messages yet</div>
 						{:else}
@@ -1963,13 +2126,12 @@ tokens
 						{#if isWaitingForInput}
 							<div class="trow input-row">
 								<span class="tmsg prompt-caret">&gt; </span>
-								<!-- svelte-ignore a11y-autofocus -->
 								<input 
 									type="text" 
 									class="terminal-input" 
+									bind:this={terminalInputEl}
 									bind:value={terminalInputText}
 									on:keydown={(e) => { if (e.key === 'Enter') handleTerminalInput() }}
-									autofocus
 								/>
 							</div>
 						{/if}
@@ -2137,6 +2299,18 @@ tokens
 		height: 18px;
 		object-fit: contain;
 	}
+	.icon-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: 4px solid var(--outline);
+		background: transparent;
+		color: var(--ink);
+		padding: 8px 12px;
+		border-radius: 8px;
+		cursor: pointer;
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+	}
 
 	.left {
 		display: flex;
@@ -2220,12 +2394,19 @@ tokens
 		object-fit: contain;
 	}
 	.tmsg {
-		white-space: pre-wrap;
+		white-space: pre;
 		font-family:
 			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 		tab-size: 4;
 		-moz-tab-size: 4;
 		-o-tab-size: 4;
+	}
+	.terminal-body {
+		overflow-x: auto;
+		overflow-y: auto;
+	}
+	.terminal-body .trow {
+		min-width: max-content;
 	}
 
 	.right {
@@ -2283,16 +2464,6 @@ tokens
 		border: none;
 		box-shadow: none;
 	}
-	.table-title {
-		text-align: left;
-		font-weight: 700;
-		margin-bottom: 0;
-		/* margin-top: 48px; */
-
-		border: none;
-		box-shadow: none;
-	}
-
 	/* Tab bar for the right panel */
 	.panel-tabs {
 		display: flex;
@@ -2356,6 +2527,10 @@ tokens
 		/* 
 		border: none;
 		box-shadow: none; */
+	}
+	.table-body.terminal-body {
+		overflow-x: auto;
+		overflow-y: auto;
 	}
 	.empty {
 		opacity: 0.7;
@@ -2429,10 +2604,27 @@ tokens
 	}
 
 	:global(.CodeMirror-scroll) {
-		/* disable horizontal scrolling and allow wrapping */
-		overflow-x: hidden !important;
+		overflow-x: auto !important;
 		overflow-y: auto !important;
-		white-space: pre-wrap !important; /* allow wrap onto next line */
+		white-space: pre !important;
+	}
+
+	/* Make fold controls visible and clickable next to line numbers. */
+	:global(.CodeMirror-foldgutter) {
+		width: 1.1em;
+	}
+	:global(.CodeMirror-foldgutter-open),
+	:global(.CodeMirror-foldgutter-folded) {
+		cursor: pointer;
+		text-align: center;
+	}
+	:global(.CodeMirror-foldgutter-open::after) {
+		content: '▾';
+		color: var(--ink-muted);
+	}
+	:global(.CodeMirror-foldgutter-folded::after) {
+		content: '▸';
+		color: var(--ink);
 	}
 
 	/* Make gutters transparent and inherit muted color */
@@ -2452,7 +2644,7 @@ tokens
 		line-height: 20px !important;
 		padding: 0 8px !important;
 		margin: 0 !important;
-		white-space: pre-wrap !important; /* allow wrapped lines */
+		white-space: pre !important;
 	}
 
 	/* Cursor color per theme */
