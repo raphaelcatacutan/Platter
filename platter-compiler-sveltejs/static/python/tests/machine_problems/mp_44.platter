@@ -12,7 +12,7 @@ prepare piece of pascalTriangle(piece of rows){
 
     pass(i = 0; i += 1; i < rows){
         pass(spaces = 0; spaces += 1; spaces < rows - i - 1){
-            bill(" ");
+            bill("\t");
         }
 
         coefficient = 1;
@@ -21,7 +21,7 @@ prepare piece of pascalTriangle(piece of rows){
             bill(tochars(coefficient));
 
             check(j < i){
-                bill(" ");
+                bill("\t\t");
                 numerator = i - j;
                 numerator = coefficient * numerator;
                 denominator = j + 1;
@@ -48,11 +48,13 @@ start(){
 
 }
 --end
-5
+7
 --end
-Enter the number of rows: 5
-    1
-   1 1
-  1 2 1
- 1 3 3 1
-1 4 6 4 1
+Enter the number of rows: 7
+						1
+					1		1
+				1		2		1
+			1		3		3		1
+		1		4		6		4		1
+	1		5		10		10		5		1
+1		6		15		20		15		6		1

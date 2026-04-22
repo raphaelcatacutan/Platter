@@ -52,7 +52,21 @@ prepare piece of transposeMatrix(piece[] of a, piece[] of b){
     arrayTemp = arrayA;
     arrayA = arrayB;
     arrayB = arrayTemp;
-    bill("Matrix Swapped!");
+    bill("Matrix Swapped!\n");
+    
+    bill("New Matrix A: [");
+    pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(arrayA[i])); 
+        check (i == arraySize - 1){ bill("]\n"); }
+        instead { bill(", "); }
+	}
+    bill("New Matrix B: [");
+    pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(arrayB[i])); 
+        check (i == arraySize - 1){ bill("]\n"); }
+        instead { bill(", "); }
+	}
+    
 	serve 0;
 }
 
@@ -110,40 +124,23 @@ start(){
       } repeat(input != 4);
 }
 --end
-2
-1
-2
 3
-4
-1
-2
+11
+12
+13
+21
+22
+23
 3
-1
 4
 --end
-Enter array size: 2
-Enter element for array A at index [0]: 1
-Enter element for array A at index [1]: 2
-Enter element for array B at index [0]: 3
-Enter element for array B at index [1]: 4
-
-Matrix Operations
-	1. Matrix Addition
-	2. Matrix Subtraction
-	3. Matrix Transpose
-	4. Exit
-Enter choice: 1
-Matrix Addition
-Sum matrix: [4, 6]
-
-Matrix Operations
-	1. Matrix Addition
-	2. Matrix Subtraction
-	3. Matrix Transpose
-	4. Exit
-Enter choice: 2
-Matrix Subtraction
-Difference matrix: [-2, -2]
+Enter array size: 3
+Enter element for array A at index [0]: 11
+Enter element for array A at index [1]: 12
+Enter element for array A at index [2]: 13
+Enter element for array B at index [0]: 21
+Enter element for array B at index [1]: 22
+Enter element for array B at index [2]: 23
 
 Matrix Operations
 	1. Matrix Addition
@@ -153,15 +150,9 @@ Matrix Operations
 Enter choice: 3
 Matrix Transpose
 Matrix Swapped!
+New Matrix A: [21, 22, 23]
+New Matrix B: [11, 12, 13]
 
-Matrix Operations
-	1. Matrix Addition
-	2. Matrix Subtraction
-	3. Matrix Transpose
-	4. Exit
-Enter choice: 1
-Matrix Addition
-Sum matrix: [4, 6]
 
 Matrix Operations
 	1. Matrix Addition
