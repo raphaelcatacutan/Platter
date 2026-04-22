@@ -1,0 +1,109 @@
+# Utility helpers for safe input validation before typecasting
+prepare flag of safeIsPiece(chars of txt, flag of positiveOnly){
+    piece of i = 1;
+    chars of ch = "";
+    flag of hasDigit = down;
+
+    check(txt == ""){
+        serve down;
+    }
+
+    ch = copy(txt, 1, 1);
+    check(ch == "-"){
+        check(positiveOnly){
+            serve down;
+        }
+        i = 2;
+    }
+
+    repeat(copy(txt, i, i) != ""){
+        ch = copy(txt, i, i);
+        check(ch >= "0" and ch <= "9"){
+            hasDigit = up;
+        } instead {
+            serve down;
+        }
+        i = i + 1;
+    }
+
+    serve hasDigit;
+}
+prepare flag of safeIsSip(chars of txt, flag of positiveOnly){
+    piece of i = 1;
+    piece of lastPos = 0;
+    chars of ch = "";
+    flag of hasDigit = down;
+    flag of hasDot = down;
+
+    check(txt == ""){
+        serve down;
+    }
+
+    ch = copy(txt, 1, 1);
+    check(ch == "-"){
+        check(positiveOnly){
+            serve down;
+        }
+        i = 2;
+    }
+
+    repeat(copy(txt, i, i) != ""){
+        ch = copy(txt, i, i);
+        lastPos = i;
+
+        check(ch >= "0" and ch <= "9"){
+            hasDigit = up;
+        } alt(ch == "."){
+            check(hasDot){
+                serve down;
+            }
+            check(i == 1 or (i == 2 and copy(txt, 1, 1) == "-")){
+                serve down;
+            }
+            hasDot = up;
+        } instead {
+            serve down;
+        }
+
+        i = i + 1;
+    }
+
+    check(hasDot){
+        check(copy(txt, lastPos, lastPos) == "."){
+            serve down;
+        }
+    }
+
+    serve hasDigit;
+}
+prepare flag of safeIsChars(chars of txt){
+    piece of i = 1;
+    chars of ch = "";
+
+    repeat(copy(txt, i, i) != ""){
+        ch = copy(txt, i, i);
+        check(ch == " " or (ch >= "!" and ch <= "~")){
+            # allowed ASCII 32-126
+        } instead {
+            serve down;
+        }
+        i = i + 1;
+    }
+
+    serve up;
+}
+# Utility helpers for chars
+prepare piece of charsLen(chars of txt){
+	piece of i = 1;
+	repeat(copy(txt, i, i) != ""){
+		i = i + 1;
+	}
+	serve i - 1;
+}
+
+start(){
+    serve 0;
+}
+--end
+--end
+[[EXIT_MESSAGE]]Program ended with exit code 0

@@ -1,0 +1,94 @@
+piece of maxAttempts = 5;
+
+prepare flag of safeIsPiece(chars of txt, flag of positiveOnly){
+    piece of i = 1;
+    chars of ch = "";
+    flag of hasDigit = down;
+
+    check(txt == ""){
+        serve down;
+    }
+
+    ch = copy(txt, 1, 1);
+    check(ch == "-"){
+        check(positiveOnly){
+            serve down;
+        }
+        i = 2;
+    }
+
+    repeat(copy(txt, i, i) != ""){
+        ch = copy(txt, i, i);
+        check(ch >= "0" and ch <= "9"){
+            hasDigit = up;
+        } instead {
+            serve down;
+        }
+        i = i + 1;
+    }
+
+    serve hasDigit;
+}
+
+start(){
+    piece of secret = 0;
+    piece of attempts = 0;
+    piece of guess = 0;
+    piece of attemptsLeft = 0;
+    chars of raw = "";
+    flag of won = down;
+
+    repeat(up){
+        secret = topiece(rand() * 100.0) + 1;
+        attempts = 0;
+        won = down;
+
+        bill("\n==============================\n");
+        bill("Guessing Game\n");
+        bill("==============================\n");
+        bill("I picked a secret number from 1 to 100.\n");
+        bill("You have " + tochars(maxAttempts) + " attempts.\n");
+        bill("Type exit to quit the game.\n");
+
+        repeat(attempts < maxAttempts){
+            bill("Enter your guess: ");
+            raw = take();
+
+            check(raw == "exit"){
+                bill("\nThanks for playing.\n");
+                serve 0;
+            } alt (not safeIsPiece(raw, down)) {
+                bill("Invalid Input. Only Piece is allowed.\n");
+            } instead {
+                guess = topiece(raw);
+
+                check(guess > 100 or guess < 1) {
+                    bill("Invalid Input. Only values from 1 to 100 is allowed.\n");
+                }
+                alt (guess == secret){
+                    won = up;
+                    bill("Correct! You guessed the secret number.\n");
+                    stop;
+                } alt(guess < secret){
+
+                    attempts = attempts + 1;
+                    attemptsLeft = maxAttempts - attempts;
+                    bill("Too low. Attempts left: " + tochars(attemptsLeft) + "\n");
+                } instead {
+                    attempts = attempts + 1;
+                    attemptsLeft = maxAttempts - attempts;
+                    bill("Too high. Attempts left: " + tochars(attemptsLeft) + "\n");
+                }
+            }
+            check(guess == secret){
+                stop;
+            }
+        }
+        check(not won){
+            bill("Out of attempts. Secret number was " + tochars(secret) + ".\n");
+        }
+        bill("Starting a new round...\n");
+    }
+
+    serve 0;
+}

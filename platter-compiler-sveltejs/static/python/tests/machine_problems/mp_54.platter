@@ -1,0 +1,1401 @@
+##
+Combined Machine Problems 50 - 53
+Matrix Operations
+Student Records
+Client Transactions
+Jeepney Dashboard
+##
+
+piece[] of arrayA;
+piece[] of arrayB;
+piece[] of arrayC;
+piece[] of arrayTemp;
+piece of arraySize;
+
+table of Student = [
+	chars of name;
+	chars of studentNumber;
+	chars of course;
+];
+
+Student[] of records = [];
+
+table of ClientRecord = [
+	chars of name;
+	piece of accountNumber;
+	chars of date;
+	piece of balance;
+	piece of dailyDepositTotal;
+	piece of dailyWithdrawalTotal;
+	piece of depositCount;
+	piece of withdrawalCount;
+	piece of inquiryCount;
+	flag of done;
+];
+
+ClientRecord[] of clients = [];
+ClientRecord of activeClient = [];
+
+piece of clientCount = 0;
+piece of registeredClients = 0;
+
+piece[] of seats = [];
+piece of capacity = 22;
+piece of currentPassengers = 0;
+piece of location = 0;
+
+prepare piece of addMatrix(piece[] of a, piece[] of b){
+	piece of i;
+	bill("Sum matrix: [");
+	pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(a[i] + b[i]));
+		check (i == arraySize - 1){ bill("]"); }
+		instead { bill(", "); }
+	}
+	serve 0;
+}
+
+prepare piece of subMatrix(piece[] of a, piece[] of b){
+	piece of i;
+	bill("Difference matrix: [");
+	pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(a[i] - b[i]));
+		check (i == arraySize - 1){ bill("]"); }
+		instead { bill(", "); }
+	}
+	serve 0;
+}
+
+prepare piece of transposeMatrix(){
+	arrayTemp = arrayA;
+	arrayA = arrayB;
+	arrayB = arrayTemp;
+	bill("Matrix Swapped!");
+	serve 0;
+}
+
+prepare piece of matrixMenu(){
+	piece of i;
+	piece of input;
+	piece of element;
+	piece of ans;
+
+	arrayA = [];
+	arrayB = [];
+	arrayC = [];
+	arrayTemp = [];
+	arraySize = 0;
+
+	bill("Enter array size: ");
+	arraySize = topiece(take());
+		
+	pass(i = 0; i += 1; i < arraySize){
+		bill("Enter element for array A at index [" + tochars(i) + "]: ");
+		element = topiece(take());
+		arrayA = append(arrayA, element);   
+	}
+	
+	pass(i = 0; i += 1; i < arraySize){
+		bill("Enter element for array B at index [" + tochars(i) + "]: ");
+		element = topiece(take());
+		arrayB = append(arrayB, element);   
+	}
+
+	bill("\n");
+	order {
+		bill("Matrix Operations\n");
+		bill("\t1. Matrix Addition\n");
+		bill("\t2. Matrix Subtraction\n");
+		bill("\t3. Matrix Transpose\n");
+		bill("\t4. Exit\n");
+		bill("Enter choice: ");
+		input = topiece(take());
+
+		menu(input){
+			choice 1:
+				bill("Matrix Addition\n");
+				arrayC = [];
+				pass(i = 0; i += 1; i < arraySize){
+					ans = arrayA[i] + arrayB[i];
+					append(arrayC, ans);
+				}
+				
+				bill("Sum matrix: [");
+				pass(i = 0; i += 1; i < arraySize){
+					bill(tochars(arrayC[i])); 
+					check (i == arraySize - 1){ bill("]"); }
+					instead { bill(", "); }
+				}
+				stop;
+			choice 2:
+				bill("Matrix Subtraction\n");
+				arrayC = [];
+				pass(i = 0; i += 1; i < arraySize){
+					ans = arrayA[i] - arrayB[i];
+					append(arrayC, ans);
+				}
+				
+				bill("Difference matrix: [");
+				pass(i = 0; i += 1; i < arraySize){
+					bill(tochars(arrayC[i])); 
+					check (i == arraySize - 1){ bill("]"); }
+					instead { bill(", "); }
+				}
+				stop;
+			choice 3:
+				bill("Matrix Transpose\n");
+				arrayTemp = arrayA;
+				arrayA = arrayB;
+				arrayB = arrayTemp;
+				bill("Matrix Swapped!");
+				stop;
+			choice 4:
+				bill("Menu exited\n");
+				stop;
+			usual:
+				bill("Not a valid choice!\n");
+				stop;
+		}
+		bill("\n\n");
+	} repeat(input != 4);
+	serve 0;
+}
+
+prepare piece of charsLen(chars of txt){
+	piece of i = 1;
+
+	repeat(copy(txt, i, i) != ""){
+		i = i + 1;
+	}
+
+	serve i - 1;
+}
+
+prepare flag of validLen(chars of txt, piece of minLen, piece of maxLen){
+	piece of n = charsLen(txt);
+	serve n >= minLen and n <= maxLen;
+}
+
+prepare flag of validStudNo(chars of studNo){
+	piece of i = 1;
+	chars of ch = "";
+
+	check(studNo == ""){
+		serve down;
+	}
+
+	repeat(copy(studNo, i, i) != ""){
+		ch = copy(studNo, i, i);
+		check((ch >= "0" and ch <= "9") or ch == "-"){
+			# valid character
+		} instead {
+			serve down;
+		}
+		i = i + 1;
+	}
+
+	serve up;
+}
+
+prepare flag of hasStudNo(Student[] of recordsArg, chars of studNo){
+	piece of i = 0;
+
+	repeat(i < size(recordsArg)){
+		check(recordsArg[i]:studentNumber == studNo){
+			serve up;
+		}
+		i = i + 1;
+	}
+
+	serve down;
+}
+
+prepare piece of studentMenu(){
+	piece of c = 0, i = 0, editChoice = 0;
+	chars of inputName = "", inputStudNo = "", inputCourse = "";
+	chars of searchStudNo = "";
+	flag of running = up, found = down, studNoOk = down;
+	Student of newRecord = []; 
+
+	records = [];
+
+	repeat(running){
+		bill("\n==============================\n");
+		bill("Student Records Menu\n");
+		bill("==============================\n");
+		bill("1. Add Record\n");
+		bill("2. Display Record (all)\n");
+		bill("3. Search Record (individual)\n");
+		bill("4. Edit Student Record\n");
+		bill("5. Delete Student Record\n");
+		bill("6. Exit\n");
+		bill("Enter choice: ");
+		c = topiece(take());
+
+		check(c == 1){
+			bill("\n==============================\n");
+			bill("Add Student Record\n");
+			bill("==============================\n");
+
+			repeat(up){
+				bill("Enter student name: ");
+				inputName = take();
+				check(validLen(inputName, 3, 25)){
+					stop;
+				} instead {
+					bill("Invalid name length. Minimum 3 and maximum 25 characters.\n");
+				}
+			}
+
+			studNoOk = down;
+			repeat(not studNoOk){
+				bill("Enter student number: ");
+				inputStudNo = take();
+
+				check(not validLen(inputStudNo, 3, 10)){
+					bill("Invalid student number length. Minimum 3 and maximum 10 characters.\n");
+				} alt(not validStudNo(inputStudNo)){
+					bill("Invalid student number format. Numbers and dash only.\n");
+				} alt(hasStudNo(records, inputStudNo)){
+					bill("Student number already taken\n");
+				} instead {
+					studNoOk = up;
+				}
+			}
+
+			repeat(up){
+				bill("Enter course: ");
+				inputCourse = take();
+				check(validLen(inputCourse, 3, 25)){
+					stop;
+				} instead {
+					bill("Invalid course length. Minimum 3 and maximum 25 characters.\n");
+				}
+			}
+
+			newRecord = [
+				name = inputName;
+				studentNumber = inputStudNo;
+				course = inputCourse;
+			];
+			records = append(records, newRecord);
+
+			bill("==============================\n");
+			bill("Record added successfully.\n");
+			bill("==============================\n");
+
+		} alt(c == 2){
+			check(size(records) == 0){
+				bill("\n==============================\n");
+				bill("No records found.\n");
+				bill("==============================\n");
+			} instead {
+				bill("\n==============================\n");
+				bill("All Student Records\n");
+				bill("==============================\n");
+				pass(i = 0; i += 1; i < size(records)){
+					bill("Record #" + tochars(i + 1) + "\n");
+					bill("Name: " + records[i]:name + "\n");
+					bill("Student Number: " + records[i]:studentNumber + "\n");
+					bill("Course: " + records[i]:course + "\n");
+					bill("------------------------------\n");
+				}
+			}
+
+		} alt(c == 3){
+			bill("Enter student number to search: ");
+			searchStudNo = take();
+			found = down;
+
+			pass(i = 0; i += 1; i < size(records)){
+				check(records[i]:studentNumber == searchStudNo and not found){
+					bill("\n==============================\n");
+					bill("Record Found\n");
+					bill("==============================\n");
+					bill("Name: " + records[i]:name + "\n");
+					bill("Student Number: " + records[i]:studentNumber + "\n");
+					bill("Course: " + records[i]:course + "\n");
+					bill("==============================\n");
+					found = up;
+				}
+			}
+
+			check(not found){
+				bill("\n==============================\n");
+				bill("Record not found.\n");
+				bill("==============================\n");
+			}
+
+		} alt(c == 4){
+			bill("Enter student number to edit: ");
+			searchStudNo = take();
+			found = down;
+
+			pass(i = 0; i += 1; i < size(records)){
+				check(records[i]:studentNumber == searchStudNo and not found){
+					bill("\n==============================\n");
+					bill("Edit Record Menu\n");
+					bill("==============================\n");
+					bill("Student number can't be edited\n");
+					bill("1. Edit Name\n");
+					bill("2. Edit Course\n");
+					bill("3. Edit Name and Course\n");
+					bill("4. Cancel\n");
+					bill("Enter edit choice: ");
+					editChoice = topiece(take());
+
+					check(editChoice == 1){
+						repeat(up){
+							bill("Enter new student name: ");
+							inputName = take();
+							check(validLen(inputName, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid name length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+						newRecord = [
+							name = inputName;
+							studentNumber = records[i]:studentNumber;
+							course = records[i]:course;
+						];
+						records[i] = newRecord;
+						bill("Record updated successfully.\n");
+					} alt(editChoice == 2){
+						repeat(up){
+							bill("Enter new course: ");
+							inputCourse = take();
+							check(validLen(inputCourse, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid course length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+						newRecord = [
+							name = records[i]:name;
+							studentNumber = records[i]:studentNumber;
+							course = inputCourse;
+						];
+						records[i] = newRecord;
+						bill("Record updated successfully.\n");
+					} alt(editChoice == 3){
+						repeat(up){
+							bill("Enter new student name: ");
+							inputName = take();
+							check(validLen(inputName, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid name length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+
+						repeat(up){
+							bill("Enter new course: ");
+							inputCourse = take();
+							check(validLen(inputCourse, 3, 25)){
+								stop;
+							} instead {
+								bill("Invalid course length. Minimum 3 and maximum 25 characters.\n");
+							}
+						}
+						newRecord = [
+							name = inputName;
+							studentNumber = records[i]:studentNumber;
+							course = inputCourse;
+						];
+						records[i] = newRecord;
+						bill("Record updated successfully.\n");
+					} alt(editChoice == 4){
+						bill("Edit cancelled.\n");
+					} instead {
+						bill("Invalid edit choice.\n");
+					}
+
+					bill("==============================\n");
+					found = up;
+				}
+			}
+
+			check(not found){
+				bill("\n==============================\n");
+				bill("Record not found.\n");
+				bill("==============================\n");
+			}
+
+		} alt(c == 5){
+			bill("Enter student number to delete: ");
+			searchStudNo = take();
+			found = down;
+
+			pass(i = 0; i += 1; i < size(records)){
+				check(records[i]:studentNumber == searchStudNo and not found){
+					records = remove(records, i);
+					bill("\n==============================\n");
+					bill("Record deleted successfully.\n");
+					bill("==============================\n");
+					found = up;
+				}
+			}
+
+			check(not found){
+				bill("\n==============================\n");
+				bill("Record not found.\n");
+				bill("==============================\n");
+			}
+
+		} alt(c == 6){
+			bill("\n==============================\n");
+			bill("Exiting Student Records program.\n");
+			bill("==============================\n");
+			running = down;
+
+		} instead {
+			bill("\n==============================\n");
+			bill("Invalid choice. Please select 1 to 6.\n");
+			bill("==============================\n");
+		}
+	}
+	serve 0;
+}
+
+prepare flag of isWholeNumber(chars of text) {
+	piece of i = 1;
+	chars of c = "";
+
+	check(text == "") {
+		serve down;
+	}
+
+	c = copy(text, i, i);
+	repeat(c != "") {
+		check(c < "0" or c > "9") {
+			serve down;
+		}
+
+		i += 1;
+		c = copy(text, i, i);
+	}
+
+	serve up;
+}
+
+prepare piece of findClientIndex(piece of accountNumber) {
+	piece of i = 0;
+	ClientRecord of currentClient = [];
+
+	pass(i = 0; i += 1; i < registeredClients) {
+		currentClient = clients[i];
+		check(currentClient:accountNumber == accountNumber) {
+			serve i;
+		}
+	}
+
+	serve registeredClients;
+}
+
+prepare piece of displaySummary(piece of idx) {
+	ClientRecord of currentClient = [];
+	currentClient = activeClient;
+
+	bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
+	bill("Client Name: " + currentClient:name + "\n");
+	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
+	bill("Date: " + currentClient:date + "\n");
+	bill("Deposit Transactions: " + tochars(currentClient:depositCount) + "\n");
+	bill("Total Deposited: " + tochars(currentClient:dailyDepositTotal) + "\n");
+	bill("Withdrawal Transactions: " + tochars(currentClient:withdrawalCount) + "\n");
+	bill("Total Withdrawn: " + tochars(currentClient:dailyWithdrawalTotal) + "\n");
+	bill("Balance Inquiries: " + tochars(currentClient:inquiryCount) + "\n");
+	bill("Current Balance: " + tochars(currentClient:balance) + "\n");
+	bill("==================================\n");
+	serve 0;
+}
+
+prepare piece of dispClient(){
+	ClientRecord of currentClient = [];
+	currentClient = activeClient;
+
+	bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
+	bill("Client Name: " + currentClient:name + "\n");
+	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
+	bill("Date: " + currentClient:date + "\n");
+	bill("Deposit Transactions: " + tochars(currentClient:depositCount) + "\n");
+	bill("Total Deposited: " + tochars(currentClient:dailyDepositTotal) + "\n");
+	bill("Withdrawal Transactions: " + tochars(currentClient:withdrawalCount) + "\n");
+	bill("Total Withdrawn: " + tochars(currentClient:dailyWithdrawalTotal) + "\n");
+	bill("Balance Inquiries: " + tochars(currentClient:inquiryCount) + "\n");
+	bill("Current Balance: " + tochars(currentClient:balance) + "\n");
+	bill("==================================\n");
+	serve 0;
+}
+
+prepare piece of procClient(piece of transactionsPerClient) {
+	piece of completed = 0;
+	piece of amount = 0;
+	piece of rawInput = 0;
+	ClientRecord of currentClient = [];
+
+	currentClient = activeClient;
+
+	bill("\n==================================\n");
+	bill("Processing Client: " + currentClient:name + "\n");
+	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
+	bill("Date: " + currentClient:date + "\n");
+	bill("==================================\n");
+
+	repeat(completed < transactionsPerClient) {
+		bill("\nTransactions Completed: " + tochars(completed) + " / " + tochars(transactionsPerClient) + "\n");
+		bill("1. Deposit\n");
+		bill("2. Withdraw\n");
+		bill("3. Balance Inquiry\n");
+		bill("4. Display Transaction Summary\n");
+		bill("Enter choice: ");
+
+		rawInput = topiece(take());
+		check(isWholeNumber(topiece(rawInput))) {
+			rawInput = topiece(rawInput);
+		} instead {
+			rawInput = 0;
+		}
+
+		menu(rawInput) {
+			choice 1:
+				bill("Enter deposit amount: ");
+				rawInput = topiece(take());
+
+				check(isWholeNumber(topiece(rawInput))) {
+					amount = topiece(rawInput);
+
+					check(amount <= 0) {
+						bill("Deposit amount must be greater than 0\n");
+					} instead {
+						check(currentClient:dailyDepositTotal + amount > 50000) {
+							bill("Daily deposit limit exceeded. Maximum total deposit per day is 50000\n");
+						} instead {
+							currentClient:balance += amount;
+							currentClient:dailyDepositTotal += amount;
+							currentClient:depositCount += 1;
+							activeClient = currentClient;
+							completed += 1;
+							bill("Deposit successful\n");
+						}
+					}
+				} instead {
+					bill("Invalid amount. Enter digits only\n");
+				}
+				stop;
+
+			choice 2:
+				bill("Enter withdrawal amount: ");
+				rawInput = topiece(take());
+
+				check(isWholeNumber(topiece(rawInput))) {
+					amount = topiece(rawInput);
+
+					check(amount <= 0) {
+						bill("Withdrawal amount must be greater than 0\n");
+					} instead {
+						check(currentClient:dailyWithdrawalTotal + amount > 20000) {
+							bill("Daily withdrawal limit exceeded. Maximum total withdrawal per day is 20000\n");
+						} instead {
+							check(amount > currentClient:balance) {
+								bill("Insufficient balance. Withdrawal must be less than or equal to balance\n");
+							} instead {
+								currentClient:balance -= amount;
+								currentClient:dailyWithdrawalTotal += amount;
+								currentClient:withdrawalCount += 1;
+								activeClient = currentClient;
+								completed += 1;
+								bill("Withdrawal successful\n");
+							}
+						}
+					}
+				} instead {
+					bill("Invalid amount. Enter digits only\n");
+				}
+				stop;
+
+			choice 3:
+				currentClient:inquiryCount += 1;
+				activeClient = currentClient;
+				completed += 1;
+				bill("Current balance: " + tochars(currentClient:balance) + "\n");
+				stop;
+
+			choice 4:
+				activeClient = currentClient;
+				dispClient();
+				stop;
+
+			usual:
+				bill("Invalid menu choice\n");
+		}
+	}
+
+	activeClient = currentClient;
+	bill("\nCompleted required transactions for account " + tochars(currentClient:accountNumber) + "\n");
+	dispClient();
+	serve 0;
+}
+
+prepare piece of displayClientChoices(flag of lockDoneClients) {
+	piece of i = 0;
+	ClientRecord of currentClient = [];
+
+	pass(i = 0; i += 1; i < clientCount) {
+		currentClient = clients[i];
+		check(lockDoneClients == up and currentClient:done == up) {
+			bill(tochars(i + 1) + ". " + currentClient:name + " (Account: " + tochars(currentClient:accountNumber) + ") - LOCKED\n");
+		} instead {
+			bill(tochars(i + 1) + ". " + currentClient:name + " (Account: " + tochars(currentClient:accountNumber) + ")\n");
+		}
+	}
+
+	serve 0;
+}
+
+prepare piece of processClientTransactions(piece of idx, piece of transactionsPerClient) {
+	piece of completed = 0;
+	piece of amount = 0;
+	piece of rawInput = 0;
+	ClientRecord of currentClient = [];
+
+	currentClient = clients[idx];
+
+	bill("\n==================================\n");
+	bill("Processing Client: " + currentClient:name + "\n");
+	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
+	bill("Date: " + currentClient:date + "\n");
+	bill("==================================\n");
+
+	repeat(completed < transactionsPerClient) {
+		bill("\nTransactions Completed: " + tochars(completed) + " / " + tochars(transactionsPerClient) + "\n");
+		bill("1. Deposit\n");
+		bill("2. Withdraw\n");
+		bill("3. Balance Inquiry\n");
+		bill("4. Display Transaction Summary\n");
+		bill("Enter choice: ");
+
+		rawInput = topiece(take());
+		check(isWholeNumber(topiece(rawInput))) {
+			rawInput = topiece(rawInput);
+		} instead {
+			rawInput = 0;
+		}
+
+		menu(rawInput) {
+			choice 1:
+				bill("Enter deposit amount: ");
+				rawInput = topiece(take());
+
+				check(isWholeNumber(topiece(rawInput))) {
+					amount = topiece(rawInput);
+
+					check(amount <= 0) {
+						bill("Deposit amount must be greater than 0\n");
+					} instead {
+						check(currentClient:dailyDepositTotal + amount > 50000) {
+							bill("Daily deposit limit exceeded. Maximum total deposit per day is 50000\n");
+						} instead {
+							currentClient:balance += amount;
+							currentClient:dailyDepositTotal += amount;
+							currentClient:depositCount += 1;
+							clients[idx] = currentClient;
+							completed += 1;
+							bill("Deposit successful\n");
+						}
+					}
+				} instead {
+					bill("Invalid amount. Enter digits only\n");
+				}
+				stop;
+
+			choice 2:
+				bill("Enter withdrawal amount: ");
+				rawInput = topiece(take());
+
+				check(isWholeNumber(topiece(rawInput))) {
+					amount = topiece(rawInput);
+
+					check(amount <= 0) {
+						bill("Withdrawal amount must be greater than 0\n");
+					} instead {
+						check(currentClient:dailyWithdrawalTotal + amount > 20000) {
+							bill("Daily withdrawal limit exceeded. Maximum total withdrawal per day is 20000\n");
+						} instead {
+							check(amount > currentClient:balance) {
+								bill("Insufficient balance. Withdrawal must be less than or equal to balance\n");
+							} instead {
+								currentClient:balance -= amount;
+								currentClient:dailyWithdrawalTotal += amount;
+								currentClient:withdrawalCount += 1;
+								clients[idx] = currentClient;
+								completed += 1;
+								bill("Withdrawal successful\n");
+							}
+						}
+					}
+				} instead {
+					bill("Invalid amount. Enter digits only\n");
+				}
+				stop;
+
+			choice 3:
+				currentClient:inquiryCount += 1;
+				clients[idx] = currentClient;
+				completed += 1;
+				bill("Current balance: " + tochars(currentClient:balance) + "\n");
+				stop;
+
+			choice 4:
+				clients[idx] = currentClient;
+				displaySummary(idx);
+				stop;
+
+			usual:
+				bill("Invalid menu choice\n");
+		}
+	}
+
+	clients[idx] = currentClient;
+	bill("\nCompleted required transactions for account " + tochars(currentClient:accountNumber) + "\n");
+	displaySummary(idx);
+	serve 0;
+}
+
+prepare piece of clientMenu() {
+	piece of transactionsPerClient = 0;
+	piece of accountNumber = 0;
+	piece of initialBalance = 0;
+	piece of clientNumber = 0;
+	chars of clientName = "";
+	chars of clientDate = "";
+	piece of rawInput = 0;
+	ClientRecord of newClient;
+	activeClient = [];
+
+	order {
+		bill("Enter number of clients (1 to 5): ");
+		rawInput = topiece(take());
+
+		check(isWholeNumber(topiece(rawInput))) {
+			clientCount = topiece(rawInput);
+		} instead {
+			clientCount = 0;
+			bill("Invalid input. Enter digits only\n");
+		}
+
+		check(clientCount > 5) {
+			bill("Maximum number of clients is 5\n");
+		}
+	} repeat(clientCount <= 0 or clientCount > 5);
+
+	order {
+		bill("Enter number of transactions per client (minimum 5): ");
+		rawInput = topiece(take());
+
+		check(isWholeNumber(topiece(rawInput))) {
+			transactionsPerClient = topiece(rawInput);
+		} instead {
+			transactionsPerClient = 0;
+			bill("Invalid input. Enter digits only\n");
+		}
+
+		check(transactionsPerClient > 0 and transactionsPerClient < 5) {
+			bill("Each client must have at least 5 transactions per day\n");
+		}
+	} repeat(transactionsPerClient < 5);
+
+	bill("\nEnter details for client #1\n");
+
+	bill("Client name: ");
+	clientName = take();
+
+	order {
+		bill("Client account number: ");
+		rawInput = topiece(take());
+
+		check(isWholeNumber(topiece(rawInput))) {
+			accountNumber = topiece(rawInput);
+
+			check(accountNumber <= 0) {
+				bill("Account number must be greater than 0\n");
+			}
+		} instead {
+			accountNumber = 0;
+			bill("Invalid input. Enter digits only\n");
+		}
+	} repeat(accountNumber <= 0);
+
+	bill("Date (YYYY-MM-DD): ");
+	clientDate = take();
+
+	order {
+		bill("Initial balance: ");
+		rawInput = topiece(take());
+
+		check(isWholeNumber(topiece(rawInput))) {
+			initialBalance = topiece(rawInput);
+			check(initialBalance < 0) {
+				bill("Initial balance cannot be negative\n");
+			}
+		} instead {
+			initialBalance = -1;
+			bill("Invalid input. Enter digits only\n");
+		}
+	} repeat(initialBalance < 0);
+
+	newClient = [
+		name = clientName;
+		accountNumber = accountNumber;
+		date = clientDate;
+		balance = initialBalance;
+		dailyDepositTotal = 0;
+		dailyWithdrawalTotal = 0;
+		depositCount = 0;
+		withdrawalCount = 0;
+		inquiryCount = 0;
+		done = down;
+	];
+	activeClient = newClient;
+
+	bill("\nChoose which client will transact first\n");
+	bill("1. " + activeClient:name + " (Account: " + tochars(activeClient:accountNumber) + ")\n");
+
+	order {
+		bill("Enter client number to start (1 to 1): ");
+		rawInput = topiece(take());
+
+		check(isWholeNumber(topiece(rawInput))) {
+			clientNumber = topiece(rawInput);
+		} instead {
+			clientNumber = 0;
+			bill("Invalid input. Enter digits only\n");
+		}
+
+		check(clientNumber < 1 or clientNumber > 1) {
+			bill("Please select a valid client number\n");
+		}
+	} repeat(clientNumber < 1 or clientNumber > 1);
+
+	bill("\n=== STARTING CLIENT TRANSACTIONS ===\n");
+	procClient(transactionsPerClient);
+	activeClient:done = up;
+
+	bill("\n=== ALL CLIENTS SUMMARY ===\n");
+	dispClient();
+
+	bill("Simulation complete\n");
+	serve 0;
+}
+
+prepare piece of check_vacancy(piece of current, piece of max){
+	serve max - current;
+}
+
+prepare piece of billMap(piece[] of localSeats, piece of idx, piece of total){
+	check(idx < total){
+		check(idx < 11){
+			check(localSeats[idx] == 1){ bill(" O "); } instead { bill(" X "); }
+			check(idx == 10){ bill("|\n"); } instead { bill("|"); }
+		}
+		check(idx == 11){
+			check(localSeats[idx] == 1){ bill(" O "); } instead { bill(" X "); }
+			bill("|\n\n"); 
+			bill(" D |"); 
+		}
+		check(idx >= 12){
+			check(localSeats[idx] == 1){ bill(" O "); } instead { bill(" X "); }
+			check(idx == 21){ bill("|"); } instead { bill("|"); }
+		}
+		billMap(localSeats, idx + 1, total);
+	}
+	serve 0;
+}
+
+prepare piece of jeepneyMenu(){
+	chars of playAgain = "y";
+	piece[] of localSeats = [];
+	piece of temp_input = 0, target_seat = 0;
+	piece of choice1 = 0, vacant = 0, loaded = 0, removed = 0;
+	piece of i = 0;
+
+	localSeats = [];
+	currentPassengers = 0;
+	location = 0;
+	pass(i = -1; i += 1; i < capacity){ append(localSeats, 0); }
+
+	repeat(choice1 != 4){
+		bill("\n==============================\n");
+		bill("  PLATTER JEEPNEY DASHBOARD   \n");
+		bill("==============================\n");
+		
+		bill("Status: ");
+		check(location == 0){ bill("Cruising...\n"); }
+		check(location == 1){ bill("At Loading Area\n"); }
+		check(location == 2){ bill("At Unloading Area\n"); }
+		
+		vacant = check_vacancy(currentPassengers, 22);
+		bill("Headcount: " + tochars(currentPassengers) + "/22\n");
+		bill("------------------------------\n");
+		bill("1-Drive to Loading Area\n2-Drive to Unloading Area\n3-Show Map\n4-Exit\nChoice: ");
+		
+		choice1 = topiece(take());
+
+		check(choice1 < 1 or choice1 > 4){
+			bill("Invalid menu choice! Please select 1-4.\n");
+		} instead {
+			menu(choice1){
+				choice 1: 
+					location = 1; 
+					bill("\n>> Arrived @ Loading Area.\n"); 
+					vacant = check_vacancy(currentPassengers, 22);
+					
+					check(vacant == 0){ bill("Jeepney is full!\n"); } instead {
+						order {
+							bill("How many are loading? (" + tochars(vacant) + " vacant): ");
+							temp_input = topiece(take());
+							check(temp_input > vacant){ bill("Not enough vacant seats!\n"); }
+							check(temp_input < 0){ bill("Input cannot be negative!\n"); }
+						} repeat (temp_input > vacant or temp_input < 0);
+
+						check(temp_input > 0){
+							check(temp_input == 22){
+								bill("Full capacity! Auto-filling all seats...\n");
+								pass(i = -1; i += 1; i < capacity){ localSeats[i] = 1; }
+							} instead {
+								loaded = 0;
+								order {
+									bill("\nCurrently Occupied: ");
+									check(currentPassengers == 0 and loaded == 0){
+										bill("None");
+									} instead {
+										pass(i = -1; i += 1; i < capacity){
+											check(localSeats[i] == 1){ bill("[" + tochars(i) + "] "); }
+										}
+									}
+									bill("\n--- SELECT VACANT SEAT (X) --- \n");
+									billMap(localSeats, 0, capacity);
+									bill("\nPassenger " + tochars(loaded + 1) + " of " + tochars(temp_input));
+									bill("\nEnter Seat Index (0-21): ");
+									target_seat = topiece(take());
+
+									check(target_seat < 0 or target_seat > 21){ 
+										bill(">>Invalid seat index!\n"); 
+									} instead {
+										check(localSeats[target_seat] == 1){ bill("Seat already occupied!\n"); } instead {
+											localSeats[target_seat] = 1;
+											loaded = loaded + 1;
+											bill("Passenger officially seated at [" + tochars(target_seat) + "]\n");
+										}
+									}
+								} repeat (loaded < temp_input);
+							}
+							currentPassengers = currentPassengers + temp_input;
+						}
+					}
+					location = 0; stop;
+
+				choice 2: 
+					location = 2; 
+					bill("\n>> Arrived @ Unloading Area.\n"); 
+					check(currentPassengers == 0){ bill("Jeepney is empty!\n"); } instead {
+						
+						bill("Seats Occupied: ");
+						pass(i = -1; i += 1; i < capacity){
+							check(localSeats[i] == 1){ bill("[" + tochars(i) + "] "); }
+						}
+						bill("\n");
+
+						order {
+							bill("How many are leaving? (" + tochars(currentPassengers) + " occupied): ");
+							temp_input = topiece(take());
+							check(temp_input > currentPassengers){ bill("Exceeds headcount!\n"); }
+							check(temp_input < 0){ bill("Input cannot be negative!\n"); }
+						} repeat (temp_input > currentPassengers or temp_input < 0);
+
+						check(temp_input > 0){
+							check(temp_input == currentPassengers){
+								bill("All passengers leaving. Clearing all seats...\n");
+								pass(i = -1; i += 1; i < capacity){ localSeats = append(localSeats, 0); }
+							} instead {
+								removed = 0;
+								order {
+									bill("\nCurrently Occupied: ");
+									pass(i = -1; i += 1; i < capacity){
+										check(localSeats[i] == 1){ bill("[" + tochars(i) + "] "); }
+									}
+									bill("\n--- SELECT OCCUPIED SEAT (O) --- \n");
+									billMap(localSeats, 0, capacity);
+									bill("\nPassenger " + tochars(removed + 1) + " of " + tochars(temp_input));
+									bill("\nEnter Seat Index to vacate (0-21): ");
+									target_seat = topiece(take());
+
+									check(target_seat < 0 or target_seat > 21){ 
+										bill("Invalid seat index!\n"); 
+									} instead {
+										check(localSeats[target_seat] == 0){ bill("Seat is already empty!\n"); } instead {
+											localSeats[target_seat] = 0;
+											removed = removed + 1;
+											bill(">> Seat [" + tochars(target_seat) + "] is now vacant.\n");
+										}
+									}
+								} repeat (removed < temp_input);
+							}
+							currentPassengers = currentPassengers - temp_input;
+						}
+					}
+					location = 0; stop;
+
+				choice 3: 
+					bill("\n---JeepNey Seat Index----------------------\n");
+					billMap(localSeats, 0, capacity);
+					bill("\n");
+					stop;
+
+				choice 4: bill("Ending shift.\n"); stop;
+			}
+		}
+	}
+	serve 0;
+}
+
+prepare piece of combinedMenu(){
+	piece of mainChoice = 0;
+
+	repeat(mainChoice != 5){
+		bill("==============================\n");
+		bill("Combined Program Menu\n");
+		bill("==============================\n");
+		bill("1. Matrix Operations\n");
+		bill("2. Student Records\n");
+		bill("3. Client Transactions\n");
+		bill("4. Jeepney Dashboard\n");
+		bill("5. Exit\n");
+		bill("Enter choice: ");
+		mainChoice = topiece(take());
+
+		menu(mainChoice){
+			choice 1:
+				matrixMenu();
+				stop;
+			choice 2:
+				studentMenu();
+				stop;
+			choice 3:
+				clientMenu();
+				stop;
+			choice 4:
+				jeepneyMenu();
+				stop;
+			choice 5:
+				bill("Combined menu exited\n");
+				stop;
+			usual:
+				bill("Not a valid choice!\n");
+				stop;
+		}
+		bill("\n\n");
+	}
+	serve 0;
+}
+
+start(){
+	combinedMenu();
+}
+--end
+1
+2
+1
+2
+3
+4
+1
+4
+2
+1
+Alice Cruz
+2024-0001
+BSCS
+2
+6
+3
+1
+5
+Alice
+1001
+2026-04-21
+1000
+1
+1
+200
+2
+100
+3
+1
+300
+2
+50
+4
+3
+4
+5
+--end
+==============================
+Combined Program Menu
+==============================
+1. Matrix Operations
+2. Student Records
+3. Client Transactions
+4. Jeepney Dashboard
+5. Exit
+Enter choice: 1
+Enter array size: 2
+Enter element for array A at index [0]: 1
+Enter element for array A at index [1]: 2
+Enter element for array B at index [0]: 3
+Enter element for array B at index [1]: 4
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 1
+Matrix Addition
+Sum matrix: [4, 6]
+
+
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 4
+Menu exited
+
+
+==============================
+Combined Program Menu
+==============================
+1. Matrix Operations
+2. Student Records
+3. Client Transactions
+4. Jeepney Dashboard
+5. Exit
+Enter choice: 2
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 1
+
+==============================
+Add Student Record
+==============================
+Enter student name: Alice Cruz
+Enter student number: 2024-0001
+Enter course: BSCS
+==============================
+Record added successfully.
+==============================
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 2
+
+==============================
+All Student Records
+==============================
+Record #1
+Name: Alice Cruz
+Student Number: 2024-0001
+Course: BSCS
+------------------------------
+
+==============================
+Student Records Menu
+==============================
+1. Add Record
+2. Display Record (all)
+3. Search Record (individual)
+4. Edit Student Record
+5. Delete Student Record
+6. Exit
+Enter choice: 6
+
+==============================
+Exiting Student Records program.
+==============================
+
+
+==============================
+Combined Program Menu
+==============================
+1. Matrix Operations
+2. Student Records
+3. Client Transactions
+4. Jeepney Dashboard
+5. Exit
+Enter choice: 3
+Enter number of clients (1 to 5): 1
+Enter number of transactions per client (minimum 5): 5
+
+Enter details for client #1
+Client name: Alice
+Client account number: 1001
+Date (YYYY-MM-DD): 2026-04-21
+Initial balance: 1000
+
+Choose which client will transact first
+1. Alice (Account: 1001)
+Enter client number to start (1 to 1): 1
+
+=== STARTING CLIENT TRANSACTIONS ===
+
+==================================
+Processing Client: Alice
+Account Number: 1001
+Date: 2026-04-21
+==================================
+
+Transactions Completed: 0 / 5
+1. Deposit
+2. Withdraw
+3. Balance Inquiry
+4. Display Transaction Summary
+Enter choice: 1
+Enter deposit amount: 200
+Deposit successful
+
+Transactions Completed: 1 / 5
+1. Deposit
+2. Withdraw
+3. Balance Inquiry
+4. Display Transaction Summary
+Enter choice: 2
+Enter withdrawal amount: 100
+Withdrawal successful
+
+Transactions Completed: 2 / 5
+1. Deposit
+2. Withdraw
+3. Balance Inquiry
+4. Display Transaction Summary
+Enter choice: 3
+Current balance: 1100
+
+Transactions Completed: 3 / 5
+1. Deposit
+2. Withdraw
+3. Balance Inquiry
+4. Display Transaction Summary
+Enter choice: 1
+Enter deposit amount: 300
+Deposit successful
+
+Transactions Completed: 4 / 5
+1. Deposit
+2. Withdraw
+3. Balance Inquiry
+4. Display Transaction Summary
+Enter choice: 2
+Enter withdrawal amount: 50
+Withdrawal successful
+
+Completed required transactions for account 1001
+
+=== CLIENT TRANSACTION SUMMARY ===
+Client Name: Alice
+Account Number: 1001
+Date: 2026-04-21
+Deposit Transactions: 2
+Total Deposited: 500
+Withdrawal Transactions: 2
+Total Withdrawn: 150
+Balance Inquiries: 1
+Current Balance: 1350
+==================================
+
+=== ALL CLIENTS SUMMARY ===
+
+=== CLIENT TRANSACTION SUMMARY ===
+Client Name: Alice
+Account Number: 1001
+Date: 2026-04-21
+Deposit Transactions: 2
+Total Deposited: 500
+Withdrawal Transactions: 2
+Total Withdrawn: 150
+Balance Inquiries: 1
+Current Balance: 1350
+==================================
+Simulation complete
+
+
+==============================
+Combined Program Menu
+==============================
+1. Matrix Operations
+2. Student Records
+3. Client Transactions
+4. Jeepney Dashboard
+5. Exit
+Enter choice: 4
+
+==============================
+  PLATTER JEEPNEY DASHBOARD   
+==============================
+Status: Cruising...
+Headcount: 0/22
+------------------------------
+1-Drive to Loading Area
+2-Drive to Unloading Area
+3-Show Map
+4-Exit
+Choice: 3
+
+---JeepNey Seat Index----------------------
+ X | X | X | X | X | X | X | X | X | X | X |
+ X |
+
+ D | X | X | X | X | X | X | X | X | X | X |
+
+
+==============================
+  PLATTER JEEPNEY DASHBOARD   
+==============================
+Status: Cruising...
+Headcount: 0/22
+------------------------------
+1-Drive to Loading Area
+2-Drive to Unloading Area
+3-Show Map
+4-Exit
+Choice: 4
+Ending shift.
+
+
+==============================
+Combined Program Menu
+==============================
+1. Matrix Operations
+2. Student Records
+3. Client Transactions
+4. Jeepney Dashboard
+5. Exit
+Enter choice: 5
+Combined menu exited

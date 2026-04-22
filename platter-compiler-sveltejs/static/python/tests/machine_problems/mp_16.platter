@@ -30,33 +30,58 @@ start(){
         } instead {
             menu(num){
                 choice 1:
-                    bill("Enter radius: ");
-                    radius = tosip(take());
+                    repeat(up) {
+                        bill("Enter radius: ");
+                        radius = tosip(take());
+                        check (radius > 0.0) {stop;}
+                        bill("Invalid Input. You can't input a negative radius\n");
+                    }
                     area = pi * radius * radius;
                     bill("Area of Circle: " + tochars(area));
                     stop;
 
                 choice 2:
-                    bill("Enter base: ");
-                    base = tosip(take());
-                    bill("Enter height: ");
-                    height = tosip(take());
+                    repeat(up) {
+                        bill("Enter base: ");
+                        base = tosip(take());
+                        check (base > 0.0) {stop;}
+                        bill("Invalid Input. You can't input a negative base\n");
+                    }
+                    repeat(up) {
+                        bill("Enter height: ");
+                        height = tosip(take());
+                        check (height > 0.0) {stop;}
+                        bill("Invalid Input. You can't input a negative height\n");
+                    }
+                    
                     area = (base * height) / 2.0;
                     bill("Area of Triangle: " + tochars(area));
                     stop;
 
                 choice 3:
-                    bill("Enter side: ");
-                    side = tosip(take());
+                    repeat(up) {
+                        bill("Enter side: ");
+                        side = tosip(take());
+                        check (side > 0.0) {stop;}
+                        bill("Invalid Input. You can't input a negative side\n");
+                    }
                     area = side * side;
                     bill("Area of Square: " + tochars(area));
                     stop;
 
                 choice 4:
-                    bill("Enter length: ");
-                    length = tosip(take());
-                    bill("Enter width: ");
-                    width = tosip(take());
+                    repeat(up) {
+                        bill("Enter length: ");
+                        length = tosip(take());
+                        check (length > 0.0) {stop;}
+                        bill("Invalid Input. You can't input a negative length\n");
+                    }
+                    repeat(up) {
+                        bill("Enter width: ");
+                        width = tosip(take());
+                        check (width > 0.0) {stop;}
+                        bill("Invalid Input. You can't input a negative width\n");
+                    }
                     area = length * width;
                     bill("Area of Rectangle: " + tochars(area));
                     stop;

@@ -37,6 +37,23 @@ prepare flag of isWholeNumber(chars of text) {
 	serve up;
 }
 
+prepare flag of hasDigit(chars of text) {
+	piece of i = 1;
+	chars of c = "";
+
+	c = copy(text, i, i);
+	repeat(c != "") {
+		check(c >= "0" and c <= "9") {
+			serve up;
+		}
+
+		i += 1;
+		c = copy(text, i, i);
+	}
+
+	serve down;
+}
+
 prepare piece of findClientIndex(piece of accountNumber) {
 	piece of i = 0;
 	ClientRecord of currentClient = [];
@@ -205,6 +222,8 @@ start() {
     piece of firstClientDec = 0;
 	chars of clientName = "";
 	chars of clientDate = "";
+	chars of accountInput = "";
+	flag of nameHasDigit = down;
 	piece of rawInput = 0;
 	ClientRecord of newClient;
 	ClientRecord of selectedClient = [];
@@ -244,15 +263,26 @@ start() {
 	pass(i = 0; i += 1; i < clientCount) {
 		bill("\nEnter details for client #" + tochars(i + 1) + "\n");
 
-		bill("Client name: ");
-		clientName = take();
+		order {
+			bill("Client name: ");
+			clientName = take();
+			nameHasDigit = hasDigit(clientName);
+
+			check(clientName == "") {
+				bill("Client name cannot be empty\n");
+			}
+
+			check(nameHasDigit == up) {
+				bill("Invalid name. Digits are not allowed\n");
+			}
+		} repeat(clientName == "" or nameHasDigit == up);
 
 		order {
 			bill("Client account number: ");
-			rawInput = topiece(take());
+			accountInput = take();
 
-			check(isWholeNumber(topiece(rawInput))) {
-				accountNumber = topiece(rawInput);
+			check(isWholeNumber(accountInput)) {
+				accountNumber = topiece(accountInput);
 
 				check(accountNumber <= 0) {
 					bill("Account number must be greater than 0\n");
@@ -264,7 +294,7 @@ start() {
 				}
 			} instead {
 				accountNumber = 0;
-				bill("Invalid input. Enter digits only\n");
+				bill("Invalid input. Enter positive digits only\n");
 			}
 		} repeat(accountNumber <= 0);
 

@@ -1,0 +1,57 @@
+table of Transaction = [
+	piece of kind;
+	sip of amount;
+	chars of result;
+	sip of balance;
+];
+
+start(){
+	piece[] of topNumbers = [1, 2, 3];
+	Transaction[] of topLogs = [[kind = 1; amount = 1.0; result = "top"; balance = 1.0;]];
+	Transaction of topItem = [];
+	piece of index = 0;
+	piece of menuIndex = 0;
+
+	check(up){
+		piece[] of checkNumbers = [4, 5];
+		Transaction[] of checkLogs = [[kind = 2; amount = 2.0; result = "check"; balance = 2.0;]];
+		Transaction of checkItem = [];
+	} instead {
+		piece[] of insteadNumbers = [];
+		Transaction[] of insteadLogs = [];
+		Transaction of insteadItem = [];
+	}
+
+	pass(index = 0; index += 1; index < 1){
+		piece[] of passNumbers = [6, 7];
+		Transaction[] of passLogs = [[kind = 3; amount = 3.0; result = "pass"; balance = 3.0;]];
+		Transaction of passItem = [];
+	}
+
+	repeat(up){
+		piece[] of repeatNumbers = [8];
+		Transaction[] of repeatLogs = [[kind = 4; amount = 4.0; result = "repeat"; balance = 4.0;]];
+		Transaction of repeatItem = [];
+	}
+
+	order{
+		piece[] of orderNumbers = [9];
+		Transaction[] of orderLogs = [[kind = 5; amount = 5.0; result = "order"; balance = 5.0;]];
+		Transaction of orderItem = [];
+	} repeat(up);
+
+	menu(1){
+		choice 1:
+			pass(menuIndex = 0; menuIndex += 1; menuIndex < 1){
+				piece[] of menuPassNumbers = [10];
+				Transaction[] of menuPassLogs = [[kind = 6; amount = 6.0; result = "menu"; balance = 6.0;]];
+				Transaction of menuPassItem = [];
+			}
+		usual:
+			repeat(up){
+				piece[] of menuRepeatNumbers = [11];
+				Transaction[] of menuRepeatLogs = [[kind = 7; amount = 7.0; result = "menu-repeat"; balance = 7.0;]];
+				Transaction of menuRepeatItem = [];
+			}
+	}
+}

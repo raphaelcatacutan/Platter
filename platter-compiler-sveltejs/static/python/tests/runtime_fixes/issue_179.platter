@@ -1,0 +1,18 @@
+table of Transaction = [
+piece of kind;
+sip of amount;
+chars of result;
+sip of balance;
+];
+
+start(){
+piece of numClients = 0, cIndex = 0;
+flag of isValid = down;
+pass(cIndex = 0; cIndex += 1; cIndex < numClients){
+Transaction[] of trxLog = [];
+Transaction of trxItem = [];
+}
+}
+--end
+--end
+[[EXIT_MESSAGE]]Program ended with exit code 0

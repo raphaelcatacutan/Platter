@@ -1,51 +1,46 @@
 # Multiplaction Table (using arrays)
-
 start(){
-        piece of i, v;
-        piece of col, row;
-                piece[][] of mulTable;
-        
-        
-        bill("Enter number of columns: ");
-        col = topiece(take());
-        check (col < 1) {
-                bill("Not a valid value");
-                serve 0;
+	piece[][] of mulTable; 
+    piece of row, col, r, c;
+  	
+    order{
+    row = topiece(bill("Enter table row size: ")+take());
+    check(row <= 0) {bill("Invalid row size\n");}
+    } repeat(row <= 0);
+    
+    order{
+    col = topiece(bill("Enter table column size: ")+take());
+    check(row <= 0) {bill("Invalid column size\n");}
+    } repeat(col <= 0);
+    
+    # Calculation
+    pass(r = 1; r += 1; r <= row) {
+        piece[] of rowLine;
+        pass(c = 1; c += 1; c <= col) {
+        	rowLine = append(rowLine, r * c);
         }
-        
-        bill("Enter number of rows: ");
-        row = topiece(take());
-        check (row < 1) {
-                bill("Not a valid value");
-                serve 0;
+        mulTable = append(mulTable, rowLine);
+    }
+    
+    # Printing
+    bill("Multiplication Table of size "+tochars(row)+" x "+tochars(col)+":\n");
+    pass(r = 0; r += 1; r < row) {
+        piece[] of rowLine;
+        rowLine = mulTable[r];
+        pass(c = 0; c += 1; c < col) {
+          piece of value = rowLine[c];
+          bill(tochars(value) + "\t");
         }
-        
-        # Calculation
-        pass(v = 1; v += 1; v <= row) {
-                piece[] of rowLine;
-            pass(i = 1; i += 1; i <= col) {
-                    rowLine = append(rowLine, v * i);
-                   }
-            mulTable = append(mulTable, rowLine);
-        }
-        
-        # Printing
-        pass(v = 0; v += 1; v < row) {
-                piece[] of rowLine;
-            rowLine = mulTable[v];
-            pass(i = 0; i += 1; i < col) {
-                    piece of value = rowLine[i];
-                                bill(tochars(value) + "\t");
-                   }
-            bill("\n");
-        }
+        bill("\n");
+    }
 }
 --end
 10
 10
 --end
-Enter number of columns: 10
-Enter number of rows: 10
+Enter table row size: 10
+Enter table column size: 10
+Multiplication Table of size 10 x 10:
 1	2	3	4	5	6	7	8	9	10	
 2	4	6	8	10	12	14	16	18	20	
 3	6	9	12	15	18	21	24	27	30	
@@ -55,4 +50,4 @@ Enter number of rows: 10
 7	14	21	28	35	42	49	56	63	70	
 8	16	24	32	40	48	56	64	72	80	
 9	18	27	36	45	54	63	72	81	90	
-10	20	30	40	50	60	70	80	90	100	
+10	20	30	40	50	60	70	80	90	100		

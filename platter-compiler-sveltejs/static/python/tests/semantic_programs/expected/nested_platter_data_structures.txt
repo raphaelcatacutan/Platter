@@ -1,0 +1,25 @@
+No semantic errors with 24 warning(s)
+[WARNING] [W102] Unused ingredient 'topNumbers' at line 9, column 13
+[WARNING] [W102] Unused ingredient 'topLogs' at line 10, column 19
+[WARNING] [W102] Unused ingredient 'topItem'
+[WARNING] [W102] Unused ingredient 'checkNumbers' at line 16, column 14
+[WARNING] [W102] Unused ingredient 'checkLogs' at line 17, column 20
+[WARNING] [W102] Unused ingredient 'checkItem'
+[WARNING] [W102] Unused ingredient 'insteadNumbers' at line 20, column 14
+[WARNING] [W102] Unused ingredient 'insteadLogs' at line 21, column 20
+[WARNING] [W102] Unused ingredient 'insteadItem'
+[WARNING] [W102] Unused ingredient 'passNumbers' at line 26, column 14
+[WARNING] [W102] Unused ingredient 'passLogs' at line 27, column 20
+[WARNING] [W102] Unused ingredient 'passItem'
+[WARNING] [W102] Unused ingredient 'repeatNumbers' at line 32, column 14
+[WARNING] [W102] Unused ingredient 'repeatLogs' at line 33, column 20
+[WARNING] [W102] Unused ingredient 'repeatItem'
+[WARNING] [W102] Unused ingredient 'orderNumbers' at line 38, column 14
+[WARNING] [W102] Unused ingredient 'orderLogs' at line 39, column 20
+[WARNING] [W102] Unused ingredient 'orderItem'
+[WARNING] [W102] Unused ingredient 'menuPassNumbers' at line 46, column 16
+[WARNING] [W102] Unused ingredient 'menuPassLogs' at line 47, column 22
+[WARNING] [W102] Unused ingredient 'menuPassItem'
+[WARNING] [W102] Unused ingredient 'menuRepeatNumbers' at line 52, column 16
+[WARNING] [W102] Unused ingredient 'menuRepeatLogs' at line 53, column 22
+[WARNING] [W102] Unused ingredient 'menuRepeatItem'

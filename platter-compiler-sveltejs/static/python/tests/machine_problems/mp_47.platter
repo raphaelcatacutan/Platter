@@ -1,0 +1,130 @@
+##
+Make 3 array. Input 5 numbers sa Array A and Input 5 number sa Array B.
+Make the user pick if ascending or descending also make them pick what sorting technique. Bubble sort or balloon sort.
+Use Array C to display the 10 numbers
+##
+
+# Ascending
+prepare piece[] of bubbleSort(piece[] of input){
+	piece of i,j, temp, indexNext;
+    pass(i = 0; i+= 1; i < size(input)){
+        # FIXED: Changed the condition order below
+    	pass(j = 0; j += 1; j < size(input) - i - 1){
+        indexNext = j+1;
+          check(input[j] > input[indexNext]){
+              temp = input[j];
+              input[j] = input[indexNext];
+              input[indexNext] = temp;
+          }
+        }
+    }
+    serve input;
+}
+
+# Descending
+prepare piece[] of balloonSort(piece[] of input){
+	piece of i,j, temp, indexNext;
+    pass(i = 0; i+= 1; i < size(input)){
+        # FIXED: Changed the condition order below
+    	pass(j = 0; j += 1; j < size(input) - i - 1){
+        indexNext = j+1;
+          check(input[j] < input[indexNext]){
+              temp = input[j];
+              input[j] = input[indexNext];
+              input[indexNext] = temp;
+          }
+        }
+    }
+    serve input;
+}
+
+prepare piece of printArray(piece[] of input){
+	piece of index = 0;
+    bill("The array has: ");
+    repeat(index < size(input)){
+    	bill(tochars(input[index])+" ");
+        index += 1;
+    }
+    serve 0;
+}
+
+start(){
+  piece[] of arrayA, arrayB, arrayC;
+  piece of cnt;
+  chars of menuChoice;
+
+	
+  bill("Enter numbers for Array A\n");
+  pass (cnt = 0; cnt += 1; cnt < 5){
+  arrayA = append(arrayA, topiece(bill("Enter number "+tochars(cnt+1)+": ") + take()));
+  }
+  bill("\nEnter numbers for Array B\n");
+  pass (cnt = 0; cnt += 1; cnt < 5){
+  arrayB = append(arrayB, topiece(bill("Enter number "+tochars(cnt+1)+": ") + take()));
+  }
+  
+  # append Array B to Array A then reassign to Array C
+  arrayC = arrayA;
+  pass (cnt = 0; cnt += 1; cnt < size(arrayB)){
+  arrayC = append(arrayC, arrayB[cnt]);
+  }
+  
+  repeat (menuChoice != "3"){
+      bill("\n[1] Sort by Ascending\n[2] Sort by Descending\n[3] Exit\nChoice: "); 
+      menuChoice = take();
+      menu(menuChoice){
+      choice "1": 
+      	bill("\n[1] Sort using Bubble Sort\n[2] Sort using Balloon Sort\n[3] Exit\nChoice: "); 
+      	menuChoice = take();
+      	menu(menuChoice){
+          choice "1": arrayC = bubbleSort(arrayC); printArray(arrayC); stop;
+          choice "2": arrayC = reverse(balloonSort(arrayC)); printArray(arrayC); stop;
+          choice "3": menuChoice =""; stop;
+      		usual: bill("Invalid Input");
+        }
+      	stop;
+      choice "2":
+      	bill("\n[1] Sort using Bubble Sort\n[2] Sort using Balloon Sort\n[3] Exit\nChoice: "); 
+      	menuChoice = take();
+      	menu(menuChoice){
+          choice "1": arrayC = reverse(bubbleSort(arrayC)); printArray(arrayC); stop;
+          choice "2": arrayC = balloonSort(arrayC); printArray(arrayC); stop;
+          choice "3": menuChoice =""; stop;
+      		usual: bill("Invalid Input");
+        }
+      choice "3": stop;
+      usual: bill("Invalid Input");
+      }
+    } 
+}
+--end
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+3
+--end
+Enter numbers for Array A
+Enter number 1: 1
+Enter number 2: 2
+Enter number 3: 3
+Enter number 4: 4
+Enter number 5: 5
+
+Enter numbers for Array B
+Enter number 1: 6
+Enter number 2: 7
+Enter number 3: 8
+Enter number 4: 9
+Enter number 5: 10
+
+[1] Sort by Ascending
+[2] Sort by Descending
+[3] Exit
+Choice: 3

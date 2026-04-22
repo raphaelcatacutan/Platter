@@ -3625,8 +3625,9 @@ class ASTParser:
             self.parse_token(";")
             node_6 = self.local_decl_menu()
 
-            # Collect: [ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6
-            result = [ArrayDecl(self._context_dimensions,node_1,token_3.value,node_4, token_3.line, token_3.col)] + node_6
+            dims = 1 + (node_1 if node_1 else 0)
+            # Collect: [ArrayDecl(CONTEXT_TYPE,$1,$3.value,$4)] + $6
+            result = [ArrayDecl(self._context_type, dims, token_3.value, node_4, token_3.line, token_3.col)] + node_6
             return result
 
             """    259 <endsb_tail_menu>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_menu>    """
@@ -3965,8 +3966,9 @@ class ASTParser:
             self.parse_token(";")
             node_6 = self.local_decl_loop()
 
-            # Collect: [ArrayDecl(CONTEXT,$1,$3.value,$4)] + $6
-            result = [ArrayDecl(self._context_dimensions,node_1,token_3.value,node_4, token_3.line, token_3.col)] + node_6
+            dims = 1 + (node_1 if node_1 else 0)
+            # Collect: [ArrayDecl(CONTEXT_TYPE,$1,$3.value,$4)] + $6
+            result = [ArrayDecl(self._context_type, dims, token_3.value, node_4, token_3.line, token_3.col)] + node_6
             return result
 
             """    281 <endsb_tail_loop>	=>	<array_accessor_val>	<assignment_op>	<value>	;	<statements_loop>    """

@@ -1,45 +1,42 @@
-# Rectangle drawing using * input height and width (hollow)
+# Rectangle drawing using * input width and height (hollow)
 
 start() {
-    piece of height, width, i, j;
-    bill("Enter the number of height: ");
-    height =  topiece(take());
-    check (height < 1) {
-        bill("Not a valid value");
-        serve 0;
-    }
-    bill("Enter the number of width: ");
-    width =  topiece(take());
-    check (width < 1) {
-        bill("Not a valid value");
-        serve 0;
-    }
-
+    piece of height, width, i, j;   
+    
+    order{
+      width = topiece(bill("Enter the number of width: ")+take());
+      check(width <= 0) {bill("Invalid width\n");}
+    } repeat(width <= 0);
+    
+    order{
+      height = topiece(bill("Enter the number of height: ")+take());
+      check(height <= 0) {bill("Invalid height\n");}
+    } repeat(height <= 0);
+    
+    bill("Rectangle with width of "+tochars(width)+" and height of "+tochars(height)+": \n");
     pass(i = 0; i += 1; i < height) {
         pass(j = 0; j += 1; j < width) {
-                check (j == 0 or j == width - 1 or i == 0 or i == height - 1) {
-                    bill("*");
+        	check(i == 0 or i == height - 1 or j == 0 or j == width - 1 ){
+            	bill("* ");
             } instead {
-                    bill(" ");
+            	bill("  ");
             }
-            bill("    ");
         }
         bill("\n");
     }
 }
 --end
+-3
 10
 5
 --end
-Enter the number of height: 10
-Enter the number of width: 5
-*    *    *    *    *    
-*                   *    
-*                   *    
-*                   *    
-*                   *    
-*                   *    
-*                   *    
-*                   *    
-*                   *    
-*    *    *    *    *    
+Enter the number of width: -3
+Invalid width
+Enter the number of width: 10
+Enter the number of height: 5
+Rectangle with width of 10 and height of 5: 
+* * * * * * * * * * 
+*                 * 
+*                 * 
+*                 * 
+* * * * * * * * * * 

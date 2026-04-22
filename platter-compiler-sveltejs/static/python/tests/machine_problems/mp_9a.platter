@@ -2,14 +2,14 @@
 
 start() {
     piece of side, i, j;
-    bill("Enter the side size: ");
-    side = topiece(take());
+    
+    order{
+      side = topiece(bill("Enter the side length: ")+take());
+      check(side <= 0) {bill("Invalid side length\n");}
+    } repeat(side <=0 );
 
-    check (side < 1) {
-        bill("Not a valid value");
-        serve 0;
-    }
-
+	
+    bill("Square with side length of "+tochars(side)+": \n");
     pass(i = 0; i += 1; i < side) {
         pass(j = 0; j += 1; j < side) {
             bill(" * ");
@@ -18,9 +18,13 @@ start() {
     }
 }
 --end
+-3
 10
 --end
-Enter the side size: 10
+Enter the side length: -3
+Invalid side length
+Enter the side length: 10
+Square with side length of 10: 
  *  *  *  *  *  *  *  *  *  * 
  *  *  *  *  *  *  *  *  *  * 
  *  *  *  *  *  *  *  *  *  * 
@@ -30,4 +34,4 @@ Enter the side size: 10
  *  *  *  *  *  *  *  *  *  * 
  *  *  *  *  *  *  *  *  *  * 
  *  *  *  *  *  *  *  *  *  * 
- *  *  *  *  *  *  *  *  *  * 
+ *  *  *  *  *  *  *  *  *  *

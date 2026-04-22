@@ -1,36 +1,43 @@
 # Triangle drawing using * input rows (hollow)
-
-start() {
-    piece of row, i, j;
-    bill("Enter the number or rows: ");
-    row = topiece(take());
-
-    pass(i = 1; i += 1; i <= row) {
-        pass(j = 0; j += 1; j < row - i) {
-            bill(" ");
+start(){
+	piece of rows,i,j,k;
+	
+    order{
+      rows = topiece(bill("Enter the number of rows: ")+take());
+      check(rows <= 0) {bill("Invalid number of rows\n");}
+    } repeat(rows <= 0);
+    
+    bill("Triangle with "+tochars(rows)+" rows:\n");
+    pass(i=0;i+=1;i<rows){
+    	# left space padding
+    	pass(j=0;j+=1; j<rows-i){
+        	bill(" ");
         }
-        pass(j = 1; j += 1; j <= (2 * i - 1)) {
-            check(j == 1 or j == (2 * i - 1) or i == row) {
-                bill("*");
-            } instead {
-                bill(" ");
+        # asterisks
+    	pass(k=i+1;k-=1;k>0){
+        	# prints entire first and last row, and first and last asterisk per row
+        	check(i == 0 or i == rows - 1 or k == i+1 or k == 1){
+              bill("* ");
+            } instead{	
+              bill("  ");
             }
         }
-
         bill("\n");
     }
+    
 }
 --end
 10
 --end
-Enter the number or rows: 10
-         *
-        * *
-       *   *
-      *     *
-     *       *
-    *         *
-   *           *
-  *             *
- *               *
-*******************
+Enter the number of rows: 10
+Triangle with 10 rows:
+          * 
+         * * 
+        *   * 
+       *     * 
+      *       * 
+     *         * 
+    *           * 
+   *             * 
+  *               * 
+ * * * * * * * * * * 
