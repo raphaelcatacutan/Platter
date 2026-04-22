@@ -7,6 +7,10 @@ start(){
     bill("Enter a string: ");
     string = take();
 
+    check (string == "") {
+        bill("Input is empty");
+        serve 0;
+    }
     rev_S = "";
     length = 1;
 
