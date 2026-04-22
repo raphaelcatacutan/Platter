@@ -227,8 +227,10 @@
 	}
 
 	function handleTerminalPanelClick(event: PointerEvent) {
-		event.preventDefault();
 		if (!isWaitingForInput || rightPanelTab !== 'terminal') return;
+		const target = event.target as HTMLElement | null;
+		if (target?.closest('.tmsg, .ticon-img')) return;
+		if (target?.closest('input, button, a')) return;
 		void focusTerminal(true);
 	}
 

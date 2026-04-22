@@ -1,41 +1,65 @@
 # Fibonacci Series (non-recursive)
 
-start() {
-    piece of n;
-    piece of a = 0;
-    piece of b = 1;
-    piece of i = 0;
+prepare flag of safeIsPiece(chars of txt, flag of positiveOnly){
+    piece of i = 1;
+    chars of ch = "";
+    flag of hasDigit = down;
 
-    bill("Enter the series length: ");
-    n = topiece(take());
-
-    check (n <= 0) {
-        bill("Negative numbers or 0 are not allowed");
-        serve 0;
+    check(txt == ""){
+        serve down;
     }
 
-    check (n >= 1) {
-        bill(tochars(a));
-        bill(" ");
+    ch = copy(txt, 1, 1);
+    check(ch == "-"){
+        check(positiveOnly){
+            serve down;
+        }
+        i = 2;
     }
 
-    check (n >= 2) {
-        bill(tochars(b));
-        bill(" ");
+    repeat(copy(txt, i, i) != ""){
+        ch = copy(txt, i, i);
+        check(ch >= "0" and ch <= "9"){
+            hasDigit = up;
+        } instead {
+            serve down;
+        }
+        i = i + 1;
     }
 
-    repeat(i < n - 2) {
-        piece of c = a + b;
-        bill(tochars(c));
-        bill(" ");
-
+    serve hasDigit;
+}
+start(){
+	piece of N, a = 0, b = 1, i = 0;
+    chars of input;
+    order{
+    	bill("Enter the series length: ");
+    	input = take();
+        check(not safeIsPiece(input, up) or input == "0"){
+        	bill("Invalid input\n");
+        }
+    } repeat (not safeIsPiece(input, up) or input == "0");
+    
+    N = topiece(input);
+    bill("The fibonacci series of length "+input+" is: ");
+    check(N >= 1){
+    	bill("0 ");
+    }
+    
+    check(N >= 2){
+    	bill("1 ");
+    }
+    
+    repeat(i < N - 2) {
+    	piece of c = a + b;
+        bill(tochars (c)+" ");
         a = b;
         b = c;
-        i = i + 1;
+        i += 1;
     }
 }
 --end
 10
 --end
 Enter the series length: 10
-0 1 1 2 3 5 8 13 21 34
+The fibonacci series of length 10 is: 0 1 1 2 3 5 8 13 21 34
