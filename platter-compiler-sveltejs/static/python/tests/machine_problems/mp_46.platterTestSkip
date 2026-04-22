@@ -1,5 +1,35 @@
 piece of maxAttempts = 5;
 
+prepare flag of safeIsPiece(chars of txt, flag of positiveOnly){
+    piece of i = 1;
+    chars of ch = "";
+    flag of hasDigit = down;
+
+    check(txt == ""){
+        serve down;
+    }
+
+    ch = copy(txt, 1, 1);
+    check(ch == "-"){
+        check(positiveOnly){
+            serve down;
+        }
+        i = 2;
+    }
+
+    repeat(copy(txt, i, i) != ""){
+        ch = copy(txt, i, i);
+        check(ch >= "0" and ch <= "9"){
+            hasDigit = up;
+        } instead {
+            serve down;
+        }
+        i = i + 1;
+    }
+
+    serve hasDigit;
+}
+
 start(){
     piece of secret = 0;
     piece of attempts = 0;
@@ -27,10 +57,15 @@ start(){
             check(raw == "exit"){
                 bill("\nThanks for playing.\n");
                 serve 0;
+            } alt (not safeIsPiece(raw, down)) {
+                bill("Invalid Input. Only Piece is allowed.\n");
             } instead {
                 guess = topiece(raw);
 
-                check(guess == secret){
+                check(guess > 100 or guess < 1) {
+                    bill("Invalid Input. Only values from 1 to 100 is allowed.\n");
+                }
+                alt (guess == secret){
                     won = up;
                     bill("Correct! You guessed the secret number.\n");
                     stop;
