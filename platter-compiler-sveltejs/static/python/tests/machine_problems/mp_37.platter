@@ -6,40 +6,34 @@ tell whether the # is a perfect # or not.
 
 piece of num, sum, i;
 flag of first = up;
-
+chars of divisorLog = "";
 start(){
-
     sum = 0;
     i = 1;
+    divisorLog = "";
 
     bill("Enter a number: ");
     num = topiece(take());
 
-    bill(tochars(num) + " = ");
-
     repeat(i < num){
-
         check(num % i == 0){
-
             sum = sum + i;
 
             check(not first){
-                bill(" + ");
+                divisorLog = divisorLog + " + ";
             }
 
-            bill(tochars(i));
-
+            divisorLog = divisorLog + tochars(i);
             first = down;
         }
-
         i = i + 1;
     }
 
-    bill("\n");
-
     check(sum == num){
+        bill(tochars(num) + " = " + divisorLog + "\n");
         bill(tochars(num) + " is a Perfect Number.");
     } instead {
+        bill(tochars(num) + " != " + divisorLog + "\n");
         bill(tochars(num) + " is not a Perfect Number.");
     }
 }

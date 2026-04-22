@@ -1,62 +1,60 @@
 # Input a series of characters, and if the user inputs a number, stop Input a series of numbers and if characters, stop
-# Doesn't allow negative numbers, decimals(without the leading 0), and special characters
+# Doesn't allow negative numbers, decimals(without the leading 0)
 
 start(){
     chars[] of log = [];
     chars of entry = "";
-    piece of i = 0, total = 0;
-    flag of active = up, firstInput = up, isNum = up, invalid = down;
+    chars of rawChoice = "";
+    piece of choice1 = 0, total = 0, i = 0;
+    flag of active = up, isNumMode = down, validChoice = down;
 
-    bill(" '' Start Typing '' \n");
+    order {
+        bill("Choose Input Mode:\n1 - Character Mode\n2 - Number Mode\nChoice: ");
+        rawChoice = take();
+
+        check(rawChoice == "1" or rawChoice == "2"){
+            choice1 = topiece(rawChoice);
+            validChoice = up;
+        } instead {
+            bill(">> Invalid selection. Please try again.\n\n");
+        }
+    } repeat (validChoice == down);
+
+    check(choice1 == 2){
+        isNumMode = up;
+        bill("\n>> Number Mode Active. (Enter a character to stop)\n");
+        bill(">> Symbols (negatives/decimals without leading zeroes) are blocked.\n");
+    } instead {
+        isNumMode = down;
+        bill("\n>> Character Mode Active. (Enter a number to stop)\n");
+    }
 
     order {
         bill("Input: ");
         entry = take();
-        invalid = up;
-
-        check(entry >= "0" and entry <= "9"){ invalid = down; }
-        alt(entry >= "a" and entry <= "z"){ invalid = down; }
-        alt(entry >= "A" and entry <= "Z"){ invalid = down; }
-
-        check(invalid == up){
-            bill("Invalid: Only Positive Numbers or Letters are allowed.\n");
-            active = down; 
-        } instead {
-            
-            check(firstInput == up){
-                check(entry >= "0" and entry <= "9"){
-                    isNum = up;
-                } instead {
-                    isNum = down;
-                }
-                firstInput = down;
-            }
-
-            check(isNum == up){
-                check(entry >= "0" and entry <= "9"){
+        
+            check(entry >= "0" and entry <= "9"){
+                check(isNumMode == up){
                     append(log, entry);
                     total = total + 1;
                 } instead {
-                    bill("END: A Letter is Entered in Number Mode.\n");
+                    bill(">> Number detected. Stopping.\n");
                     active = down;
                 }
             } instead {
-                check(entry >= "0" and entry <= "9"){
-                    bill("END: A Number is Entered in Character Mode.\n");
-                    active = down;
-                } instead {
+                check(isNumMode == down){
                     append(log, entry);
                     total = total + 1;
+                } instead {
+                    bill(">> Character detected. Stopping.\n");
+                    active = down;
                 }
             }
-        }
-
-    } repeat (active == up);
+        } repeat (active == up);
 
     bill("\n--- FINAL LOG ---\n");
-
     check(total == 0){
-        bill("Empty.\n");
+        bill("No valid entries recorded.\n");
     } instead {
         pass(i = 0; i += 1; i < total){
             bill("[" + tochars(i) + "]: " + log[i] + "\n");
@@ -64,22 +62,32 @@ start(){
     }
 }
 --end
+2
 1
 2
 3
 4
+5
 a
 --end
- '' Start Typing '' 
+Choose Input Mode:
+1 - Character Mode
+2 - Number Mode
+Choice: 2
+
+>> Number Mode Active. (Enter a character to stop)
+>> Symbols (negatives/decimals without leading zeroes) are blocked.
 Input: 1
 Input: 2
 Input: 3
 Input: 4
+Input: 5
 Input: a
-END: A Letter is Entered in Number Mode.
+>> Character detected. Stopping.
 
 --- FINAL LOG ---
 [0]: 1
 [1]: 2
 [2]: 3
 [3]: 4
+[4]: 5
