@@ -35,11 +35,13 @@ table of ClientRecord = [
 
 ClientRecord[] of clients = [];
 ClientRecord of activeClient = [];
+chars of activeClientName = "";
+chars of activeClientDate = "";
+piece of activeClientAccount = 0;
 
 piece of clientCount = 0;
 piece of registeredClients = 0;
 
-piece[] of seats = [];
 piece of capacity = 22;
 piece of currentPassengers = 0;
 piece of location = 0;
@@ -67,10 +69,23 @@ prepare piece of subMatrix(piece[] of a, piece[] of b){
 }
 
 prepare piece of transposeMatrix(){
+	piece of i;
 	arrayTemp = arrayA;
 	arrayA = arrayB;
 	arrayB = arrayTemp;
 	bill("Matrix Swapped!");
+	bill("New Matrix A: [");
+	pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(arrayA[i])); 
+		check (i == arraySize - 1){ bill("]\n"); }
+		instead { bill(", "); }
+	}
+	bill("New Matrix B: [");
+	pass(i = 0; i += 1; i < arraySize){
+		bill(tochars(arrayB[i])); 
+		check (i == arraySize - 1){ bill("]\n"); }
+		instead { bill(", "); }
+	}
 	serve 0;
 }
 
@@ -144,10 +159,7 @@ prepare piece of matrixMenu(){
 				stop;
 			choice 3:
 				bill("Matrix Transpose\n");
-				arrayTemp = arrayA;
-				arrayA = arrayB;
-				arrayB = arrayTemp;
-				bill("Matrix Swapped!");
+				transposeMatrix();
 				stop;
 			choice 4:
 				bill("Menu exited\n");
@@ -512,19 +524,16 @@ prepare piece of displaySummary(piece of idx) {
 }
 
 prepare piece of dispClient(){
-	ClientRecord of currentClient = [];
-	currentClient = activeClient;
-
 	bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
-	bill("Client Name: " + currentClient:name + "\n");
-	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
-	bill("Date: " + currentClient:date + "\n");
-	bill("Deposit Transactions: " + tochars(currentClient:depositCount) + "\n");
-	bill("Total Deposited: " + tochars(currentClient:dailyDepositTotal) + "\n");
-	bill("Withdrawal Transactions: " + tochars(currentClient:withdrawalCount) + "\n");
-	bill("Total Withdrawn: " + tochars(currentClient:dailyWithdrawalTotal) + "\n");
-	bill("Balance Inquiries: " + tochars(currentClient:inquiryCount) + "\n");
-	bill("Current Balance: " + tochars(currentClient:balance) + "\n");
+	bill("Client Name: " + activeClientName + "\n");
+	bill("Account Number: " + tochars(activeClientAccount) + "\n");
+	bill("Date: " + activeClientDate + "\n");
+	bill("Deposit Transactions: " + tochars(activeClient:depositCount) + "\n");
+	bill("Total Deposited: " + tochars(activeClient:dailyDepositTotal) + "\n");
+	bill("Withdrawal Transactions: " + tochars(activeClient:withdrawalCount) + "\n");
+	bill("Total Withdrawn: " + tochars(activeClient:dailyWithdrawalTotal) + "\n");
+	bill("Balance Inquiries: " + tochars(activeClient:inquiryCount) + "\n");
+	bill("Current Balance: " + tochars(activeClient:balance) + "\n");
 	bill("==================================\n");
 	serve 0;
 }
@@ -533,14 +542,11 @@ prepare piece of procClient(piece of transactionsPerClient) {
 	piece of completed = 0;
 	piece of amount = 0;
 	piece of rawInput = 0;
-	ClientRecord of currentClient = [];
-
-	currentClient = activeClient;
 
 	bill("\n==================================\n");
-	bill("Processing Client: " + currentClient:name + "\n");
-	bill("Account Number: " + tochars(currentClient:accountNumber) + "\n");
-	bill("Date: " + currentClient:date + "\n");
+	bill("Processing Client: " + activeClient:name + "\n");
+	bill("Account Number: " + tochars(activeClient:accountNumber) + "\n");
+	bill("Date: " + activeClient:date + "\n");
 	bill("==================================\n");
 
 	repeat(completed < transactionsPerClient) {
@@ -569,13 +575,12 @@ prepare piece of procClient(piece of transactionsPerClient) {
 					check(amount <= 0) {
 						bill("Deposit amount must be greater than 0\n");
 					} instead {
-						check(currentClient:dailyDepositTotal + amount > 50000) {
+						check(activeClient:dailyDepositTotal + amount > 50000) {
 							bill("Daily deposit limit exceeded. Maximum total deposit per day is 50000\n");
 						} instead {
-							currentClient:balance += amount;
-							currentClient:dailyDepositTotal += amount;
-							currentClient:depositCount += 1;
-							activeClient = currentClient;
+							activeClient:balance += amount;
+							activeClient:dailyDepositTotal += amount;
+							activeClient:depositCount += 1;
 							completed += 1;
 							bill("Deposit successful\n");
 						}
@@ -595,16 +600,15 @@ prepare piece of procClient(piece of transactionsPerClient) {
 					check(amount <= 0) {
 						bill("Withdrawal amount must be greater than 0\n");
 					} instead {
-						check(currentClient:dailyWithdrawalTotal + amount > 20000) {
+						check(activeClient:dailyWithdrawalTotal + amount > 20000) {
 							bill("Daily withdrawal limit exceeded. Maximum total withdrawal per day is 20000\n");
 						} instead {
-							check(amount > currentClient:balance) {
+							check(amount > activeClient:balance) {
 								bill("Insufficient balance. Withdrawal must be less than or equal to balance\n");
 							} instead {
-								currentClient:balance -= amount;
-								currentClient:dailyWithdrawalTotal += amount;
-								currentClient:withdrawalCount += 1;
-								activeClient = currentClient;
+								activeClient:balance -= amount;
+								activeClient:dailyWithdrawalTotal += amount;
+								activeClient:withdrawalCount += 1;
 								completed += 1;
 								bill("Withdrawal successful\n");
 							}
@@ -616,14 +620,12 @@ prepare piece of procClient(piece of transactionsPerClient) {
 				stop;
 
 			choice 3:
-				currentClient:inquiryCount += 1;
-				activeClient = currentClient;
+				activeClient:inquiryCount += 1;
 				completed += 1;
-				bill("Current balance: " + tochars(currentClient:balance) + "\n");
+				bill("Current balance: " + tochars(activeClient:balance) + "\n");
 				stop;
 
 			choice 4:
-				activeClient = currentClient;
 				dispClient();
 				stop;
 
@@ -632,8 +634,7 @@ prepare piece of procClient(piece of transactionsPerClient) {
 		}
 	}
 
-	activeClient = currentClient;
-	bill("\nCompleted required transactions for account " + tochars(currentClient:accountNumber) + "\n");
+	bill("\nCompleted required transactions for account " + tochars(activeClient:accountNumber) + "\n");
 	dispClient();
 	serve 0;
 }
@@ -768,23 +769,21 @@ prepare piece of clientMenu() {
 	piece of accountNumber = 0;
 	piece of initialBalance = 0;
 	piece of clientNumber = 0;
+	piece of completed = 0;
+	piece of amount = 0;
 	chars of clientName = "";
 	chars of clientDate = "";
 	piece of rawInput = 0;
-	ClientRecord of newClient;
-	activeClient = [];
 
 	order {
 		bill("Enter number of clients (1 to 5): ");
 		rawInput = topiece(take());
-
 		check(isWholeNumber(topiece(rawInput))) {
 			clientCount = topiece(rawInput);
 		} instead {
 			clientCount = 0;
 			bill("Invalid input. Enter digits only\n");
 		}
-
 		check(clientCount > 5) {
 			bill("Maximum number of clients is 5\n");
 		}
@@ -793,31 +792,26 @@ prepare piece of clientMenu() {
 	order {
 		bill("Enter number of transactions per client (minimum 5): ");
 		rawInput = topiece(take());
-
 		check(isWholeNumber(topiece(rawInput))) {
 			transactionsPerClient = topiece(rawInput);
 		} instead {
 			transactionsPerClient = 0;
 			bill("Invalid input. Enter digits only\n");
 		}
-
 		check(transactionsPerClient > 0 and transactionsPerClient < 5) {
 			bill("Each client must have at least 5 transactions per day\n");
 		}
 	} repeat(transactionsPerClient < 5);
 
 	bill("\nEnter details for client #1\n");
-
 	bill("Client name: ");
 	clientName = take();
 
 	order {
 		bill("Client account number: ");
 		rawInput = topiece(take());
-
 		check(isWholeNumber(topiece(rawInput))) {
 			accountNumber = topiece(rawInput);
-
 			check(accountNumber <= 0) {
 				bill("Account number must be greater than 0\n");
 			}
@@ -833,7 +827,6 @@ prepare piece of clientMenu() {
 	order {
 		bill("Initial balance: ");
 		rawInput = topiece(take());
-
 		check(isWholeNumber(topiece(rawInput))) {
 			initialBalance = topiece(rawInput);
 			check(initialBalance < 0) {
@@ -845,7 +838,7 @@ prepare piece of clientMenu() {
 		}
 	} repeat(initialBalance < 0);
 
-	newClient = [
+	activeClient = [
 		name = clientName;
 		accountNumber = accountNumber;
 		date = clientDate;
@@ -857,34 +850,151 @@ prepare piece of clientMenu() {
 		inquiryCount = 0;
 		done = down;
 	];
-	activeClient = newClient;
+	activeClientName = clientName;
+	activeClientDate = clientDate;
+	activeClientAccount = accountNumber;
 
 	bill("\nChoose which client will transact first\n");
 	bill("1. " + activeClient:name + " (Account: " + tochars(activeClient:accountNumber) + ")\n");
-
 	order {
 		bill("Enter client number to start (1 to 1): ");
 		rawInput = topiece(take());
-
 		check(isWholeNumber(topiece(rawInput))) {
 			clientNumber = topiece(rawInput);
 		} instead {
 			clientNumber = 0;
 			bill("Invalid input. Enter digits only\n");
 		}
-
 		check(clientNumber < 1 or clientNumber > 1) {
 			bill("Please select a valid client number\n");
 		}
 	} repeat(clientNumber < 1 or clientNumber > 1);
 
 	bill("\n=== STARTING CLIENT TRANSACTIONS ===\n");
-	procClient(transactionsPerClient);
+	bill("\n==================================\n");
+	bill("Processing Client: " + activeClient:name + "\n");
+	bill("Account Number: " + tochars(activeClient:accountNumber) + "\n");
+	bill("Date: " + activeClient:date + "\n");
+	bill("==================================\n");
+
+	completed = 0;
+	repeat(completed < transactionsPerClient) {
+		bill("\nTransactions Completed: " + tochars(completed) + " / " + tochars(transactionsPerClient) + "\n");
+		bill("1. Deposit\n");
+		bill("2. Withdraw\n");
+		bill("3. Balance Inquiry\n");
+		bill("4. Display Transaction Summary\n");
+		bill("Enter choice: ");
+
+		rawInput = topiece(take());
+		check(isWholeNumber(topiece(rawInput))) {
+			rawInput = topiece(rawInput);
+		} instead {
+			rawInput = 0;
+		}
+
+		menu(rawInput) {
+			choice 1:
+				bill("Enter deposit amount: ");
+				rawInput = topiece(take());
+				check(isWholeNumber(topiece(rawInput))) {
+					amount = topiece(rawInput);
+					check(amount <= 0) {
+						bill("Deposit amount must be greater than 0\n");
+					} instead {
+						check(activeClient:dailyDepositTotal + amount > 50000) {
+							bill("Daily deposit limit exceeded. Maximum total deposit per day is 50000\n");
+						} instead {
+							activeClient:balance += amount;
+							activeClient:dailyDepositTotal += amount;
+							activeClient:depositCount += 1;
+							completed += 1;
+							bill("Deposit successful\n");
+						}
+					}
+				} instead {
+					bill("Invalid amount. Enter digits only\n");
+				}
+				stop;
+
+			choice 2:
+				bill("Enter withdrawal amount: ");
+				rawInput = topiece(take());
+				check(isWholeNumber(topiece(rawInput))) {
+					amount = topiece(rawInput);
+					check(amount <= 0) {
+						bill("Withdrawal amount must be greater than 0\n");
+					} instead {
+						check(activeClient:dailyWithdrawalTotal + amount > 20000) {
+							bill("Daily withdrawal limit exceeded. Maximum total withdrawal per day is 20000\n");
+						} instead {
+							check(amount > activeClient:balance) {
+								bill("Insufficient balance. Withdrawal must be less than or equal to balance\n");
+							} instead {
+								activeClient:balance -= amount;
+								activeClient:dailyWithdrawalTotal += amount;
+								activeClient:withdrawalCount += 1;
+								completed += 1;
+								bill("Withdrawal successful\n");
+							}
+						}
+					}
+				} instead {
+					bill("Invalid amount. Enter digits only\n");
+				}
+				stop;
+
+			choice 3:
+				activeClient:inquiryCount += 1;
+				completed += 1;
+				bill("Current balance: " + tochars(activeClient:balance) + "\n");
+				stop;
+
+			choice 4:
+				bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
+				bill("Client Name: " + clientName + "\n");
+				bill("Account Number: " + tochars(accountNumber) + "\n");
+				bill("Date: " + clientDate + "\n");
+				bill("Deposit Transactions: " + tochars(activeClient:depositCount) + "\n");
+				bill("Total Deposited: " + tochars(activeClient:dailyDepositTotal) + "\n");
+				bill("Withdrawal Transactions: " + tochars(activeClient:withdrawalCount) + "\n");
+				bill("Total Withdrawn: " + tochars(activeClient:dailyWithdrawalTotal) + "\n");
+				bill("Balance Inquiries: " + tochars(activeClient:inquiryCount) + "\n");
+				bill("Current Balance: " + tochars(activeClient:balance) + "\n");
+				bill("==================================\n");
+				stop;
+
+			usual:
+				bill("Invalid menu choice\n");
+		}
+	}
+
+	bill("\nCompleted required transactions for account " + tochars(activeClient:accountNumber) + "\n");
+	bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
+	bill("Client Name: " + clientName + "\n");
+	bill("Account Number: " + tochars(accountNumber) + "\n");
+	bill("Date: " + clientDate + "\n");
+	bill("Deposit Transactions: " + tochars(activeClient:depositCount) + "\n");
+	bill("Total Deposited: " + tochars(activeClient:dailyDepositTotal) + "\n");
+	bill("Withdrawal Transactions: " + tochars(activeClient:withdrawalCount) + "\n");
+	bill("Total Withdrawn: " + tochars(activeClient:dailyWithdrawalTotal) + "\n");
+	bill("Balance Inquiries: " + tochars(activeClient:inquiryCount) + "\n");
+	bill("Current Balance: " + tochars(activeClient:balance) + "\n");
+	bill("==================================\n");
 	activeClient:done = up;
 
 	bill("\n=== ALL CLIENTS SUMMARY ===\n");
-	dispClient();
-
+	bill("\n=== CLIENT TRANSACTION SUMMARY ===\n");
+	bill("Client Name: " + clientName + "\n");
+	bill("Account Number: " + tochars(accountNumber) + "\n");
+	bill("Date: " + clientDate + "\n");
+	bill("Deposit Transactions: " + tochars(activeClient:depositCount) + "\n");
+	bill("Total Deposited: " + tochars(activeClient:dailyDepositTotal) + "\n");
+	bill("Withdrawal Transactions: " + tochars(activeClient:withdrawalCount) + "\n");
+	bill("Total Withdrawn: " + tochars(activeClient:dailyWithdrawalTotal) + "\n");
+	bill("Balance Inquiries: " + tochars(activeClient:inquiryCount) + "\n");
+	bill("Current Balance: " + tochars(activeClient:balance) + "\n");
+	bill("==================================\n");
 	bill("Simulation complete\n");
 	serve 0;
 }
@@ -914,7 +1024,6 @@ prepare piece of billMap(piece[] of localSeats, piece of idx, piece of total){
 }
 
 prepare piece of jeepneyMenu(){
-	chars of playAgain = "y";
 	piece[] of localSeats = [];
 	piece of temp_input = 0, target_seat = 0;
 	piece of choice1 = 0, vacant = 0, loaded = 0, removed = 0;
@@ -1017,7 +1126,7 @@ prepare piece of jeepneyMenu(){
 						check(temp_input > 0){
 							check(temp_input == currentPassengers){
 								bill("All passengers leaving. Clearing all seats...\n");
-								pass(i = -1; i += 1; i < capacity){ localSeats = append(localSeats, 0); }
+								pass(i = -1; i += 1; i < capacity){ localSeats[i] = 0; }
 							} instead {
 								removed = 0;
 								order {
@@ -1111,6 +1220,7 @@ start(){
 3
 4
 1
+3
 4
 2
 1
@@ -1165,6 +1275,14 @@ Enter choice: 1
 Matrix Addition
 Sum matrix: [4, 6]
 
+Matrix Operations
+	1. Matrix Addition
+	2. Matrix Subtraction
+	3. Matrix Transpose
+	4. Exit
+Enter choice: 3
+Matrix Transpose
+Matrix Swapped!New Matrix A: [New Matrix B: [
 
 Matrix Operations
 	1. Matrix Addition
@@ -1173,6 +1291,8 @@ Matrix Operations
 	4. Exit
 Enter choice: 4
 Menu exited
+
+
 
 
 ==============================
@@ -1373,7 +1493,6 @@ Choice: 3
  X |
 
  D | X | X | X | X | X | X | X | X | X | X |
-
 
 ==============================
   PLATTER JEEPNEY DASHBOARD   
