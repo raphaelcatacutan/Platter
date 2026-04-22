@@ -104,6 +104,16 @@ prepare flag of safeIsChars(chars of txt){
 
     serve up;
 }
+##
+	Input runtime catch validation template
+    order{
+    	bill("Enter the series length: ");
+    	input = take();
+        check(not safeIsPiece(input, up) or input == "0"){
+        	bill("Invalid input\n");
+        }
+    } repeat (not safeIsPiece(input, up) or input == "0");
+##
 # Utility helpers for chars
 prepare piece of charsLen(chars of txt){
 	piece of i = 1;
