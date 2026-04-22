@@ -4,8 +4,12 @@ start(){
     piece of i,n,sum;
     bill("Enter a number: ");
     n = topiece(take());
+    check (n <= 0) {
+        bill("Invalid Number. You can't input numbers less than 1");
+        serve 0;
+    }
     pass(i = 1; i+=1; i<=n){
-            sum += i*i*i;
+        sum += i*i*i;
     }
     bill("The sum of the cube of the numbers from 1 to "+tochars(n)+" is "+tochars(sum));
 }
