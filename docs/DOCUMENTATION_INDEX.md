@@ -33,6 +33,12 @@ Complete documentation for the Platter programming language compiler and IDE.
   - Grammar specification
   - AST construction rules
 
+- **[Syntax Flow Guide](../platter-compiler-sveltejs/docs/SYNTAX_FLOW_GUIDE.md)** - Parser-aligned language flow reference
+  - Top-level program order
+  - Global, local, recipe, and `start()` syntax
+  - Arrays, tables, accessors, and built-ins
+  - Control-flow and parser-specific gotchas
+
 #### Language Specification
 
 - **[Lexical Analysis Reference](LEXER_REFERENCE.md)** - Tokenization and lexical rules
