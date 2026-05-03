@@ -392,9 +392,14 @@ class TACInterpreter:
         elif name == "take":
             # take() → no flavors, awaits input, serves chars
             if self._stdin_idx < len(self.stdin_lines):
-                val = self.stdin_lines[self._stdin_idx]
+                val = str(self.stdin_lines[self._stdin_idx])
+                
+                # Platter only allows basic ASCII characters (no emojis, extended Unicode, etc.)
+                if not all(ord(c) == 9 or ord(c) == 10 or ord(c) == 13 or (32 <= ord(c) <= 126) for c in val):
+                    raise InterpreterError("Invalid input: take() received characters not allowed in the Platter language")
+                    
                 self._stdin_idx += 1
-                self.output_lines.append(str(val) + "\n")
+                self.output_lines.append(val + "\n")
                 return val
             else:
                 raise InputPauseSignal(
