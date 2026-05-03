@@ -24,6 +24,9 @@ class TypeChecker:
             'menu': 0, 'choice': 0, 'usual': 0,
             'block': 0
         }
+        # Track nested loop bodies so size-changing calls inside loops can be
+        # treated conservatively instead of freezing a one-iteration size.
+        self.loop_nesting_depth = 0
 
     def _navigate_and_check_scope(self, scope_type: str, check_func, *args):
         """Navigate into a named scope, execute a check function, then exit."""
@@ -431,7 +434,11 @@ class TypeChecker:
                 node.condition,
                 ErrorCodes.TYPE_MISMATCH
             )
-        self._navigate_and_check_scope('repeat', self._check_platter, node.body)
+        self.loop_nesting_depth += 1
+        try:
+            self._navigate_and_check_scope('repeat', self._check_platter, node.body)
+        finally:
+            self.loop_nesting_depth -= 1
     
     def _check_order_repeat_loop(self, node: OrderRepeatLoop):
         """Check order-repeat loop"""
@@ -445,7 +452,11 @@ class TypeChecker:
                     ErrorCodes.TYPE_MISMATCH
                 )
 
-        self._navigate_and_check_scope('order_repeat', check_order_repeat_loop_scope)
+        self.loop_nesting_depth += 1
+        try:
+            self._navigate_and_check_scope('order_repeat', check_order_repeat_loop_scope)
+        finally:
+            self.loop_nesting_depth -= 1
     
     def _check_pass_loop(self, node: PassLoop):
         """Check pass loop"""
@@ -464,7 +475,11 @@ class TypeChecker:
                 self._check_assignment(node.update)
             self._check_platter(node.body)
 
-        self._navigate_and_check_scope('pass', check_pass_loop_scope)
+        self.loop_nesting_depth += 1
+        try:
+            self._navigate_and_check_scope('pass', check_pass_loop_scope)
+        finally:
+            self.loop_nesting_depth -= 1
     
     def _get_expression_type(self, expr: ASTNode, expected_type: Optional[TypeInfo] = None) -> Optional[TypeInfo]:
         """Get the type of an expression
@@ -774,7 +789,22 @@ class TypeChecker:
                 symbol.type_info.array_sizes = [new_size]
         
         elif isinstance(value, RecipeCall):
+            if value.name in ("sort", "reverse") and len(value.args) >= 1:
+                # Size-neutral array operations should preserve the current
+                # size metadata instead of dropping it on the floor.
+                source_type = self._get_expression_type(value.args[0])
+                if source_type:
+                    symbol.type_info.array_sizes = list(source_type.array_sizes)
+                return
+
             if value.name == "append" and len(value.args) >= 1:
+                if self.loop_nesting_depth > 0:
+                    # Inside repeated control flow, a single static update is
+                    # not a safe exact size. Keep the array typed, but mark the
+                    # length unknown so later bounds checks do not false-positive.
+                    symbol.type_info.array_sizes = []
+                    return
+
                 # append(arr, elem) returns array with one more element
                 # The first argument should be the array being appended to
                 arg0 = value.args[0]
@@ -796,6 +826,12 @@ class TypeChecker:
                         symbol.type_info.array_sizes = [new_size]
             
             elif value.name == "remove" and len(value.args) >= 1:
+                if self.loop_nesting_depth > 0:
+                    # Removal inside loops has the same problem as append:
+                    # the exact size depends on runtime iteration count.
+                    symbol.type_info.array_sizes = []
+                    return
+
                 # remove(arr, idx) returns array with one fewer element
                 arg0 = value.args[0]
                 if isinstance(arg0, Identifier):

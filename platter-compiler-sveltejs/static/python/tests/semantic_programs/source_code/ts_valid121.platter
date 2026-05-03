@@ -1,0 +1,20 @@
+start() {
+    chars of txt;
+    chars of ch;
+    piece of i = 2, c = 1;
+    chars[] of cTxt;
+
+    bill("Enter a txt: ");
+    txt = take();
+    ch = copy(txt, 1, 1);
+    repeat(ch != "") {
+        cTxt = append(cTxt, ch);
+        ch = copy(txt, i, i);
+        i += 1;
+    }
+    cTxt = sort(cTxt);
+
+    pass(c = 0; c += 1; c < size(cTxt)) {
+        bill(cTxt[c] + "");
+    }
+}
