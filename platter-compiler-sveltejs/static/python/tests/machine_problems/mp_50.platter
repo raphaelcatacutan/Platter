@@ -15,9 +15,10 @@ piece of arraySize;
 prepare piece of addMatrix(piece[] of a, piece[] of b){
 	piece of i;
     piece of ans;
+    arrayC = [];
 	pass(i = 0; i += 1; i < arraySize){
     	ans = a[i] + b[i];
-        append(arrayC, ans);
+        arrayC = append(arrayC, ans);
     }
     
     bill("Sum matrix: [");
@@ -26,16 +27,16 @@ prepare piece of addMatrix(piece[] of a, piece[] of b){
         check (i == arraySize - 1){ bill("]"); }
         instead { bill(", "); }
 	}
-#     bill("]");
 	serve 0;
 }
 
 prepare piece of subMatrix(piece[] of a, piece[] of b){
 	piece of i;
     piece of ans;
+    arrayC = [];
 	pass(i = 0; i += 1; i < arraySize){
     	ans = a[i] - b[i];
-        append(arrayC, ans);
+        arrayC = append(arrayC, ans);
     }
     
     bill("Difference matrix: [");
@@ -81,13 +82,13 @@ start(){
       pass(i = 0; i += 1; i < arraySize){
           bill("Enter element for array A at index [" + tochars(i) + "]: ");
           element = topiece(take());
-          append(arrayA, element);   
+          arrayA = append(arrayA, element);   
       }
       
       pass(i = 0; i += 1; i < arraySize){
           bill("Enter element for array B at index [" + tochars(i) + "]: ");
           element = topiece(take());
-          append(arrayB, element);   
+          arrayB = append(arrayB, element);   
       }
 
       bill("\n");

@@ -95,7 +95,7 @@ start(){
                     bill("Invalid input. Numbers only.\n");
                 }
             }
-            append(numbers, value);
+            numbers = append(numbers, value);
         }
 
         repeat(running){

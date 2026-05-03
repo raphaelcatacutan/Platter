@@ -35,7 +35,7 @@ start(){
         
             check(entry >= "0" and entry <= "9"){
                 check(isNumMode == up){
-                    append(log, entry);
+                    log = append(log, entry);
                     total = total + 1;
                 } instead {
                     bill(">> Number detected. Stopping.\n");
@@ -43,7 +43,7 @@ start(){
                 }
             } instead {
                 check(isNumMode == down){
-                    append(log, entry);
+                    log = append(log, entry);
                     total = total + 1;
                 } instead {
                     bill(">> Character detected. Stopping.\n");

@@ -38,7 +38,7 @@ start(){
     pass(i = 0; i += 1; i < total){
         bill("Element - " + tochars(i) + " : ");
         value = tosip(take());
-        append(numbers, value);
+        numbers = append(numbers, value);
     }
 
     maxVal = findMax(numbers, 0, total);

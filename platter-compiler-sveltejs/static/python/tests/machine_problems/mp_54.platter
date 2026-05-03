@@ -132,7 +132,7 @@ prepare piece of matrixMenu(){
 				arrayC = [];
 				pass(i = 0; i += 1; i < arraySize){
 					ans = arrayA[i] + arrayB[i];
-					append(arrayC, ans);
+					arrayC = append(arrayC, ans);
 				}
 				
 				bill("Sum matrix: [");
@@ -147,7 +147,7 @@ prepare piece of matrixMenu(){
 				arrayC = [];
 				pass(i = 0; i += 1; i < arraySize){
 					ans = arrayA[i] - arrayB[i];
-					append(arrayC, ans);
+					arrayC = append(arrayC, ans);
 				}
 				
 				bill("Difference matrix: [");
@@ -1032,7 +1032,7 @@ prepare piece of jeepneyMenu(){
 	localSeats = [];
 	currentPassengers = 0;
 	location = 0;
-	pass(i = -1; i += 1; i < capacity){ append(localSeats, 0); }
+	pass(i = -1; i += 1; i < capacity){ localSeats = append(localSeats, 0); }
 
 	repeat(choice1 != 4){
 		bill("\n==============================\n");

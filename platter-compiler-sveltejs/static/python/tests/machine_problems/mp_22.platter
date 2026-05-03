@@ -65,7 +65,7 @@ start(){
                         }                
 
             check (not isTriplicate){
-                append(nums, inputNum);
+                nums = append(nums, inputNum);
             }
 
         } instead {

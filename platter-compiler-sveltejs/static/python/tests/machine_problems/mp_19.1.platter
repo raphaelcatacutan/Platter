@@ -32,7 +32,7 @@ start(){
         pass(i = 0; i += 1; i < total){
             bill("Element - " + tochars(i) + " : ");
             value = topiece(take());
-            append(numbers, value);
+            numbers = append(numbers, value);
         }
 
         bill("The elements in the array are : ");

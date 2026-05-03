@@ -33,7 +33,7 @@ start(){
     order {
         seats = [];
         current_passengers = 0;
-        pass(i = -1; i += 1; i < capacity){ append(seats, 0); }
+        pass(i = -1; i += 1; i < capacity){ seats = append(seats, 0); }
 
         order {
             bill("\n==============================\n");

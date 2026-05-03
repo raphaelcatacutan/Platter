@@ -15,18 +15,18 @@ start(){
     pass(i = 0; i += 1; i < total){
         bill("A[" + tochars(i) + "]: ");
         tempValue = tosip(take());
-        append(arrayA, tempValue);
+        arrayA = append(arrayA, tempValue);
     }
 
     bill("\nInput " + tochars(total) + " elements for Array B:\n");
     pass(i = 0; i += 1; i < total){
         bill("B[" + tochars(i) + "]: ");
         tempValue = tosip(take());
-        append(arrayB, tempValue);
+        arrayB = append(arrayB, tempValue);
     }
 
     pass(i = 0; i += 1; i < total){
-        append(arrayC, arrayA[i] + arrayB[i]);
+        arrayC = append(arrayC, arrayA[i] + arrayB[i]);
     }
 
     bill("\nThe sum (Array C) is: ");
