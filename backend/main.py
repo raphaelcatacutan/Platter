@@ -26,7 +26,8 @@ from app.intermediate_code.ir_generator import IRGenerator
 from app.intermediate_code.output_formatter import IRFormatter
 from app.code_optimization.optimizer_manager import OptimizerManager, OptimizationLevel
 
-RUN_RESPONSE_TIMEOUT_SEC = 0.4
+RUN_RESPONSE_TIMEOUT_SEC = 1.0
+RUN_SLICE_STEPS = 500
 
 
 class CodeRequest(BaseModel):
@@ -57,6 +58,7 @@ def _format_execution_result(exec_result: Dict[str, Any]) -> Dict[str, Any]:
         "execution_output": exec_result.get("output", ""),
         "execution_success": bool(exec_result.get("success")),
         "execution_paused": bool(exec_result.get("paused")),
+        "execution_running": bool(exec_result.get("running")),
         "execution_error": exec_result.get("error", ""),
         "execution_exit_message": exec_result.get("exit_message", ""),
         "execution_terminate_message": exec_result.get("terminate_message", ""),
@@ -71,6 +73,18 @@ def _worker_main(cmd_queue: mp.Queue, resp_queue: mp.Queue, app_root: str) -> No
     from app.interpreter.ir_interpreter import TACInterpreter
 
     interpreter: Optional[TACInterpreter] = None
+    last_output_len = 0
+
+    def _push_result(exec_result: Dict[str, Any]) -> None:
+        nonlocal last_output_len
+        payload = _format_execution_result(exec_result)
+        output = exec_result.get("output", "") or ""
+        if output and len(output) >= last_output_len:
+            payload["execution_output_delta"] = output[last_output_len:]
+        else:
+            payload["execution_output_delta"] = output
+        last_output_len = len(output)
+        resp_queue.put(payload)
 
     while True:
         cmd = cmd_queue.get()
@@ -82,8 +96,9 @@ def _worker_main(cmd_queue: mp.Queue, resp_queue: mp.Queue, app_root: str) -> No
         if cmd_type == "start":
             optimized_tac = cmd.get("optimized_tac")
             interpreter = TACInterpreter(optimized_tac)
-            exec_result = interpreter.run()
-            resp_queue.put(_format_execution_result(exec_result))
+            last_output_len = 0
+            exec_result = interpreter.run(max_steps=RUN_SLICE_STEPS)
+            _push_result(exec_result)
             continue
 
         if cmd_type == "input":
@@ -91,12 +106,21 @@ def _worker_main(cmd_queue: mp.Queue, resp_queue: mp.Queue, app_root: str) -> No
                 resp_queue.put({"execution_error": "No active interpreter", "execution_success": False})
                 continue
             interpreter.stdin_lines.append(cmd.get("input", ""))
-            exec_result = interpreter.run()
-            resp_queue.put(_format_execution_result(exec_result))
+            exec_result = interpreter.run(max_steps=RUN_SLICE_STEPS)
+            _push_result(exec_result)
+            continue
+
+        if cmd_type == "status":
+            if interpreter is None:
+                resp_queue.put({"execution_error": "No active interpreter", "execution_success": False})
+                continue
+            exec_result = interpreter.run(max_steps=RUN_SLICE_STEPS)
+            _push_result(exec_result)
             continue
 
         if cmd_type == "stop":
             interpreter = None
+            last_output_len = 0
             resp_queue.put({"execution_stopped": True})
 
 
@@ -150,6 +174,12 @@ class ExecutionManager:
             return self.resp_queue.get_nowait()
         except queue.Empty:
             return None
+
+    def status(self) -> Optional[Dict[str, Any]]:
+        if not self.process or not self.process.is_alive() or not self.cmd_queue or not self.resp_queue:
+            return None
+        self.cmd_queue.put({"type": "status"})
+        return self._wait_for_result(RUN_RESPONSE_TIMEOUT_SEC)
 
     def stop(self) -> None:
         self._terminate_process()
@@ -426,7 +456,7 @@ def semantic(req: SemanticRequest) -> Dict[str, Any]:
 
     if exec_result:
         payload.update(exec_result)
-        payload["execution_running"] = False
+        payload["execution_running"] = bool(exec_result.get("execution_running"))
         return payload
 
     payload["execution_running"] = True
@@ -446,16 +476,16 @@ def execution_input(req: InputRequest) -> Dict[str, Any]:
     if exec_result is None:
         return {"execution_running": True}
 
-    exec_result["execution_running"] = False
+    exec_result["execution_running"] = bool(exec_result.get("execution_running"))
     return exec_result
 
 
 @app.get("/api/execution/status")
 def execution_status() -> Dict[str, Any]:
-    exec_result = execution_manager.poll()
+    exec_result = execution_manager.status()
     if exec_result is None:
         return {"execution_running": True}
-    exec_result["execution_running"] = False
+    exec_result["execution_running"] = bool(exec_result.get("execution_running"))
     return exec_result
 
 

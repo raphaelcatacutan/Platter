@@ -216,11 +216,10 @@
 		if (!executionActive) return;
 		try {
 			const data = await fetchBackendJson<any>('/api/execution/status');
+			applyExecutionResult(data);
 			if (data.execution_running) {
 				executionPollTimer = setTimeout(pollExecutionStatus, EXECUTION_POLL_INTERVAL_MS);
-				return;
 			}
-			applyExecutionResult(data);
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : 'Execution status failed';
 			termMessages = [{ icon: errorIcon, text: msg }];
@@ -229,20 +228,18 @@
 	}
 
 	function applyExecutionResult(data: any) {
-		const successMsgs: TermMsg[] = [];
-		if (data.execution_output) {
-			const lines = data.execution_output.split('\n');
-			for (let i = 0; i < lines.length; i++) {
-				if (i === lines.length - 1 && lines[i] === '') continue;
-				successMsgs.push({ text: lines[i] });
-			}
-		}
+		const outputDelta = data.execution_output_delta ?? data.execution_output ?? '';
+		appendExecutionOutput(outputDelta);
 
 		if (data.execution_success) {
+			if (executionOutputRemainder) {
+				termMessages = termMessages.concat([{ text: executionOutputRemainder }]);
+				executionOutputRemainder = '';
+			}
 			if (data.execution_exit_message) {
 				const exitLines = data.execution_exit_message.split('\n');
 				for (const l of exitLines) {
-					if (l !== '') successMsgs.push({ text: l });
+					if (l !== '') termMessages = termMessages.concat([{ text: l }]);
 				}
 			}
 			isWaitingForInput = false;
@@ -252,23 +249,27 @@
 			isWaitingForInput = true;
 			executionActive = true;
 		} else if (data.execution_error) {
-			successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
+			if (executionOutputRemainder) {
+				termMessages = termMessages.concat([{ text: executionOutputRemainder }]);
+				executionOutputRemainder = '';
+			}
+			termMessages = termMessages.concat([
+				{ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` }
+			]);
 			if (data.execution_terminate_message) {
-				successMsgs.push({ text: data.execution_terminate_message });
+				termMessages = termMessages.concat([{ text: data.execution_terminate_message }]);
 			}
 			isWaitingForInput = false;
 			executionActive = false;
 			clearExecutionPolling();
 		} else if (data.execution_running) {
-			if (successMsgs.length === 0) {
-				successMsgs.push({ text: 'Execution running... use Stop to cancel.' });
+			if (termMessages.length === 0 && !outputDelta) {
+				termMessages = [{ text: 'Execution running... use Stop to cancel.' }];
 			}
 			isWaitingForInput = false;
 			executionActive = true;
 			executionPollTimer = setTimeout(pollExecutionStatus, EXECUTION_POLL_INTERVAL_MS);
 		}
-
-		termMessages = successMsgs.length ? successMsgs : termMessages;
 	}
 
 	async function stopExecution() {
@@ -298,6 +299,7 @@
 	let terminalInputText = '';
 	let terminalInputEl: HTMLInputElement | null = null;
 	let terminalViewportEl: HTMLDivElement | null = null;
+	let executionOutputRemainder = '';
 	const CTRL_ENTER_HINT_SEEN_KEY = 'platter_ctrl_enter_hint_seen_v1';
 
 	function sanitizeProgramText(source: string): string {
@@ -790,6 +792,26 @@
 		termMessages = [];
 		isWaitingForInput = false;
 		terminalInputText = '';
+		executionOutputRemainder = '';
+	}
+
+	function appendExecutionOutput(text: string) {
+		if (!text) return;
+		const combined = executionOutputRemainder + text;
+		const parts = combined.split('\n');
+		executionOutputRemainder = parts.pop() ?? '';
+		const newMsgs = parts.map((line) => ({ text: line }));
+		if (newMsgs.length) {
+			termMessages = termMessages.concat(newMsgs);
+			void scrollTerminalToBottom();
+		}
+	}
+
+	async function scrollTerminalToBottom() {
+		await tick();
+		if (terminalViewportEl) {
+			terminalViewportEl.scrollTop = terminalViewportEl.scrollHeight;
+		}
 	}
 
 	export async function handleTerminalInput() {
