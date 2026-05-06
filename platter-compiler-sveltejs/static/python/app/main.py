@@ -42,8 +42,8 @@ if __name__ == "__main__":
 
     source = load_source_only(filepath)
 
-    lexer = Lexer(source)
-    tokens = lexer.tokenize()
+    lexer = Lexer(source)                                                                                                                   # Lexical
+    tokens = lexer.tokenize()                                                                                                               # Lexical
 
     tokens = [
         t for t in tokens
@@ -61,10 +61,10 @@ if __name__ == "__main__":
         print("=" * 80)
         print("\n\nSYNTAX:")
         log.disable(log.WARNING) 
-        parser = Parser(tokens)
-        python_error = None
+        parser = Parser(tokens)                                                                                                             # Syntax
+        python_error = None                                                                             
         try:
-            parser.parse_program()
+            parser.parse_program()                                                                                                          # Syntax
             python_error = "No Syntax Error"
             print(python_error)
         except SyntaxError as e:
@@ -80,11 +80,11 @@ if __name__ == "__main__":
         
         try:
             # Parse AST
-            ast_parser = ASTParser(tokens)
-            ast = ast_parser.parse_program()
+            ast_parser = ASTParser(tokens)                                                                                                  # Syntax - AST
+            ast = ast_parser.parse_program()                                                                                                # Syntax - AST
             
             # Run semantic analysis
-            symbol_table, error_handler = analyze_program(ast)
+            symbol_table, error_handler = analyze_program(ast)                                                                              # Semantics
             
             # Print AST Structure (capture and filter output)
             print("\nAST Structure:")
@@ -104,18 +104,19 @@ if __name__ == "__main__":
             
             # Filter out unwanted sections and fix border characters
             symbol_output = symbol_buffer.getvalue()
-            
-            # Replace double-line borders with single-line borders for STATISTICS and ISSUES
-            symbol_output = symbol_output.replace('╔', '')
-            symbol_output = symbol_output.replace('╗', '')
-            symbol_output = symbol_output.replace('╚', '')
-            symbol_output = symbol_output.replace('╝', '')
-            symbol_output = symbol_output.replace('╠', '')
-            symbol_output = symbol_output.replace('╣', '')
-            symbol_output = symbol_output.replace('║', '')
-            symbol_output = symbol_output.replace('═', '')
-            
-            lines = symbol_output.split('\n')
+            if symbol_output:
+                
+                # Replace double-line borders with single-line borders for STATISTICS and ISSUES
+                symbol_output = symbol_output.replace('╔', '')
+                symbol_output = symbol_output.replace('╗', '')
+                symbol_output = symbol_output.replace('╚', '')
+                symbol_output = symbol_output.replace('╝', '')
+                symbol_output = symbol_output.replace('╠', '')
+                symbol_output = symbol_output.replace('╣', '')
+                symbol_output = symbol_output.replace('║', '')
+                symbol_output = symbol_output.replace('═', '')
+                
+                lines = symbol_output.split('\n')
             
             # Find where user-defined symbols section starts and skip all before it
             start_idx = None
@@ -146,8 +147,8 @@ if __name__ == "__main__":
                 
                 try:
                     # Generate IR
-                    ir_gen = IRGenerator()
-                    tac_instructions, quad_table = ir_gen.generate(ast)
+                    ir_gen = IRGenerator()                                                                                                  # IR Generator                                                 
+                    tac_instructions, quad_table = ir_gen.generate(ast)                                                                     # IR Generator
                     formatter = IRFormatter()
                     
                     # Display TAC
@@ -157,9 +158,9 @@ if __name__ == "__main__":
                     print(ir_tac_text)
                     
                     # Optimize TAC
-                    optimizer = OptimizerManager(OptimizationLevel.STANDARD)
-                    optimized_tac = optimizer.optimize_tac(tac_instructions)
-                    ir_tac_optimized_text = formatter.format_tac_text(optimized_tac)
+                    optimizer = OptimizerManager(OptimizationLevel.STANDARD)                                                                # Code Optimizer
+                    optimized_tac = optimizer.optimize_tac(tac_instructions)                                                                # Code Optimizer
+                    ir_tac_optimized_text = formatter.format_tac_text(optimized_tac)                                                        # Code Optimizer
                     
                     print("\nOptimized TAC:")
                     print("-" * 80)
@@ -167,12 +168,12 @@ if __name__ == "__main__":
                     
                     print("\nExecution Output:")
                     print("-" * 80)
-                    interpreter = TACInterpreter(optimized_tac)
+                    interpreter = TACInterpreter(optimized_tac)                                                                             # TAC Interpreter
                     printed_output_len = 0
                     pending_input_echo = None
                     final_output = ""
                     while True:
-                        exec_result = interpreter.run()
+                        exec_result = interpreter.run()                                                                                     # TAC Interpreter
 
                         # Stream only newly produced output so execution feels like a real terminal run.
                         current_output = exec_result.get("output", "")
