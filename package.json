@@ -4,12 +4,17 @@
 	"description": "Platter Programming Language IDE (Frontend-First, Pyodide-powered)",
 	"type": "module",
 	"scripts": {
-		"start": "node server-manager.cjs",
-		"dev": "node server-manager.cjs",
+		"start": "npm run dev",
+		"dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+		"dev:frontend": "npm run dev --prefix platter-compiler-sveltejs",
+		"dev:backend": "python backend/main.py",
 		"preview": "cd platter-compiler-sveltejs && npm run preview",
 		"install": "cd platter-compiler-sveltejs && npm install",
 		"test": "cd platter-compiler-sveltejs/static/python && python -m unittest discover -s tests -p \"ga_*.py\" -v",
 		"build": "cd ./platter-compiler-sveltejs/static/python && python -m app.utils.BuildBackend"
+	},
+	"devDependencies": {
+		"concurrently": "^9.2.1"
 	},
 	"repository": {
 		"type": "git",

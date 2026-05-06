@@ -463,3 +463,9 @@ def execution_status() -> Dict[str, Any]:
 def execution_stop() -> Dict[str, Any]:
     execution_manager.stop()
     return {"execution_stopped": True}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
