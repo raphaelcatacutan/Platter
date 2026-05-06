@@ -1,6 +1,6 @@
 # Platter IDE Frontend
 
-A SvelteKit-based IDE for the Platter programming language, running Python analysis directly in the browser via Pyodide.
+A SvelteKit-based IDE for the Platter programming language, using a FastAPI backend for analysis and execution.
 
 ## Features
 
@@ -10,7 +10,7 @@ A SvelteKit-based IDE for the Platter programming language, running Python analy
 - **Error Highlighting**: Visual error markers in the editor
 - **Dark/Light Theme**: Toggle between themes
 - **File Operations**: Open and save `.platter` files
-- **Python in Browser**: Uses Pyodide to run Python analysis without a backend
+- **Backend Execution**: Runs analysis and IR interpreter on the FastAPI server
 
 ## Developing
 
@@ -26,6 +26,14 @@ npm run dev -- --open
 
 The app will be available at `http://localhost:5173`
 
+Start the backend in a separate terminal:
+
+```sh
+cd ../backend
+python -m pip install -r requirements.txt
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
 ## Building
 
 To create a production version of your app:
@@ -38,17 +46,11 @@ You can preview the production build with `npm run preview`.
 
 ## Deployment
 
-The built app is fully static and can be deployed to:
-- GitHub Pages
-- Netlify
-- Vercel
-- Any static hosting service
-
-The `build/` directory contains all necessary files.
+The frontend can be deployed as static assets, but the FastAPI backend must also be hosted.
 
 ## Python Integration
 
-Python code from `../backend/app/` is copied to `static/python/app/` and loaded into Pyodide's virtual filesystem at runtime. The Python modules are:
+Python code under `static/python/app/` is used by the FastAPI backend for analysis:
 
 - `app.lexer.*` - Lexical analysis
 - `app.parser.*` - Syntax analysis
@@ -58,5 +60,5 @@ Python code from `../backend/app/` is copied to `static/python/app/` and loaded 
 - **Framework**: SvelteKit
 - **Styling**: Tailwind CSS
 - **Editor**: CodeMirror 5
-- **Python Runtime**: Pyodide (WebAssembly)
+- **Backend**: FastAPI + Uvicorn
 - **Build Tool**: Vite

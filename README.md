@@ -2690,13 +2690,13 @@ MIT License - see LICENSE file for details
 ## ❓ FAQ
 
 **Q: Do I need Python installed?**  
-A: Not for running the app! Pyodide runs Python in the browser. Python is only needed for running tests.
+A: Yes for the backend. The FastAPI server runs the compiler pipeline and interpreter.
 
 **Q: Why is the first analysis slow?**  
-A: Pyodide loads ~6-10MB on first use (cached after). This only happens once per browser session.
+A: The backend starts the Python runtime on first request and may warm caches. Subsequent runs are faster.
 
 **Q: Can I deploy to GitHub Pages?**  
 A: Yes! Run `npm run build` and deploy the `platter-compiler-sveltejs/build/` directory.
 
 **Q: Where is the backend?**  
-A: There isn''t one! Everything runs client-side via Pyodide.
+A: In the root-level backend/ folder. Start it with Uvicorn (see backend/requirements.txt).

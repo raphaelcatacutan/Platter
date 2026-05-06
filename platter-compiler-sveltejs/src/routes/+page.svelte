@@ -39,6 +39,9 @@
 
 	export let data;
 
+	const API_BASE_URL = 'http://127.0.0.1:8000';
+	const EXECUTION_POLL_INTERVAL_MS = 700;
+
 	// Logger Service for Google Apps Script webhook
 	const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwkXRRIlnkZI2z5bXT08Lswe504TalqtJcA13CtbMZcgoH3EhYfWtJBlD4ql_hg9q4eWg/exec';
 	const BATCH_DELAY = 10000; // 10 seconds
@@ -136,6 +139,11 @@
 	const lexerRows: Array<{ lexeme: string; token: string }> = [];
 	let tokens: Token[] = [];
 	let isAnalyzing = false;
+	let backendReady = false;
+	let backendLoading = false;
+	let backendError = '';
+	let executionActive = false;
+	let executionPollTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Resizable panels
 	let gridEl: HTMLElement | null = null;
@@ -162,10 +170,121 @@
 		document.body.style.cursor = '';
 	}
 
-	// Pyodide integration
-	let pyodide: any = null;
-	let pyodideLoading = false;
-	let pyodideReady = false;
+	async function ensureBackendReady(): Promise<boolean> {
+		if (backendReady) return true;
+		if (backendLoading) return false;
+		backendLoading = true;
+		backendError = '';
+		try {
+			const response = await fetch(`${API_BASE_URL}/api/health`);
+			if (!response.ok) {
+				throw new Error(`Backend not reachable (HTTP ${response.status})`);
+			}
+			backendReady = true;
+			return true;
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : 'Backend not reachable';
+			backendError = msg;
+			backendReady = false;
+			return false;
+		} finally {
+			backendLoading = false;
+		}
+	}
+
+	async function fetchBackendJson<T>(path: string, payload?: Record<string, unknown>): Promise<T> {
+		const options: RequestInit = {
+			method: payload ? 'POST' : 'GET',
+			headers: payload ? { 'Content-Type': 'application/json' } : undefined,
+			body: payload ? JSON.stringify(payload) : undefined
+		};
+		const response = await fetch(`${API_BASE_URL}${path}`, options);
+		if (!response.ok) {
+			throw new Error(`Backend request failed (HTTP ${response.status})`);
+		}
+		return (await response.json()) as T;
+	}
+
+	function clearExecutionPolling() {
+		if (executionPollTimer) {
+			clearTimeout(executionPollTimer);
+			executionPollTimer = null;
+		}
+	}
+
+	async function pollExecutionStatus() {
+		if (!executionActive) return;
+		try {
+			const data = await fetchBackendJson<any>('/api/execution/status');
+			if (data.execution_running) {
+				executionPollTimer = setTimeout(pollExecutionStatus, EXECUTION_POLL_INTERVAL_MS);
+				return;
+			}
+			applyExecutionResult(data);
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : 'Execution status failed';
+			termMessages = [{ icon: errorIcon, text: msg }];
+			executionActive = false;
+		}
+	}
+
+	function applyExecutionResult(data: any) {
+		const successMsgs: TermMsg[] = [];
+		if (data.execution_output) {
+			const lines = data.execution_output.split('\n');
+			for (let i = 0; i < lines.length; i++) {
+				if (i === lines.length - 1 && lines[i] === '') continue;
+				successMsgs.push({ text: lines[i] });
+			}
+		}
+
+		if (data.execution_success) {
+			if (data.execution_exit_message) {
+				const exitLines = data.execution_exit_message.split('\n');
+				for (const l of exitLines) {
+					if (l !== '') successMsgs.push({ text: l });
+				}
+			}
+			isWaitingForInput = false;
+			executionActive = false;
+			clearExecutionPolling();
+		} else if (data.execution_paused) {
+			isWaitingForInput = true;
+			executionActive = true;
+		} else if (data.execution_error) {
+			successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
+			if (data.execution_terminate_message) {
+				successMsgs.push({ text: data.execution_terminate_message });
+			}
+			isWaitingForInput = false;
+			executionActive = false;
+			clearExecutionPolling();
+		} else if (data.execution_running) {
+			if (successMsgs.length === 0) {
+				successMsgs.push({ text: 'Execution running... use Stop to cancel.' });
+			}
+			isWaitingForInput = false;
+			executionActive = true;
+			executionPollTimer = setTimeout(pollExecutionStatus, EXECUTION_POLL_INTERVAL_MS);
+		}
+
+		termMessages = successMsgs.length ? successMsgs : termMessages;
+	}
+
+	async function stopExecution() {
+		if (!executionActive) return;
+		try {
+			await fetchBackendJson('/api/execution/stop', {});
+			executionActive = false;
+			isWaitingForInput = false;
+			terminalInputText = '';
+			termMessages = [{ icon: warning, text: 'Execution stopped.' }];
+			clearExecutionPolling();
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : 'Failed to stop execution';
+			termMessages = [{ icon: errorIcon, text: msg }];
+		}
+	}
 
 	// CodeMirror integration
 	let textareaEl: HTMLTextAreaElement | null = null;
@@ -311,104 +430,6 @@
 		}
 	}
 
-	async function initPyodide() {
-		if (pyodide || pyodideLoading) return;
-		pyodideLoading = true;
-
-		try {
-			// Load Pyodide from CDN
-			await loadScript('https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js');
-			pyodide = await (window as any).loadPyodide({
-				indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'
-			});
-
-		// Load Python files from static directory
-		const pythonFiles = [
-			'/python/app/__init__.py',
-			'/python/app/lexer/__init__.py',
-			'/python/app/lexer/token.py',
-			'/python/app/lexer/protocol.py',
-			'/python/app/lexer/base.py',
-			'/python/app/lexer/keywords.py',
-			'/python/app/lexer/identifiers.py',
-			'/python/app/lexer/numericals.py',
-			'/python/app/lexer/operators.py',
-			'/python/app/lexer/char_com.py',
-			'/python/app/lexer/lexer.py',
-			'/python/app/parser/__init__.py',
-			'/python/app/parser/error_handler.py',
-			'/python/app/parser/predict_set.py',
-			'/python/app/parser/parser_program.py',
-			'/python/app/utils/FileHandler.py',
-			'/python/app/parser/first_set.py',
-			'/python/app/semantic_analyzer/__init__.py',
-			'/python/app/semantic_analyzer/semantic_analyzer.py',
-			'/python/app/semantic_analyzer/builtin_recipes.py',
-			'/python/app/semantic_analyzer/ast/__init__.py',
-			'/python/app/semantic_analyzer/ast/ast_nodes.py',
-			'/python/app/semantic_analyzer/ast/ast_parser_program.py',
-			'/python/app/semantic_analyzer/ast/ast_reader.py',
-			'/python/app/semantic_analyzer/symbol_table/__init__.py',
-			'/python/app/semantic_analyzer/symbol_table/types.py',
-			'/python/app/semantic_analyzer/symbol_table/symbol_table.py',
-			'/python/app/semantic_analyzer/symbol_table/symbol_table_builder.py',
-			'/python/app/semantic_analyzer/symbol_table/symbol_table_output.py',
-			'/python/app/semantic_analyzer/semantic_passes/__init__.py',
-			'/python/app/semantic_analyzer/semantic_passes/error_handler.py',
-			'/python/app/semantic_analyzer/semantic_passes/type_checker.py',
-			'/python/app/semantic_analyzer/semantic_passes/scope_checker.py',
-			'/python/app/semantic_analyzer/semantic_passes/control_flow_checker.py',
-			'/python/app/semantic_analyzer/semantic_passes/function_checker.py',
-			'/python/app/intermediate_code/__init__.py',
-			'/python/app/intermediate_code/tac.py',
-			'/python/app/intermediate_code/quadruple.py',
-			'/python/app/intermediate_code/ir_generator.py',
-			'/python/app/intermediate_code/output_formatter.py',
-			'/python/app/code_optimization/__init__.py',
-			'/python/app/code_optimization/optimizer.py',
-			'/python/app/code_optimization/constant_folding.py',
-			'/python/app/code_optimization/propagation.py',
-			'/python/app/code_optimization/dead_code_elimination.py',
-			'/python/app/code_optimization/algebraic_simplification.py',
-			'/python/app/code_optimization/optimizer_manager.py',
-			'/python/app/interpreter/__init__.py',
-			'/python/app/interpreter/ir_interpreter.py',
-		];
-
-		// Fetch and write Python files to Pyodide's virtual filesystem
-		for (const file of pythonFiles) {
-			const response = await fetch(`${data.basePath}${file}`);
-			if (!response.ok) {
-				throw new Error(`Failed to load Python file: ${file} (HTTP ${response.status})`);
-			}
-			const content = await response.text();
-			const path = file.replace('/python/', '');
-				
-				// Create directory structure
-				const dirs = path.split('/').slice(0, -1);
-				let currentPath = '';
-				for (const dir of dirs) {
-					currentPath += (currentPath ? '/' : '') + dir;
-					try {
-						pyodide.FS.mkdir(currentPath);
-					} catch (e) {
-						// Directory might already exist
-					}
-				}
-				
-				// Write file
-				pyodide.FS.writeFile(path, content);
-			}
-
-			pyodideReady = true;
-			console.log('Pyodide initialized successfully');
-		} catch (err) {
-			console.error('Failed to initialize Pyodide:', err);
-			setTerminalError('Failed to initialize Python runtime');
-		} finally {
-			pyodideLoading = false;
-		}
-	}
 
 	onMount(async () => {
 		showFirstVisitCtrlEnterHint();
@@ -710,8 +731,8 @@
 			// Fetch app version
 			await fetchVersion();
 
-			// Initialize Pyodide
-			await initPyodide();
+			// Check backend availability (FastAPI)
+			await ensureBackendReady();
 
 		} catch (err) {
 			console.warn('Failed to load CodeMirror from CDN:', err);
@@ -736,6 +757,8 @@
 			panelSyncObserver.disconnect();
 			panelSyncObserver = null;
 		}
+
+		clearExecutionPolling();
 
 		if (handleGlobalCtrlEnter) {
 			window.removeEventListener('keydown', handleGlobalCtrlEnter);
@@ -770,90 +793,30 @@
 	}
 
 	export async function handleTerminalInput() {
-		if (!terminalInputText || !pyodideReady) return;
+		if (!terminalInputText) return;
+		const ready = await ensureBackendReady();
+		if (!ready) {
+			setTerminalError(backendError || 'Backend not reachable');
+			return;
+		}
 		const input = terminalInputText;
 		terminalInputText = '';
 		isWaitingForInput = false;
 
 		try {
-			pyodide.globals.set('user_input', input);
-			const result = await pyodide.runPythonAsync(`
-import sys
-import json
-import traceback
-
-interpreter = getattr(sys.modules.get('__main__'), 'active_interpreter', None)
-if interpreter is None:
-    result = {"success": False, "error": "No active interpreter found"}
-else:
-    try:
-        interpreter.stdin_lines.append(user_input)
-        exec_result = interpreter.run()
-        
-        execution_output = exec_result.get("output", "")
-        execution_success = exec_result.get("success", False)
-        execution_error = exec_result.get("error", "")
-        execution_paused = exec_result.get("paused", False)
-        execution_globals = exec_result.get("globals", {})
-        execution_exit_message = exec_result.get("exit_message", "")
-        execution_terminate_message = exec_result.get("terminate_message", "")
-        
-        result = {
-            "success": True,
-            "execution_output": execution_output,
-            "execution_success": execution_success,
-            "execution_error": execution_error,
-            "execution_paused": execution_paused,
-            "execution_globals": json.dumps(execution_globals),
-            "execution_exit_message": execution_exit_message,
-            "execution_terminate_message": execution_terminate_message
-        }
-    except Exception as e:
-        result = {"success": False, "error": str(e), "traceback": traceback.format_exc()}
-result
-			`);
-
-			const data = result.toJs({ dict_converter: Object.fromEntries });
-
-			if (data.success) {
-				const successMsgs = [];
-				if (data.execution_output) {
-					const lines = data.execution_output.split('\\n');
-					for (let i = 0; i < lines.length; i++) {
-						if (i === lines.length - 1 && lines[i] === '') continue;
-						successMsgs.push({ text: lines[i] });
-					}
-				}
-				if (data.execution_success) {
-					// Show exit code message if present
-					if (data.execution_exit_message) {
-						const exitLines = data.execution_exit_message.split('\n');
-						for (const l of exitLines) {
-							if (l !== '') successMsgs.push({ text: l });
-						}
-					}
-					isWaitingForInput = false;
-				} else if (data.execution_paused) {
-					isWaitingForInput = true;
-				} else if (data.execution_error) {
-					successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
-					// Show termination message if present
-					if (data.execution_terminate_message) {
-						successMsgs.push({ text: data.execution_terminate_message });
-					}
-					isWaitingForInput = false;
-				}
-				termMessages = successMsgs;
-			} else {
-				termMessages.push({ icon: errorIcon, text: `Interpreter Error: ${data.error}` });
-				termMessages = [...termMessages];
-				isWaitingForInput = false;
+			const data = await fetchBackendJson<any>('/api/execution/input', { input });
+			if (data.execution_running) {
+				executionActive = true;
+				executionPollTimer = setTimeout(pollExecutionStatus, EXECUTION_POLL_INTERVAL_MS);
+				termMessages = [{ text: 'Execution running... use Stop to cancel.' }];
+				return;
 			}
+			applyExecutionResult(data);
 		} catch (e) {
 			const errMsg = e instanceof Error ? e.message : String(e);
-			termMessages.push({ icon: errorIcon, text: `Frontend Error: ${errMsg}` });
-			termMessages = [...termMessages];
+			termMessages = [{ icon: errorIcon, text: `Backend Error: ${errMsg}` }];
 			isWaitingForInput = false;
+			executionActive = false;
 		}
 	}
 
@@ -925,6 +888,10 @@ result
 
 	async function analyzeSemantic(runTacInterpreter = false) {
 		normalizeCurlyQuotes();
+		if (runTacInterpreter) {
+			clearExecutionPolling();
+			executionActive = false;
+		}
 		const startTime = performance.now();
 		let analysisStatus = 'error';
 		let terminalOutput = '';
@@ -936,508 +903,175 @@ result
 		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
 			clearTerminal();
 
-			if (!pyodideReady) {
-				const errorMsg = 'Python runtime not ready';
+			const ready = await ensureBackendReady();
+			if (!ready) {
+				const errorMsg = backendError || 'Backend not reachable';
 				setTerminalError(errorMsg);
 				analysisStatus = 'error';
 				terminalOutput = `${lexicalResult.output}\n${errorMsg}`;
 			} else {
 				try {
-					// Set the code input in Python
-					pyodide.globals.set('code_input', codeInput);
-					pyodide.globals.set('run_ir_pipeline', runTacInterpreter);
+					const data = await fetchBackendJson<any>('/api/semantic', {
+						code: codeInput,
+						run_ir_pipeline: runTacInterpreter
+					});
 
-					// Run AST parser and semantic analysis
-					const semanticPythonScript = `
-import sys
-import re
-import json
-import importlib
-
-# Force reload of modified modules to clear cache
-def _ensure_parent_packages(module_name):
-    parts = module_name.split('.')
-    for i in range(1, len(parts)):
-        parent_name = '.'.join(parts[:i])
-        if parent_name not in sys.modules:
-            importlib.import_module(parent_name)
-
-
-def _safe_reload(module_name):
-    if module_name in sys.modules:
-        try:
-            _ensure_parent_packages(module_name)
-            importlib.reload(sys.modules[module_name])
-        except Exception as reload_err:
-            print(f"[Reload Warning] {module_name}: {reload_err}")
-
-
-for module_name in [
-    'app.semantic_analyzer.symbol_table.types',
-    'app.semantic_analyzer.symbol_table.symbol_table',
-    'app.semantic_analyzer.symbol_table.symbol_table_builder',
-    'app.semantic_analyzer.semantic_passes.error_handler',
-    'app.semantic_analyzer.semantic_passes.scope_checker',
-    'app.semantic_analyzer.semantic_passes.type_checker',
-    'app.semantic_analyzer.semantic_passes.control_flow_checker',
-    'app.semantic_analyzer.semantic_passes.function_checker',
-    'app.semantic_analyzer.semantic_analyzer',
-    'app.intermediate_code.tac',
-    'app.intermediate_code.quadruple',
-    'app.intermediate_code.ir_generator',
-    'app.intermediate_code.output_formatter',
-    'app.code_optimization',
-    'app.code_optimization.optimizer',
-    'app.code_optimization.constant_folding',
-    'app.code_optimization.propagation',
-    'app.code_optimization.dead_code_elimination',
-    'app.code_optimization.algebraic_simplification',
-    'app.code_optimization.optimizer_manager',
-    'app.interpreter',
-    'app.interpreter.ir_interpreter',
-]:
-    _safe_reload(module_name)
-
-from app.lexer.lexer import Lexer
-from app.parser.parser_program import Parser as SyntaxParser
-from app.semantic_analyzer.ast.ast_parser_program import ASTParser
-from app.semantic_analyzer.ast.ast_reader import ASTReader, print_ast
-from app.semantic_analyzer import analyze_program
-from app.semantic_analyzer.symbol_table import print_symbol_table
-from app.semantic_analyzer.symbol_table.symbol_table_output import format_symbol_table_for_console
-
-result = None
-try:
-    lexer = Lexer(code_input)
-    tokens = lexer.tokenize()
-    # Run syntax check first; raises SyntaxError on failure
-    syntax_tokens = [t for t in tokens if t.type not in ("space", "tab", "newline", "comment_single", "comment_multi")]
-    syntax_parser = SyntaxParser(syntax_tokens)
-    syntax_parser.parse_program()
-    # Syntax OK — proceed with AST parser and semantic analysis
-    parser = ASTParser(tokens)
-    ast = parser.parse_program()
-    
-    # Pretty print AST to console logs
-    print("")
-    print("="*80)
-    print("AST Analysis Complete")
-    print("="*80)
-    print_ast(ast, format="pretty")
-    
-    # Run complete semantic analysis with all passes
-    print("")
-    print("="*80)
-    print("Running Semantic Analysis (All Passes)")
-    print("="*80)
-    symbol_table, error_handler = analyze_program(ast)
-    
-    # Print symbol table with error handler
-    print_symbol_table(symbol_table, error_handler)
-    
-    # Also create JSON representation
-    reader = ASTReader(ast)
-    ast_json = reader.to_json(indent=2)
-    
-    # Get symbol table data for console.table output
-    symbol_table_data = format_symbol_table_for_console(symbol_table)
-    symbol_table_json = json.dumps(symbol_table_data)
-    
-    # Generate IR and execute only when explicitly requested (Ctrl+Enter).
-    ir_tac_text = ""
-    ir_quads_text = ""
-    ir_tac_optimized_text = ""
-    execution_output = ""
-    execution_success = False
-    execution_paused = False
-    execution_error = ""
-    execution_globals = {}
-    execution_exit_message = ""
-    execution_terminate_message = ""
-	if run_ir_pipeline:
-		try:
-			ir_gen = __import__('app.intermediate_code.ir_generator', fromlist=['IRGenerator']).IRGenerator()
-			tac_instructions, quad_table = ir_gen.generate(ast)
-			formatter = __import__('app.intermediate_code.output_formatter', fromlist=['IRFormatter']).IRFormatter()
-			ir_tac_text = formatter.format_tac_text(tac_instructions)
-			ir_quads_text = formatter.format_quadruples_text(quad_table)
-
-			print("")
-			print("=" * 80)
-			print("Intermediate Code (Three Address Code)")
-			print("=" * 80)
-			print(ir_tac_text)
-
-			print("")
-			print("=" * 80)
-			print("Intermediate Code (Quadruples)")
-			print("=" * 80)
-			print(ir_quads_text)
-
-			optimizer_module = __import__('app.code_optimization.optimizer_manager', fromlist=['OptimizerManager', 'OptimizationLevel'])
-			OptimizerManager = optimizer_module.OptimizerManager
-			OptimizationLevel = optimizer_module.OptimizationLevel
-			optimizer = OptimizerManager(OptimizationLevel.STANDARD)
-			optimized_tac = optimizer.optimize_tac(tac_instructions)
-			ir_tac_optimized_text = formatter.format_tac_text(optimized_tac)
-
-			print("")
-			print("=" * 80)
-			print("Optimized IR (Three Address Code - Standard Level)")
-			print("=" * 80)
-			print(ir_tac_optimized_text)
-
-			print("")
-			print("=" * 80)
-			print("Program Execution (IR Interpreter)")
-			print("=" * 80)
-
-			interpreter_module = __import__('app.interpreter.ir_interpreter', fromlist=['TACInterpreter'])
-			TACInterpreter = interpreter_module.TACInterpreter
-			interpreter = TACInterpreter(optimized_tac)
-			import sys
-			sys.modules['__main__'].active_interpreter = interpreter
-			exec_result = interpreter.run()
-			execution_output = exec_result.get("output", "")
-			execution_success = exec_result.get("success", False)
-			execution_error = exec_result.get("error", "")
-			execution_paused = exec_result.get("paused", False)
-			execution_globals = exec_result.get("globals", {})
-			execution_exit_message = exec_result.get("exit_message", "")
-			execution_terminate_message = exec_result.get("terminate_message", "")
-
-			if execution_success:
-				print("[Execution OK]")
-			elif execution_paused:
-				print("[Execution Paused - waiting for input]")
-			else:
-				print(f"[Execution Error] {execution_error}")
-
-			if execution_output:
-				print(execution_output)
-			elif execution_success:
-				print("(no output)")
-		except Exception as ir_err:
-			import traceback
-			print(f"IR generation error: {str(ir_err)}")
-			traceback.print_exc()
-			execution_output = ""
-			execution_success = False
-			execution_paused = False
-			execution_error = str(ir_err)
-			execution_globals = {}
-			execution_exit_message = ""
-			execution_terminate_message = ""
-    else:
-        print("")
-        print("="*80)
-        print("Semantic Analysis Complete (IR execution skipped)")
-        print("="*80)
-    
-    # Check for semantic errors from error handler
-    if error_handler.has_errors():
-        error_list = []
-        error_details = []
-        error_messages = []
-        warning_messages = []
-        error_markers = []  # For frontend error marking
-
-        print("")
-        print("="*80)
-        print("SEMANTIC ERROR DETAILS WITH POSITIONS")
-        print("="*80)
-        
-        sorted_errors = sorted(error_handler.get_errors(), key=lambda e: 0 if getattr(e.severity, "name", "") == "ERROR" else 1)
-        for err in sorted_errors:
-            error_list.append(str(err))
-            # Format each error with position info
-            severity_label = "ERROR" if err.severity.name == "ERROR" else "WARNING"
-            if severity_label == "ERROR":
-                error_messages.append(err.message)
-            else:
-                warning_messages.append(err.message)
-            position_info = f" at line {err.line}, column {err.column}" if err.line and err.column else ""
-            error_details.append(f"[{severity_label}] {err.message}{position_info}")
-            
-            # Log position info to console
-            position_log = f"Line: {err.line}, Column: {err.column}" if err.line and err.column else "Position: Unknown"
-            print(f"{severity_label}: {err.message}")
-            print(f"  > {position_log}")
-            print(f"  > Error Code: {err.error_code or 'N/A'}")
-            if err.node:
-                print(f"  > Node Type: {err.node.node_type}")
-            print()
-            
-            # Add position info for error markers if available
-            if err.line and err.column:
-                error_markers.append({
-                    "line": err.line,
-                    "col": err.column,
-                    "value": err.error_code or "semantic_error",
-                    "message": err.message,
-                    "severity": severity_label
-                })
-                print(f"  [OK] Error marker added for line {err.line}, col {err.column}")
-            else:
-                print(f"  [SKIP] No position info available - marker not added")
-        
-        print("")
-        print(f"Total error markers to send to frontend: {len(error_markers)}")
-        print("="*80)
-        
-        # Build detailed message with all errors (formal formatting)
-        error_count = error_handler.get_error_count()
-        warning_count = error_handler.get_warning_count()
-        if error_count > 0:
-            detailed_message = f"Semantic analysis failed with {error_count} error(s) and {warning_count} warning(s)\\n"
-        else:
-            detailed_message = f"No semantic errors with {warning_count} warning(s)\\n"
-        for detail in error_details:
-            detailed_message += f"{detail}\\n"
-        
-        result = {
-            "success": False, 
-            "message": detailed_message,
-            "ast": ast_json,
-            "symbol_table": symbol_table_json,
-            "ir_tac": ir_tac_text,
-            "ir_quads": ir_quads_text,
-            "ir_tac_optimized": ir_tac_optimized_text,
-            "execution_output": execution_output,
-            "execution_success": execution_success,
-            "execution_paused": execution_paused,
-            "execution_error": execution_error,
-            "execution_globals": json.dumps(execution_globals),
-            "execution_exit_message": execution_exit_message,
-            "execution_terminate_message": execution_terminate_message,
-            "errors": error_list,
-            "semantic_errors": json.dumps(error_messages),
-            "semantic_warnings": json.dumps(warning_messages),
-            "error_markers": json.dumps(error_markers)
-        }
-    else:
-        # Check for warnings even if no errors
-        warning_messages_success = []
-        warning_markers_success = []
-        if error_handler.has_warnings():
-            for warn in error_handler.get_errors():
-                if warn.severity.name == "WARNING":
-                    warning_messages_success.append(warn.message)
-                    if warn.line and warn.column:
-                        warning_markers_success.append({
-                            "line": warn.line,
-                            "col": warn.column,
-                            "value": warn.error_code or "semantic_warning",
-                            "message": warn.message,
-                            "severity": "warning"
-                        })
-        
-        warning_msg = f" with {len(warning_messages_success)} warning(s)" if warning_messages_success else ""
-        result = {
-            "success": True, 
-            "message": f"No semantic errors{warning_msg}",
-            "ast": ast_json,
-            "symbol_table": symbol_table_json,
-            "ir_tac": ir_tac_text,
-            "ir_quads": ir_quads_text,
-            "ir_tac_optimized": ir_tac_optimized_text,
-            "execution_output": execution_output,
-            "execution_success": execution_success,
-            "execution_paused": execution_paused,
-            "execution_error": execution_error,
-            "execution_globals": json.dumps(execution_globals),
-            "execution_exit_message": execution_exit_message,
-            "execution_terminate_message": execution_terminate_message,
-            "semantic_warnings": json.dumps(warning_messages_success),
-            "error_markers": json.dumps(warning_markers_success)
-        }
-except SyntaxError as e:
-    error_msg = str(e)
-    # Try to extract line and col from error message
-    match = re.search(r'line (\\d+), col (\\d+)', error_msg)
-    if match:
-        line = int(match.group(1))
-        col = int(match.group(2))
-        result = {"success": False, "message": error_msg, "error": {"line": line, "col": col, "message": error_msg}}
-    else:
-        result = {"success": False, "message": error_msg}
-except Exception as e:
-    result = {"success": False, "message": f"Semantic analysis failed: {str(e)}"}
-
-result
-				`;
-					const result = await pyodide.runPythonAsync(semanticPythonScript.replace(/\t/g, '    '));
-
-				const data = result.toJs({ dict_converter: Object.fromEntries });
-
-				if (data.success) {
-					clearErrorMarkers();
-					const semWarningsSuccess: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
-					const warningMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
-					if (warningMarkers.length > 0) addErrorMarkers(warningMarkers);
-					const successMsgs: TermMsg[] = [];
-
-					if (runTacInterpreter) {
-						// Show any output produced before pause/completion
-						if (data.execution_output) {
-							const lines = data.execution_output.split('\n');
-							for (let i = 0; i < lines.length; i++) {
-								if (i === lines.length - 1 && lines[i] === '') continue;
-								successMsgs.push({ text: lines[i] });
-							}
-						}
-						if (data.execution_success) {
-							// Append exit code message if present
-							if (data.execution_exit_message) {
-								const exitLines = data.execution_exit_message.split('\n');
-								for (const l of exitLines) {
-									if (l !== '') successMsgs.push({ text: l });
-								}
-							}
-							isWaitingForInput = false;
-						} else if (data.execution_paused) {
-							isWaitingForInput = true;
-						} else if (data.execution_error) {
-							successMsgs.push({ icon: errorIcon, text: `Runtime Error: ${data.execution_error}` });
-							// Append termination message if present
-							if (data.execution_terminate_message) {
-								successMsgs.push({ text: data.execution_terminate_message });
-							}
-							isWaitingForInput = false;
-						}
-					} else {
-						successMsgs.push({ icon: check, text: data.message || 'No semantic errors' });
-						for (const msg of semWarningsSuccess) successMsgs.push({ icon: warning, text: `Warning: ${msg}` });
-					}
-
-					termMessages = successMsgs;
-					analysisStatus = 'success';
-					terminalOutput = runTacInterpreter ? data.execution_output || data.message || '' : data.message || '';
-					
-					// Log AST to browser console
-					if (data.ast) {
-						try {
-							const astObj = JSON.parse(data.ast);
-							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
-							console.log('%c🌳 Abstract Syntax Tree (AST)', 'color: #00ff00; font-size: 16px; font-weight: bold');
-							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
-							console.log(astObj);
-							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
-						} catch (e) {
-							console.warn('Failed to parse AST JSON:', e);
-						}
-					}
-					
-					// Log Symbol Table as console.table for better display of accessed scopes
-					if (data.symbol_table) {
-						try {
-							const symbolTableData = JSON.parse(data.symbol_table);
-							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
-							console.log('%c📋 Symbol Table (Detailed View)', 'color: #00bcd4; font-size: 16px; font-weight: bold');
-							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
-							console.table(symbolTableData);
-							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
-						} catch (e) {
-							console.warn('Failed to parse Symbol Table JSON:', e);
-						}
-					}
-
-					// Log Intermediate Code (TAC)
-					if (data.ir_tac) {
-						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
-						console.log('%c⚙️  Intermediate Code — Three Address Code (TAC)', 'color: #ff9800; font-size: 16px; font-weight: bold');
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
-						console.log(data.ir_tac);
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
-					}
-
-					// Log Intermediate Code (Quadruples)
-					if (data.ir_quads) {
-						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
-						console.log('%c🔢 Intermediate Code — Quadruples', 'color: #ce93d8; font-size: 16px; font-weight: bold');
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
-						console.log(data.ir_quads);
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
-					}
-
-					// Log Optimized IR (TAC)
-					if (data.ir_tac_optimized) {
-						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
-						console.log('%c✨ Optimized IR — Three Address Code (Standard Level)', 'color: #80cbc4; font-size: 16px; font-weight: bold');
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
-						console.log(data.ir_tac_optimized);
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
-					}
-
-					if (runTacInterpreter) {
-						// Log Execution Output
-						const execColor = data.execution_success ? '#69f0ae' : '#ff5252';
-						console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
-						console.log(`%c▶  Program Execution (IR Interpreter)`, `color: ${execColor}; font-size: 16px; font-weight: bold`);
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
-						if (data.execution_success) {
-							console.log('%cStatus: OK ✓', 'color: #69f0ae; font-weight: bold');
-							console.log(data.execution_output || '(no output)');
-							if (data.execution_globals) {
-								try {
-									const globals = JSON.parse(data.execution_globals);
-									if (Object.keys(globals).length > 0) {
-										console.log('%cFinal variable state:', 'color: #69f0ae; font-weight: bold');
-										console.table(globals);
-									}
-								} catch {
-									// Ignore malformed globals payload.
-								}
-							}
-
-						} else {
-							console.log('%cStatus: Runtime Error ✗', 'color: #ff5252; font-weight: bold');
-							console.log(data.execution_error || 'Unknown error');
-						}
-						console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
-					}
-				} else {
-					// Log error markers received from backend
-					console.log('\n=== SEMANTIC ERROR MARKERS DEBUG ===');
-					console.log('Error markers received:', data.error_markers);
-					const parsedMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
-					console.log('Number of markers:', Array.isArray(parsedMarkers) ? parsedMarkers.length : 0);
-					
-					// Check if we have semantic errors
-					if (data.errors && data.errors.length > 0) {
+					if (data.success) {
 						clearErrorMarkers();
-						
+						const semWarningsSuccess: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
+						const warningMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
+						if (warningMarkers.length > 0) addErrorMarkers(warningMarkers);
+						const successMsgs: TermMsg[] = [];
+
+						if (runTacInterpreter) {
+							applyExecutionResult(data);
+							if (data.execution_running) {
+								executionActive = true;
+								executionPollTimer = setTimeout(pollExecutionStatus, EXECUTION_POLL_INTERVAL_MS);
+							}
+						} else {
+							successMsgs.push({ icon: check, text: data.message || 'No semantic errors' });
+							for (const msg of semWarningsSuccess) {
+								successMsgs.push({ icon: warning, text: `Warning: ${msg}` });
+							}
+							executionActive = false;
+							clearExecutionPolling();
+						}
+
+						if (!runTacInterpreter) {
+							termMessages = successMsgs;
+						}
+						analysisStatus = 'success';
+						terminalOutput = runTacInterpreter
+							? data.execution_output || data.message || ''
+							: data.message || '';
+
+						// Log AST to browser console
+						if (data.ast) {
+							try {
+								const astObj = JSON.parse(data.ast);
+								console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+								console.log('%c🌳 Abstract Syntax Tree (AST)', 'color: #00ff00; font-size: 16px; font-weight: bold');
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+								console.log(astObj);
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff00');
+							} catch (e) {
+								console.warn('Failed to parse AST JSON:', e);
+							}
+						}
+
+						// Log Symbol Table as console.table for better display of accessed scopes
+						if (data.symbol_table) {
+							try {
+								const symbolTableData = JSON.parse(data.symbol_table);
+								console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+								console.log('%c📋 Symbol Table (Detailed View)', 'color: #00bcd4; font-size: 16px; font-weight: bold');
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+								console.table(symbolTableData);
+								console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00bcd4');
+							} catch (e) {
+								console.warn('Failed to parse Symbol Table JSON:', e);
+							}
+						}
+
+						// Log Intermediate Code (TAC)
+						if (data.ir_tac) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							console.log('%c⚙️  Intermediate Code — Three Address Code (TAC)', 'color: #ff9800; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+							console.log(data.ir_tac);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff9800');
+						}
+
+						// Log Intermediate Code (Quadruples)
+						if (data.ir_quads) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+							console.log('%c🔢 Intermediate Code — Quadruples', 'color: #ce93d8; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+							console.log(data.ir_quads);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ce93d8');
+						}
+
+						// Log Optimized IR (TAC)
+						if (data.ir_tac_optimized) {
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+							console.log('%c✨ Optimized IR — Three Address Code (Standard Level)', 'color: #80cbc4; font-size: 16px; font-weight: bold');
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+							console.log(data.ir_tac_optimized);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #80cbc4');
+						}
+
+						if (runTacInterpreter) {
+							// Log Execution Output
+							const execColor = data.execution_success ? '#69f0ae' : '#ff5252';
+							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
+							console.log(`%c▶  Program Execution (IR Interpreter)`, `color: ${execColor}; font-size: 16px; font-weight: bold`);
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
+							if (data.execution_running) {
+								console.log('%cStatus: Running...', 'color: #ffb74d; font-weight: bold');
+							} else if (data.execution_success) {
+								console.log('%cStatus: OK ✓', 'color: #69f0ae; font-weight: bold');
+								console.log(data.execution_output || '(no output)');
+								if (data.execution_globals) {
+									try {
+										const globals = JSON.parse(data.execution_globals);
+										if (Object.keys(globals).length > 0) {
+											console.log('%cFinal variable state:', 'color: #69f0ae; font-weight: bold');
+											console.table(globals);
+										}
+									} catch {
+										// Ignore malformed globals payload.
+									}
+								}
+							} else {
+								console.log('%cStatus: Runtime Error ✗', 'color: #ff5252; font-weight: bold');
+								console.log(data.execution_error || 'Unknown error');
+							}
+							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor}`);
+						}
+					} else if (data.errors && data.errors.length > 0) {
+						// Log error markers received from backend
+						console.log('\n=== SEMANTIC ERROR MARKERS DEBUG ===');
+						console.log('Error markers received:', data.error_markers);
+						const parsedMarkers = data.error_markers ? JSON.parse(data.error_markers) : [];
+						console.log('Number of markers:', Array.isArray(parsedMarkers) ? parsedMarkers.length : 0);
+
+						clearErrorMarkers();
+
 						// Add error markers if position info is available
 						if (parsedMarkers.length > 0) {
-						console.log('Processing error markers...');
-						const semanticTokens = parsedMarkers.map((marker: any) => {
-							console.log(`  Marker: Line ${marker.line}, Col ${marker.col}, Severity: ${marker.severity}, Message: ${marker.message}`);
-							return {
-								type: 'semantic_error',
-								value: marker.value,
-								line: marker.line,
-								col: marker.col,
-								message: marker.message,
-								severity: marker.severity
-							};
-						});
-						console.log('Semantic tokens created:', semanticTokens);
-						console.log('Calling addErrorMarkers with', semanticTokens.length, 'tokens');
-						addErrorMarkers(semanticTokens);
-						console.log('Error markers added to editor');
-					} else {
-						console.log('No error markers to add (array empty or undefined)');
-					}
-					console.log('=== END ERROR MARKERS DEBUG ===\n');
-					// Build one termMessages entry per error/warning so errorCount is accurate
-					const semErrors: string[] = data.semantic_errors ? JSON.parse(data.semantic_errors) : [];
-					const semWarnings: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
-					const msgs: { icon: any; text: string }[] = [];
-					for (const msg of semErrors) msgs.push({ icon: errorIcon, text: `Semantic Error: ${msg}` });
-					for (const msg of semWarnings) msgs.push({ icon: warning, text: `Warning: ${msg}` });
-					termMessages = msgs;
-					analysisStatus = 'error';
-					terminalOutput = data.message;
+							console.log('Processing error markers...');
+							const semanticTokens = parsedMarkers.map((marker: any) => {
+								console.log(`  Marker: Line ${marker.line}, Col ${marker.col}, Severity: ${marker.severity}, Message: ${marker.message}`);
+								return {
+									type: 'semantic_error',
+									value: marker.value,
+									line: marker.line,
+									col: marker.col,
+									message: marker.message,
+									severity: marker.severity
+								};
+							});
+							console.log('Semantic tokens created:', semanticTokens);
+							console.log('Calling addErrorMarkers with', semanticTokens.length, 'tokens');
+							addErrorMarkers(semanticTokens);
+							console.log('Error markers added to editor');
+						} else {
+							console.log('No error markers to add (array empty or undefined)');
+						}
+						console.log('=== END ERROR MARKERS DEBUG ===\n');
+						// Build one termMessages entry per error/warning so errorCount is accurate
+						const semErrors: string[] = data.semantic_errors ? JSON.parse(data.semantic_errors) : [];
+						const semWarnings: string[] = data.semantic_warnings ? JSON.parse(data.semantic_warnings) : [];
+						const msgs: { icon: any; text: string }[] = [];
+						for (const msg of semErrors) msgs.push({ icon: errorIcon, text: `Semantic Error: ${msg}` });
+						for (const msg of semWarnings) msgs.push({ icon: warning, text: `Warning: ${msg}` });
+						termMessages = msgs;
+						analysisStatus = 'error';
+						terminalOutput = data.message;
+						executionActive = false;
+						clearExecutionPolling();
+
 						// Still log AST to console if available
 						if (data.ast) {
 							try {
@@ -1451,7 +1085,7 @@ result
 								console.warn('Failed to parse AST JSON:', e);
 							}
 						}
-						
+
 						// Still log Symbol Table if available
 						if (data.symbol_table) {
 							try {
@@ -1499,7 +1133,9 @@ result
 							console.log('\n%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor2}`);
 							console.log('%c▶  Program Execution (IR Interpreter)', `color: ${execColor2}; font-size: 16px; font-weight: bold`);
 							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor2}`);
-							if (data.execution_success) {
+							if (data.execution_running) {
+								console.log('%cStatus: Running...', 'color: #ffb74d; font-weight: bold');
+							} else if (data.execution_success) {
 								console.log('%cStatus: OK ✓', 'color: #69f0ae; font-weight: bold');
 								console.log(data.execution_output || '(no output)');
 							} else {
@@ -1508,10 +1144,8 @@ result
 							}
 							console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', `color: ${execColor2}`);
 						}
-					}
-					// Handle syntax errors with line/col information
-					else if (data.error && data.error.line && data.error.col) {
-						// Create a token-like object for the error marker
+					} else if (data.error && data.error.line && data.error.col) {
+						// Handle syntax errors with line/col information
 						const errorToken = {
 							type: 'Syntax Error',
 							value: 'error',
@@ -1529,16 +1163,19 @@ result
 						setTerminalError(semanticError);
 						analysisStatus = 'error';
 						terminalOutput = `${lexicalResult.output}\n${semanticError}`;
+						executionActive = false;
+						clearExecutionPolling();
 					}
+				} catch (err) {
+					const msg = err instanceof Error ? err.message : 'Unknown error';
+					const semanticError = `Semantic analysis failed: ${msg}`;
+					const errorMessage = `${lexicalResult.output}\n${semanticError}`;
+					setTerminalError(semanticError);
+					analysisStatus = 'error';
+					terminalOutput = errorMessage;
+					executionActive = false;
+					clearExecutionPolling();
 				}
-			} catch (err) {
-				const msg = err instanceof Error ? err.message : 'Unknown error';
-				const semanticError = `Semantic analysis failed: ${msg}`;
-				const errorMessage = `${lexicalResult.output}\n${semanticError}`;
-				setTerminalError(semanticError);
-				analysisStatus = 'error';
-				terminalOutput = errorMessage;
-			}
 			}
 		} else if (termMessages.length > 0) {
 			// Lexical errors found
@@ -1582,84 +1219,47 @@ result
 		if (termMessages.length === 1 && termMessages[0].text.startsWith('Lexical OK')) {
 			clearTerminal();
 
-			if (!pyodideReady) {
-				const errorMsg = 'Python runtime not ready';
+			const ready = await ensureBackendReady();
+			if (!ready) {
+				const errorMsg = backendError || 'Backend not reachable';
 				setTerminalError(errorMsg);
 				analysisStatus = 'error';
 				terminalOutput = `${lexicalResult.output}\n${errorMsg}`;
-				// Continue to logging at the end
 			} else {
 				try {
-					// Set the code input in Python
-					pyodide.globals.set('code_input', codeInput);
-
-					// Run syntax analysis
-					const result = await pyodide.runPythonAsync(`
-import sys
-import re
-from app.lexer.lexer import Lexer
-from app.parser.parser_program import Parser
-
-result = None
-try:
-    lexer = Lexer(code_input)
-    tokens = lexer.tokenize()
-    parser = Parser(tokens)
-    parser.parse_program()
-    
-    result = {"success": True, "message": "No Syntax Error"}
-except SyntaxError as e:
-    error_msg = str(e)
-    # Try to extract line and col from error message
-    match = re.search(r'line (\\d+), col (\\d+)', error_msg)
-    if match:
-        line = int(match.group(1))
-        col = int(match.group(2))
-        result = {"success": False, "message": error_msg, "error": {"line": line, "col": col, "message": error_msg}}
-    else:
-        result = {"success": False, "message": error_msg}
-except Exception as e:
-    result = {"success": False, "message": f"Syntax analysis failed: {str(e)}"}
-
-result
-				`);
-
-				const data = result.toJs({ dict_converter: Object.fromEntries });
-
-				if (data.success) {
-					clearErrorMarkers();
-					const syntaxMessage = data.message || 'Syntax analysis completed successfully';
-					const okMessage = `${lexicalResult.output}\n${syntaxMessage}`;
-					setTerminalOk(syntaxMessage);
-					analysisStatus = 'success';
-					terminalOutput = okMessage;
-				} else {
-					// Handle syntax errors with line/col information
-					if (data.error && data.error.line && data.error.col) {
-						// Create a token-like object for the error marker
-						const errorToken = {
-							type: 'Syntax Error',
-							value: 'error',
-							line: data.error.line,
-							col: data.error.col
-						};
-						addErrorMarkers([errorToken]);
+					const data = await fetchBackendJson<any>('/api/syntax', { code: codeInput });
+					if (data.success) {
+						clearErrorMarkers();
+						const syntaxMessage = data.message || 'Syntax analysis completed successfully';
+						const okMessage = `${lexicalResult.output}\n${syntaxMessage}`;
+						setTerminalOk(syntaxMessage);
+						analysisStatus = 'success';
+						terminalOutput = okMessage;
+					} else {
+						if (data.error && data.error.line && data.error.col) {
+							const errorToken = {
+								type: 'Syntax Error',
+								value: 'error',
+								line: data.error.line,
+								col: data.error.col
+							};
+							addErrorMarkers([errorToken]);
+						}
+						const syntaxError = data.message || 'Syntax analysis failed';
+						const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
+						setTerminalError(syntaxError);
+						analysisStatus = 'error';
+						terminalOutput = errorMessage;
 					}
-					const syntaxError = data.message || 'Syntax analysis failed';
+				} catch (err) {
+					const msg = err instanceof Error ? err.message : 'Unknown error';
+					const syntaxError = `Syntax analysis failed: ${msg}`;
 					const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
 					setTerminalError(syntaxError);
 					analysisStatus = 'error';
 					terminalOutput = errorMessage;
 				}
-			} catch (err) {
-				const msg = err instanceof Error ? err.message : 'Unknown error';
-				const syntaxError = `Syntax analysis failed: ${msg}`;
-				const errorMessage = `${lexicalResult.output}\n${syntaxError}`;
-				setTerminalError(syntaxError);
-				analysisStatus = 'error';
-				terminalOutput = errorMessage;
 			}
-		}
 	} else if (termMessages.length > 0) {
 			// Lexical errors found
 			const lexicalErrors = termMessages.map(m => m.text).join('; ');
@@ -1717,12 +1317,11 @@ result
 			return { status: analysisStatus, output: terminalOutput };
 		}
 
-		if (!pyodideReady) {
-			const errorMsg = 'Python runtime not ready. Please wait...';
+		const ready = await ensureBackendReady();
+		if (!ready) {
+			const errorMsg = backendError || 'Backend not reachable';
 			setTerminalError(errorMsg);
 			terminalOutput = errorMsg;
-			
-			// Log even for early returns
 			if (!skipLogging) {
 				const duration = performance.now() - startTime;
 				addToLogBatch({
@@ -1739,32 +1338,8 @@ result
 
 		isAnalyzing = true;
 		try {
-			// Set the code input in Python
-			pyodide.globals.set('code_input', codeInput);
-
-			// Run lexical analysis
-			const tokensProxy = await pyodide.runPythonAsync(`
-from app.lexer.lexer import Lexer
-
-lexer = Lexer(code_input)
-tokenize = lexer.tokenize()
-tokens = []
-
-for token in tokenize:
-    if token is None:
-        break
-    tokens.append({
-        "type": token.type,
-        "value": token.value or '\\\\0',
-        "line": token.line,
-        "col": token.col
-    })
-
-tokens
-			`);
-
-		// Convert Python list to JavaScript array
-		const received = tokensProxy.toJs({ dict_converter: Object.fromEntries });
+			const data = await fetchBackendJson<any>('/api/lexical', { code: codeInput });
+			const received = Array.isArray(data.tokens) ? data.tokens : [];
 		// treat tokens with type starting with 'invalid' or 'exceeds' (case-insensitive) as lexical errors
 		const invalidTokens = received.filter(
 			(t: Token) =>
@@ -1975,6 +1550,9 @@ tokens
 						<img class="icon" src={synSemLexIcon1} alt="Run Icon" />
 					{/if}
 					<span>Run Code</span>
+				</button>
+				<button class="pill pill-danger" on:click={stopExecution} disabled={!executionActive}>
+					<span>Stop</span>
 				</button>
 
 				<div class="spacer"></div>
@@ -2288,6 +1866,14 @@ tokens
 		border-radius: 8px;
 		cursor: pointer;
 		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+	}
+	.pill.pill-danger {
+		border-color: #f15b5b;
+		color: #f15b5b;
+	}
+	.pill:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 	.pill.active {
 		background: rgba(255, 255, 255, 0.08);
