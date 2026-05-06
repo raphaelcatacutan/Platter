@@ -1,0 +1,53 @@
+table of Student = [
+chars of name;
+piece of age;
+];
+Student[] of database = [[name = "a"; age = 1;]];
+
+prepare piece of addStudent(){
+chars of inp_name;
+piece of inp_age;
+
+bill("Enter student name: ");
+inp_name = take();
+
+bill("Enter student age: ");
+inp_age = topiece(take());
+
+database = append(database, [name = inp_name; age = inp_age;]);
+
+bill("\nRecord Saved\n");
+serve 0;
+}
+
+start(){
+piece of input;
+flag of system = up;
+
+order {
+	bill("=== STUDENT MANAGEMENT SYSTEM ===\n");
+    bill("\t1. Add Student\n");
+    bill("\t2. View All Student Records\n");
+    bill("Your choice: ");
+    input = topiece(take());
+    
+	menu(input){
+    	choice 1:
+    		bill("");
+            addStudent();
+        	stop;
+        choice 2:
+        	bill("");
+        	stop;
+        choice 3:
+        	bill("Exited");
+            system = down;
+            stop;
+        usual:
+        	bill("Invalid Input");
+            stop;
+    }
+
+
+} repeat(system);
+}

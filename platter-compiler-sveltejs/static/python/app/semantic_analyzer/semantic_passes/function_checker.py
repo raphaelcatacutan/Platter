@@ -247,12 +247,31 @@ class FunctionChecker:
 
             if array_type and value_type:
                 element_type = array_type.get_element_type()
-                if element_type and not element_type.is_exact_match(value_type):
+                if element_type and not self._is_append_compatible(element_type, value_type):
                     self.error_handler.add_error(
                         f"Flavor 2 of built-in recipe 'append': expected {element_type}, got {value_type}",
                         node.args[1],
                         ErrorCodes.FLAVOR_TYPE_MISMATCH
                     )
+    
+    def _is_append_compatible(self, expected_type: TypeInfo, actual_type: TypeInfo) -> bool:
+        """Check if a type is compatible for append operations (more flexible for tables)"""
+        # Exact match is always compatible
+        if expected_type.is_exact_match(actual_type):
+            return True
+        
+        # For table types, check structural compatibility instead of exact name match
+        if expected_type.is_table and actual_type.is_table:
+            # Must have the same fields
+            if set(expected_type.table_fields.keys()) != set(actual_type.table_fields.keys()):
+                return False
+            # All fields must be compatible (allows table literals to match named table types)
+            for field_name in expected_type.table_fields:
+                if not expected_type.table_fields[field_name].is_compatible_with(actual_type.table_fields[field_name]):
+                    return False
+            return True
+        
+        return False
     
     def _is_compatible_for_builtin(self, arg_type: TypeInfo, expected_type: TypeInfo) -> bool:
         """Check if a type is compatible for built-in recipe calls (more flexible)"""
