@@ -137,26 +137,40 @@ class TACInterpreter:
         self._evaluating_for_bill: bool = False  # Phase 1: skip overflow checks during bill evaluation
         self.exit_code: Any = 0                   # Phase 3: exit code from serve statements
         self.exit_code_type: str = "piece"
+        self.halted: bool = False
 
     # ── Public entry point ─────────────────────────────────────────────────────
 
-    def run(self) -> Dict[str, Any]:
+    def run(self, max_steps: Optional[int] = None) -> Dict[str, Any]:
         """
         Execute the program starting from pc=0.
         Global inits run first, then recipe bodies are skipped until 'start' is reached
         and executed inline.  Recipe calls go through _call_function as normal.
         Returns a summary dict with output, final global vars, and status.
         """
+        if self.halted:
+            return {
+                "success": True,
+                "paused": False,
+                "running": False,
+                "output": "".join(self.output_lines),
+                "exit_message": f"\nProgram ended with exit code {self._format_exit_code_display()}",
+                "stdin_consumed": self._stdin_idx,
+                "globals": {k: v for k, v in self.global_frame.vars.items()
+                            if not k.startswith("t")},
+            }
+
         if self.pc == 0 and "start" not in self.func_map:
             raise InterpreterError("No 'start' function found in IR.")
 
         try:
-            self._execute()
+            is_running = self._execute(max_steps=max_steps)
         except InputPauseSignal as p:
             self.pc -= 1
             return {
                 "success": False,
                 "paused": True,
+                "running": False,
                 "error": p.message,
                 "output": "".join(self.output_lines),
                 "stdin_consumed": self._stdin_idx,
@@ -167,6 +181,7 @@ class TACInterpreter:
             return {
                 "success": False,
                 "paused": False,
+                "running": False,
                 "error": self._translate_error(str(e)),
                 "output": "".join(self.output_lines),
                 "terminate_message": "Program terminated with error",
@@ -176,15 +191,30 @@ class TACInterpreter:
             return {
                 "success": False,
                 "paused": False,
+                "running": False,
                 "error": self._translate_error(str(e)),
                 "output": "".join(self.output_lines),
                 "terminate_message": "Program terminated with error",
                 "stdin_consumed": self._stdin_idx,
             }
 
+        if is_running:
+            return {
+                "success": False,
+                "paused": False,
+                "running": True,
+                "output": "".join(self.output_lines),
+                "stdin_consumed": self._stdin_idx,
+                "globals": {k: v for k, v in self.global_frame.vars.items()
+                            if not k.startswith("t")},
+            }
+
+        self.halted = True
+
         return {
             "success": True,
             "paused": False,
+            "running": False,
             "output": "".join(self.output_lines),
             "exit_message": f"\nProgram ended with exit code {self._format_exit_code_display()}",
             "stdin_consumed": self._stdin_idx,
@@ -194,8 +224,11 @@ class TACInterpreter:
 
     # ── Main execution loop ────────────────────────────────────────────────────
 
-    def _execute(self):
+    def _execute(self, max_steps: Optional[int] = None) -> bool:
+        steps = 0
         while self.pc < len(self.instructions):
+            if max_steps is not None and steps >= max_steps:
+                return True
             instr = self.instructions[self.pc]
 
             # When scanning the top-level (we are in the global frame), skip over
@@ -211,6 +244,9 @@ class TACInterpreter:
 
             self.pc += 1
             self._dispatch(instr)
+            steps += 1
+
+        return False
 
     def _dispatch(self, instr: TACInstruction):
         t = type(instr)
