@@ -29,11 +29,11 @@ let isWindows = os.platform() === 'win32';
 
 // Logging utilities
 const log = {
-  info: (msg) => console.log(`\x1b[36mℹ  ${msg}\x1b[0m`),
-  success: (msg) => console.log(`\x1b[32m✅ ${msg}\x1b[0m`),
-  warning: (msg) => console.log(`\x1b[33m⚠️  ${msg}\x1b[0m`),
-  error: (msg) => console.log(`\x1b[31m❌ ${msg}\x1b[0m`),
-  step: (msg) => console.log(`\x1b[35m🔄 ${msg}\x1b[0m`)
+  info: (msg) => console.log(`\x1b[36mINFO ${msg}\x1b[0m`),
+  success: (msg) => console.log(`\x1b[32mOK   ${msg}\x1b[0m`),
+  warning: (msg) => console.log(`\x1b[33mWARN ${msg}\x1b[0m`),
+  error: (msg) => console.log(`\x1b[31mERR  ${msg}\x1b[0m`),
+  step: (msg) => console.log(`\x1b[35mSTEP ${msg}\x1b[0m`)
 };
 
 // Utility functions
@@ -446,7 +446,7 @@ class ServerManager {
       // Open browser automatically
       await this.openBrowser(`http://localhost:${CONFIG.FRONTEND_PORT}`);
       
-      console.log('✨ Happy coding!\n');
+      console.log('\x1b[32mHappy coding!\x1b[0m\n');
       
     } catch (error) {
       log.error(`Failed to start servers: ${error.message}`);
@@ -455,7 +455,7 @@ class ServerManager {
   }
 
   static async stopServers() {
-    console.log('\n🛑 Stopping servers...');
+    console.log('\nStopping servers...');
     
     // Kill spawned processes first
     if (backendProcess) {
@@ -514,7 +514,7 @@ class ServerManager {
   }
 
   static async forceStopAll() {
-    console.log('\n🛑 Force stopping all processes...');
+    console.log('\nForce stopping all processes...');
     
     // Reset process references
     backendProcess = null;
@@ -553,7 +553,7 @@ async function main() {
   
   // Handle graceful shutdown
   process.on('SIGINT', async () => {
-    console.log('\n\n🛑 Shutting down...');
+    console.log('\n\nStopping servers...');
     await ServerManager.stopServers();
     process.exit(0);
   });
@@ -591,7 +591,7 @@ async function main() {
         break;
         
       default:
-        console.log('Usage: node server-manager.js [start|stop|restart|venv|force-stop]');
+        console.log('Usage: node server-manager.cjs [start|stop|restart|venv|force-stop]');
         console.log('  start      - Start both servers (default)');
         console.log('  stop       - Stop all servers gracefully');
         console.log('  restart    - Restart all servers');

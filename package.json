@@ -4,8 +4,8 @@
 	"description": "Platter Programming Language IDE (Frontend-First, Pyodide-powered)",
 	"type": "module",
 	"scripts": {
-		"start": "cd platter-compiler-sveltejs && npm run dev",
-		"dev": "cd platter-compiler-sveltejs && npm run dev",
+		"start": "node server-manager.cjs",
+		"dev": "node server-manager.cjs",
 		"preview": "cd platter-compiler-sveltejs && npm run preview",
 		"install": "cd platter-compiler-sveltejs && npm install",
 		"test": "cd platter-compiler-sveltejs/static/python && python -m unittest discover -s tests -p \"ga_*.py\" -v",
