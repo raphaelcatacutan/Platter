@@ -5,6 +5,7 @@ Executes optimized Three Address Code (TAC) instructions directly in Python.
 No assembly or machine code generation needed — runs the IR as a tree-walking
 interpreter over the flat TAC instruction list.
 """
+import math
 
 from typing import List, Dict, Any, Optional
 from app.intermediate_code.tac import (
@@ -41,6 +42,22 @@ class Frame:
         raise InterpreterError(f"Undefined variable '{name}'")
 
     def set(self, name: str, value: Any):
+        # Only mutable collection values should write back to an outer frame.
+        # Scalar assignments must stay local so recipe-local variables and loop
+        # counters do not clobber outer scope variables with the same name.
+        if name in self.vars:
+            self.vars[name] = value
+            return
+
+        if isinstance(value, (list, dict)):
+            frame = self.parent
+            while frame is not None:
+                if name in frame.vars:
+                    frame.vars[name] = value
+                    return
+                frame = frame.parent
+
+        # Variable doesn't exist locally (or shouldn't escape); create it here.
         self.vars[name] = value
 
 
@@ -649,13 +666,20 @@ class TACInterpreter:
 
     def _eval_binary(self, op: str, left: Any, right: Any) -> Any:
         ops = {
-            "+":   lambda a, b: a + b,
-            "-":   lambda a, b: a - b,
-            "*":   lambda a, b: a * b,
+            "+": lambda a, b: (
+                round(a + b, 7)
+                if not (isinstance(a, str) or isinstance(b, str))
+                else a + b
+            ),
+            "-": lambda a, b: round(a - b, 7),
+            "*": lambda a, b: round(a * b, 7),
             # piece/piece → integer division (truncate toward zero, C-style)
-            "/":   lambda a, b: int(a / b) if (isinstance(a, int) and not isinstance(a, bool)
-                                               and isinstance(b, int) and not isinstance(b, bool))
-                                           else a / b,
+            "/": lambda a, b: (
+                int(a / b)
+                if (isinstance(a, int) and not isinstance(a, bool)
+                    and isinstance(b, int) and not isinstance(b, bool))
+                else round(a / b, 7)
+            ),
             "%":   lambda a, b: a % b,
             "==":  lambda a, b: a == b,
             "!=":  lambda a, b: a != b,
