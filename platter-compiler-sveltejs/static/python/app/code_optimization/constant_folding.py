@@ -192,6 +192,10 @@ class ConstantFoldingPass(OptimizationPass):
             elif op == 'or':
                 return bool(left) or bool(right)
             
+            # Round floating-point arithmetic results to 7 decimal places
+            if result is not None and isinstance(result, float) and op in ('+', '-', '*', '/', '%'):
+                result = round(result, 7)
+            
             # Check for numeric overflow on arithmetic results
             if result is not None and op in ('+', '-', '*', '/', '%'):
                 if self._check_overflow(result, left, right, op):

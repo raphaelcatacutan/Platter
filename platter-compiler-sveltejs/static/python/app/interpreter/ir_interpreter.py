@@ -5,6 +5,7 @@ Executes optimized Three Address Code (TAC) instructions directly in Python.
 No assembly or machine code generation needed — runs the IR as a tree-walking
 interpreter over the flat TAC instruction list.
 """
+import math
 
 from typing import List, Dict, Any, Optional
 from app.intermediate_code.tac import (
@@ -629,13 +630,20 @@ class TACInterpreter:
 
     def _eval_binary(self, op: str, left: Any, right: Any) -> Any:
         ops = {
-            "+":   lambda a, b: a + b,
-            "-":   lambda a, b: a - b,
-            "*":   lambda a, b: a * b,
+            "+": lambda a, b: (
+                round(a + b, 7)
+                if not (isinstance(a, str) or isinstance(b, str))
+                else a + b
+            ),
+            "-": lambda a, b: round(a - b, 7),
+            "*": lambda a, b: round(a * b, 7),
             # piece/piece → integer division (truncate toward zero, C-style)
-            "/":   lambda a, b: int(a / b) if (isinstance(a, int) and not isinstance(a, bool)
-                                               and isinstance(b, int) and not isinstance(b, bool))
-                                           else a / b,
+            "/": lambda a, b: (
+                int(a / b)
+                if (isinstance(a, int) and not isinstance(a, bool)
+                    and isinstance(b, int) and not isinstance(b, bool))
+                else round(a / b, 7)
+            ),
             "%":   lambda a, b: a % b,
             "==":  lambda a, b: a == b,
             "!=":  lambda a, b: a != b,
