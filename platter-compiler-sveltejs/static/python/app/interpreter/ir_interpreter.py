@@ -41,6 +41,22 @@ class Frame:
         raise InterpreterError(f"Undefined variable '{name}'")
 
     def set(self, name: str, value: Any):
+        # Only mutable collection values should write back to an outer frame.
+        # Scalar assignments must stay local so recipe-local variables and loop
+        # counters do not clobber outer scope variables with the same name.
+        if name in self.vars:
+            self.vars[name] = value
+            return
+
+        if isinstance(value, (list, dict)):
+            frame = self.parent
+            while frame is not None:
+                if name in frame.vars:
+                    frame.vars[name] = value
+                    return
+                frame = frame.parent
+
+        # Variable doesn't exist locally (or shouldn't escape); create it here.
         self.vars[name] = value
 
 
